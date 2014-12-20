@@ -1,0 +1,16 @@
+[
+{
+  "modid": "dynamicswordskills",
+  "name": "Dynamic Sword Skills",
+  "description": "Bored of Minecraft combat? Parry, dodge, unleash devastating blows, and more!",
+  "version": "1.6.4-v1.5",
+  "mcversion": "1.6.4",
+  "url": "http://www.minecraftforum.net/topic/2458957-172164-dynamic-sword-skills-v11/",
+  "updateUrl": "",
+  "authors": ["coolAlias"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": ["zeldaswordskills"]
+}
+]
