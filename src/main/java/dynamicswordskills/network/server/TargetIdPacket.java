@@ -93,7 +93,7 @@ public class TargetIdPacket implements IMessage
 					Entity entity = player.worldObj.getEntityByID(message.entityId);
 					skill.setCurrentTarget(entity);
 					if (entity == null) { // For some reason the target id is sometimes incorrect or out of date
-						DynamicSwordSkills.logger.warning("Invalid target; entity with id " + message.entityId + " is null");
+						DynamicSwordSkills.logger.warn("Invalid target; entity with id " + message.entityId + " is null");
 					}
 				}
 			}
