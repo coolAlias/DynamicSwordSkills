@@ -20,6 +20,7 @@ package dynamicswordskills.skills;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -27,12 +28,12 @@ import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSClientEvents;
+import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.lib.ModInfo;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.server.AddExhaustionPacket;
-import dynamicswordskills.network.server.SpawnLeapingBlowPacket;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.util.PlayerUtils;
 
 /**
@@ -56,7 +57,6 @@ public class LeapingBlow extends SkillActive
 
 	public LeapingBlow(String name) {
 		super(name);
-		setDisablesLMB();
 	}
 
 	private LeapingBlow(LeapingBlow skill) {
@@ -88,6 +88,14 @@ public class LeapingBlow extends SkillActive
 		return 2.0F - (0.1F * level);
 	}
 
+	/**
+	 * LeapingBlow adds exhaustion after entity is spawned, rather than on initial activation
+	 */
+	@Override
+	protected boolean autoAddExhaustion() {
+		return false;
+	}
+
 	/** Returns player's base damage (which includes all attribute bonuses) plus 1.0F per level */
 	private float getDamage(EntityPlayer player) {
 		return (float)(level + player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue());
@@ -100,44 +108,65 @@ public class LeapingBlow extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && !player.onGround &&
-				PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
+		return super.canUse(player) && !isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
 	}
 
 	@Override
-	public boolean activate(World world, EntityPlayer player) {
-		isActive = canUse(player);
-		if (isActive()) {
-			DSSPlayerInfo.get(player).setCurrentActiveSkill(this);
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return !isActive() && player.onGround && PlayerUtils.isUsingItem(player);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+		return key == mc.gameSettings.keyBindJump;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (canExecute(player)) {
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
+			KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
+			return true;
 		}
+		return false;
+	}
+
+	@Override
+	protected boolean onActivated(World world, EntityPlayer player) {
+		isActive = true;
 		return isActive();
+	}
+
+	@Override
+	protected void onDeactivated(World world, EntityPlayer player) {
+		isActive = false;
 	}
 
 	/**
 	 * Called from Forge fall Events
 	 * @param distance distance fallen, passed from Forge fall Event
 	 */
-	@SideOnly(Side.CLIENT)
 	public void onImpact(EntityPlayer player, float distance) {
 		SwordBasic swordSkill = (SwordBasic) DSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
 		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this)) {
-			isActive = false;
-			if (distance < 1.0F) {
-				DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);
-			} else {
-				player.swingItem();
-				PacketDispatcher.sendToServer(new AddExhaustionPacket(getExhaustion()));
-				PacketDispatcher.sendToServer(new SpawnLeapingBlowPacket());
+			if (player.worldObj.isRemote) {
+				if (distance < 1.0F) {
+					DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);
+				} else {
+					player.swingItem();
+				}
+			} else if (distance >= 1.0F) {
+				// add exhaustion here, now that skill has truly activated:
+				player.addExhaustion(getExhaustion());
+				Entity entity = new EntityLeapingBlow(player.worldObj, player).setDamage(getDamage(player)).setLevel(level);
+				player.worldObj.spawnEntityInWorld(entity);
+				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_LEAPINGBLOW, 0.4F, 0.5F);
 			}
 		}
-	}
-
-	/**
-	 * Called upon receipt of SpawnLeapingBlowPacket on server; spawns the entity
-	 */
-	public void spawnLeapingBlowEntity(World world, EntityPlayer player) {
-		Entity entity = new EntityLeapingBlow(world, player).setDamage(getDamage(player)).setLevel(level);
-		world.spawnEntityInWorld(entity);
-		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_LEAPINGBLOW, 0.4F, 0.5F);
+		onDeactivated(player.worldObj, player);
 	}
 }

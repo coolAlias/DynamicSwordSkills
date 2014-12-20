@@ -19,7 +19,6 @@ package dynamicswordskills.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.MouseEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
@@ -27,13 +26,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.lib.Config;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.skills.ArmorBreak;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.skills.SpinAttack;
 import dynamicswordskills.util.TargetUtils;
 
 /**
@@ -94,66 +89,52 @@ public class DSSClientEvents
 			}
 			return;
 		}
-		EntityPlayer player = mc.thePlayer;
-		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-		ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
+		DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
 		if (event.buttonstate || event.dwheel != 0) {
-			if (skills.isSkillActive(SkillBase.mortalDraw)) {
-				event.setCanceled(true);
-			} else if (isAttackKey) {
-				event.setCanceled(player.attackTime > 0);
-			}
-		} else if (!event.buttonstate && isAttackKey) {
-			if (skills.hasSkill(SkillBase.armorBreak)) {
-				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player, false);
+			if (isAttackKey) {
+				// hack for spin attack: allows key press information to be received while animating
+				if (skills.isSkillActive(SkillBase.spinAttack) && skills.getActiveSkill(SkillBase.spinAttack).isAnimating()) {
+					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
+					event.setCanceled(true);
+				} /*else if (skills.isSkillActive(SkillBase.backSlice) && skills.getActiveSkill(SkillBase.backSlice).isAnimating()) {
+					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
+					event.setCanceled(true);
+				} */else {
+					event.setCanceled(!skills.canInteract() || mc.thePlayer.attackTime > 0);
+				}
+			} else { // cancel mouse wheel and use key while animations are in progress
+				event.setCanceled(!skills.canInteract());
 			}
 		}
-
-		if (event.isCanceled()) {
+		if (event.isCanceled() || !event.buttonstate) {
 			return;
 		}
 
+		ILockOnTarget skill = skills.getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
-			if (isAttackKey && event.buttonstate) {
-				if (!skills.canInteract()) {
-					if (skills.isSkillActive(SkillBase.spinAttack)) {
-						((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindAttack, mc.thePlayer);
-					}
-					event.setCanceled(true);
-					return;
-				}
-				if (Config.allowVanillaControls() && player.getHeldItem() != null) {
-					if (skills.shouldSkillActivate(SkillBase.dash)) {
-						PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.dash));
-					} else if (skills.shouldSkillActivate(SkillBase.risingCut)) {
-						PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.risingCut));
-						performComboAttack(mc, skill);
-					} else if (skills.shouldSkillActivate(SkillBase.endingBlow)) {
-						PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.endingBlow));
-						performComboAttack(mc, skill);
-					} else {
+			if (isAttackKey) {
+				// mouse attack will always be canceled while locked on, as the click has been handled
+				if (Config.allowVanillaControls()) {
+					if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
+						//LogHelper.info("MouseEvent - no skill handled attack key press, performing combo attack");
+						// no skill activated - perform a 'standard' attack
 						performComboAttack(mc, skill);
 					}
-					// handle separately so can attack and begin charging without pressing key twice
+					// hack for Armor Break: allows charging to begin without having to press attack key a second time
 					if (skills.hasSkill(SkillBase.armorBreak)) {
-						((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player, true);
+						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					}
-				} else if (skills.shouldSkillActivate(SkillBase.mortalDraw)) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.mortalDraw));
-				} else { // Vanilla controls not enabled simply attacks; handles possibility of being ICombo
-					performComboAttack(mc, skill);
 				}
-				// always cancel left click to prevent weapons taking double durability damage
+
+				// if vanilla controls not enabled, mouse click is ignored (i.e. canceled)
+				// if vanilla controls enabled, mouse click was already handled - cancel
 				event.setCanceled(true);
 			} else if (isUseKey && Config.allowVanillaControls()) {
-				if (!skills.canInteract() && event.buttonstate) {
-					event.setCanceled(true);
-				}
+				// is this case even possible?
+				event.setCanceled(!skills.canInteract());
 			}
-		} else { // not locked on to a target, normal item swing
-			if (isAttackKey && event.buttonstate) {
-				DSSCombatEvents.setPlayerAttackTime(player);
-			}
+		} else  if (isAttackKey) { // not locked on to a target, normal item swing: set attack time only
+			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
 		}
 	}
 }

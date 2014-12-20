@@ -32,7 +32,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.lib.Config;
 import dynamicswordskills.lib.ModInfo;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.network.server.TargetIdPacket;
 import dynamicswordskills.util.DamageUtils;
@@ -90,10 +89,6 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	/** True if this skill is currently active */
 	private boolean isActive = false;
 
-	/** True when de-activation packet sent; prevents multiple packets from being sent during onUpdate */
-	@SideOnly(Side.CLIENT)
-	private boolean packetSent;
-
 	/** The current target, if any; kept synchronized between the client and server */
 	private EntityLivingBase currentTarget = null;
 
@@ -137,6 +132,11 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
+	public boolean hasAnimation() {
+		return false;
+	}
+
+	@Override
 	protected float getExhaustion() {
 		return 0.0F;
 	}
@@ -146,40 +146,71 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		return (MAX_LEVEL * 2);
 	}
 
+	/** Returns amount of time allowed between successful attacks before combo terminates */
+	private final int getComboTimeLimit() {
+		return (20 + (level * 2));
+	}
+
+	/** Returns the max combo size attainable (2 plus skill level) */
+	private final int getMaxComboSize() {
+		return (2 + level);
+	}
+
+	/** Returns max distance at which targets may be acquired or remain targetable */
+	private final int getRange() {
+		return (6 + level);
+	}
+
 	@Override
-	public boolean activate(World world, EntityPlayer player) {
-		if (super.activate(world, player)) {
-			isActive = !isActive;
-			if (isActive) {
-				if (!isComboInProgress()) {
-					combo = null;
-				}
-				currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true);
-			} else {
-				currentTarget = null;
-				if (world.isRemote) {
-					prevTarget = null;
-					if (packetSent) {
-						packetSent = false;
-					}
-				}
+	protected boolean onActivated(World world, EntityPlayer player) {
+		if (isActive) { // deactivate if already active
+			onDeactivated(world, player); // don't need to use deactivate, as packets already sent
+		} else { // otherwise activate
+			isActive = true;
+			if (!isComboInProgress()) {
+				combo = null;
 			}
-			return true;
+			currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true);
 		}
-		return false;
+		return true;
+	}
+
+	@Override
+	protected void onDeactivated(World world, EntityPlayer player) {
+		isActive = false;
+		currentTarget = null;
+		if (world.isRemote) {
+			prevTarget = null;
+		}
 	}
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (isActive && player.worldObj.isRemote && !packetSent) {
+		if (isActive() && player.worldObj.isRemote) {
 			if (Minecraft.getMinecraft().currentScreen != null  || !updateTargets(player)) {
-				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-				packetSent = true;
+				deactivate(player);
 			}
 		}
 		if (isComboInProgress()) {
 			combo.onUpdate(player);
 		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
+		double dx = player.posX - currentTarget.posX;
+		double dz = player.posZ - currentTarget.posZ;
+		double angle = Math.atan2(dz, dx) * 180 / Math.PI;
+		double pitch = Math.atan2(player.posY - (currentTarget.posY + (currentTarget.height / 2.0F)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
+		double distance = player.getDistanceToEntity(currentTarget);
+		float rYaw = (float)(angle - player.rotationYaw);
+		while (rYaw > 180) { rYaw -= 360; }
+		while (rYaw < -180) { rYaw += 360; }
+		rYaw += 90F;
+		float rPitch = (float) pitch - (float)(10.0F / Math.sqrt(distance)) + (float)(distance * Math.PI / 90);
+		player.setAngles(rYaw, -(rPitch - player.rotationPitch));
+		return false;
 	}
 
 	@Override
@@ -234,11 +265,6 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		PacketDispatcher.sendToServer(new TargetIdPacket(this));
 	}
 
-	/** Returns max distance at which targets may be acquired or remain targetable */
-	private final int getRange() {
-		return (6 + level);
-	}
-
 	/**
 	 * Updates targets, setting to null if no longer valid and acquiring new target if necessary
 	 * @return returns true if the current target is valid
@@ -280,16 +306,6 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	@Override
 	public final boolean isComboInProgress() {
 		return (combo != null && !combo.isFinished());
-	}
-
-	/** Returns the max combo size attainable (2 plus skill level) */
-	private final int getMaxComboSize() {
-		return (2 + level);
-	}
-
-	/** Returns amount of time allowed between successful attacks before combo terminates */
-	private final int getComboTimeLimit() {
-		return (20 + (level * 2));
 	}
 
 	@Override

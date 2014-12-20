@@ -19,6 +19,8 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -26,12 +28,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.client.DSSClientEvents;
+import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.lib.Config;
 import dynamicswordskills.lib.ModInfo;
 import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.AttackTimePacket;
 import dynamicswordskills.util.PlayerUtils;
 
@@ -54,18 +59,23 @@ import dynamicswordskills.util.PlayerUtils;
  */
 public class EndingBlow extends SkillActive
 {
-	/** Set to 1 when activated; set to 0 when target struck in onImpact() */
+	/** Flag for isActive() so that skill can trigger upon impact from LivingHurtEvent */
 	private int activeTimer = 0;
+
 	/** Only for vanilla activation: Current number of ticks remaining before skill will not activate */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
+
 	/** Number of times the forward key has been pressed this activation cycle */
 	@SideOnly(Side.CLIENT)
 	private int keyPressed;
+
 	/** Number of consecutive hits the combo had when the skill was last used */
 	private int lastNumHits;
+
 	/** Workaround for armor / potions changing damage: checks next tick if entity is dead or not */
 	private EntityLivingBase entityHit;
+
 	/** Xp amount to grant if entityHit is dead on update tick */
 	private int xp;
 
@@ -96,14 +106,18 @@ public class EndingBlow extends SkillActive
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public boolean canExecute(EntityPlayer player) {
-		return keyPressed > 1;
+	protected float getExhaustion() {
+		return 2.0F - (level * 0.1F);
+	}
+
+	/** Returns the duration of the defense down effect */
+	public int getDuration() {
+		return 45 - (level * 5);
 	}
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		if (super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player) && player.attackTime == 0) {
+		if (!isActive() && super.canUse(player) && PlayerUtils.isHoldingSkillItem(player)) {
 			ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
 			if (skill != null && skill.isComboInProgress()) {
 				if (lastNumHits > 0) {
@@ -117,28 +131,63 @@ public class EndingBlow extends SkillActive
 	}
 
 	@Override
-	protected float getExhaustion() {
-		return 2.0F - (level * 0.1F);
-	}
-
-	/** Returns the duration of the defense down effect */
-	public int getDuration() {
-		return 45 - (level * 5);
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return ticksTilFail > 0 && keyPressed > 1 && canUse(player);
 	}
 
 	@Override
-	public boolean activate(World world, EntityPlayer player) {
-		if (super.activate(world, player)) {
-			activeTimer = 1;
-			ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
-			if (skill.getCombo() != null) {
-				lastNumHits = skill.getCombo().getSize();
+	@SideOnly(Side.CLIENT)
+	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+		return (key == mc.gameSettings.keyBindForward || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK]
+				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+	}
+
+	/**
+	 * Increments the number of times the key has been pressed and starts the fail timer if not yet set,
+	 * or triggers the skill if the right conditions are met
+	 */
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (key == mc.gameSettings.keyBindForward) {
+			if (ticksTilFail == 0) {
+				ticksTilFail = 6;
 			}
-			if (world.isRemote) {
-				keyPressed = 0;
-			}
+			++keyPressed;
+		} else if (canExecute(player)) {
+			ticksTilFail = 0;
+			keyPressed = 0;
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	protected boolean onActivated(World world, EntityPlayer player) {
+		activeTimer = 3; // gives server some time for client attack to occur
+		ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
+		if (skill.getCombo() != null) {
+			lastNumHits = skill.getCombo().getSize();
+		}
+		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
+			DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), DSSPlayerInfo.get(player).getTargetingSkill());
+			ticksTilFail = 0;
+			keyPressed = 0;
 		}
 		return isActive();
+	}
+
+	@Override
+	protected void onDeactivated(World world, EntityPlayer player) {
+		activeTimer = 0;
+		entityHit = null;
+		xp = 0;
+		if (world.isRemote) {
+			keyPressed = 0;
+			ticksTilFail = 0;
+		}
 	}
 
 	@Override
@@ -150,7 +199,6 @@ public class EndingBlow extends SkillActive
 			}
 		}
 		if (lastNumHits > 0) {
-			// only ever true on server, which is fine:
 			if (entityHit != null && xp > 0) {
 				updateEntityState(player);
 			}
@@ -160,8 +208,8 @@ public class EndingBlow extends SkillActive
 			}
 		}
 		if (isActive()) {
-			activeTimer = 0;
-			if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
+			--activeTimer;
+			if (activeTimer == 0 && !player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
 				player.attackTime = getDuration() * 2;
 				PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
 			}
@@ -172,47 +220,37 @@ public class EndingBlow extends SkillActive
 	 * Checks if entity hit is dead, granting Xp or causing defensive penalty
 	 */
 	private void updateEntityState(EntityPlayer player) {
-		if (entityHit.getHealth() <= 0.0F) {
-			if (entityHit instanceof EntityLiving) {
-				DirtyEntityAccessor.setLivingXp((EntityLiving) entityHit, xp, true);
+		if (!player.worldObj.isRemote) {
+			if (entityHit.getHealth() <= 0.0F) {
+				if (entityHit instanceof EntityLiving) {
+					DirtyEntityAccessor.setLivingXp((EntityLiving) entityHit, xp, true);
+				} else {
+					PlayerUtils.spawnXPOrbsWithRandom(player.worldObj, player.worldObj.rand, MathHelper.floor_double(entityHit.posX),
+							MathHelper.floor_double(entityHit.posY), MathHelper.floor_double(entityHit.posZ), xp);
+				}
 			} else {
-				PlayerUtils.spawnXPOrbsWithRandom(player.worldObj, player.worldObj.rand, MathHelper.floor_double(entityHit.posX),
-						MathHelper.floor_double(entityHit.posY), MathHelper.floor_double(entityHit.posZ), xp);
-			}
-		} else {
-			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_HURT_FLESH, 0.3F, 0.8F);
-			if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
-				player.attackTime = getDuration();
-				PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
+				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_HURT_FLESH, 0.3F, 0.8F);
+				if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
+					player.attackTime = getDuration();
+					PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
+				}
 			}
 		}
 		entityHit = null;
 		xp = 0;
 	}
 
-	/**
-	 * Call upon landing a blow to increase the damage
-	 */
-	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
+	@Override
+	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		activeTimer = 0;
 		ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
 		ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
 		if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
-			event.ammount *= 1.0F + (level * 0.2F);
+			amount *= 1.0F + (level * 0.2F);
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_MORTALDRAW, 0.4F, 0.5F);
-			entityHit = event.entityLiving;
-			xp = level + 1 + player.worldObj.rand.nextInt(Math.max(2, MathHelper.ceiling_float_int(event.entityLiving.getHealth())));
+			entityHit = entity;
+			xp = level + 1 + player.worldObj.rand.nextInt(Math.max(2, MathHelper.ceiling_float_int(entity.getHealth())));
 		}
-	}
-
-	/**
-	 * Increments the number of times the key has been pressed and starts the fail timer if not yet set
-	 */
-	@SideOnly(Side.CLIENT)
-	public void keyPressed() {
-		if (ticksTilFail == 0) {
-			ticksTilFail = 6;
-		}
-		++keyPressed;
+		return amount;
 	}
 }

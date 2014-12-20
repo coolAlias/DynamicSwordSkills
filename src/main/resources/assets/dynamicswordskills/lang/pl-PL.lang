@@ -80,6 +80,7 @@ skill.dss.dash.desc.activate=While locked on, press the attack key while blockin
 skill.dss.dash.desc.full=Dash into an enemy at high speed, knocking the target back and inflicting minor damage. An effective dash requires sufficient space between you and your foe.
 skill.dss.dash.desc.info.1=Knockback: %d blocks
 skill.dss.dash.desc.info.2=Minimum Range: %s blocks
+skill.dss.parry.desc.info.3=Max Attacks Parried: %d
 skill.dss.dash.desc.tooltip.1=Dash attack knocks target back
 skill.dss.dodge.name=Dodge
 skill.dss.dodge.desc.activate=Tap left or right to dodge an incoming attack. Must be locked on.

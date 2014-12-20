@@ -34,13 +34,8 @@ import dynamicswordskills.lib.Config;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.server.OpenGuiPacket;
-import dynamicswordskills.skills.ArmorBreak;
-import dynamicswordskills.skills.Dodge;
 import dynamicswordskills.skills.ILockOnTarget;
-import dynamicswordskills.skills.Parry;
 import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.skills.SpinAttack;
-import dynamicswordskills.skills.SwordBreak;
 import dynamicswordskills.util.PlayerUtils;
 
 @SideOnly(Side.CLIENT)
@@ -125,58 +120,69 @@ public class DSSKeyHandler
 		}
 		if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
 			skill.getNextTarget(mc.thePlayer);
-		} else if (kb == keys[KEY_ATTACK].getKeyCode()) {
-			if (canInteract && mc.thePlayer.attackTime == 0) {
-				KeyBinding.setKeyBindState(keys[KEY_ATTACK].getKeyCode(), true);
-			} else {
+		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
+			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK] : mc.gameSettings.keyBindAttack);
+			boolean flag = (mc.thePlayer.attackTime > 0);
+			if (canInteract && !flag) {
+				KeyBinding.setKeyBindState(key.getKeyCode(), true);
+			} else if (!flag) {
+				// hack for Super Spin Attack, as it requires key press to be passed while animation is in progress
 				if (skills.isSkillActive(SkillBase.spinAttack)) {
-					((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(keys[KEY_ATTACK], mc.thePlayer);
-				}
-				return;
+					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.thePlayer);
+					return;
+				}/* else if (skills.isSkillActive(SkillBase.backSlice)) {
+					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, key, mc.thePlayer);
+					return;
+				}*/
 			}
-			if (mc.thePlayer.getHeldItem() != null) {
-				if (skills.shouldSkillActivate(SkillBase.dash)) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.dash));
-				} else if (skills.shouldSkillActivate(SkillBase.risingCut)) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.risingCut));
-					DSSClientEvents.performComboAttack(mc, skill);
-				} else if (skills.shouldSkillActivate(SkillBase.endingBlow)) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.endingBlow));
-					DSSClientEvents.performComboAttack(mc, skill);
-				} else {
+			// Only allow attack key to continue processing if it was set to pressed
+			if (key.getIsKeyPressed()) {
+				if (!skills.onKeyPressed(mc, key)) {
 					DSSClientEvents.performComboAttack(mc, skill);
 				}
-				// handle separately so can attack and begin charging without pressing key twice
+				// hack for Armor Break to begin charging without having to press attack again
 				if (skills.hasSkill(SkillBase.armorBreak)) {
-					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer, false);
-				}
-			} else if (skills.shouldSkillActivate(SkillBase.mortalDraw)) {
-				PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.mortalDraw));
-			} else {
-				DSSClientEvents.performComboAttack(mc, skill);
-			}
-		} else if (kb == keys[KEY_LEFT].getKeyCode() || kb == keys[KEY_RIGHT].getKeyCode()) {
-			KeyBinding key;
-			if (kb == keys[KEY_RIGHT].getKeyCode()) {
-				key = keys[KEY_RIGHT];
-			} else {
-				key = keys[KEY_LEFT];
-			}
-
-			if (canInteract) {
-				if (skills.hasSkill(SkillBase.dodge) && mc.thePlayer.onGround) {
-					((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed(key, mc.thePlayer);
-				}
-				if (skills.hasSkill(SkillBase.spinAttack)) {
-					((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(key, mc.thePlayer);
+					skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.thePlayer);
 				}
 			}
-		} else if (kb == keys[KEY_DOWN].getKeyCode() && canInteract) {
-			if (PlayerUtils.isUsingItem(mc.thePlayer) && skills.hasSkill(SkillBase.swordBreak)) {
-				((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).keyPressed(mc.thePlayer);
-			} else if (skills.hasSkill(SkillBase.parry)) {
-				((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(mc.thePlayer);
+		} else if (canInteract) {
+			// Only works for keys mapped to custom key bindings, which is fine for remapped mouse keys
+			KeyBinding key = getKeyBindFromCode(mc, kb);
+			if (key != null) {
+				KeyBinding.setKeyBindState(kb, true);
+				skills.onKeyPressed(mc, key);
 			}
 		}
+	}
+
+	/**
+	 * Returns the KeyBinding corresponding to the key code given, or NULL if no key binding is found
+	 * Currently handles all custom keys, plus the following vanilla keys:
+	 * 	Always allowed: keyBindForward, keyBindJump
+	 * 	{@link Config#allowVanillaControls}: keyBindLeft, keyBindRight, keyBindBack
+	 * @param keyCode	Will be a negative number for mouse keys, or positive for keyboard
+	 * @param mc		Pass in Minecraft instance as a workaround to get vanilla KeyBindings
+	 */
+	@SideOnly(Side.CLIENT)
+	public static KeyBinding getKeyBindFromCode(Minecraft mc, int keyCode) {
+		for (KeyBinding k : keys) {
+			if (k.getKeyCode() == keyCode) {
+				return k;
+			}
+		}
+		if (keyCode == mc.gameSettings.keyBindForward.getKeyCode()) {
+			return mc.gameSettings.keyBindForward;
+		} else if (keyCode == mc.gameSettings.keyBindJump.getKeyCode()) {
+			return mc.gameSettings.keyBindJump;
+		} else if (Config.allowVanillaControls()) {
+			if (keyCode == mc.gameSettings.keyBindLeft.getKeyCode()) {
+				return mc.gameSettings.keyBindLeft;
+			} else if (keyCode == mc.gameSettings.keyBindRight.getKeyCode()) {
+				return mc.gameSettings.keyBindRight;
+			} else if (keyCode == mc.gameSettings.keyBindBack.getKeyCode()) {
+				return mc.gameSettings.keyBindBack;
+			}
+		}
+		return null;
 	}
 }

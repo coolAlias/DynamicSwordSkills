@@ -13,6 +13,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 import org.apache.logging.log4j.Logger;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -107,7 +108,9 @@ public class DynamicSwordSkills
 	public void init(FMLInitializationEvent event) {
 		if (shouldLoad) {
 			proxy.registerRenderers();
-			MinecraftForge.EVENT_BUS.register(new DSSCombatEvents());
+			DSSCombatEvents events = new DSSCombatEvents();
+			MinecraftForge.EVENT_BUS.register(events);
+			FMLCommonHandler.instance().bus().register(events); // for PlayerLoggedInEvent
 			DSSCombatEvents.initializeDrops();
 			if (Config.getLootWeight() > 0) {
 				registerSkillOrbLoot();

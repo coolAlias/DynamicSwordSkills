@@ -21,7 +21,10 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -54,6 +57,10 @@ import dynamicswordskills.util.PlayerUtils;
  */
 public class Dodge extends SkillActive
 {
+	/** Key that was pressed to initiate dodge */
+	@SideOnly(Side.CLIENT)
+	private KeyBinding keyPressed;
+
 	/** Current number of ticks remaining before dodge will not activate */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
@@ -61,13 +68,11 @@ public class Dodge extends SkillActive
 	/** Timer during which player may evade incoming attacks */
 	private int dodgeTimer = 0;
 
-	/** Key that was pressed to initiate dodge */
-	@SideOnly(Side.CLIENT)
-	private KeyBinding keyPressed;
+	/** Entity dodged, since the attack event may fire multiple times in quick succession for mobs like zombies */
+	private Entity entityDodged;
 
 	public Dodge(String name) {
 		super(name);
-		setDisablesLMB();
 	}
 
 	private Dodge(Dodge skill) {
@@ -77,11 +82,6 @@ public class Dodge extends SkillActive
 	@Override
 	public Dodge newInstance() {
 		return new Dodge(this);
-	}
-
-	@Override
-	public boolean isActive() {
-		return (dodgeTimer > 0);
 	}
 
 	@Override
@@ -95,9 +95,13 @@ public class Dodge extends SkillActive
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
+	/**
+	 * Prevents Dodge from being activated in quick succession, but does not prevent
+	 * other skills from being activated once Dodge has finished animating
+	 */
 	@Override
-	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && DSSPlayerInfo.get(player).isSkillActive(swordBasic);
+	public boolean isActive() {
+		return (dodgeTimer > 0);
 	}
 
 	@Override
@@ -105,49 +109,10 @@ public class Dodge extends SkillActive
 		return 0.05F;
 	}
 
-	/**
-	 * Doesn't send packet back to client as it's too slow; client activated directly
-	 */
-	@Override
-	public boolean activate(World world, EntityPlayer player) {
-		if (canUse(player)) {
-			DSSPlayerInfo.get(player).setCurrentActiveSkill(this);
-			dodgeTimer = getDodgeTime();
-			if (!player.capabilities.isCreativeMode) {
-				player.addExhaustion(getExhaustion());
-			}
-		}
-		return isActive();
-	}
-
-	/** Amount of time dodge will remain active */
-	private int getDodgeTime() {
-		return (5 + level);
-	}
-
-	@Override
-	public void onUpdate(EntityPlayer player) {
-		if (isActive()) {
-			--dodgeTimer;
-		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
-			if (!Config.requiresDoubleTap() && !keyPressed.getIsKeyPressed()) {
-				activate(player.worldObj, player);
-				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-				ticksTilFail = 0;
-			} else {
-				--ticksTilFail;
-			}
-		}
-	}
-
-	/** Returns player's base chance to successfully evade an attack */
+	/** Returns player's base chance to successfully evade an attack, including bonuses from buffs */
 	private float getBaseDodgeChance(EntityPlayer player) {
-		return (level * 0.1F);
-	}
-
-	/** Returns timing evasion bonus */
-	private float getTimeBonus() {
-		return ((dodgeTimer + level - 5) * 0.02F);
+		float speedBonus = 2.0F * (float)(player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - Dash.BASE_MOVE);
+		return ((level * 0.1F) + speedBonus);
 	}
 
 	/** Returns full chance to dodge an attack, including all bonuses */
@@ -155,49 +120,119 @@ public class Dodge extends SkillActive
 		return getBaseDodgeChance(player) + getTimeBonus();
 	}
 
-	/**
-	 * Returns true if the attack was dodged and the attack event should be canceled
-	 */
-	public boolean dodgeAttack(EntityPlayer player) {
-		if (player.worldObj.rand.nextFloat() < getDodgeChance(player)) {
-			PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
-			return true;
+	/** Amount of time dodge will remain active */
+	private int getDodgeTime() {
+		return (5 + level);
+	}
+
+	/** Returns timing evasion bonus */
+	private float getTimeBonus() {
+		return ((dodgeTimer + level - 5) * 0.02F);
+	}
+
+	@Override
+	public boolean canUse(EntityPlayer player) {
+		return super.canUse(player) && !isActive() && DSSPlayerInfo.get(player).isSkillActive(swordBasic);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return player.onGround && canUse(player);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
+				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT] || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT]);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (canExecute(player)) {
+			if (Config.requiresDoubleTap()) {
+				if (ticksTilFail > 0 && key == keyPressed) {
+					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+					ticksTilFail = 0;
+					return true;
+				} else {
+					keyPressed = key;
+					ticksTilFail = 6;
+				}
+				// Single-tap activation only allowed using custom key bindings:
+			} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT] || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT]) {
+				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+				return true;
+			}
+		}
+		return false; // allow other skills to receive this key press (e.g. Spin Attack)
+	}
+
+	@Override
+	public boolean onActivated(World world, EntityPlayer player) {
+		dodgeTimer = getDodgeTime();
+		entityDodged = null;
+		return isActive();
+	}
+
+	@Override
+	protected void onDeactivated(World world, EntityPlayer player) {
+		dodgeTimer = 0;
+		entityDodged = null;
+	}
+
+	@Override
+	public void onUpdate(EntityPlayer player) {
+		if (isActive()) {
+			--dodgeTimer;
+		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
+			--ticksTilFail;
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean isAnimating() {
+		return (dodgeTimer > level);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
+		double speed = 1.0D + 10.0D * (player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - Dash.BASE_MOVE);
+		if (speed > 1.0D) {
+			speed = 1.0D;
+		}
+		double d = 0.15D * speed * speed;
+		Vec3 vec3 = player.getLookVec();
+		if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
+			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
+		} else {
+			player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
+		if (dodgeTimer > level) { // still able to dodge (used to use isActive(), but changed for animating)
+			Entity attacker = source.getEntity();
+			if (attacker != null) {
+				return (attacker == entityDodged || dodgeAttack(player, attacker));
+			}
 		}
 		return false;
 	}
 
 	/**
-	 * Sets the key pressed and starts the key timer
+	 * Returns true if the attack was dodged and the attack event should be canceled
 	 */
-	@SideOnly(Side.CLIENT)
-	public void keyPressed(KeyBinding key, EntityPlayer player) {
-		if (!isActive()) {
-			if (Config.requiresDoubleTap() && ticksTilFail > 0 && key == keyPressed) {
-				activate(player.worldObj, player);
-				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-				ticksTilFail = 0;
-			} else {
-				keyPressed = key;
-				ticksTilFail = (Config.requiresDoubleTap() ? 6 : 3);
-			}
-		}
-	}
-
-	/**
-	 * Updates the dodge animation each render tick
-	 * @return returns true if animation is in progress
-	 */
-	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
-		if (dodgeTimer > level) {
-			double d = 0.05D;
-			Vec3 vec3 = player.getLookVec();
-			if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || (Config.allowVanillaControls()
-					&& keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight)) {
-				player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
-			} else {
-				player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
-			}
+	private boolean dodgeAttack(EntityPlayer player, Entity attacker) {
+		if (player.worldObj.rand.nextFloat() < getDodgeChance(player)) {
+			entityDodged = attacker;
+			PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
 			return true;
 		}
 		return false;

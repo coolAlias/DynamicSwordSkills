@@ -19,6 +19,8 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -26,7 +28,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.client.DSSClientEvents;
+import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.lib.Config;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.util.PlayerUtils;
 
 /**
@@ -47,14 +54,15 @@ public class RisingCut extends SkillActive
 	/** Flag for activation; set when player jumps while sneaking */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
+
 	/** True while animation is in progress */
 	private int activeTimer;
+
 	/** Stores the entity struck to add velocity on the next update */
 	private Entity entityHit;
 
 	public RisingCut(String name) {
 		super(name);
-		setDisablesLMB();
 	}
 
 	private RisingCut(RisingCut skill) {
@@ -79,9 +87,8 @@ public class RisingCut extends SkillActive
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public boolean canExecute(EntityPlayer player) {
-		return ticksTilFail > 0 && player.motionY > 0.0D;
+	protected float getExhaustion() {
+		return 3.0F - (level * 0.2F);
 	}
 
 	@Override
@@ -90,18 +97,50 @@ public class RisingCut extends SkillActive
 	}
 
 	@Override
-	protected float getExhaustion() {
-		return 3.0F - (level * 0.2F);
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return ticksTilFail > 0 && player.motionY > 0.0D && canUse(player);
 	}
 
 	@Override
-	public boolean activate(World world, EntityPlayer player) {
-		if (super.activate(world, player)) {
-			activeTimer = 5 + level;
-			player.motionY += 0.3D + (0.115D * level);
-			DSSPlayerInfo.get(player).reduceFallAmount = level;
+	@SideOnly(Side.CLIENT)
+	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+		return (key == mc.gameSettings.keyBindJump || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK]
+				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+	}
+
+	/**
+	 * Flags the skill as ready to be activated when the player next attacks,
+	 * provided {@link #canExecute} still returns true at that time
+	 */
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (key == mc.gameSettings.keyBindJump) {
+			if (!isActive() && !PlayerUtils.isUsingItem(player) && player.isSneaking()) {
+				ticksTilFail = 3; // this allows canExecute to return true for 3 ticks
+				return true;
+			}
+		} else if (canExecute(player)) {
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+			DSSClientEvents.performComboAttack(mc, DSSPlayerInfo.get(player).getTargetingSkill());
+			return true;
 		}
+		return false;
+	}
+
+	@Override
+	protected boolean onActivated(World world, EntityPlayer player) {
+		activeTimer = 5 + level;
+		entityHit = null;
+		player.motionY += 0.3D + (0.115D * level);
+		DSSPlayerInfo.get(player).reduceFallAmount += level;
 		return isActive();
+	}
+
+	@Override
+	protected void onDeactivated(World world, EntityPlayer player) {
+		activeTimer = 0;
 	}
 
 	@Override
@@ -125,21 +164,9 @@ public class RisingCut extends SkillActive
 		}
 	}
 
-	/**
-	 * Flags the skill as ready to be activated when the player next attacks,
-	 * provided canExecute(EntityPlayer) returns true at that time
-	 */
+	@Override
 	@SideOnly(Side.CLIENT)
-	public void keyPressed() {
-		ticksTilFail = 3;
-	}
-
-	/**
-	 * Keeps player's sword fully extended for duration of skill
-	 * @return always false so that player remains looking at the target
-	 */
-	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		player.swingProgress = 0.5F;
 		return false;
 	}
@@ -148,8 +175,10 @@ public class RisingCut extends SkillActive
 	 * Call when an entity is damaged to flag the entity for velocity update next tick.
 	 * This is necessary because adding velocity right before the entity is damaged fails.
 	 */
-	public void onImpact(Entity entity) {
+	@Override
+	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		boolean flag = !(entity instanceof EntityPlayer) || !((EntityPlayer) entity).isBlocking();
 		this.entityHit = (flag ? entity : null);
+		return amount;
 	}
 }

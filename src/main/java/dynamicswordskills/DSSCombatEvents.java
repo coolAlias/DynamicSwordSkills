@@ -40,34 +40,26 @@ import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.lib.Config;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.client.MortalDrawPacket;
 import dynamicswordskills.skills.ArmorBreak;
-import dynamicswordskills.skills.Dodge;
-import dynamicswordskills.skills.EndingBlow;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.LeapingBlow;
 import dynamicswordskills.skills.MortalDraw;
-import dynamicswordskills.skills.Parry;
-import dynamicswordskills.skills.RisingCut;
 import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.skills.SwordBreak;
 
 /**
  * 
@@ -141,7 +133,7 @@ public class DSSCombatEvents
 		}
 	}
 
-	
+
 
 	/**
 	 * Used for anti-spam of left click, if enabled in the configuration settings.
@@ -159,28 +151,7 @@ public class DSSCombatEvents
 	@SubscribeEvent
 	public void onAttacked(LivingAttackEvent event) {
 		if (!event.isCanceled() && event.entity instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.entity;
-			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-			if (skills.isSkillActive(SkillBase.dodge)) {
-				event.setCanceled(((Dodge) skills.getPlayerSkill(SkillBase.dodge)).dodgeAttack(player));
-			} else if (skills.isSkillActive(SkillBase.parry)) {
-				if (event.source.getSourceOfDamage() instanceof EntityLivingBase) {
-					EntityLivingBase attacker = (EntityLivingBase) event.source.getSourceOfDamage();
-					event.setCanceled(((Parry) skills.getPlayerSkill(SkillBase.parry)).parryAttack(player, attacker));
-				}
-			} else if (skills.isSkillActive(SkillBase.swordBreak)) {
-				if (event.source.getSourceOfDamage() instanceof EntityLivingBase) {
-					EntityLivingBase attacker = (EntityLivingBase) event.source.getSourceOfDamage();
-					event.setCanceled(((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).breakAttack(player, attacker));
-				}
-			} else if (skills.isSkillActive(SkillBase.mortalDraw) && event.source.getEntity() != null) {
-				if (!player.worldObj.isRemote) {
-					if (((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, event.source.getEntity())) {
-						PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
-						event.setCanceled(true);
-					}
-				}
-			}
+			DSSPlayerInfo.get((EntityPlayer) event.entity).onBeingAttacked(event);
 		}
 	}
 
@@ -211,23 +182,7 @@ public class DSSCombatEvents
 			}
 		}
 		if (event.ammount > 0.0F && event.source.getEntity() instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.source.getEntity();
-			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-			if (skills.isSkillActive(SkillBase.risingCut)) {
-				((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).onImpact(event.entity);
-			} else if (skills.isSkillActive(SkillBase.endingBlow)) {
-				((EndingBlow) skills.getPlayerSkill(SkillBase.endingBlow)).onImpact(player, event);
-			}
-			if (skills.getComboSkill() != null) {
-				skills.getComboSkill().onHurtTarget(player, event);
-			}
-		}
-	}
-
-	@SubscribeEvent
-	public void onLivingDeathEvent(LivingDeathEvent event) {
-		if (!event.entity.worldObj.isRemote && event.entity instanceof EntityPlayer) {
-			DSSPlayerInfo.saveProxyData((EntityPlayer) event.entity);
+			DSSPlayerInfo.get((EntityPlayer) event.source.getEntity()).onPostImpact(event);
 		}
 	}
 
@@ -239,19 +194,22 @@ public class DSSCombatEvents
 	}
 
 	@SubscribeEvent
-	public void onEntityJoinWorld(EntityJoinWorldEvent event) {
-		if (!event.entity.worldObj.isRemote && event.entity instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.entity;
-			DSSPlayerInfo.loadProxyData(player);
-			DSSPlayerInfo.get(player).verifyStartingGear();
-		}
-	}
-
-	@SubscribeEvent
 	public void onEntityConstructing(EntityConstructing event) {
 		if (event.entity instanceof EntityPlayer && DSSPlayerInfo.get((EntityPlayer) event.entity) == null) {
 			DSSPlayerInfo.register((EntityPlayer) event.entity);
 		}
+	}
+
+	@SubscribeEvent
+	public void onPlayerLoggedIn(PlayerLoggedInEvent event) {
+		if (!event.player.worldObj.isRemote) {
+			DSSPlayerInfo.get(event.player).onPlayerLoggedIn();
+		}
+	}
+
+	@SubscribeEvent
+	public void onClonePlayer(PlayerEvent.Clone event) {
+		DSSPlayerInfo.get(event.entityPlayer).copy(DSSPlayerInfo.get(event.original));
 	}
 
 	/**
@@ -263,7 +221,7 @@ public class DSSCombatEvents
 		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-			if (player.worldObj.isRemote && skills.isSkillActive(SkillBase.leapingBlow)) {
+			if (skills.isSkillActive(SkillBase.leapingBlow)) {
 				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(player, event.distance);
 			}
 			if (skills.reduceFallAmount > 0.0F) {
@@ -279,7 +237,7 @@ public class DSSCombatEvents
 	@SubscribeEvent
 	public void onCreativeFall(PlayerFlyableFallEvent event) {
 		DSSPlayerInfo skills = DSSPlayerInfo.get(event.entityPlayer);
-		if (skills != null && event.entityPlayer.worldObj.isRemote) {
+		if (skills != null) {
 			if (skills.isSkillActive(SkillBase.leapingBlow)) {
 				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(event.entityPlayer, event.distance);
 			}

@@ -21,6 +21,8 @@ import java.util.Random;
 
 import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -28,6 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillItem;
@@ -137,7 +140,7 @@ public class PlayerUtils
 		if (!world.isRemote) {
 			while (xpAmount > 0) {
 				int xp = (xpAmount > 50 ? 50 : EntityXPOrb.getXPSplit(xpAmount));
-                xpAmount -= xp;
+				xpAmount -= xp;
 				float spawnX = x + rand.nextFloat();
 				float spawnY = y + rand.nextFloat();
 				float spawnZ = z + rand.nextFloat();
@@ -145,6 +148,29 @@ public class PlayerUtils
 				xpOrb.motionY += (4 + rand.nextGaussian()) * 0.05F;
 				world.spawnEntityInWorld(xpOrb);
 			}
+		}
+	}
+
+	/**
+	 * Drops the entity's currently held item into the world
+	 */
+	public static void dropHeldItem(EntityLivingBase entity) {
+		if (!entity.worldObj.isRemote && entity.getHeldItem() != null) {
+			EntityItem drop = new EntityItem(entity.worldObj, entity.posX,
+					entity.posY - 0.30000001192092896D + (double) entity.getEyeHeight(),
+					entity.posZ, entity.getHeldItem().copy());
+			float f = 0.3F;
+			float f1 = entity.worldObj.rand.nextFloat() * (float) Math.PI * 2.0F;
+			drop.motionX = (double)(-MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f);
+			drop.motionZ = (double)(MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f);
+			drop.motionY = (double)(-MathHelper.sin(entity.rotationPitch / 180.0F * (float) Math.PI) * f + 0.1F);
+			f = 0.02F * entity.worldObj.rand.nextFloat();
+			drop.motionX += Math.cos((double) f1) * (double) f;
+			drop.motionY += (double)((entity.worldObj.rand.nextFloat() - entity.worldObj.rand.nextFloat()) * 0.1F);
+			drop.motionZ += Math.sin((double) f1) * (double) f;
+			drop.delayBeforeCanPickup = 40;
+			entity.worldObj.spawnEntityInWorld(drop);
+			entity.setCurrentItemOrArmor(0, (ItemStack) null);
 		}
 	}
 }

@@ -18,9 +18,13 @@
 package dynamicswordskills.entity;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -30,9 +34,10 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import dynamicswordskills.CommonProxy;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.client.DSSKeyHandler;
@@ -65,8 +70,15 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	/** Slot of the item providing the persistent dummy sword skill, if any */
 	private int persistentDummySkillSlot = -1;
 
-	/** ID of currently active skill that prevents left-mouse button interaction */
-	private int currentActiveSkillId = -1;
+	/** Currently active skills */
+	private final List<SkillActive> activeSkills = new LinkedList<SkillActive>();
+
+	/**
+	 * Currently animating skill that {@link SkillActive#hasAnimation() has an animation};
+	 * it may or may not currently be {@link SkillActive#isAnimating() animating}
+	 */
+	@SideOnly(Side.CLIENT)
+	private SkillActive animatingSkill;
 
 	/** Whether the player has received the starting bonus gear or not yet */
 	private boolean receivedGear = false;
@@ -78,6 +90,9 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		this.player = player;
 		this.skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
 	}
+
+	@Override
+	public void init(Entity entity, World world) {}
 
 	/**
 	 * Resets all data related to skills
@@ -157,18 +172,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Returns true if the given skill may be activated; i.e. the player has the skill
-	 * and {@link SkillActive#canExecute(EntityPlayer) skill.canExecute} returns true.
-	 * Note that this does not guarantee the skill will successfully activate, but only
-	 * that the initial conditions are correct (e.g. all necessary keys pressed)
-	 */
-	@SideOnly(Side.CLIENT)
-	public boolean shouldSkillActivate(SkillBase skill) {
-		SkillActive active = getActiveSkill(skill);
-		return active != null && active.canExecute(player);
-	}
-
-	/**
 	 * Returns true if the player can currently use the skill; i.e. the player has the skill
 	 * and {@link SkillActive#canUse(EntityPlayer) skill.canUse} returns true. This implies
 	 * that the skill will trigger successfully if activated.
@@ -181,6 +184,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	/**
 	 * Returns true if the player has the skill and the skill is currently active
 	 */
+	/*
 	public boolean isSkillActive(SkillBase skill) {
 		if (!(skill instanceof SkillActive)) {
 			return false;
@@ -194,21 +198,126 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			return false;
 		}
 	}
+	 */
 
-	/** Used only for skills that disable left-mouse click interactions */
-	public void setCurrentActiveSkill(SkillBase skill) {
-		currentActiveSkillId = skill.getId();
+	/**
+	 * Returns true if the player has the skill and the skill is currently active
+	 */
+	public boolean isSkillActive(SkillBase skill) {
+		for (SkillActive active : activeSkills) {
+			if (active.getId() == skill.getId()) {
+				return active.isActive();
+			}
+		}
+		if (itemSkill instanceof SkillActive && itemSkill.getId() == skill.getId()) {
+			return ((SkillActive) itemSkill).isActive();
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the {@link #animatingSkill}, which may be null
+	 */
+	@SideOnly(Side.CLIENT)
+	public SkillActive getCurrentlyAnimatingSkill() {
+		return animatingSkill;
+	}
+
+	/**
+	 * This method is called automatically from {@link #onSkillActivated} for each skill activated.
+	 * @param skill If this skill {@link SkillActive#hasAnimation has an animation}, it will be set
+	 * 				as the currently animating skill.
+	 */
+	@SideOnly(Side.CLIENT)
+	public void setCurrentlyAnimatingSkill(SkillActive skill) {
+		animatingSkill = (skill == null || skill.hasAnimation() ? skill : animatingSkill);
 	}
 
 	/**
 	 * Returns false any skill is active that prevents left-clicks, such as most skills with animations
 	 */
+	/*
 	public boolean canInteract() {
 		if (currentActiveSkillId > -1 && !isSkillActive(SkillBase.getSkill(currentActiveSkillId))) {
 			currentActiveSkillId = -1;
 		}
 		// include attack time since onMouseChanged doesn't otherwise account for it
 		return currentActiveSkillId == -1 && player.attackTime == 0;
+	}
+	 */
+
+	/**
+	 * Returns whether key/mouse input and skill interactions are currently allowed,
+	 * i.e. the {@link #animatingSkill} is either null or not currently animating
+	 */
+	@SideOnly(Side.CLIENT)
+	public boolean canInteract() {
+		// don't set the current skill to null just yet if it is still animating
+		// this allows skills to prevent key/mouse input without having to be 'active'
+		if (animatingSkill != null && !animatingSkill.isActive() && !animatingSkill.isAnimating()) {//!isSkillActive(currentActiveSkill)) {
+			animatingSkill = null;
+		}
+		return animatingSkill == null || !animatingSkill.isAnimating();
+	}
+
+	/**
+	 * Call when a key is pressed to pass the key press to the player's skills'
+	 * {@link SkillActive#keyPressed keyPressed} method, but only if the skill returns
+	 * true from {@link SkillActive#isKeyListener isKeyListener} for the key pressed.
+	 * The first skill to return true from keyPressed precludes any remaining skills
+	 * from receiving the key press.
+	 * @return	True if a listening skill's {@link SkillActive#keyPressed} signals that the key press was handled
+	 */
+	@SideOnly(Side.CLIENT)
+	public boolean onKeyPressed(Minecraft mc, KeyBinding key) {
+		for (SkillBase skill : skills.values()) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key)) {
+				if (((SkillActive) skill).keyPressed(mc, key, player)) {
+					return true;
+				}
+			}
+		}
+		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isKeyListener(mc, key)) {
+			return ((SkillActive) itemSkill).keyPressed(mc, key, player);
+		}
+		return false;
+	}
+
+	/**
+	 * Called from LivingAttackEvent to trigger {@link SkillActive#onBeingAttacked} for each
+	 * currently active skill, potentially canceling the event. If the event is canceled, it
+	 * returns immediately without processing any remaining active skills.
+	 */
+	public void onBeingAttacked(LivingAttackEvent event) {
+		for (SkillActive skill : activeSkills) {
+			if (skill.isActive() && skill.onBeingAttacked(player, event.source)) {
+				event.setCanceled(true);
+				return;
+			}
+		}
+		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+			((SkillActive) itemSkill).onBeingAttacked(player, event.source);
+		}
+	}
+
+	/**
+	 * Called from LivingHurtEvent to trigger {@link SkillActive#postImpact} for each
+	 * currently active skill, potentially altering the value of event.ammount, as
+	 * well as calling {@link ICombo#onHurtTarget onHurtTarget} for the current ICombo.
+	 */
+	public void onPostImpact(LivingHurtEvent event) {
+		for (SkillActive skill : activeSkills) {
+			if (skill.isActive()) {
+				event.ammount = skill.postImpact(player, event.entityLiving, event.ammount);
+			}
+		}
+		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+			event.ammount = ((SkillActive) itemSkill).postImpact(player, event.entityLiving, event.ammount);
+		}
+		// combo gets updated last, after all damage modifications are completed
+		if (getComboSkill() != null) {
+			getComboSkill().onHurtTarget(player, event);
+		}
 	}
 
 	/**
@@ -317,30 +426,56 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 	}
 
-	/** Returns true if the player successfully activates his/her skill */
+	/**
+	 * Call after activating any skill to ensure it is added to the list of 
+	 * current active skills and set as the currently animating skill
+	 */
+	private void onSkillActivated(World world, SkillActive skill) {
+		if (skill.isActive()) {
+			DynamicSwordSkills.logger.info("Activated skill " + skill.getDisplayName());
+			activeSkills.add(skill);
+		}
+		if (world.isRemote) {
+			setCurrentlyAnimatingSkill(skill);
+		}
+	}
+
+	/**
+	 * Returns true if the player has this skill and {@link SkillActive#activate} returns true
+	 */
 	public boolean activateSkill(World world, SkillBase skill) {
 		return activateSkill(world, skill.getId());
 	}
 
 	/**
-	 * Returns true if the player successfully activates his/her skill
+	 * Returns true if the player has this skill and {@link SkillActive#activate} returns true
 	 */
 	public boolean activateSkill(World world, byte id) {
 		SkillBase skill = getPlayerSkill(id);
-		return (skill instanceof SkillActive ? ((SkillActive) skill).activate(world, player) : false);
+		if (skill instanceof SkillActive && ((SkillActive) skill).activate(world, player)) {
+			onSkillActivated(world, (SkillActive) skill);
+			return true;
+		}
+		return false;
 	}
 
-	/** Returns true if the skill was triggered (e.g. activated without player input) */
+	/**
+	 * Returns true if the player has this skill and {@link SkillActive#trigger} returns true
+	 */
 	public boolean triggerSkill(World world, SkillBase skill) {
 		return triggerSkill(world, skill.getId());
 	}
 
 	/**
-	 * Returns true if the skill was successfully triggered (e.g. activated without player input)
+	 * Returns true if the player has this skill and {@link SkillActive#trigger} returns true
 	 */
 	public boolean triggerSkill(World world, byte id) {
 		SkillBase skill = getPlayerSkill(id);
-		return (skill instanceof SkillActive ? ((SkillActive) skill).trigger(world, player) : false);
+		if (skill instanceof SkillActive && ((SkillActive) skill).trigger(world, player, true)) {
+			onSkillActivated(world, (SkillActive) skill);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -351,6 +486,26 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	public void syncClientSideSkill(byte id, NBTTagCompound compound) {
 		if (SkillBase.doesSkillExist(id)) {
 			skills.put(id, SkillBase.getNewSkillInstance(id).loadFromNBT(compound));
+		}
+	}
+
+	/**
+	 * Call during the render tick to update animating and ILockOnTarget skills
+	 */
+	@SideOnly(Side.CLIENT)
+	public void onRenderTick(float partialRenderTick) {
+		// flags whether a skill is currently animating
+		boolean flag = false;
+		if (animatingSkill != null) {
+			if (animatingSkill.isAnimating()) {
+				flag = animatingSkill.onRenderTick(player, partialRenderTick);
+			} else if (!animatingSkill.isActive()) {
+				setCurrentlyAnimatingSkill(null);
+			}
+		}
+		ILockOnTarget skill = getTargetingSkill();
+		if (!flag && skill != null && skill.isLockedOn()) {
+			((SkillActive) skill).onRenderTick(player, partialRenderTick);
 		}
 	}
 
@@ -370,6 +525,14 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 		for (SkillBase skill : skills.values()) {
 			skill.onUpdate(player);
+		}
+		// must use iterators to avoid concurrent modification exceptions to list
+		Iterator<SkillActive> iterator = activeSkills.iterator();
+		while (iterator.hasNext()) {
+			SkillActive skill = iterator.next();
+			if (!skill.isActive()) {
+				iterator.remove();
+			}
 		}
 		if (player.worldObj.isRemote) {
 			if (DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getIsKeyPressed() &&
@@ -468,34 +631,26 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		return (DSSPlayerInfo) player.getExtendedProperties(EXT_PROP_NAME);
 	}
 
-	/** Makes it look nicer in the methods save/loadProxyData */
-	private static final String getSaveKey(EntityPlayer player) {
-		return player.getCommandSenderName() + ":" + EXT_PROP_NAME;
-	}
-
 	/**
-	 * Does everything I did in onLivingDeathEvent and it's static,
-	 * so you now only need to use the following in the above event:
-	 * ExtendedPlayer.saveProxyData((EntityPlayer) event.entity));
+	 * Call when the player logs in for the first time
 	 */
-	public static final void saveProxyData(EntityPlayer player) {
-		NBTTagCompound tag = new NBTTagCompound();
-		DSSPlayerInfo.get(player).saveNBTData(tag);
-		CommonProxy.storeEntityData(getSaveKey(player), tag);
-	}
-
-	/**
-	 * This cleans up the onEntityJoinWorld event by replacing most of the code
-	 * with a single line: ExtendedPlayer.loadProxyData((EntityPlayer) event.entity));
-	 */
-	public static final void loadProxyData(EntityPlayer player) {
-		DSSPlayerInfo info = DSSPlayerInfo.get(player);
-		NBTTagCompound tag = CommonProxy.getEntityData(getSaveKey(player));
-		if (tag != null) {
-			info.loadNBTData(tag);
+	public void onPlayerLoggedIn() {
+		validateSkills();
+		if (player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
 		}
-		info.validateSkills();
-		PacketDispatcher.sendTo(new SyncPlayerInfoPacket(info), (EntityPlayerMP) player);
+		verifyStartingGear();
+	}
+
+	/**
+	 * Copies given data to this one
+	 */
+	public void copy(DSSPlayerInfo info) {
+		NBTTagCompound compound = new NBTTagCompound();
+		info.saveNBTData(compound);
+		this.loadNBTData(compound);
+		// validateSkills(); ?
+		// SyncPlayerInfoPacket ?
 	}
 
 	/**
@@ -530,8 +685,4 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 		receivedGear = compound.getBoolean("receivedGear");
 	}
-
-	@Override
-	public void init(Entity entity, World world) {}
-
 }

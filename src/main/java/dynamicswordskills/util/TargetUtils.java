@@ -27,6 +27,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -57,6 +58,62 @@ public class TargetUtils
 	 */
 	public static boolean canReachTarget(EntityPlayer player, Entity target) {
 		return (player.canEntityBeSeen(target) && player.getDistanceSqToEntity(target) < getReachDistanceSq(player));
+	}
+
+	/**
+	 * Returns MovingObjectPosition of Entity or Block impacted, or null if nothing was struck
+	 * @param entity	The entity checking for impact, e.g. an arrow
+	 * @param shooter	An entity not to be collided with, generally the shooter
+	 * @param hitBox	The amount by which to expand the collided entities' bounding boxes when checking for impact (may be negative)
+	 * @param flag		Optional flag to allow collision with shooter, e.g. (ticksInAir >= 5)
+	 * 
+	 */
+	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
+		Vec3 vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
+		Vec3 vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
+		// func_147447_a is the ray_trace method
+		MovingObjectPosition mop = world.func_147447_a(vec3, vec31, false, true, false);
+		vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
+		vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
+
+		if (mop != null) {
+			vec31 = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
+		}
+
+		Entity target = null;
+		List list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.boundingBox.addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
+		double d0 = 0.0D;
+		//double hitBox = 0.3D;
+
+		for (int i = 0; i < list.size(); ++i) {
+			Entity entity1 = (Entity) list.get(i);
+			if (entity1.canBeCollidedWith() && (entity1 != shooter || flag)) {
+				AxisAlignedBB axisalignedbb = entity1.boundingBox.expand(hitBox, hitBox, hitBox);
+				MovingObjectPosition mop1 = axisalignedbb.calculateIntercept(vec3, vec31);
+				if (mop1 != null) {
+					double d1 = vec3.distanceTo(mop1.hitVec);
+					if (d1 < d0 || d0 == 0.0D) {
+						target = entity1;
+						d0 = d1;
+					}
+				}
+			}
+		}
+
+		if (target != null) {
+			mop = new MovingObjectPosition(target);
+		}
+
+		if (mop != null && mop.entityHit instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) mop.entityHit;
+			if (player.capabilities.disableDamage || (shooter instanceof EntityPlayer
+					&& !((EntityPlayer) shooter).canAttackPlayer(player)))
+			{
+				mop = null;
+			}
+		}
+
+		return mop;
 	}
 
 	/**

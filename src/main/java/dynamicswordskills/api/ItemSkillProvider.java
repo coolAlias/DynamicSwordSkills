@@ -59,12 +59,16 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 {
 	/** The weapon's tool material determines damage and durability */
 	private final ToolMaterial material;
+
 	/** Weapon damage is based on tool material, just like swords */
 	private float weaponDamage;
+
 	/** The skill id and level of the SkillBase.{skill} granted by this Item */
 	private final byte skillId, level;
+
 	/** This is used mainly for the tooltip display */
 	private SkillBase skill;
+
 	/** Whether the player should be granted basic sword skill should they not have it */
 	private final boolean grantsBasicSkill;
 
@@ -107,6 +111,7 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	 * called to improve efficiency (since the level will never change) using the method
 	 * {@link SkillBase#getSkillFromItem(ItemStack, ISkillProvider) SkillBase.getSkillFromItem}
 	 * @param stack not used in this implementation, but required for the SkillBase method above
+	 * @return	DO NOT use the returned skill as a player's active instance - it is not unique!
 	 */
 	protected SkillBase getSkill(ItemStack stack) {
 		if (skill == null) {

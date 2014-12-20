@@ -28,6 +28,7 @@ import dynamicswordskills.lib.ModInfo;
 import dynamicswordskills.network.bidirectional.AbstractBiMessageHandler;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.AttackTimePacket;
+import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
 import dynamicswordskills.network.bidirectional.PlaySoundPacket;
 import dynamicswordskills.network.client.AbstractClientMessageHandler;
 import dynamicswordskills.network.client.MortalDrawPacket;
@@ -37,9 +38,10 @@ import dynamicswordskills.network.client.UnpressKeyPacket;
 import dynamicswordskills.network.client.UpdateComboPacket;
 import dynamicswordskills.network.server.AbstractServerMessageHandler;
 import dynamicswordskills.network.server.AddExhaustionPacket;
+import dynamicswordskills.network.server.DashImpactPacket;
 import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.network.server.OpenGuiPacket;
-import dynamicswordskills.network.server.SpawnLeapingBlowPacket;
+import dynamicswordskills.network.server.RefreshSpinPacket;
 import dynamicswordskills.network.server.TargetIdPacket;
 
 /**
@@ -63,6 +65,7 @@ public class PacketDispatcher
 		// Bi-directional packets using standard IMessageHandler implementation (handled identically on both sides)
 		registerBiMessage(ActivateSkillPacket.Handler.class, ActivateSkillPacket.class);
 		registerBiMessage(AttackTimePacket.Handler.class, AttackTimePacket.class);
+		registerBiMessage(DeactivateSkillPacket.Handler.class, DeactivateSkillPacket.class);
 
 		// Packets handled on CLIENT
 		registerMessage(MortalDrawPacket.Handler.class, MortalDrawPacket.class);
@@ -73,9 +76,10 @@ public class PacketDispatcher
 
 		// Packets handled on SERVER
 		registerMessage(AddExhaustionPacket.Handler.class, AddExhaustionPacket.class);
+		registerMessage(DashImpactPacket.Handler.class, DashImpactPacket.class);
 		registerMessage(EndComboPacket.Handler.class, EndComboPacket.class);
 		registerMessage(OpenGuiPacket.Handler.class, OpenGuiPacket.class);
-		registerMessage(SpawnLeapingBlowPacket.Handler.class, SpawnLeapingBlowPacket.class);
+		registerMessage(RefreshSpinPacket.Handler.class, RefreshSpinPacket.class);
 		registerMessage(TargetIdPacket.Handler.class, TargetIdPacket.class);
 	}
 
