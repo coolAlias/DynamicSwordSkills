@@ -148,7 +148,7 @@ public class Dash extends SkillActive
 				double d0 = (target.posX - player.posX);
 				double d1 = (target.posY + (double)(target.height / 3.0F) - player.posY);
 				double d2 = (target.posZ - player.posZ);
-				Vec3 vec3 = player.worldObj.getWorldVec3Pool().getVecFromPool(d0, d1, d2).normalize();
+				Vec3 vec3 = Vec3.createVectorHelper(d0, d1, d2).normalize();
 
 				player.addVelocity(vec3.xCoord, 0.0D, vec3.zCoord);
 				distance += vec3.lengthVector();

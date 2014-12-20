@@ -20,7 +20,7 @@ package dynamicswordskills.lib;
 public class ModInfo {
 	public static final String ID = "dynamicswordskills";
 	public static final String NAME = "Dynamic Sword Skills";
-	public static final String VERSION = "1.6.4-v1.5";
+	public static final String VERSION = "1.7.10-v1.5.1";
 	public static final String CHANNEL = "dsschannel";
 	public static final String CLIENT_PROXY = "dynamicswordskills.ClientProxy";
 	public static final String COMMON_PROXY = "dynamicswordskills.CommonProxy";

@@ -22,18 +22,18 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.MortalDrawPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.MortalDrawPacket;
 import dynamicswordskills.util.PlayerUtils;
 
 /**
@@ -93,13 +93,14 @@ public class MortalDraw extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.pressed
-				|| DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].pressed);
+		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.getIsKeyPressed()
+				|| DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getIsKeyPressed());
 	}
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && attackTimer == 0 && swordSlot > -1 && player.getHeldItem() == null;
+		// && DSSPlayerInfo.get(player).isSkillActive(swordBasic);
 	}
 
 	@Override
@@ -136,7 +137,7 @@ public class MortalDraw extends SkillActive
 			if (attackTimer == DELAY && !player.worldObj.isRemote) {
 				drawSword(player, null);
 				if (player.getHeldItem() != null) {
-					PacketDispatcher.sendPacketToPlayer(new MortalDrawPacket().makePacket(), (Player) player);
+					PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
 				}
 			}
 		}

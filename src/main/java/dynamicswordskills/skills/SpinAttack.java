@@ -27,14 +27,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.lib.Config;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.AddExhaustionPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.server.AddExhaustionPacket;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
 
@@ -220,9 +220,9 @@ public class SpinAttack extends SkillActive
 	/** Returns true if either left or right arrow key is currently being pressed (or both in the case of vanilla controls) */
 	@SideOnly(Side.CLIENT)
 	private boolean isKeyPressed() {
-		return DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].pressed || DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].pressed
-				|| (Config.allowVanillaControls() && (Minecraft.getMinecraft().gameSettings.keyBindLeft.pressed
-						&& Minecraft.getMinecraft().gameSettings.keyBindRight.pressed));
+		return DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getIsKeyPressed() || DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getIsKeyPressed()
+				|| (Config.allowVanillaControls() && (Minecraft.getMinecraft().gameSettings.keyBindLeft.getIsKeyPressed()
+						&& Minecraft.getMinecraft().gameSettings.keyBindRight.getIsKeyPressed()));
 	}
 
 	/** Max sword range for striking targets */
@@ -242,7 +242,7 @@ public class SpinAttack extends SkillActive
 	private void startSpin(World world, EntityPlayer player) {
 		++refreshed;
 		PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SPINATTACK, 0.4F, 0.5F);
-		PacketDispatcher.sendPacketToServer(new AddExhaustionPacket(getExhaustion()).makePacket());
+		PacketDispatcher.sendToServer(new AddExhaustionPacket(getExhaustion()));
 		targets = world.getEntitiesWithinAABB(EntityLivingBase.class, player.boundingBox.expand(getRange(), 0.0D, getRange()));
 		if (targets.contains(player)) {
 			targets.remove(player);

@@ -40,9 +40,8 @@ import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.event.EventPriority;
-import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -52,12 +51,13 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.common.eventhandler.EventPriority;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.lib.Config;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.MortalDrawPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.MortalDrawPacket;
 import dynamicswordskills.skills.ArmorBreak;
 import dynamicswordskills.skills.Dodge;
 import dynamicswordskills.skills.EndingBlow;
@@ -127,7 +127,7 @@ public class DSSCombatEvents
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onLivingDrops(LivingDropsEvent event) {
 		if (event.source.getEntity() instanceof EntityPlayer) {
 			EntityLivingBase mob = event.entityLiving;
@@ -140,7 +140,9 @@ public class DSSCombatEvents
 			}
 		}
 	}
+
 	
+
 	/**
 	 * Used for anti-spam of left click, if enabled in the configuration settings.
 	 */
@@ -154,7 +156,7 @@ public class DSSCombatEvents
 	 * This event is called when an entity is attacked by another entity; it is only
 	 * called on the server unless the source of the attack is an EntityPlayer
 	 */
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onAttacked(LivingAttackEvent event) {
 		if (!event.isCanceled() && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
@@ -174,7 +176,7 @@ public class DSSCombatEvents
 			} else if (skills.isSkillActive(SkillBase.mortalDraw) && event.source.getEntity() != null) {
 				if (!player.worldObj.isRemote) {
 					if (((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, event.source.getEntity())) {
-						PacketDispatcher.sendPacketToPlayer(new MortalDrawPacket().makePacket(), (Player) player);
+						PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
 						event.setCanceled(true);
 					}
 				}
@@ -182,7 +184,10 @@ public class DSSCombatEvents
 		}
 	}
 
-	@ForgeSubscribe(priority=EventPriority.LOWEST)
+	/**
+	 * Use LOW or LOWEST priority to prevent interrupting a combo when the event may be canceled elsewhere.
+	 */
+	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onHurt(LivingHurtEvent event) {
 		if (event.source.getEntity() instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.source.getEntity();
@@ -219,21 +224,21 @@ public class DSSCombatEvents
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onLivingDeathEvent(LivingDeathEvent event) {
 		if (!event.entity.worldObj.isRemote && event.entity instanceof EntityPlayer) {
 			DSSPlayerInfo.saveProxyData((EntityPlayer) event.entity);
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onLivingUpdate(LivingUpdateEvent event) {
 		if (event.entity instanceof EntityPlayer) {
 			DSSPlayerInfo.get((EntityPlayer) event.entity).onUpdate();
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onEntityJoinWorld(EntityJoinWorldEvent event) {
 		if (!event.entity.worldObj.isRemote && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
@@ -242,7 +247,7 @@ public class DSSCombatEvents
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onEntityConstructing(EntityConstructing event) {
 		if (event.entity instanceof EntityPlayer && DSSPlayerInfo.get((EntityPlayer) event.entity) == null) {
 			DSSPlayerInfo.register((EntityPlayer) event.entity);
@@ -253,7 +258,7 @@ public class DSSCombatEvents
 	 * NOTE 1: Leaping Blow's onImpact method is client-side only
 	 * NOTE 2: LivingFallEvent is only called when not in Creative mode
 	 */
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onFall(LivingFallEvent event) {
 		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
@@ -271,7 +276,7 @@ public class DSSCombatEvents
 	/**
 	 * NOTE: Leaping Blow's onImpact method is client-side only
 	 */
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onCreativeFall(PlayerFlyableFallEvent event) {
 		DSSPlayerInfo skills = DSSPlayerInfo.get(event.entityPlayer);
 		if (skills != null && event.entityPlayer.worldObj.isRemote) {

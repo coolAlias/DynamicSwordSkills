@@ -23,17 +23,18 @@ import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillItem;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.api.ISword;
-import dynamicswordskills.network.PlaySoundPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.PlaySoundPacket;
 import dynamicswordskills.skills.SkillBase;
 
 /**
@@ -86,6 +87,11 @@ public class PlayerUtils
 		return player.capabilities.isCreativeMode ? 0.0F : (player.getMaxHealth() - player.getHealth());
 	}
 
+	/** Sends the pre-translated message to the player as a chat message */
+	public static void sendChat(EntityPlayer player, String message) {
+		player.addChatMessage(new ChatComponentText(message));
+	}
+
 	/**
 	 * Sends a packet to the client to play a sound on the client side only, or
 	 * sends a packet to the server to play a sound on the server for all to hear.
@@ -93,9 +99,9 @@ public class PlayerUtils
 	 */
 	public static void playSound(EntityPlayer player, String sound, float volume, float pitch) {
 		if (player.worldObj.isRemote) {
-			PacketDispatcher.sendPacketToServer(new PlaySoundPacket(sound, volume, pitch, player).makePacket());
+			PacketDispatcher.sendToServer(new PlaySoundPacket(sound, volume, pitch, player));
 		} else {
-			PacketDispatcher.sendPacketToPlayer(new PlaySoundPacket(sound, volume, pitch).makePacket(), (Player) player);
+			PacketDispatcher.sendTo(new PlaySoundPacket(sound, volume, pitch), (EntityPlayerMP) player);
 		}
 	}
 

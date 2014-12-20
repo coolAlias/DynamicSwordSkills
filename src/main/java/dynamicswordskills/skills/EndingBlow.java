@@ -19,19 +19,20 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.AttackTimePacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.AttackTimePacket;
 import dynamicswordskills.util.PlayerUtils;
 
 /**
@@ -162,7 +163,7 @@ public class EndingBlow extends SkillActive
 			activeTimer = 0;
 			if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
 				player.attackTime = getDuration() * 2;
-				PacketDispatcher.sendPacketToPlayer(new AttackTimePacket(player.attackTime).makePacket(), (Player) player);
+				PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
 			}
 		}
 	}
@@ -173,16 +174,16 @@ public class EndingBlow extends SkillActive
 	private void updateEntityState(EntityPlayer player) {
 		if (entityHit.getHealth() <= 0.0F) {
 			if (entityHit instanceof EntityLiving) {
-				((EntityLiving) entityHit).experienceValue += xp;
+				DirtyEntityAccessor.setLivingXp((EntityLiving) entityHit, xp, true);
 			} else {
 				PlayerUtils.spawnXPOrbsWithRandom(player.worldObj, player.worldObj.rand, MathHelper.floor_double(entityHit.posX),
 						MathHelper.floor_double(entityHit.posY), MathHelper.floor_double(entityHit.posZ), xp);
 			}
 		} else {
-			PlayerUtils.playSoundAtEntity(player.worldObj, player, "damage.hit", 0.3F, 0.8F);
+			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_HURT_FLESH, 0.3F, 0.8F);
 			if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
 				player.attackTime = getDuration();
-				PacketDispatcher.sendPacketToPlayer(new AttackTimePacket(player.attackTime).makePacket(), (Player) player);
+				PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
 			}
 		}
 		entityHit = null;

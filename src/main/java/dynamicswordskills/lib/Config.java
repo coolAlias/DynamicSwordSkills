@@ -22,14 +22,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.util.MathHelper;
-import net.minecraftforge.common.Configuration;
+import net.minecraftforge.common.config.Configuration;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import dynamicswordskills.skills.SkillBase;
 
 public class Config
 {
-	public static int modItemIndex;
-	private static final int MOD_ITEM_INDEX_DEFAULT = 27653;
 	/*================== GENERAL =====================*/
 	/** Whether to use default movement controls to activate skills such as Dodge */
 	private static boolean allowVanillaControls;
@@ -47,6 +45,8 @@ public class Config
 	private static boolean enableBonusOrb;
 	/** Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10] */
 	private static int chestLootWeight;
+	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
+	private static boolean enableComboHud;
 	/** [Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50] */
 	private static int disarmTimingBonus;
 	/** [Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20] */
@@ -76,7 +76,6 @@ public class Config
 		config.load();
 		
 		/*================== GENERAL =====================*/
-		modItemIndex = config.get("Item","Starting mod item ID value", MOD_ITEM_INDEX_DEFAULT).getInt() - 256;
 		allowVanillaControls = config.get("General", "Allow vanilla controls to activate skills", true).getBoolean(true);
 		autoTarget = config.get("General", "Enable auto-targeting of next opponent", true).getBoolean(true);
 		baseSwingSpeed = config.get("General", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt();
@@ -85,10 +84,11 @@ public class Config
 		hitsToDisplay = config.get("General", "Max hits to display in Combo HUD [0-12]", 3).getInt();
 		enableBonusOrb = config.get("General", "Whether all players should start with a Basic Skill orb", true).getBoolean(true);
 		chestLootWeight = config.get("General", "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10]", 1).getInt();
-		enableRandomSkillSwords = config.get("General", "[Skill Swords] Enable randomized Skill Swords to appear as loot in various chests", true).getBoolean(true);
-		enableCreativeSkillSwords = config.get("General", "[Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples)", true).getBoolean(true);
+		enableComboHud = config.get("General", "[Combo HUD] Whether the combo hit counter will display by default (may be toggled in game)", true).getBoolean(true);
 		disarmTimingBonus = config.get("General", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt();
 		disarmPenalty = config.get("General", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt();
+		enableRandomSkillSwords = config.get("General", "[Skill Swords] Enable randomized Skill Swords to appear as loot in various chests", true).getBoolean(true);
+		enableCreativeSkillSwords = config.get("General", "[Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples)", true).getBoolean(true);
 		skillSwordLevel = config.get("General", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt();
 		/*================== DROPS =====================*/
 		enablePlayerDrops = config.get("Drops", "[Player] Enable skill orbs to drop from players when killed in PvP", true).getBoolean(true);
@@ -112,6 +112,7 @@ public class Config
 	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
 	public static boolean canTargetPlayers() { return enablePlayerTarget; }
 	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
+	public static boolean isComboHudEnabled() { return enableComboHud; }
 	public static int getHitsToDisplay() { return Math.max(hitsToDisplay, 0); }
 	public static boolean areRandomSwordsEnabled() { return enableRandomSkillSwords; }
 	public static boolean areCreativeSwordsEnabled() { return enableCreativeSkillSwords; }

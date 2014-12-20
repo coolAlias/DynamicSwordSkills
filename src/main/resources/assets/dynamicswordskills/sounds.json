@@ -1,0 +1,13 @@
+{
+    "armorbreak": {"category": "player","sounds": ["sword/armorbreak1","sword/armorbreak2","sword/armorbreak3"]},
+    "leapingblow": {"category": "player","sounds": ["sword/leapingblow1","sword/leapingblow2","sword/leapingblow3"]},
+    "hurtflesh": {"category": "player","sounds": ["sword/hurtflesh1","sword/hurtflesh2","sword/hurtflesh3"]},
+    "mortaldraw": {"category": "player","sounds": ["sword/mortaldraw1","sword/mortaldraw2"]},
+    "slam": {"category": "player","sounds": ["sword/slam1","sword/slam2","sword/slam3"]},
+    "spinattack": {"category": "player","sounds": ["sword/spinattack1","sword/spinattack2","sword/spinattack3"]},
+    "swordcut": {"category": "player","sounds": ["sword/swordcut1","sword/swordcut2","sword/swordcut3","sword/swordcut4"]},
+    "swordmiss": {"category": "player","sounds": ["sword/swordmiss1","sword/swordmiss2","sword/swordmiss3","sword/swordmiss4"]},
+    "swordstrike": {"category": "player","sounds": ["sword/swordstrike1","sword/swordstrike2","sword/swordstrike3","sword/swordstrike4"]},
+    "levelup": {"category": "player","sounds":["special/levelup"]},
+    "special_drop": {"category": "player","sounds":["special/special_drop"]}
+}

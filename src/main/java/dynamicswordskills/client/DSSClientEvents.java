@@ -17,21 +17,18 @@
 
 package dynamicswordskills.client;
 
-import java.util.Iterator;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.MouseEvent;
-import net.minecraftforge.event.ForgeSubscribe;
-import cpw.mods.fml.common.network.PacketDispatcher;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.lib.Config;
-import dynamicswordskills.network.ActivateSkillPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.skills.ArmorBreak;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
@@ -60,24 +57,7 @@ public class DSSClientEvents
 	}
 
 	/**
-	 * Returns the KeyBinding corresponding to the key code given, or NULL if no key binding is found
-	 * @param keyCode Will be a negative number for mouse keys, or positive for keyboard
-	 */
-	@SideOnly(Side.CLIENT)
-	public static KeyBinding getKeyBindFromCode(int keyCode) {
-		// Doesn't seem to be an easy way to get the KeyBinding from the key code...
-		Iterator iterator = KeyBinding.keybindArray.iterator();
-		while (iterator.hasNext()) {
-			KeyBinding kb = (KeyBinding) iterator.next();
-			if (kb.keyCode == keyCode) {
-				return kb;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Attacks current target if player is not currently using an item and {@link ICombo#onAttack}
+	 * Attacks current target if player not currently using an item and {@link ICombo#onAttack}
 	 * doesn't return false (i.e. doesn't miss)
 	 * @param skill must implement BOTH {@link ILockOnTarget} AND {@link ICombo}
 	 */
@@ -86,7 +66,6 @@ public class DSSClientEvents
 		if (!mc.thePlayer.isUsingItem()) {
 			mc.thePlayer.swingItem();
 			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
-			// TODO if (DynamicSwordSkills.isZeldaLoaded) { ZSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
 			if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
 				Entity entity = TargetUtils.getMouseOverEntity();
 				mc.playerController.attackEntity(mc.thePlayer, (entity != null ? entity : skill.getCurrentTarget()));
@@ -101,12 +80,18 @@ public class DSSClientEvents
 	 * no button clicked -1, left button 0, right click 1, middle click 2, possibly 3+ for other buttons
 	 * NOTE: Corresponding key codes for the mouse in Minecraft are (event.button -100)
 	 */
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onMouseChanged(MouseEvent event) {
 		mouseKey = event.button - 100;
-		isAttackKey = (mouseKey == mc.gameSettings.keyBindAttack.keyCode);
-		isUseKey = (mouseKey == mc.gameSettings.keyBindUseItem.keyCode);
-		if ((event.button == -1 && event.dwheel == 0) || (!isAttackKey && !isUseKey)) {
+		isAttackKey = (mouseKey == mc.gameSettings.keyBindAttack.getKeyCode());
+		isUseKey = (mouseKey == mc.gameSettings.keyBindUseItem.getKeyCode());
+		if ((event.button == -1 && event.dwheel == 0)) {
+			return;
+		} else if ((!isAttackKey && !isUseKey)) {
+			// pass mouse clicks to custom key handler when pressed, as KeyInputEvent no longer receives these
+			if (event.buttonstate) {
+				DSSKeyHandler.onKeyPressed(mc, mouseKey);
+			}
 			return;
 		}
 		EntityPlayer player = mc.thePlayer;
@@ -118,17 +103,6 @@ public class DSSClientEvents
 			} else if (isAttackKey) {
 				event.setCanceled(player.attackTime > 0);
 			}
-			/* TODO
-			else if (DynamicSwordSkills.isZeldaLoaded) {
-			if (event.button == 0) {
-				Item heldItem = (player.getHeldItem() != null ? player.getHeldItem().getItem() : null);
-				event.setCanceled(ZSSEntityInfo.get(player).isBuffActive(Buff.STUN) || heldItem instanceof ItemHeldBlock ||
-						(player.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
-			} else if (event.button == 1) {
-				event.setCanceled(ZSSEntityInfo.get(player).isBuffActive(Buff.STUN));
-			}
-			}
-			 */
 		} else if (!event.buttonstate && isAttackKey) {
 			if (skills.hasSkill(SkillBase.armorBreak)) {
 				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player, false);
@@ -150,13 +124,12 @@ public class DSSClientEvents
 				}
 				if (Config.allowVanillaControls() && player.getHeldItem() != null) {
 					if (skills.shouldSkillActivate(SkillBase.dash)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
+						PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.dash));
 					} else if (skills.shouldSkillActivate(SkillBase.risingCut)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
+						PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.risingCut));
 						performComboAttack(mc, skill);
-					} // TODO swordBeam
-					else if (skills.shouldSkillActivate(SkillBase.endingBlow)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.endingBlow).makePacket());
+					} else if (skills.shouldSkillActivate(SkillBase.endingBlow)) {
+						PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.endingBlow));
 						performComboAttack(mc, skill);
 					} else {
 						performComboAttack(mc, skill);
@@ -166,18 +139,18 @@ public class DSSClientEvents
 						((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player, true);
 					}
 				} else if (skills.shouldSkillActivate(SkillBase.mortalDraw)) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
-					//event.setCanceled(true);
-				} else {
+					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.mortalDraw));
+				} else { // Vanilla controls not enabled simply attacks; handles possibility of being ICombo
 					performComboAttack(mc, skill);
 				}
+				// always cancel left click to prevent weapons taking double durability damage
 				event.setCanceled(true);
-			} else if (event.button == 1 && Config.allowVanillaControls()) {
+			} else if (isUseKey && Config.allowVanillaControls()) {
 				if (!skills.canInteract() && event.buttonstate) {
 					event.setCanceled(true);
 				}
 			}
-		} else { // regular left-click
+		} else { // not locked on to a target, normal item swing
 			if (isAttackKey && event.buttonstate) {
 				DSSCombatEvents.setPlayerAttackTime(player);
 			}

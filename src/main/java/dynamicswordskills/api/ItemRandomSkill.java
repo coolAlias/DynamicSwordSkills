@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.EnumToolMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
@@ -51,8 +50,8 @@ public class ItemRandomSkill extends ItemSword implements ISkillProvider
 	/** The maximum level of the SkillBase.{skill} granted by this Item */
 	private final byte maxLevel;
 
-	public ItemRandomSkill(int id, EnumToolMaterial material) {
-		super(id, material);
+	public ItemRandomSkill(ToolMaterial material) {
+		super(material);
 		this.maxLevel = (byte)(2 + material.getHarvestLevel());
 		setCreativeTab(null);
 	}
@@ -86,7 +85,7 @@ public class ItemRandomSkill extends ItemSword implements ISkillProvider
 	}
 
 	@Override
-	public String getItemDisplayName(ItemStack stack) {
+	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
 		return StatCollector.translateToLocal("item.dss.skillitem.name") + (skill != null ? (" " + skill.getDisplayName()) : "");
 	}

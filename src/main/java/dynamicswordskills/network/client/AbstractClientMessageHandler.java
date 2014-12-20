@@ -15,44 +15,21 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dynamicswordskills.network;
-
-import java.io.IOException;
+package dynamicswordskills.network.client;
 
 import net.minecraft.entity.player.EntityPlayer;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import dynamicswordskills.network.AbstractMessageHandler;
 
 /**
  * 
- * Sets the player's attack time on either the client or the server
- *
+ * Handler for messages sent to the CLIENT
+ * Only allows implementation of {@link AbstractMessageHandler#handleClientMessage handleClientMessage}
+ * 
  */
-public class AttackTimePacket extends CustomPacket
-{
-	private int attackTime;
-
-	public AttackTimePacket() {}
-	
-	public AttackTimePacket(int attackTime) {
-		this.attackTime = attackTime;
-	}
-
-	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeInt(attackTime);
-	}
-
-	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		attackTime = in.readInt();
-	}
-
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		player.attackTime = this.attackTime;
+public abstract class AbstractClientMessageHandler<T extends IMessage> extends AbstractMessageHandler<T> {
+	public final IMessage handleServerMessage(EntityPlayer player, T message, MessageContext ctx) {
+		return null;
 	}
 }

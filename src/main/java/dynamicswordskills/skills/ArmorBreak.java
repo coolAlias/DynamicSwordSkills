@@ -24,12 +24,14 @@ import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.lib.Config;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.ActivateSkillPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
 
@@ -90,7 +92,7 @@ public class ArmorBreak extends SkillActive
 	public ArmorBreak newInstance() {
 		return new ArmorBreak(this);
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
@@ -113,21 +115,21 @@ public class ArmorBreak extends SkillActive
 		return 2.0F - (0.1F * level);
 	}
 
-	/** Called when key pressed or released; initiates or cancels charging */
+	/**
+	 * Called when key pressed or released; initiates or cancels charging
+	 * @param state the state of LMB; bound key press should always pass false
+	 */
 	@SideOnly(Side.CLIENT)
 	public void keyPressed(EntityPlayer player, boolean state) {
 		buttonState = state;
-		charge = (buttonState ? getChargeTime(player) : 0);
+		charge = (isKeyPressed() ? getChargeTime(player) : 0);
 	}
 
 	/** Returns true if skill should continue charging up (key is still held down) */
-	/*
 	@SideOnly(Side.CLIENT)
 	private boolean isKeyPressed() {
-		return DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].pressed || (Config.allowVanillaControls() &&
-				Minecraft.getMinecraft().gameSettings.keyBindAttack.pressed && !Minecraft.getMinecraft().gameSettings.keyBindAttack.isPressed());
+		return DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getIsKeyPressed() || (Config.allowVanillaControls() && buttonState);
 	}
-	*/
 
 	@Override
 	public boolean trigger(World world, EntityPlayer player) {
@@ -138,13 +140,14 @@ public class ArmorBreak extends SkillActive
 				player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
 			}
 		}
+
 		return isActive();
 	}
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		if (isCharging(player)) {
-			if (buttonState && PlayerUtils.isHoldingSkillItem(player)) {
+			if (isKeyPressed() && PlayerUtils.isHoldingSkillItem(player)) {
 				if (!player.isSwingInProgress) {
 					if (charge < (getChargeTime(player) - 1)) {
 						Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
@@ -158,7 +161,7 @@ public class ArmorBreak extends SkillActive
 					player.swingItem();
 					SwordBasic skill = (SwordBasic) DSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
 					if (skill != null && skill.onAttack(player)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this, true).makePacket());
+						PacketDispatcher.sendToServer(new ActivateSkillPacket(this, true));
 					}
 				}
 			} else {
@@ -166,7 +169,7 @@ public class ArmorBreak extends SkillActive
 				charge = 0;
 			}
 		}
-		
+
 		if (isActive()) {
 			--activeTimer;
 		}

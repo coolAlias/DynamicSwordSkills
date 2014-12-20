@@ -20,13 +20,13 @@ package dynamicswordskills.item;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
@@ -35,14 +35,15 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.lib.ModInfo;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.PlayerUtils;
 
 public class ItemSkillOrb extends Item
 {
 	@SideOnly(Side.CLIENT)
-	private List<Icon> icons;
+	private List<IIcon> icons;
 
-	public ItemSkillOrb(int id) {
-		super(id);
+	public ItemSkillOrb() {
+		super();
 		setMaxDamage(0);
 		setHasSubtypes(true);
 		setCreativeTab(DynamicSwordSkills.tabSkills);
@@ -55,13 +56,13 @@ public class ItemSkillOrb extends Item
 			if (skill != null) {
 				if (DSSPlayerInfo.get(player).grantSkill(skill)) {
 					world.playSoundAtEntity(player, ModInfo.SOUND_LEVELUP, 1.0F, 1.0F);
-					player.addChatMessage(StatCollector.translateToLocalFormatted("chat.dss.skill.levelup",
+					PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.dss.skill.levelup",
 							skill.getDisplayName(), DSSPlayerInfo.get(player).getTrueSkillLevel(skill)));
 					if (!player.capabilities.isCreativeMode) {
 						--stack.stackSize;
 					}
 				} else {
-					player.addChatMessage(StatCollector.translateToLocalFormatted("chat.dss.skill.maxlevel", skill.getDisplayName()));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.dss.skill.maxlevel", skill.getDisplayName()));
 				}
 			}
 		}
@@ -70,29 +71,29 @@ public class ItemSkillOrb extends Item
 	}
 
 	@Override
-	public String getItemDisplayName(ItemStack stack) {
+	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
 		return StatCollector.translateToLocal(super.getUnlocalizedName() + ".name") + " " + (skill != null ? skill.getDisplayName() : "");
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int damage) {
+	public IIcon getIconFromDamage(int damage) {
 		return icons.get(damage % icons.size());
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(int itemID, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List list) {
 		for (SkillBase skill : SkillBase.getSkills()) {
-			list.add(new ItemStack(itemID, 1, skill.getId()));
+			list.add(new ItemStack(item, 1, skill.getId()));
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
-		icons = new ArrayList<Icon>(SkillBase.getNumSkills());
+	public void registerIcons(IIconRegister register) {
+		icons = new ArrayList<IIcon>(SkillBase.getNumSkills());
 		for (SkillBase skill : SkillBase.getSkills()) {
 			icons.add(register.registerIcon(skill.getIconTexture()));
 		}

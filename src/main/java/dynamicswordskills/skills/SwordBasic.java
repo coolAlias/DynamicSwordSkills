@@ -27,15 +27,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.lib.Config;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.ActivateSkillPacket;
-import dynamicswordskills.network.CustomPacket.ProtocolException;
-import dynamicswordskills.network.EndComboPacket;
-import dynamicswordskills.network.TargetIdPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.network.server.EndComboPacket;
+import dynamicswordskills.network.server.TargetIdPacket;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
@@ -128,6 +127,11 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
+	public boolean canUse(EntityPlayer player) {
+		return level > 0;
+	}
+
+	@Override
 	public boolean isActive() {
 		return isActive;
 	}
@@ -168,8 +172,8 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		if (isActive && player.worldObj.isRemote && !packetSent) {
-			if (Minecraft.getMinecraft().currentScreen != null  || !updateTargets(player)) {//|| !isHoldingSword(player)
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+			if (Minecraft.getMinecraft().currentScreen != null  || !updateTargets(player)) {
+				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 				packetSent = true;
 			}
 		}
@@ -189,15 +193,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
-	public void setCurrentTarget(Side side, Entity entity) throws ProtocolException {
-		if (side.isServer()) {
-			if (entity == null || entity instanceof EntityLivingBase) {
-				currentTarget = (EntityLivingBase) entity;
-			} else {
-				throw new ProtocolException("Sword combos can only target EntityLivingBase");
-			}
-		} else {
-			throw new ProtocolException("Target can only be directly set on the server side.");
+	public void setCurrentTarget(Entity entity) {
+		if (entity == null || entity instanceof EntityLivingBase) {
+			currentTarget = (EntityLivingBase) entity;
 		}
 	}
 
@@ -233,7 +231,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 			currentTarget = prevTarget;
 			prevTarget = nextTarget;
 		}
-		PacketDispatcher.sendPacketToServer(new TargetIdPacket(this).makePacket());
+		PacketDispatcher.sendToServer(new TargetIdPacket(this));
 	}
 
 	/** Returns max distance at which targets may be acquired or remain targetable */
@@ -302,7 +300,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		if (!attackHit) {
 			PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
 			if (isComboInProgress()) {
-				PacketDispatcher.sendPacketToServer(new EndComboPacket(this).makePacket());
+				PacketDispatcher.sendToServer(new EndComboPacket(this));
 			}
 		}
 		return attackHit;

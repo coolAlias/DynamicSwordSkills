@@ -24,13 +24,13 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.event.ForgeSubscribe;
-import cpw.mods.fml.common.network.PacketDispatcher;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.lib.Config;
-import dynamicswordskills.network.EndComboPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.skills.Combo;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
@@ -48,22 +48,26 @@ public class ComboOverlay extends Gui
 
 	/** Combo to display will update as combo updates, should fade after some time */
 	private Combo combo = null;
-	
+
 	/** Used to detect changes in the combo size */
 	private int lastComboSize = 0;
-	
+
 	/** Time at which the current combo first started displaying */
 	private long displayStartTime;
-	
+
 	/** Length of time combo pop-up will display */
 	private static final long DISPLAY_TIME = 5000;
+
+	/** Whether combo overlay should display */
+	public static boolean shouldDisplay;
 
 	public ComboOverlay() {
 		super();
 		this.mc = Minecraft.getMinecraft();
+		shouldDisplay = Config.isComboHudEnabled();
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onRenderExperienceBar(RenderGameOverlayEvent.Post event) {
 		if (event.type != ElementType.HOTBAR) {
 			return;
@@ -77,11 +81,11 @@ public class ComboOverlay extends Gui
 				displayStartTime = Minecraft.getSystemTime();
 				if (iCombo.getCombo().isFinished()) {
 					iCombo.setCombo(null);
-					PacketDispatcher.sendPacketToServer(new EndComboPacket((SkillBase) iCombo).makePacket());
+					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) iCombo));
 				}
 			}
 		}
-		
+
 		if (combo != null && combo.getSize() > 0) {
 			// combo has changed, reset time
 			if (lastComboSize != combo.getSize()) {
@@ -89,13 +93,15 @@ public class ComboOverlay extends Gui
 				displayStartTime = Minecraft.getSystemTime();
 			}
 			if ((Minecraft.getSystemTime() - displayStartTime) < DISPLAY_TIME) {
-				String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
-				mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
-				mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, 0xFFFFFF, true);
-				mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
-				List<Float> damageList = combo.getDamageList();
-				for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
-					mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
+				if (shouldDisplay) {
+					String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
+					mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
+					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, 0xFFFFFF, true);
+					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
+					List<Float> damageList = combo.getDamageList();
+					for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
+						mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
+					}
 				}
 				if (skills.canUseSkill(SkillBase.endingBlow)) {
 					ICombo skill = skills.getComboSkill();

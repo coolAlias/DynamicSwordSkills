@@ -25,7 +25,6 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
-import net.minecraft.item.EnumToolMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
@@ -59,12 +58,12 @@ import dynamicswordskills.skills.SkillBase;
 public class ItemSkillProvider extends Item implements ISkillProvider
 {
 	/** The weapon's tool material determines damage and durability */
-	private final EnumToolMaterial material;
+	private final ToolMaterial material;
 	/** Weapon damage is based on tool material, just like swords */
 	private float weaponDamage;
 	/** The skill id and level of the SkillBase.{skill} granted by this Item */
 	private final byte skillId, level;
-	/** This is used only for the tooltip display to avoid constantly creating a new skill */
+	/** This is used mainly for the tooltip display */
 	private SkillBase skill;
 	/** Whether the player should be granted basic sword skill should they not have it */
 	private final boolean grantsBasicSkill;
@@ -78,8 +77,8 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	 * @param skill		use SkillBase.{skill} during construction to ensure a valid skill
 	 * @param level		should be at least 1, and will be capped automatically at the skill's max level
 	 */
-	public ItemSkillProvider(int id, EnumToolMaterial material, SkillBase skill, byte level) {
-		this(id, material, skill, level, true);
+	public ItemSkillProvider(ToolMaterial material, SkillBase skill, byte level) {
+		this(material, skill, level, true);
 	}
 
 	/**
@@ -91,8 +90,8 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	 * @param grantsBasicSkill	if true, the player will be temporarily granted Basic Sword skill in
 	 * 							order to use the ISkillItem's main skill, if other than Basic Sword
 	 */
-	public ItemSkillProvider(int id, EnumToolMaterial material, SkillBase skill, byte level, boolean grantsBasicSkill) {
-		super(id);
+	public ItemSkillProvider(ToolMaterial material, SkillBase skill, byte level, boolean grantsBasicSkill) {
+		super();
 		this.material = material;
 		this.weaponDamage = 4.0F + this.material.getDamageVsEntity();
 		this.skillId = skill.getId();
@@ -154,7 +153,7 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
-		return material.getToolCraftingMaterial() == stack.itemID ? true : super.getIsRepairable(toRepair, stack);
+		return material.func_150995_f() == stack.getItem() ? true : super.getIsRepairable(toRepair, stack);
 	}
 
 	@Override
@@ -163,8 +162,8 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	}
 
 	@Override
-	public boolean onBlockDestroyed(ItemStack stack, World world, int blockID, int x, int y, int z, EntityLivingBase entity) {
-		if (Block.blocksList[blockID].getBlockHardness(world, x, y, z) != 0.0D) {
+	public boolean onBlockDestroyed(ItemStack stack, World world, Block block, int x, int y, int z, EntityLivingBase entity) {
+		if (block.getBlockHardness(world, x, y, z) != 0.0D) {
 			stack.damageItem(2, entity);
 		}
 		return true;
@@ -177,7 +176,7 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	}
 
 	@Override
-	public String getItemDisplayName(ItemStack stack) {
+	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
 		return StatCollector.translateToLocal("item.dss.skillitem.name") + (skill != null ? (" " + skill.getDisplayName()) : "");
 	}
@@ -197,8 +196,8 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	}
 
 	@Override
-	public Multimap getItemAttributeModifiers() {
-		Multimap multimap = super.getItemAttributeModifiers();
+	public Multimap getAttributeModifiers(ItemStack stack) {
+		Multimap multimap = super.getAttributeModifiers(stack);
 		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(field_111210_e, "Weapon modifier", weaponDamage, 0));
 		return multimap;
 	}

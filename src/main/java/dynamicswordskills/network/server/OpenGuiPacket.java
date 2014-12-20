@@ -15,42 +15,39 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dynamicswordskills.network;
+package dynamicswordskills.network.server;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.DynamicSwordSkills;
 
-public class OpenGuiPacket extends CustomPacket
+public class OpenGuiPacket implements IMessage
 {
 	private int id;
 
 	public OpenGuiPacket() {}
-	
+
 	public OpenGuiPacket(int id) {
 		this.id = id;
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeInt(id);
+	public void fromBytes(ByteBuf buffer) {
+		id = buffer.readInt();
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		id = in.readInt();
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeInt(id);
 	}
-
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isServer()) {
-			player.openGui(DynamicSwordSkills.instance, id, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
+	
+	public static class Handler extends AbstractServerMessageHandler<OpenGuiPacket> {
+		@Override
+		public IMessage handleServerMessage(EntityPlayer player, OpenGuiPacket message, MessageContext ctx) {
+			player.openGui(DynamicSwordSkills.instance, message.id, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
+			return null;
 		}
 	}
 }

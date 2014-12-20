@@ -34,7 +34,7 @@ public class DamageUtils
 	ARMOR_BREAK = "armorBreak",
 	/** Indirect damage caused by sword skills such as Leaping Blow */
 	INDIRECT_SWORD = "indirectSword";
-
+	
 	/**
 	 * Returns an armor-bypassing physical DamageSource
 	 */
@@ -49,7 +49,7 @@ public class DamageUtils
 			setDamageBypassesArmor();
 		}
 	}
-
+	
 	/**
 	 * Returns an indirect sword-based DamageSource
 	 * @param direct - entity directly responsible for causing the damage

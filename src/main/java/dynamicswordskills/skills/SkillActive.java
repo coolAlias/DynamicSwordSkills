@@ -17,16 +17,19 @@
 
 package dynamicswordskills.skills;
 
+import java.util.List;
+
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.ActivateSkillPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.util.PlayerUtils;
 
 /**
  * 
@@ -78,6 +81,12 @@ public abstract class SkillActive extends SkillBase
 		this.disablesLMB = skill.disablesLMB;
 	}
 
+	@Override
+	@SideOnly(Side.CLIENT)
+	public List<String> getDescription(EntityPlayer player) {
+		return getDescription();
+	}
+
 	/** Returns true if this skill is currently active, however that is defined by the child class */
 	public abstract boolean isActive();
 
@@ -116,14 +125,14 @@ public abstract class SkillActive extends SkillBase
 				player.addExhaustion(getExhaustion());
 			}
 			if (!world.isRemote) {
-				PacketDispatcher.sendPacketToPlayer(new ActivateSkillPacket(this).makePacket(), (Player) player);
+				PacketDispatcher.sendTo(new ActivateSkillPacket(this), (EntityPlayerMP) player);
 			} else if (disablesLMB) { // only care about this client side
 				DSSPlayerInfo.get(player).setCurrentActiveSkill(this);
 			}
 			return true;
 		} else {
 			if (level > 0) {
-				player.addChatMessage(StatCollector.translateToLocalFormatted("chat.dss.skill.use.fail", getDisplayName()));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.dss.skill.use.fail", getDisplayName()));
 			}
 			return false;
 		}
@@ -141,7 +150,7 @@ public abstract class SkillActive extends SkillBase
 	/** Returns true if this skill can currently be used by the player; override to add further conditions */
 	public boolean canUse(EntityPlayer player) {
 		return (level > 0 && player.getFoodStats().getFoodLevel() > 0);
-		}
+	}
 
 	/** Disables manual activation of this skill */
 	protected SkillActive disableUserActivation() {

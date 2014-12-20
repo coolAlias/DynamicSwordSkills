@@ -15,17 +15,13 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dynamicswordskills.network;
+package dynamicswordskills.network.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.ICombo;
@@ -33,24 +29,19 @@ import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillBase;
 
-/**
- * 
- * Sent to client to sync sword swap on the hotbar and initiate attack
- *
- */
-public class MortalDrawPacket extends CustomPacket
-{
+public class MortalDrawPacket implements IMessage {
+
 	public MortalDrawPacket() {}
+	
+	@Override
+	public void fromBytes(ByteBuf buffer) {}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {}
+	public void toBytes(ByteBuf buffer) {}
 
-	@Override
-	public void read(ByteArrayDataInput in) throws IOException {}
-
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
+	public static class Handler extends AbstractClientMessageHandler<MortalDrawPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, MortalDrawPacket message, MessageContext ctx) {
 			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 			if (skills.hasSkill(SkillBase.mortalDraw)) {
 				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
@@ -59,6 +50,36 @@ public class MortalDrawPacket extends CustomPacket
 					DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), skill);
 				}
 			}
+			return null;
 		}
 	}
 }
+
+/*
+public class MortalDrawPacket extends AbstractPacket {
+
+	public MortalDrawPacket() {}
+
+	@Override
+	public void encodeInto(ChannelHandlerContext ctx, ByteBuf buffer) {}
+
+	@Override
+	public void decodeInto(ChannelHandlerContext ctx, ByteBuf buffer) {}
+
+	@Override
+	public void handleClientSide(EntityPlayer player) {
+		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+		if (skills.hasSkill(SkillBase.mortalDraw)) {
+			((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
+			ILockOnTarget skill = skills.getTargetingSkill();
+			if (skill instanceof ICombo) {
+				DSSCombatEvents.performComboAttack(Minecraft.getMinecraft(), skill);
+			}
+		}
+	}
+
+	@Override
+	public void handleServerSide(EntityPlayer player) {}
+
+}
+*/

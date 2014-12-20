@@ -105,22 +105,22 @@ public class GuiSkills extends GuiContainer
 			RenderHelperQ.drawTexturedRect(260, 61, 283, 17, 1, 88, 285, 180);
 			RenderHelperQ.drawTexturedRect(259, 61 + (int)(scrollY * 81), 282, 10, 3, 7, 285, 180);
 		}
-		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : StatCollector.translateToLocal("skill.dss.gui.click"));
-		isUnicode = fontRenderer.getUnicodeFlag();
-		fontRenderer.setUnicodeFlag(true);
-		fontRenderer.drawString(s, 158, 38, 4210752);
+		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : StatCollector.translateToLocal("skill.dss.gui.description"));
+		isUnicode = fontRendererObj.getUnicodeFlag();
+		fontRendererObj.setUnicodeFlag(true);
+		fontRendererObj.drawString(s, 158, 38, 4210752);
 		if (currentSkill != null) {
 			s = currentSkill.getLevelDisplay(false);
-			fontRenderer.drawString(s, 262 - fontRenderer.getStringWidth(s), 38, 4210752);
+			fontRendererObj.drawString(s, 262 - fontRendererObj.getStringWidth(s), 38, 4210752);
 		}
 		refreshDescription();
-		textY = 38 + (fontRenderer.FONT_HEIGHT * 2);
+		textY = 38 + (fontRendererObj.FONT_HEIGHT * 2);
 		int start = (needsScrollBar() ? (int)(scrollY * (numLines - MAX_LINES)) : 0);
 		for (int i = start; i < desc.size() && i < (MAX_LINES + start); ++i) {
-			fontRenderer.drawString(desc.get(i), 158, textY, 4210752);
-			textY += fontRenderer.FONT_HEIGHT;
+			fontRendererObj.drawString(desc.get(i), 158, textY, 4210752);
+			textY += fontRendererObj.FONT_HEIGHT;
 		}
-		fontRenderer.setUnicodeFlag(isUnicode);
+		fontRendererObj.setUnicodeFlag(isUnicode);
 	}
 
 	@Override
@@ -138,17 +138,16 @@ public class GuiSkills extends GuiContainer
 		}
 		if (currentSkill != null) {
 			desc.add(StatCollector.translateToLocal("skill.dss.gui.summary"));
-			desc.add(currentSkill.getLevelDisplay(false));
 			currentSkill.addInformation(desc, mc.thePlayer);
 			desc.add("");
 			desc.add(StatCollector.translateToLocal("skill.dss.gui.activation"));
-			desc.addAll(fontRenderer.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
+			desc.addAll(fontRendererObj.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
 			desc.add("");
 		}
 		desc.add(StatCollector.translateToLocal("skill.dss.gui.description"));
 		String[] temp = (currentSkill != null ? currentSkill.getFullDescription().split("\\\\n") : StatCollector.translateToLocal("skill.dss.gui.explanation").split("\\\\n"));
 		for (String s : temp) {
-			desc.addAll(fontRenderer.listFormattedStringToWidth(s, 101));
+			desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
 			desc.add("");
 		}
 		numLines = desc.size();
@@ -211,7 +210,8 @@ public class GuiSkills extends GuiContainer
 	private Slot getSlotAtPosition(int x, int y) {
 		for (int k = 0; k < inventorySlots.inventorySlots.size(); ++k) {
 			Slot slot = (Slot) inventorySlots.inventorySlots.get(k);
-			if (isPointInRegion(slot.xDisplayPosition, slot.yDisplayPosition, 16, 16, x, y)) {
+			// func_146978_c is inPointInRegion
+			if (func_146978_c(slot.xDisplayPosition, slot.yDisplayPosition, 16, 16, x, y)) {
 				return slot;
 			}
 		}
@@ -220,7 +220,7 @@ public class GuiSkills extends GuiContainer
 
 	@Override
 	protected void keyTyped(char c, int key) {
-		if (key == 1 || key == mc.gameSettings.keyBindInventory.keyCode) {
+		if (key == 1 || key == mc.gameSettings.keyBindInventory.getKeyCode() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_SKILLS_GUI].getKeyCode()) {
 			mc.thePlayer.closeScreen();
 		}
 	}

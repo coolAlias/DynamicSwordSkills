@@ -20,18 +20,19 @@ package dynamicswordskills.skills;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.lib.Config;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.ActivateSkillPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
 
@@ -104,8 +105,8 @@ public class SwordBreak extends SkillActive
 			breakTimer = getActiveTime();
 			playMissSound = true;
 			if (world.isRemote) {
-				Minecraft.getMinecraft().gameSettings.keyBindUseItem.pressed = false;
-				DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].pressed = false;
+				KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
+				KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 				player.swingItem();
 			}
 		}
@@ -121,8 +122,8 @@ public class SwordBreak extends SkillActive
 				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
 			}
 		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
-			if (!Config.requiresDoubleTap() && !Minecraft.getMinecraft().gameSettings.keyBindBack.pressed) {
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+			if (!Config.requiresDoubleTap() && !Minecraft.getMinecraft().gameSettings.keyBindBack.getIsKeyPressed()) {
+				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 				ticksTilFail = 0;
 			} else {
 				--ticksTilFail;
@@ -153,7 +154,7 @@ public class SwordBreak extends SkillActive
 	public void keyPressed(EntityPlayer player) {
 		if (!isActive()) {
 			if (Config.requiresDoubleTap() && ticksTilFail > 0) {
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 				ticksTilFail = 0;
 			} else {
 				ticksTilFail = (Config.requiresDoubleTap() ? 6 : 3);

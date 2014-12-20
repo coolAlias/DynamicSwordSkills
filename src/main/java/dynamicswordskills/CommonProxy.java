@@ -24,6 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.network.IGuiHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.client.GuiSkills;
 import dynamicswordskills.inventory.ContainerSkills;
 
@@ -36,7 +37,14 @@ public class CommonProxy implements IGuiHandler
 	private static final Map<String, NBTTagCompound> extendedEntityData = new HashMap<String, NBTTagCompound>();
 
 	public void registerRenderers() {}
-
+	
+	/**
+	 * Returns a side-appropriate EntityPlayer for use during message handling
+	 */
+	public EntityPlayer getPlayerEntity(MessageContext ctx) {
+		return ctx.getServerHandler().playerEntity;
+	}
+	
 	/** Adds an entity's custom data to the map for temporary storage */
 	public static void storeEntityData(String name, NBTTagCompound compound) {
 		extendedEntityData.put(name, compound);

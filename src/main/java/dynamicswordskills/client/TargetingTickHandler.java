@@ -17,14 +17,13 @@
 
 package dynamicswordskills.client;
 
-import java.util.EnumSet;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.common.ITickHandler;
-import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.entity.DSSPlayerInfo;
@@ -45,7 +44,7 @@ import dynamicswordskills.util.PlayerUtils;
  *
  */
 @SideOnly(Side.CLIENT)
-public class TargetingTickHandler implements ITickHandler
+public class TargetingTickHandler
 {
 	private final Minecraft mc;
 
@@ -62,84 +61,75 @@ public class TargetingTickHandler implements ITickHandler
 		this.mc = Minecraft.getMinecraft();
 	}
 
-	@Override
-	public EnumSet<TickType> ticks() {
-		return EnumSet.of(TickType.RENDER);
-	}
+	@SubscribeEvent
+	public void onRenderTick(RenderTickEvent event) {
+		if (event.phase == Phase.START) {
+			player = mc.thePlayer;
+			if (player != null && DSSPlayerInfo.get(player) != null) {
+				DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+				ILockOnTarget skill = skills.getTargetingSkill();
+				if (skill != null) {
+					// Flag is true if an animation is in progress
+					boolean flag = false;
 
-	@Override
-	public String getLabel() { return null; }
-
-	@Override
-	public void tickStart(EnumSet<TickType> type, Object... tickData) {
-		player = mc.thePlayer;
-		if (player != null && DSSPlayerInfo.get(player) != null) {
-			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-			ILockOnTarget skill = skills.getTargetingSkill();
-			if (skill != null) {
-				// Flag is true if an animation is in progress
-				boolean flag = false;
-
-				if (skills.isSkillActive(SkillBase.dodge)) {
-					flag = ((Dodge) skills.getPlayerSkill(SkillBase.dodge)).onRenderTick(player);
-				} else if (skills.isSkillActive(SkillBase.spinAttack)) {
-					flag = ((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).onRenderTick(player);
-				} else if (skills.isSkillActive(SkillBase.risingCut)) {
-					flag = ((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).onRenderTick(player);
-				}
-				if (!flag && skill.isLockedOn()) {
-					target = skill.getCurrentTarget();
-					updatePlayerView();
-				}
-				if (skill.isLockedOn() && skills.canInteract()) {
-					if (isVanillaKeyPressed(mc.gameSettings.keyBindJump)) {
-						if (skills.hasSkill(SkillBase.risingCut) && !skills.isSkillActive(SkillBase.risingCut) && !PlayerUtils.isUsingItem(player) && player.isSneaking()) {
-							((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).keyPressed();
-						} else if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) && PlayerUtils.isUsingItem(player)) {
-							skills.activateSkill(mc.theWorld, SkillBase.leapingBlow);
-							mc.gameSettings.keyBindUseItem.pressed = false;
-							DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].pressed = false;
-						}
-					} else if (isVanillaKeyPressed(mc.gameSettings.keyBindForward)) {
-						if (skills.hasSkill(SkillBase.endingBlow)) {
-							((EndingBlow) skills.getPlayerSkill(SkillBase.endingBlow)).keyPressed();
-						}
-					} else if (Config.allowVanillaControls()) {
-						isLeftPressed = isVanillaKeyPressed(mc.gameSettings.keyBindLeft);
-						if (isLeftPressed || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
-							if (skills.hasSkill(SkillBase.spinAttack)) {
-								((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed((isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
+					if (skills.isSkillActive(SkillBase.dodge)) {
+						flag = ((Dodge) skills.getPlayerSkill(SkillBase.dodge)).onRenderTick(player);
+					} else if (skills.isSkillActive(SkillBase.spinAttack)) {
+						flag = ((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).onRenderTick(player);
+					} else if (skills.isSkillActive(SkillBase.risingCut)) {
+						flag = ((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).onRenderTick(player);
+					}
+					if (!flag && skill.isLockedOn()) {
+						target = skill.getCurrentTarget();
+						updatePlayerView();
+					}
+					if (skill.isLockedOn() && skills.canInteract()) {
+						if (isVanillaKeyPressed(mc.gameSettings.keyBindJump)) {
+							if (skills.hasSkill(SkillBase.risingCut) && !skills.isSkillActive(SkillBase.risingCut) && !PlayerUtils.isUsingItem(player) && player.isSneaking()) {
+								((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).keyPressed();
+							} else if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) && PlayerUtils.isUsingItem(player)) {
+								skills.activateSkill(mc.theWorld, SkillBase.leapingBlow);
+								KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
+								KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 							}
-							if (skills.hasSkill(SkillBase.dodge) && player.onGround) {
-								((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed((isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
+						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindForward)) {
+							if (skills.hasSkill(SkillBase.endingBlow)) {
+								((EndingBlow) skills.getPlayerSkill(SkillBase.endingBlow)).keyPressed();
 							}
-						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack)) {
-							if (PlayerUtils.isUsingItem(player) && skills.hasSkill(SkillBase.swordBreak)) {
-								((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).keyPressed(player);
-							} else if (skills.hasSkill(SkillBase.parry)) {
-								((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(player);
+						} else if (Config.allowVanillaControls()) {
+							isLeftPressed = isVanillaKeyPressed(mc.gameSettings.keyBindLeft);
+							if (isLeftPressed || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
+								if (skills.hasSkill(SkillBase.spinAttack)) {
+									((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed((isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
+								}
+								if (skills.hasSkill(SkillBase.dodge) && player.onGround) {
+									((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed((isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
+								}
+							} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack)) {
+								if (PlayerUtils.isUsingItem(player) && skills.hasSkill(SkillBase.swordBreak)) {
+									((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).keyPressed(player);
+								} else if (skills.hasSkill(SkillBase.parry)) {
+									((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(player);
+								}
 							}
 						}
 					}
 				}
 			}
+		} else {
+			this.player = null;
+			this.target = null;
 		}
 	}
 
-	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-		this.player = null;
-		this.target = null;
-	}
-
 	/**
-	 * Returns true if a vanilla keybinding is both pressed and isPressed()
+	 * Returns true if a vanilla keybinding is both getIsKeyPressed() and isPressed()
 	 * This is necessary to prevent skills from being activated as soon as locking on to a target,
-	 * (when isPressed() is still true) or while the key is held down (pressed is true).
+	 * (when isPressed() is still true) or while the key is held down (getIsKeyPressed() is true).
 	 */
 	@SideOnly(Side.CLIENT)
 	private boolean isVanillaKeyPressed(KeyBinding key) {
-		return key.isPressed() && key.pressed;
+		return key.isPressed() && key.getIsKeyPressed();
 	}
 
 	/**

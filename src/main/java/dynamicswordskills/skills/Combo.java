@@ -22,14 +22,14 @@ import java.util.List;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import dynamicswordskills.network.UpdateComboPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.UpdateComboPacket;
 
 /**
  * 
@@ -89,7 +89,7 @@ public class Combo
 		this.skillId = skill.getId();
 		this.maxComboSize = maxComboSize;
 		this.timeLimit = timeLimit;
-		PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);
+		PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class Combo
 	/** Returns a copy of the current damage list */
 	public List<Float> getDamageList() { return new ArrayList(damageList); }
 
-	/** Returns the last entity that was hit in the combo */
+	/** Returns the last entity directly hit during the combo */
 	public Entity getLastEntityHit() { return lastEntityHit; }
 
 	/** Returns the number of consecutive hits on the same target entity */
@@ -130,7 +130,7 @@ public class Combo
 
 	/** Returns translated current description of combo; e.g. "Great" */
 	public String getLabel() {
-		return StatCollector.translateToLocal("combo.label." + getSize());
+		return StatCollector.translateToLocal("combo.label." + Math.min(getSize(), 10));
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class Combo
 			}
 			damageList.add(damage);
 			comboDamage += damage;
-			PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);
+			PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 			if (getSize() == maxComboSize) {
 				endCombo(player);
 			} else {
@@ -180,7 +180,7 @@ public class Combo
 			if (getSize() == 0) {
 				comboTimer = timeLimit;
 			}
-			PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);
+			PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 		}
 	}
 
@@ -193,7 +193,7 @@ public class Combo
 			lastEntityHit = null;
 			consecutiveHits = 0;
 			if (!player.worldObj.isRemote) {
-				PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);
+				PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 			}
 		}
 	}
@@ -219,7 +219,7 @@ public class Combo
 			compound.setFloat("Dmg" + i, damageList.get(i));
 		}
 		compound.setFloat("TotalDamage", comboDamage);
-		compound.setInteger("EntityId", (lastEntityHit != null ? lastEntityHit.entityId : 0));
+		compound.setInteger("EntityId", (lastEntityHit != null ? lastEntityHit.getEntityId() : 0));
 		compound.setInteger("ConsecutiveHits", consecutiveHits);
 		compound.setBoolean("Finished", isFinished);
 		return compound;

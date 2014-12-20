@@ -23,13 +23,13 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
+import net.minecraftforge.common.util.Constants;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.CommonProxy;
@@ -37,13 +37,14 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.lib.Config;
-import dynamicswordskills.network.SyncPlayerInfoPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 
-public final class DSSPlayerInfo implements IExtendedEntityProperties
+public class DSSPlayerInfo implements IExtendedEntityProperties
 {
 	private final static String EXT_PROP_NAME = "DSSPlayerInfo";
 
@@ -75,7 +76,7 @@ public final class DSSPlayerInfo implements IExtendedEntityProperties
 
 	public DSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
-		skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
+		this.skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
 	}
 
 	/**
@@ -88,7 +89,7 @@ public final class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 		validateSkills();
 		skills.clear();
-		PacketDispatcher.sendPacketToPlayer(new SyncPlayerInfoPacket(this).setReset().makePacket(), (Player) player);
+		PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this).setReset(), (EntityPlayerMP) player);
 	}
 
 	/** Returns true if the player has at least one level in the specified skill */
@@ -97,7 +98,7 @@ public final class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/** Returns true if the player has at least one level in the specified skill (of any class) */
-	public boolean hasSkill(byte id) {
+	private boolean hasSkill(byte id) {
 		return getSkillLevel(id) > 0;
 	}
 
@@ -371,7 +372,7 @@ public final class DSSPlayerInfo implements IExtendedEntityProperties
 			skill.onUpdate(player);
 		}
 		if (player.worldObj.isRemote) {
-			if (DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].pressed &&
+			if (DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getIsKeyPressed() &&
 					isSkillActive(SkillBase.swordBasic) && player.getHeldItem() != null)
 			{
 				Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
@@ -469,7 +470,7 @@ public final class DSSPlayerInfo implements IExtendedEntityProperties
 
 	/** Makes it look nicer in the methods save/loadProxyData */
 	private static final String getSaveKey(EntityPlayer player) {
-		return player.username + ":" + EXT_PROP_NAME;
+		return player.getCommandSenderName() + ":" + EXT_PROP_NAME;
 	}
 
 	/**
@@ -494,7 +495,7 @@ public final class DSSPlayerInfo implements IExtendedEntityProperties
 			info.loadNBTData(tag);
 		}
 		info.validateSkills();
-		PacketDispatcher.sendPacketToPlayer(new SyncPlayerInfoPacket(info).makePacket(), (Player) player);
+		PacketDispatcher.sendTo(new SyncPlayerInfoPacket(info), (EntityPlayerMP) player);
 	}
 
 	/**
@@ -521,9 +522,9 @@ public final class DSSPlayerInfo implements IExtendedEntityProperties
 	@Override
 	public void loadNBTData(NBTTagCompound compound) {
 		skills.clear(); // allows skills to reset on client without re-adding all the skills
-		NBTTagList taglist = compound.getTagList("DynamicSwordSkills");
+		NBTTagList taglist = compound.getTagList("DynamicSwordSkills", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < taglist.tagCount(); ++i) {
-			NBTTagCompound skill = (NBTTagCompound) taglist.tagAt(i);
+			NBTTagCompound skill = taglist.getCompoundTagAt(i);
 			byte id = skill.getByte("id");
 			skills.put(id, SkillBase.getSkill(id).loadFromNBT(skill));
 		}

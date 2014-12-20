@@ -17,15 +17,16 @@
 
 package dynamicswordskills;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.registry.TickRegistry;
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.client.ComboOverlay;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.client.RenderNothing;
-import dynamicswordskills.client.SoundHandler;
 import dynamicswordskills.client.TargetingTickHandler;
 import dynamicswordskills.entity.EntityLeapingBlow;
 
@@ -33,11 +34,15 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void registerRenderers() {
-		DSSKeyHandler.init();
-		MinecraftForge.EVENT_BUS.register(new SoundHandler());
 		MinecraftForge.EVENT_BUS.register(new ComboOverlay());
 		MinecraftForge.EVENT_BUS.register(new DSSClientEvents());
-		TickRegistry.registerTickHandler(new TargetingTickHandler(), Side.CLIENT);
+		FMLCommonHandler.instance().bus().register(new DSSKeyHandler());
+		FMLCommonHandler.instance().bus().register(new TargetingTickHandler());
 		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing());
+	}
+
+	@Override
+	public EntityPlayer getPlayerEntity(MessageContext ctx) {
+		return (ctx.side.isClient() ? Minecraft.getMinecraft().thePlayer : super.getPlayerEntity(ctx));
 	}
 }

@@ -15,29 +15,19 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dynamicswordskills.item;
+package dynamicswordskills.network.bidirectional;
 
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
-import net.minecraft.util.StatCollector;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import dynamicswordskills.network.AbstractMessageHandler;
+import dynamicswordskills.network.PacketDispatcher;
 
-public class CombatSkillsTab extends CreativeTabs
-{
-	public CombatSkillsTab(String label) {
-		super(label);
-	}
+/**
+ * For messages which require different handling on each Side;
+ * if the message is handled identically regardless of Side,
+ * it is better to implement {@link IMessageHandler} directly
+ * and register using {@link PacketDispatcher#registerBiMessage}
+ */
+public abstract class AbstractBiMessageHandler<T extends IMessage> extends AbstractMessageHandler<T> {
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public Item getTabIconItem() {
-		return DynamicSwordSkills.skillOrb;
-	}
-
-	@Override
-	public String getTranslatedTabLabel() {
-		return StatCollector.translateToLocal("creativetab.dss.skill");
-	}
 }

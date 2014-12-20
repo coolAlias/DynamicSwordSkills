@@ -25,16 +25,16 @@ import java.util.Map;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.SyncSkillPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.SyncSkillPacket;
 
 /**
  * 
@@ -155,6 +155,13 @@ public abstract class SkillBase
 	 */
 	@Override
 	public int hashCode() {
+		/* TODO remove
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		result = prime * result + level;
+		return result;
+		 */
 		return 31 * (31 + id) + level;
 	}
 
@@ -218,10 +225,6 @@ public abstract class SkillBase
 		return getUnlocalizedName() + ".desc." + label + (n < 0 ? "" : ("." + n));
 	}
 
-	/** Allows subclasses to add descriptions of pertinent traits (damage, range, etc.) */
-	@SideOnly(Side.CLIENT)
-	public void addInformation(List<String> desc, EntityPlayer player) {}
-
 	/** Adds a single untranslated string to the skill's tooltip display */
 	protected final SkillBase addDescription(String string) {
 		tooltip.add(string);
@@ -279,6 +282,10 @@ public abstract class SkillBase
 		return desc;
 	}
 
+	/** Allows subclasses to add descriptions of pertinent traits (damage, range, etc.) */
+	@SideOnly(Side.CLIENT)
+	public void addInformation(List<String> desc, EntityPlayer player) {}
+
 	/** Returns the translated description of the skill's activation requirements (long version) */
 	public String getActivationDisplay() {
 		return StatCollector.translateToLocal(getUnlocalizedName() + ".desc.activate");
@@ -310,14 +317,14 @@ public abstract class SkillBase
 				(inTicks ? StatCollector.translateToLocal("skill.dss.ticks") : StatCollector.translateToLocal("skill.dss.seconds")));
 	}
 
-	/** Returns the translated description of the skill's effect (long version) */
-	public String getFullDescription() {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".desc.full");
-	}
-
 	/** Returns a translated description of the skill's exhaustion, using the value provided */
 	public String getExhaustionDisplay(float exhaustion) {
 		return StatCollector.translateToLocalFormatted("skill.dss.desc.exhaustion", String.format("%.2f", exhaustion));
+	}
+
+	/** Returns the translated description of the skill's effect (long version) */
+	public String getFullDescription() {
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".desc.full");
 	}
 
 	/**
@@ -370,7 +377,7 @@ public abstract class SkillBase
 			levelUp(player);
 		}
 		if (!player.worldObj.isRemote && oldLevel < level) {
-			PacketDispatcher.sendPacketToPlayer(new SyncSkillPacket(this).makePacket(), (Player) player);
+			PacketDispatcher.sendTo(new SyncSkillPacket(this), (EntityPlayerMP) player);
 		}
 		return oldLevel < level;
 	}

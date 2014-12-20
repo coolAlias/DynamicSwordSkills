@@ -81,7 +81,7 @@ public class RisingCut extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return ticksTilFail > 0 && player.motionY > 0.0D && canUse(player);
+		return ticksTilFail > 0 && player.motionY > 0.0D;
 	}
 
 	@Override

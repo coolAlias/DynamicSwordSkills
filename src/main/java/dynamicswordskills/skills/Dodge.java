@@ -25,14 +25,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.lib.Config;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.ActivateSkillPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.util.PlayerUtils;
 
 /**
@@ -83,7 +83,7 @@ public class Dodge extends SkillActive
 	public boolean isActive() {
 		return (dodgeTimer > 0);
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
@@ -99,7 +99,7 @@ public class Dodge extends SkillActive
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && !isActive() && DSSPlayerInfo.get(player).isSkillActive(swordBasic);
 	}
-	
+
 	@Override
 	protected float getExhaustion() {
 		return 0.05F;
@@ -130,9 +130,9 @@ public class Dodge extends SkillActive
 		if (isActive()) {
 			--dodgeTimer;
 		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
-			if (!Config.requiresDoubleTap() && !keyPressed.pressed) {
+			if (!Config.requiresDoubleTap() && !keyPressed.getIsKeyPressed()) {
 				activate(player.worldObj, player);
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 				ticksTilFail = 0;
 			} else {
 				--ticksTilFail;
@@ -174,7 +174,7 @@ public class Dodge extends SkillActive
 		if (!isActive()) {
 			if (Config.requiresDoubleTap() && ticksTilFail > 0 && key == keyPressed) {
 				activate(player.worldObj, player);
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 				ticksTilFail = 0;
 			} else {
 				keyPressed = key;

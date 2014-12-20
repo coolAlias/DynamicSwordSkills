@@ -24,15 +24,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.lib.ModInfo;
-import dynamicswordskills.network.AddExhaustionPacket;
-import dynamicswordskills.network.SpawnLeapingBlowPacket;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.server.AddExhaustionPacket;
+import dynamicswordskills.network.server.SpawnLeapingBlowPacket;
 import dynamicswordskills.util.PlayerUtils;
 
 /**
@@ -126,8 +126,8 @@ public class LeapingBlow extends SkillActive
 				DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);
 			} else {
 				player.swingItem();
-				PacketDispatcher.sendPacketToServer(new AddExhaustionPacket(getExhaustion()).makePacket());
-				PacketDispatcher.sendPacketToServer(new SpawnLeapingBlowPacket().makePacket());
+				PacketDispatcher.sendToServer(new AddExhaustionPacket(getExhaustion()));
+				PacketDispatcher.sendToServer(new SpawnLeapingBlowPacket());
 			}
 		}
 	}

@@ -56,8 +56,7 @@ public class TargetUtils
 	 * Returns true if current target is within the player's reach distance; does NOT check mouse over
 	 */
 	public static boolean canReachTarget(EntityPlayer player, Entity target) {
-		//return (player.canEntityBeSeen(target) && player.getDistanceSqToEntity(target) < getReachDistanceSq(player));
-		return (player.getDistanceSqToEntity(target) < getReachDistanceSq(player));
+		return (player.canEntityBeSeen(target) && player.getDistanceSqToEntity(target) < getReachDistanceSq(player));
 	}
 
 	/**
