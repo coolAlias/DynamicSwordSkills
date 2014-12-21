@@ -43,6 +43,7 @@ import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
+import dynamicswordskills.network.client.SyncSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
@@ -93,6 +94,42 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 
 	@Override
 	public void init(Entity entity, World world) {}
+
+	/**
+	 * Removes the skill with the given name, or "all" skills
+	 * @param name	Unlocalized skill name or "all" to remove all skills
+	 * @return		False if no skill was removed
+	 */
+	public boolean removeSkill(String name) {
+		if (("all").equals(name)) {
+			resetSkills();
+			return true;
+		} else {
+			// TODO change skill storage to use unlocalized name instead of id
+			SkillBase dummy = null;
+			for (SkillBase skill : skills.values()) {
+				if (skill.getUnlocalizedName().equals(name)) {
+					dummy = skill;
+					break;
+				}
+			}
+			if (dummy != null) {
+				removeSkill(dummy);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void removeSkill(SkillBase skill) {
+		if (player instanceof EntityPlayerMP) {
+			SkillBase dummy = skill.newInstance();
+			skills.put(dummy.getId(), dummy);
+			validateSkills();
+			skills.remove(dummy.getId());
+			PacketDispatcher.sendTo(new SyncSkillPacket(dummy), (EntityPlayerMP) player);
+		}
+	}
 
 	/**
 	 * Resets all data related to skills
@@ -439,13 +476,19 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Reads a SkillBase from stream and updates the local skills map
+	 * Reads a SkillBase from stream and updates the local skills map; if the skill
+	 * loaded from NBT is level 0, that skill will be removed.
 	 * Called client side only for synchronizing a skill with the server version.
 	 */
 	@SideOnly(Side.CLIENT)
 	public void syncClientSideSkill(byte id, NBTTagCompound compound) {
 		if (SkillBase.doesSkillExist(id)) {
-			skills.put(id, SkillBase.getNewSkillInstance(id).loadFromNBT(compound));
+			SkillBase skill = SkillBase.getNewSkillInstance(id).loadFromNBT(compound);
+			if (skill.getLevel() > 0) {
+				skills.put(id, skill);
+			} else {
+				skills.remove(id);
+			}
 		}
 	}
 

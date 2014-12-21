@@ -16,16 +16,16 @@ import org.apache.logging.log4j.Logger;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
+import dynamicswordskills.command.DSSCommands;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
 import dynamicswordskills.item.CombatSkillsTab;
@@ -39,7 +39,7 @@ import dynamicswordskills.skills.SkillBase;
 @Mod(modid = ModInfo.ID, version = ModInfo.VERSION)
 public class DynamicSwordSkills
 {
-	@Instance(ModInfo.ID)
+	@Mod.Instance(ModInfo.ID)
 	public static DynamicSwordSkills instance;
 
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
@@ -66,7 +66,7 @@ public class DynamicSwordSkills
 
 	private boolean shouldLoad;
 
-	@EventHandler
+	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		logger = event.getModLog();
 		shouldLoad = !Loader.isModLoaded("zeldaswordskills");
@@ -106,7 +106,7 @@ public class DynamicSwordSkills
 		}
 	}
 
-	@EventHandler
+	@Mod.EventHandler
 	public void init(FMLInitializationEvent event) {
 		if (shouldLoad) {
 			proxy.registerRenderers();
@@ -122,6 +122,11 @@ public class DynamicSwordSkills
 			}
 			NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
 		}
+	}
+
+	@Mod.EventHandler
+	public void onServerStarting(FMLServerStartingEvent event) {
+		DSSCommands.registerCommands(event);
 	}
 
 	private void registerSkillOrbLoot() {

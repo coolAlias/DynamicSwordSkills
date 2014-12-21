@@ -35,11 +35,16 @@ public class SyncSkillPacket implements IMessage
 {
 	/** The ID of the skill to update */
 	private byte id;
+
 	/** Stores the skill's data */
 	private NBTTagCompound compound;
 
 	public SyncSkillPacket() {}
 
+	/**
+	 * Synchronizes the client side skill with the server skill's data
+	 * @param skill A level 0 skill will be removed
+	 */
 	public SyncSkillPacket(SkillBase skill) {
 		id = skill.getId();
 		compound = new NBTTagCompound();

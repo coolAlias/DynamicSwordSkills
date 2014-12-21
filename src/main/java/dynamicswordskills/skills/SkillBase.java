@@ -53,6 +53,10 @@ public abstract class SkillBase
 	/**  Map containing all registered skills */
 	private static final Map<Byte, SkillBase> skillsMap = new HashMap<Byte, SkillBase>();
 
+	/** List of registered skills' unlocalized names, for use in Commands */
+	// if the skillsMap was keyed by unlocalized name, could just return the key set
+	private static final List<String> skillNames = new ArrayList<String>();
+
 	public static final SkillBase swordBasic = new SwordBasic("swordbasic").addDescriptions(1);
 	public static final SkillBase armorBreak = new ArmorBreak("armorbreak").addDescriptions(1);
 	public static final SkillBase dodge = new Dodge("dodge").addDescriptions(1);
@@ -95,6 +99,7 @@ public abstract class SkillBase
 						+ skillsMap.get(id).unlocalizedName + " while adding " + name);
 			}
 			skillsMap.put(id, this);
+			skillNames.add(unlocalizedName);
 		}
 	}
 
@@ -122,6 +127,11 @@ public abstract class SkillBase
 		return (doesSkillExist(id) ? skillsMap.get((byte) id) : null);
 	}
 
+	/** Returns all registered skills' unlocalized names as an array */
+	public static final String[] getSkillNames() {
+		return skillNames.toArray(new String[skillNames.size()]);
+	}
+
 	/** Returns an iterable collection of all the skills in the map */
 	public static final Collection<SkillBase> getSkills() {
 		return skillsMap.values();
@@ -132,6 +142,17 @@ public abstract class SkillBase
 		return skillsMap.size();
 	}
 
+	/**
+	 * Retrieves a skill by its unlocalized name, or null if not found
+	 */
+	public static final SkillBase getSkillByName(String name) {
+		for (SkillBase skill : SkillBase.getSkills()) {
+			if (name.equals(skill.getUnlocalizedName())) {
+				return skill;
+			}
+		}
+		return null;
+	}
 	/**
 	 * Returns a leveled skill from an ISkillItem using {@link ISkillProvider#getSkillId(ItemStack)}
 	 * and {@link ISkillProvider#getSkillLevel(ItemStack)}, or null if not possible
@@ -178,11 +199,16 @@ public abstract class SkillBase
 
 	/** Returns the translated skill name */
 	public final String getDisplayName() {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name");
+		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".name");
+	}
+
+	/** Returns the unlocalized name with no prefix, exactly as the skill was registered */
+	public final String getUnlocalizedName() {
+		return unlocalizedName;
 	}
 
 	/** Returns the unlocalized name prefixed by 'skill.dss' */
-	public final String getUnlocalizedName() {
+	public final String getFullUnlocalizedName() {
 		return "skill.dss." + unlocalizedName;
 	}
 
@@ -213,7 +239,7 @@ public abstract class SkillBase
 	 * @param n if less than zero, ".n" will not be appended
 	 */
 	protected final String getInfoString(String label, int n) {
-		return getUnlocalizedName() + ".desc." + label + (n < 0 ? "" : ("." + n));
+		return getFullUnlocalizedName() + ".desc." + label + (n < 0 ? "" : ("." + n));
 	}
 
 	/** Adds a single untranslated string to the skill's tooltip display */
@@ -279,7 +305,7 @@ public abstract class SkillBase
 
 	/** Returns the translated description of the skill's activation requirements (long version) */
 	public String getActivationDisplay() {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".desc.activate");
+		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".desc.activate");
 	}
 
 	/** Returns a translated description of the skill's AoE, using the value provided */
@@ -315,7 +341,7 @@ public abstract class SkillBase
 
 	/** Returns the translated description of the skill's effect (long version) */
 	public String getFullDescription() {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".desc.full");
+		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".desc.full");
 	}
 
 	/**
