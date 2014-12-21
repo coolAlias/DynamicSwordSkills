@@ -40,10 +40,13 @@ import dynamicswordskills.util.TargetUtils;
 public class DSSClientEvents
 {
 	private final Minecraft mc;
+
 	/** Store the current key code for mouse buttons */
 	private int mouseKey;
+
 	/** Whether the button during mouse event is Minecraft's keyBindAttack */
 	private boolean isAttackKey;
+
 	/** Whether the button during mouse event is Minecraft's keyBindUseItem*/
 	private boolean isUseKey;
 
@@ -96,10 +99,10 @@ public class DSSClientEvents
 				if (skills.isSkillActive(SkillBase.spinAttack) && skills.getActiveSkill(SkillBase.spinAttack).isAnimating()) {
 					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					event.setCanceled(true);
-				} /*else if (skills.isSkillActive(SkillBase.backSlice) && skills.getActiveSkill(SkillBase.backSlice).isAnimating()) {
+				} else if (skills.isSkillActive(SkillBase.backSlice) && skills.getActiveSkill(SkillBase.backSlice).isAnimating()) {
 					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					event.setCanceled(true);
-				} */else {
+				} else {
 					event.setCanceled(!skills.canInteract() || mc.thePlayer.attackTime > 0);
 				}
 			} else { // cancel mouse wheel and use key while animations are in progress
@@ -116,7 +119,6 @@ public class DSSClientEvents
 				// mouse attack will always be canceled while locked on, as the click has been handled
 				if (Config.allowVanillaControls()) {
 					if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
-						//LogHelper.info("MouseEvent - no skill handled attack key press, performing combo attack");
 						// no skill activated - perform a 'standard' attack
 						performComboAttack(mc, skill);
 					}

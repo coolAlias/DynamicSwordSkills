@@ -45,6 +45,8 @@ public class Config
 	private static boolean enableBonusOrb;
 	/** Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10] */
 	private static int chestLootWeight;
+	/** [Back Slice] Allow Back Slice to potentially knock off player armor */
+	private static boolean allowDisarmorPlayer;
 	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
 	private static boolean enableComboHud;
 	/** [Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50] */
@@ -57,6 +59,8 @@ public class Config
 	private static boolean enableCreativeSkillSwords;
 	/** [Skill Swords] Skill level provided by the Creative Tab Skill Swords */
 	private static int skillSwordLevel;
+	/** [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
+	private static boolean requireFullHealth;
 	/*================== DROPS =====================*/
 	/** [Player] Enable skill orbs to drop from players when killed in PvP */
 	private static boolean enablePlayerDrops;
@@ -84,12 +88,14 @@ public class Config
 		hitsToDisplay = config.get("General", "Max hits to display in Combo HUD [0-12]", 3).getInt();
 		enableBonusOrb = config.get("General", "Whether all players should start with a Basic Skill orb", true).getBoolean(true);
 		chestLootWeight = config.get("General", "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10]", 1).getInt();
+		allowDisarmorPlayer = config.get("Skills", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
 		enableComboHud = config.get("General", "[Combo HUD] Whether the combo hit counter will display by default (may be toggled in game)", true).getBoolean(true);
 		disarmTimingBonus = config.get("General", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt();
 		disarmPenalty = config.get("General", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt();
 		enableRandomSkillSwords = config.get("General", "[Skill Swords] Enable randomized Skill Swords to appear as loot in various chests", true).getBoolean(true);
 		enableCreativeSkillSwords = config.get("General", "[Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples)", true).getBoolean(true);
 		skillSwordLevel = config.get("General", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt();
+		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 		/*================== DROPS =====================*/
 		enablePlayerDrops = config.get("Drops", "[Player] Enable skill orbs to drop from players when killed in PvP", true).getBoolean(true);
 		playerDropFactor = config.get("Drops", "[Player] Factor by which to multiply chance for skill orb to drop by slain players [1-20]", 5).getInt();
@@ -116,9 +122,14 @@ public class Config
 	public static int getHitsToDisplay() { return Math.max(hitsToDisplay, 0); }
 	public static boolean areRandomSwordsEnabled() { return enableRandomSkillSwords; }
 	public static boolean areCreativeSwordsEnabled() { return enableCreativeSkillSwords; }
+	public static boolean canDisarmorPlayers() { return allowDisarmorPlayer; }
 	public static float getDisarmPenalty() { return 0.01F * ((float) MathHelper.clamp_int(disarmPenalty, 0, 20)); }
 	public static float getDisarmTimingBonus() { return 0.001F * ((float) MathHelper.clamp_int(disarmTimingBonus, 0, 50)); }
 	public static int getSkillSwordLevel() { return MathHelper.clamp_int(skillSwordLevel, 1, 5); }
+	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
+	public static float getHealthAllowance(int level) {
+		return (requireFullHealth ? 0.0F : (0.6F * level));
+	}
 	/*================== DROPS =====================*/
 	public static boolean arePlayerDropsEnabled() { return enablePlayerDrops; }
 	public static float getPlayerDropFactor() { return MathHelper.clamp_int(playerDropFactor, 1, 20); }

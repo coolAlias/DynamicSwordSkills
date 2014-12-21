@@ -105,7 +105,7 @@ public class SpinAttack extends SkillActive
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		byte temp = level;
 		if (!isActive()) {
-			superLevel = (PlayerUtils.getHealthMissing(player) == 0.0F ? DSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
+			superLevel = (checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
 			level = DSSPlayerInfo.get(player).getSkillLevel(spinAttack);
 		}
 		desc.add(getChargeDisplay(getChargeTime()));
@@ -158,7 +158,7 @@ public class SpinAttack extends SkillActive
 
 	/** Returns true if players current health is within the allowed limit */
 	private boolean checkHealth(EntityPlayer player) {
-		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= 0.0F;
+		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= Config.getHealthAllowance(level);
 	}
 
 	@Override

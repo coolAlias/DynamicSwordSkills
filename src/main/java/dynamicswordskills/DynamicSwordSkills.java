@@ -27,6 +27,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
 import dynamicswordskills.entity.EntityLeapingBlow;
+import dynamicswordskills.entity.EntitySwordBeam;
 import dynamicswordskills.item.CombatSkillsTab;
 import dynamicswordskills.item.ItemSkillOrb;
 import dynamicswordskills.lib.Config;
@@ -100,6 +101,7 @@ public class DynamicSwordSkills
 				GameRegistry.registerItem(skillDiamond, skillDiamond.getUnlocalizedName().substring(5));
 			}
 			EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, this, 64, 10, true);
+			EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", 1, this, 64, 10, true);
 			PacketDispatcher.initialize();
 		}
 	}

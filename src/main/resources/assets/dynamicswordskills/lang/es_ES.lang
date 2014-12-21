@@ -28,6 +28,7 @@ death.attack.indirectSword=%1$s was slain by %2$s
 death.attack.indirectSword.item=%1$s was slain by %2$s using %3$s
 
 entity.dynamicswordskills.leapingblow.name=Golpe aéreo
+entity.dynamicswordskills.swordbeam.name=Sword Beam
 
 item.dss.skillorb.name=Orbe de habilidad 
 tooltip.dss.skillorb.desc.0=Right click para aprender
@@ -68,6 +69,12 @@ skill.dss.armorbreak.name=Atravesar Armadura
 skill.dss.armorbreak.desc.activate=While locked on, hold the attack key to charge up; once charged, the skill triggers automatically.
 skill.dss.armorbreak.desc.full=Unleash a powerful and well aimed blow, inflicting full damage even against heavily armored opponents.
 skill.dss.armorbreak.desc.tooltip.1=Lanza un ataque que penetra la armadura
+skill.dss.backslice.name=Back Slice
+skill.dss.backslice.desc.activate=While locked on, hold left or right and tap forward twice, then attack at the right time.
+skill.dss.backslice.desc.full=Quickly circle around and hit 'em where it hurts!\nSome enemies are more vulnerable to attacks from behind, and many have a small chance to lose any equipped chest armor. Higher tiers of armor are harder to knock off, even harder if enchanted with Unbreaking; Sharpness weapons gain a bonus to disarmor.\nNote that attacking too early, too late, or not from behind will only result in a standard attack.
+skill.dss.backslice.desc.info.1=Attack Angle: %d degrees
+skill.dss.backslice.desc.info.2=Disarmor Chance: %d%%
+skill.dss.backslice.desc.tooltip.1=Attack an enemy's vulnerable backside
 skill.dss.bonusheart.name=Contenedor de corazon
 skill.dss.bonusheart.desc.tooltip.1=Añade un corazon completo
 skill.dss.dash.name=Embestida

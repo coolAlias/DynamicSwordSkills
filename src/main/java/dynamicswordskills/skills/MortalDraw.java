@@ -92,11 +92,6 @@ public class MortalDraw extends SkillActive
 	}
 
 	@Override
-	public boolean canDrop() {
-		return false;
-	}
-
-	@Override
 	public boolean isActive() {
 		// subtract 2 to allow short window in which still considered active so that
 		// the attacker defended against is not able to immediately damage the defender

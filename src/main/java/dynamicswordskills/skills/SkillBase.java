@@ -31,6 +31,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.lib.ModInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -64,6 +65,8 @@ public abstract class SkillBase
 	public static final SkillBase swordBreak = new SwordBreak("swordbreak").addDescriptions(1);
 	public static final SkillBase risingCut = new RisingCut("risingcut").addDescriptions(1);
 	public static final SkillBase endingBlow = new EndingBlow("endingblow").addDescriptions(1);
+	public static final SkillBase backSlice = new BackSlice("backslice").addDescriptions(1);
+	public static final SkillBase swordBeam = new SwordBeam("swordbeam").addDescriptions(1);
 
 	/** Unlocalized name for language registry */
 	private final String unlocalizedName;
@@ -88,7 +91,7 @@ public abstract class SkillBase
 		this.id = skillIndex++;
 		if (register) {
 			if (skillsMap.containsKey(id)) {
-				System.out.println("CONFLICT @ skill " + id + " id already occupied by "
+				DynamicSwordSkills.logger.warn("CONFLICT @ skill " + id + " id already occupied by "
 						+ skillsMap.get(id).unlocalizedName + " while adding " + name);
 			}
 			skillsMap.put(id, this);
@@ -155,13 +158,6 @@ public abstract class SkillBase
 	 */
 	@Override
 	public int hashCode() {
-		/* TODO remove
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + id;
-		result = prime * result + level;
-		return result;
-		 */
 		return 31 * (31 + id) + level;
 	}
 
@@ -193,11 +189,6 @@ public abstract class SkillBase
 	/** Returns texture path for the skill's icon */
 	public String getIconTexture() {
 		return ModInfo.ID + ":skillorb_" + unlocalizedName;
-	}
-
-	/** Returns whether this skill can drop as an orb randomly from mobs */
-	public boolean canDrop() {
-		return true;
 	}
 
 	/** Each skill's ID can be used as a key to retrieve it from the map */

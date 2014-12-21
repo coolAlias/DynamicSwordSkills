@@ -81,11 +81,11 @@ public class DSSCombatEvents
 		addDrop(EntityZombie.class, SkillBase.swordBasic);
 		addDrop(EntitySkeleton.class, SkillBase.swordBasic);
 		addDrop(EntityEnderman.class, SkillBase.dodge);
-		addDrop(EntitySilverfish.class, SkillBase.dodge);
+		addDrop(EntitySilverfish.class, SkillBase.backSlice);
 		addDrop(EntitySlime.class, SkillBase.dash);
 		addDrop(EntityHorse.class, SkillBase.dash);
 		addDrop(EntityPigZombie.class, SkillBase.parry);
-		addDrop(EntityOcelot.class, SkillBase.parry);
+		addDrop(EntityOcelot.class, SkillBase.mortalDraw);
 		addDrop(EntitySpider.class, SkillBase.endingBlow);
 		addDrop(EntityCaveSpider.class, SkillBase.leapingBlow);
 		addDrop(EntityMagmaCube.class, SkillBase.leapingBlow);
@@ -94,7 +94,7 @@ public class DSSCombatEvents
 		addDrop(EntityCreeper.class, SkillBase.armorBreak);
 		addDrop(EntityIronGolem.class, SkillBase.swordBreak);
 		addDrop(EntityGhast.class, SkillBase.superSpinAttack);
-		addDrop(EntityWitch.class, SkillBase.mortalDraw);
+		addDrop(EntityWitch.class, SkillBase.swordBeam);
 	}
 
 	/**

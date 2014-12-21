@@ -37,5 +37,7 @@ public class ModInfo {
 	public static final String SOUND_SWORDCUT = ID + ":swordcut";
 	public static final String SOUND_SWORDMISS = ID + ":swordmiss";
 	public static final String SOUND_SWORDSTRIKE = ID + ":swordstrike";
+	public static final String SOUND_WHOOSH = ID + ":whoosh";
 	public static final String SOUND_LEVELUP = ID + ":levelup";
+
 }

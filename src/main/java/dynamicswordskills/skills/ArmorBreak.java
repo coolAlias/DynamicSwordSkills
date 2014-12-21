@@ -185,7 +185,7 @@ public class ArmorBreak extends SkillActive
 		if (skill != null && skill.isLockedOn()) {
 			player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
 		}
-		return isActive();
+		return false;
 	}
 
 	@Override

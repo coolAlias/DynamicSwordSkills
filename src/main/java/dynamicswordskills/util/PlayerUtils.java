@@ -134,6 +134,25 @@ public class PlayerUtils
 	}
 
 	/**
+	 * Spawns the provided ItemStack as an EntityItem with randomized position and motion
+	 * Used by blocks to scatter items when broken
+	 */
+	public static void spawnItemWithRandom(World world, ItemStack stack, double x, double y, double z) {
+		if (!world.isRemote && stack != null) {
+			double spawnX = x + world.rand.nextFloat();
+			double spawnY = y + world.rand.nextFloat();
+			double spawnZ = z + world.rand.nextFloat();
+			float f3 = 0.05F;
+			EntityItem entityitem = new EntityItem(world, spawnX, spawnY, spawnZ, stack);
+			entityitem.motionX = (-0.5F + world.rand.nextGaussian()) * f3;
+			entityitem.motionY = (4 + world.rand.nextGaussian()) * f3;
+			entityitem.motionZ = (-0.5F + world.rand.nextGaussian()) * f3;
+			entityitem.delayBeforeCanPickup = 10;
+			world.spawnEntityInWorld(entityitem);
+		}
+	}
+
+	/**
 	 * Spawns XP Orbs for the amount given with randomized position and motion
 	 */
 	public static void spawnXPOrbsWithRandom(World world, Random rand, int x, int y, int z, int xpAmount) {

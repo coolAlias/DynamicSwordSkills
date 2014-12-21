@@ -130,10 +130,10 @@ public class DSSKeyHandler
 				if (skills.isSkillActive(SkillBase.spinAttack)) {
 					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.thePlayer);
 					return;
-				}/* else if (skills.isSkillActive(SkillBase.backSlice)) {
+				} else if (skills.isSkillActive(SkillBase.backSlice)) {
 					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, key, mc.thePlayer);
 					return;
-				}*/
+				}
 			}
 			// Only allow attack key to continue processing if it was set to pressed
 			if (key.getIsKeyPressed()) {

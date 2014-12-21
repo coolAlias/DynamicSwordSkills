@@ -26,9 +26,11 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.client.ComboOverlay;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.client.RenderEntitySwordBeam;
 import dynamicswordskills.client.RenderNothing;
 import dynamicswordskills.client.TargetingTickHandler;
 import dynamicswordskills.entity.EntityLeapingBlow;
+import dynamicswordskills.entity.EntitySwordBeam;
 
 public class ClientProxy extends CommonProxy {
 
@@ -39,6 +41,7 @@ public class ClientProxy extends CommonProxy {
 		FMLCommonHandler.instance().bus().register(new DSSKeyHandler());
 		FMLCommonHandler.instance().bus().register(new TargetingTickHandler());
 		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing());
+		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam());
 	}
 
 	@Override

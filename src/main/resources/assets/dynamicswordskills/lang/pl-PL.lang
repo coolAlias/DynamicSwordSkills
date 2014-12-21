@@ -28,6 +28,7 @@ death.attack.indirectSword=%1$s został zabity przez %2$s
 death.attack.indirectSword.item=%1$s został zabity przez %2$s używając %3$s
 
 entity.dynamicswordskills.leapingblow.name=Obszerny podmuch
+entity.dynamicswordskills.swordbeam.name=Sword Beam
 
 item.dss.skillorb.name=Skill Orb of
 item.dss.skillitem.name=Sword of
@@ -73,6 +74,12 @@ skill.dss.armorbreak.name=Armor Break
 skill.dss.armorbreak.desc.activate=While locked on, hold the attack key to charge up; once charged, the skill triggers automatically.
 skill.dss.armorbreak.desc.full=Unleash a powerful and well aimed blow, inflicting full damage even against heavily armored opponents.
 skill.dss.armorbreak.desc.tooltip.1=Unleash an armor-penetrating blow
+skill.dss.backslice.name=Back Slice
+skill.dss.backslice.desc.activate=While locked on, hold left or right and tap forward twice, then attack at the right time.
+skill.dss.backslice.desc.full=Quickly circle around and hit 'em where it hurts!\nSome enemies are more vulnerable to attacks from behind, and many have a small chance to lose any equipped chest armor. Higher tiers of armor are harder to knock off, even harder if enchanted with Unbreaking; Sharpness weapons gain a bonus to disarmor.\nNote that attacking too early, too late, or not from behind will only result in a standard attack.
+skill.dss.backslice.desc.info.1=Attack Angle: %d degrees
+skill.dss.backslice.desc.info.2=Disarmor Chance: %d%%
+skill.dss.backslice.desc.tooltip.1=Attack an enemy's vulnerable backside
 skill.dss.bonusheart.name=Heart Container
 skill.dss.bonusheart.desc.tooltip.1=Adds one full heart
 skill.dss.dash.name=Dash

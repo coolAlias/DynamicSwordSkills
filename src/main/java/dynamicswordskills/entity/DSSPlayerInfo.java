@@ -184,35 +184,9 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	/**
 	 * Returns true if the player has the skill and the skill is currently active
 	 */
-	/*
 	public boolean isSkillActive(SkillBase skill) {
-		if (!(skill instanceof SkillActive)) {
-			return false;
-		} else if (itemSkill != null && itemSkill.getId() == skill.getId()) {
-			return ((SkillActive) itemSkill).isActive();
-		} else if (skill.getId() == SkillBase.swordBasic.getId() && dummySwordSkill != null) {
-			return ((SkillActive) dummySwordSkill).isActive();
-		} else if (skills.containsKey(skill.getId())) {
-			return (getSkillLevel(skill) > 0 && ((SkillActive) skills.get(skill.getId())).isActive());
-		} else {
-			return false;
-		}
-	}
-	 */
-
-	/**
-	 * Returns true if the player has the skill and the skill is currently active
-	 */
-	public boolean isSkillActive(SkillBase skill) {
-		for (SkillActive active : activeSkills) {
-			if (active.getId() == skill.getId()) {
-				return active.isActive();
-			}
-		}
-		if (itemSkill instanceof SkillActive && itemSkill.getId() == skill.getId()) {
-			return ((SkillActive) itemSkill).isActive();
-		}
-		return false;
+		SkillBase active = getPlayerSkill(skill);
+		return (active instanceof SkillActive && ((SkillActive) active).isActive());
 	}
 
 	/**
@@ -232,19 +206,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	public void setCurrentlyAnimatingSkill(SkillActive skill) {
 		animatingSkill = (skill == null || skill.hasAnimation() ? skill : animatingSkill);
 	}
-
-	/**
-	 * Returns false any skill is active that prevents left-clicks, such as most skills with animations
-	 */
-	/*
-	public boolean canInteract() {
-		if (currentActiveSkillId > -1 && !isSkillActive(SkillBase.getSkill(currentActiveSkillId))) {
-			currentActiveSkillId = -1;
-		}
-		// include attack time since onMouseChanged doesn't otherwise account for it
-		return currentActiveSkillId == -1 && player.attackTime == 0;
-	}
-	 */
 
 	/**
 	 * Returns whether key/mouse input and skill interactions are currently allowed,
@@ -427,16 +388,15 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Call after activating any skill to ensure it is added to the list of 
-	 * current active skills and set as the currently animating skill
+	 * Called after {@link SkillActive#onActivated} returns true to add the skill to the
+	 * list of currently active skills, as well as set the currently animating skill
 	 */
 	private void onSkillActivated(World world, SkillActive skill) {
 		if (skill.isActive()) {
-			DynamicSwordSkills.logger.info("Activated skill " + skill.getDisplayName());
 			activeSkills.add(skill);
-		}
-		if (world.isRemote) {
-			setCurrentlyAnimatingSkill(skill);
+			if (world.isRemote) {
+				setCurrentlyAnimatingSkill(skill);
+			}
 		}
 	}
 

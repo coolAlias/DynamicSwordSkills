@@ -34,7 +34,6 @@ import dynamicswordskills.network.client.AbstractClientMessageHandler;
 import dynamicswordskills.network.client.MortalDrawPacket;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.network.client.SyncSkillPacket;
-import dynamicswordskills.network.client.UnpressKeyPacket;
 import dynamicswordskills.network.client.UpdateComboPacket;
 import dynamicswordskills.network.server.AbstractServerMessageHandler;
 import dynamicswordskills.network.server.AddExhaustionPacket;
@@ -71,7 +70,6 @@ public class PacketDispatcher
 		registerMessage(MortalDrawPacket.Handler.class, MortalDrawPacket.class);
 		registerMessage(SyncPlayerInfoPacket.Handler.class, SyncPlayerInfoPacket.class);
 		registerMessage(SyncSkillPacket.Handler.class, SyncSkillPacket.class);
-		registerMessage(UnpressKeyPacket.Handler.class, UnpressKeyPacket.class);
 		registerMessage(UpdateComboPacket.Handler.class, UpdateComboPacket.class);
 
 		// Packets handled on SERVER

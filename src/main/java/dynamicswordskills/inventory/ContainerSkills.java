@@ -50,9 +50,12 @@ public class ContainerSkills extends Container
 		addSlotToContainer(new Slot(inventory, 0, 65, 141));
 
 		for (int i = 1; i < inventory.getSizeInventory(); ++i) {
-			if (i > 3) {
-				x = (i > 7 ? 108 : 22);
-				y = 99 - (i > 7 ? (i - 8) : (i - 4)) * 21;
+			int bottom = 3;
+			int sideBar = 5;
+			int rightSide = bottom + sideBar;
+			if (i > bottom) {
+				x = (i > rightSide ? 108 : 22);
+				y = 120 - (i > rightSide ? (i - (rightSide + 1)) : (i - (sideBar - 1))) * 21;
 			} else {
 				x = 44 + (i - 1) * 21;
 				y = 120;
