@@ -33,6 +33,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.PlayerUtils;
@@ -54,7 +55,9 @@ public class ItemSkillOrb extends Item
 		if (!player.worldObj.isRemote) {
 			SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
 			if (skill != null) {
-				if (DSSPlayerInfo.get(player).grantSkill(skill)) {
+				if (!Config.isSkillEnabled(skill.getId())) {
+					PlayerUtils.sendFormattedChat(player, "chat.dss.skill.use.disabled", skill.getDisplayName());
+				} else if (DSSPlayerInfo.get(player).grantSkill(skill)) {
 					world.playSoundAtEntity(player, ModInfo.SOUND_LEVELUP, 1.0F, 1.0F);
 					PlayerUtils.sendFormattedChat(player, "chat.dss.skill.levelup",
 							skill.getDisplayName(), DSSPlayerInfo.get(player).getTrueSkillLevel(skill));
@@ -104,11 +107,15 @@ public class ItemSkillOrb extends Item
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
 		if (SkillBase.doesSkillExist(stack.getItemDamage())) {
 			SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
-			if (skill != null && skill.getLevel() > 0) {
-				list.add(EnumChatFormatting.GOLD + skill.getLevelDisplay(true));
-				list.addAll(skill.getTranslatedTooltip(player));
-			} else {
-				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.dss.skillorb.desc.0"));
+			if (skill != null) {
+				if (!Config.isSkillEnabled(skill.getId())) {
+					list.add(EnumChatFormatting.DARK_RED + StatCollector.translateToLocal("skill.dss.disabled"));
+				} else if (skill.getLevel() > 0) {
+					list.add(EnumChatFormatting.GOLD + skill.getLevelDisplay(true));
+					list.addAll(skill.getTranslatedTooltip(player));
+				} else {
+					list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.dss.skillorb.desc.0"));
+				}
 			}
 		}
 	}

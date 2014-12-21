@@ -32,6 +32,7 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.util.PlayerUtils;
 
 /**
@@ -236,7 +237,10 @@ public abstract class SkillActive extends SkillBase
 	 * 			list of currently active skills.
 	 */
 	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
-		if (canUse(player)) {
+		if (!Config.isSkillEnabled(getId())) {
+			PlayerUtils.sendFormattedChat(player, "chat.dss.skill.use.disabled", getDisplayName());
+			return false;
+		} else if (canUse(player)) {
 			if (autoAddExhaustion() && !player.capabilities.isCreativeMode) {
 				player.addExhaustion(getExhaustion());
 			}

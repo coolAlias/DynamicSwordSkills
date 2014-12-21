@@ -23,6 +23,7 @@ import java.util.List;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
@@ -31,6 +32,7 @@ import org.lwjgl.opengl.GL11;
 
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.inventory.ContainerSkills;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 
@@ -114,7 +116,11 @@ public class GuiSkills extends GuiContainer
 		fontRendererObj.setUnicodeFlag(true);
 		fontRendererObj.drawString(s, 158, 38, 4210752);
 		if (currentSkill != null) {
-			s = currentSkill.getLevelDisplay(false);
+			if (Config.isSkillEnabled(currentSkill.getId())) {
+				s = currentSkill.getLevelDisplay(false);
+			} else {
+				s = (EnumChatFormatting.DARK_RED + StatCollector.translateToLocal("skill.dss.disabled"));
+			}
 			fontRendererObj.drawString(s, 262 - fontRendererObj.getStringWidth(s), 38, 4210752);
 		}
 		refreshDescription();

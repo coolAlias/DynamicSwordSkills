@@ -1,5 +1,6 @@
 chat.dss.skill.levelup=Learned %s level %d!
 chat.dss.skill.maxlevel=%s is already at max level!
+chat.dss.skill.use.disabled=%s has been disabled
 chat.dss.skill.use.fail=Can't currently use %s!
 
 combo.combo=Combo
@@ -76,6 +77,7 @@ skill.dss.desc.exhaustion=Exhaustion: %s
 skill.dss.desc.level=Level: %1$s/%2$s
 skill.dss.desc.range=Range: %s blocks
 skill.dss.desc.time=Time Limit: %d ticks
+skill.dss.disabled=DISABLED
 skill.dss.level.max=MAX LEVEL
 skill.dss.seconds=seconds
 skill.dss.ticks=ticks
