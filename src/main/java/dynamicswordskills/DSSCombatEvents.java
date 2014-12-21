@@ -125,7 +125,8 @@ public class DSSCombatEvents
 			EntityLivingBase mob = event.entityLiving;
 			ItemStack orb = getOrbDrop(mob);
 			if (orb != null && (Config.areOrbDropsEnabled() || (Config.arePlayerDropsEnabled() && event.entity instanceof EntityPlayer))) {
-				if (mob.worldObj.rand.nextFloat() < (Config.getDropChance(orb.getItemDamage()) + (0.005F * event.lootingLevel))) {
+				float baseChance = Config.getDropChance(orb.getItemDamage());
+				if (baseChance > 0.0F && mob.worldObj.rand.nextFloat() < (baseChance + (0.005F * event.lootingLevel))) {
 					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
 					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
 				}
