@@ -20,10 +20,10 @@ package dynamicswordskills.ref;
 public class ModInfo {
 	public static final String ID = "dynamicswordskills";
 	public static final String NAME = "Dynamic Sword Skills";
-	public static final String VERSION = "1.7.10-v1.6";
+	public static final String VERSION = "1.6";
 	public static final String CHANNEL = "dsschannel";
-	public static final String CLIENT_PROXY = "dynamicswordskills.ClientProxy";
-	public static final String COMMON_PROXY = "dynamicswordskills.CommonProxy";
+	public static final String CLIENT_PROXY = ID + ".ClientProxy";
+	public static final String COMMON_PROXY = ID + ".CommonProxy";
 	public static final String CONFIG_PATH = ("/" + ID + ".cfg");
 	
 	/** Sound file names (must NOT have a numeral suffix when referenced) */

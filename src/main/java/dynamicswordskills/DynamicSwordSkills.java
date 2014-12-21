@@ -126,7 +126,9 @@ public class DynamicSwordSkills
 
 	@Mod.EventHandler
 	public void onServerStarting(FMLServerStartingEvent event) {
-		DSSCommands.registerCommands(event);
+		if (shouldLoad) {
+			DSSCommands.registerCommands(event);
+		}
 	}
 
 	private void registerSkillOrbLoot() {
