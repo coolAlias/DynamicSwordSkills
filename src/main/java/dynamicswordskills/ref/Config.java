@@ -98,9 +98,16 @@ public class Config
 		enableCreativeSkillSwords = config.get("General", "[Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples)", true).getBoolean(true);
 		skillSwordLevel = MathHelper.clamp_int(config.get("General", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt(), 1, 5);
 		requireFullHealth = config.get("General", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
+		
+		String category = "enabledskills";
+		config.addCustomCategoryComment(category,
+				"Disabling a skill prevents players from learning or using that skill, but does not change the player\'s known skills."
+				+ "\nSkill items previously generated as loot may be found but not used, and subsequent loot will not generate with that skill."
+				+ "\nSkill orbs may still drop from mobs / players unless disabled separately, but may not be used."
+				+ "\nThis setting is save-game safe: it may be disabled and re-enabled without affecting the saved game state.");
 		enableSkill = new boolean[SkillBase.getNumSkills()];
 		for (SkillBase skill : SkillBase.getSkills()) {
-			enableSkill[skill.getId()] = config.get("EnabledSkills", "Enable use of the skill " + skill.getDisplayName(), true).getBoolean(true);
+			enableSkill[skill.getId()] = config.get(category, "Enable use of the skill " + skill.getDisplayName(), true).getBoolean(true);
 		}
 		/*================== DROPS =====================*/
 		enablePlayerDrops = config.get("Drops", "[Player] Enable skill orbs to drop from players when killed in PvP", true).getBoolean(true);

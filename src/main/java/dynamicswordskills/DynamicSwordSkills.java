@@ -133,7 +133,9 @@ public class DynamicSwordSkills
 
 	private void registerSkillOrbLoot() {
 		for (SkillBase skill : SkillBase.getSkills()) {
-			addLootToAll(new WeightedRandomChestContent(new ItemStack(skillOrb, 1, skill.getId()), 1, 1, Config.getLootWeight()), false);
+			if (Config.isSkillEnabled(skill.getId())) {
+				addLootToAll(new WeightedRandomChestContent(new ItemStack(skillOrb, 1, skill.getId()), 1, 1, Config.getLootWeight()), false);
+			}
 		}
 	}
 

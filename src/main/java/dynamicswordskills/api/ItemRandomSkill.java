@@ -30,6 +30,7 @@ import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraftforge.common.ChestGenHooks;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 
@@ -109,7 +110,7 @@ public class ItemRandomSkill extends ItemSword implements ISkillProvider
 		SkillBase skill = null;
 		while (skill == null) {
 			skill = SkillBase.getSkill(rand.nextInt(SkillBase.getNumSkills()));
-			if (!(skill instanceof SkillActive)) {
+			if (!(skill instanceof SkillActive) || !Config.isSkillEnabled(skill.getId())) {
 				skill = null;
 			}
 		}
