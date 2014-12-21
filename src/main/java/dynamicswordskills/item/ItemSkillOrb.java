@@ -56,13 +56,13 @@ public class ItemSkillOrb extends Item
 			if (skill != null) {
 				if (DSSPlayerInfo.get(player).grantSkill(skill)) {
 					world.playSoundAtEntity(player, ModInfo.SOUND_LEVELUP, 1.0F, 1.0F);
-					PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.dss.skill.levelup",
-							skill.getDisplayName(), DSSPlayerInfo.get(player).getTrueSkillLevel(skill)));
+					PlayerUtils.sendFormattedChat(player, "chat.dss.skill.levelup",
+							skill.getDisplayName(), DSSPlayerInfo.get(player).getTrueSkillLevel(skill));
 					if (!player.capabilities.isCreativeMode) {
 						--stack.stackSize;
 					}
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.dss.skill.maxlevel", skill.getDisplayName()));
+					PlayerUtils.sendFormattedChat(player, "chat.dss.skill.maxlevel", skill.getDisplayName());
 				}
 			}
 		}

@@ -31,6 +31,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillItem;
@@ -90,9 +91,19 @@ public class PlayerUtils
 		return player.capabilities.isCreativeMode ? 0.0F : (player.getMaxHealth() - player.getHealth());
 	}
 
-	/** Sends the pre-translated message to the player as a chat message */
+	/** Sends a pre-translated chat message to the player */
 	public static void sendChat(EntityPlayer player, String message) {
 		player.addChatMessage(new ChatComponentText(message));
+	}
+
+	/** Sends a translated chat message to the player */
+	public static void sendTranslatedChat(EntityPlayer player, String message) {
+		sendChat(player, StatCollector.translateToLocal(message));
+	}
+
+	/** Sends a formatted, translated chat message to the player */
+	public static void sendFormattedChat(EntityPlayer player, String message, Object... args) {
+		sendChat(player, StatCollector.translateToLocalFormatted(message, args));
 	}
 
 	/**
