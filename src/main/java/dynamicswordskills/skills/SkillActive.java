@@ -65,12 +65,6 @@ import dynamicswordskills.util.PlayerUtils;
  */
 public abstract class SkillActive extends SkillBase
 {
-	/** If false, the skill may not be manually activated; used for passive skills that can be triggered */
-	//private boolean allowUserActivation = true;
-
-	/** If true, further left-click interactions will be canceled while this skill is active */
-	//private boolean disablesLMB = false;
-
 	/**
 	 * Constructs the first instance of a skill and stores it in the skill list
 	 * @param name	this is the unlocalized name and should not contain any spaces
@@ -81,8 +75,6 @@ public abstract class SkillActive extends SkillBase
 
 	protected SkillActive(SkillActive skill) {
 		super(skill);
-		//this.allowUserActivation = skill.allowUserActivation;
-		//this.disablesLMB = skill.disablesLMB;
 	}
 
 	/**
