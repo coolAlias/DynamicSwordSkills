@@ -31,9 +31,9 @@ import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntityLeapingBlow;
-import dynamicswordskills.lib.ModInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 
 /**

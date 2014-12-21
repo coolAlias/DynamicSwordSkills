@@ -35,7 +35,7 @@ import net.minecraft.world.World;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import dynamicswordskills.lib.ModInfo;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;

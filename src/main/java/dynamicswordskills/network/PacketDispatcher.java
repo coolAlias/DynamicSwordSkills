@@ -24,7 +24,6 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import dynamicswordskills.lib.ModInfo;
 import dynamicswordskills.network.bidirectional.AbstractBiMessageHandler;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.AttackTimePacket;
@@ -42,6 +41,7 @@ import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.network.server.OpenGuiPacket;
 import dynamicswordskills.network.server.RefreshSpinPacket;
 import dynamicswordskills.network.server.TargetIdPacket;
+import dynamicswordskills.ref.ModInfo;
 
 /**
  * 

@@ -31,7 +31,7 @@ import org.lwjgl.opengl.GL11;
 
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.inventory.ContainerSkills;
-import dynamicswordskills.lib.ModInfo;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 
 public class GuiSkills extends GuiContainer

@@ -30,9 +30,9 @@ import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
 import dynamicswordskills.item.CombatSkillsTab;
 import dynamicswordskills.item.ItemSkillOrb;
-import dynamicswordskills.lib.Config;
-import dynamicswordskills.lib.ModInfo;
 import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 

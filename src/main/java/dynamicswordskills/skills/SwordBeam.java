@@ -31,10 +31,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntitySwordBeam;
-import dynamicswordskills.lib.Config;
-import dynamicswordskills.lib.ModInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 
 /**

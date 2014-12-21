@@ -33,7 +33,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.lib.ModInfo;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.PlayerUtils;
 

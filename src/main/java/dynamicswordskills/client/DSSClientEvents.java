@@ -25,7 +25,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.lib.Config;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillBase;
