@@ -46,12 +46,6 @@ import dynamicswordskills.skills.SkillBase;
  */
 public class DashImpactPacket implements IMessage
 {
-	/** Stores the player's motionX and motionZ, since the server values are unreliable */
-	//private double motionX, motionZ;
-
-	/** The moving object position as determined by the client */
-	//private MovingObjectPosition mop;
-
 	/** Stores the type of hit, as a byte (0: None 1: BLOCK 2: ENTITY) */
 	private byte hitType;
 
@@ -65,52 +59,26 @@ public class DashImpactPacket implements IMessage
 	 * @param mop Must not be null
 	 */
 	public DashImpactPacket(EntityPlayer player, MovingObjectPosition mop) {
-		//this.motionX = player.motionX;
-		//this.motionZ = player.motionZ;
 		this.hitType = (mop != null ? (byte) mop.typeOfHit.ordinal() : (byte) 0);
 		if (this.hitType == MovingObjectType.ENTITY.ordinal()) {
 			this.entityId = mop.entityHit.getEntityId();
 		}
-		//this.mop = mop;
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buffer) {
-		//motionX = buffer.readDouble();
-		//motionZ = buffer.readDouble();
 		hitType = buffer.readByte();
 		if (hitType == MovingObjectType.ENTITY.ordinal()) {
 			entityId = buffer.readInt();
 		}
-		/*
-			// Don't need a valid MOP for block hits, only entities
-			int x = buffer.readInt();
-			int y = buffer.readInt();
-			int z = buffer.readInt();
-			int side = buffer.readInt();
-		}
-		 */
 	}
 
 	@Override
 	public void toBytes(ByteBuf buffer) {
-		//buffer.writeDouble(motionX);
-		//buffer.writeDouble(motionZ);
 		buffer.writeByte(hitType);
 		if (hitType == MovingObjectType.ENTITY.ordinal()) {
 			buffer.writeInt(entityId);
 		}
-		/*
-		if (mop != null) {
-			// None of this data is needed for Dash to process the impact
-			buffer.writeInt(mop.blockX);
-			buffer.writeInt(mop.blockY);
-			buffer.writeInt(mop.blockZ);
-			buffer.writeInt(mop.sideHit);
-			buffer.writeDouble(mop.hitVec.xCoord);
-			buffer.writeDouble(mop.hitVec.yCoord);
-			buffer.writeDouble(mop.hitVec.zCoord);
-		*/
 	}
 
 	public static class Handler extends AbstractServerMessageHandler<DashImpactPacket> {
@@ -127,13 +95,8 @@ public class DashImpactPacket implements IMessage
 						DynamicSwordSkills.logger.warn("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
 					}
 				}
-				//player.motionX = message.motionX;
-				//player.motionZ = message.motionZ;
 				dash.onImpact(player.worldObj, player, mop);
-			} //else {
-				// this happens rarely, e.g. when impacting on the very last client active tick
-				// LogHelper.warning("Dash skill was either null or not active when receiving Dash Packet!"); 
-			//}
+			}
 			return null;
 		}
 	}

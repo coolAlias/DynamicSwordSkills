@@ -54,32 +54,3 @@ public class MortalDrawPacket implements IMessage {
 		}
 	}
 }
-
-/*
-public class MortalDrawPacket extends AbstractPacket {
-
-	public MortalDrawPacket() {}
-
-	@Override
-	public void encodeInto(ChannelHandlerContext ctx, ByteBuf buffer) {}
-
-	@Override
-	public void decodeInto(ChannelHandlerContext ctx, ByteBuf buffer) {}
-
-	@Override
-	public void handleClientSide(EntityPlayer player) {
-		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-		if (skills.hasSkill(SkillBase.mortalDraw)) {
-			((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
-			ILockOnTarget skill = skills.getTargetingSkill();
-			if (skill instanceof ICombo) {
-				DSSCombatEvents.performComboAttack(Minecraft.getMinecraft(), skill);
-			}
-		}
-	}
-
-	@Override
-	public void handleServerSide(EntityPlayer player) {}
-
-}
-*/

@@ -55,34 +55,3 @@ public class AddExhaustionPacket implements IMessage
 		}
 	}
 }
-
-/*
-public class AddExhaustionPacket extends AbstractPacket
-{
-	private float amount;
-
-	public AddExhaustionPacket() {}
-
-	public AddExhaustionPacket(float amount) {
-		this.amount = amount;
-	}
-
-	@Override
-	public void encodeInto(ChannelHandlerContext ctx, ByteBuf buffer) {
-		buffer.writeFloat(amount);
-	}
-
-	@Override
-	public void decodeInto(ChannelHandlerContext ctx, ByteBuf buffer) {
-		this.amount = buffer.readFloat();
-	}
-	
-	@Override
-	public void handleClientSide(EntityPlayer player) {}
-
-	@Override
-	public void handleServerSide(EntityPlayer player) {
-		player.addExhaustion(amount);
-	}
-}
-*/
