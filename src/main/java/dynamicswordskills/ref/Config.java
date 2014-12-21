@@ -82,22 +82,22 @@ public class Config
 		config.load();
 		
 		/*================== GENERAL =====================*/
-		allowVanillaControls = config.get("General", "Allow vanilla controls to activate skills", true).getBoolean(true);
-		autoTarget = config.get("General", "Enable auto-targeting of next opponent", true).getBoolean(true);
-		baseSwingSpeed = MathHelper.clamp_int(config.get("General", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
-		enablePlayerTarget = config.get("General", "Enable targeting of players by default (can be toggled in game)", true).getBoolean(true);
-		doubleTap = config.get("General", "Require double tap activation", true).getBoolean(true);
-		hitsToDisplay = Math.max(0, config.get("General", "Max hits to display in Combo HUD [0-12]", 3).getInt());
-		enableBonusOrb = config.get("General", "Whether all players should start with a Basic Skill orb", true).getBoolean(true);
-		chestLootWeight = MathHelper.clamp_int(config.get("General", "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10]", 1).getInt(), 0, 10);
-		allowDisarmorPlayer = config.get("General", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
-		enableComboHud = config.get("General", "[Combo HUD] Whether the combo hit counter will display by default (may be toggled in game)", true).getBoolean(true);
-		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("General", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 50);
-		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
-		enableRandomSkillSwords = config.get("General", "[Skill Swords] Enable randomized Skill Swords to appear as loot in various chests", true).getBoolean(true);
-		enableCreativeSkillSwords = config.get("General", "[Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples)", true).getBoolean(true);
-		skillSwordLevel = MathHelper.clamp_int(config.get("General", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt(), 1, 5);
-		requireFullHealth = config.get("General", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
+		allowVanillaControls = config.get("general", "Allow vanilla controls to activate skills", true).getBoolean(true);
+		autoTarget = config.get("general", "Enable auto-targeting of next opponent", true).getBoolean(true);
+		baseSwingSpeed = MathHelper.clamp_int(config.get("general", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
+		enablePlayerTarget = config.get("general", "Enable targeting of players by default (can be toggled in game)", true).getBoolean(true);
+		doubleTap = config.get("general", "Require double tap activation", true).getBoolean(true);
+		hitsToDisplay = Math.max(0, config.get("general", "Max hits to display in Combo HUD [0-12]", 3).getInt());
+		enableBonusOrb = config.get("general", "Whether all players should start with a Basic Skill orb", true).getBoolean(true);
+		chestLootWeight = MathHelper.clamp_int(config.get("general", "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10]", 1).getInt(), 0, 10);
+		allowDisarmorPlayer = config.get("general", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
+		enableComboHud = config.get("general", "[Combo HUD] Whether the combo hit counter will display by default (may be toggled in game)", true).getBoolean(true);
+		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("general", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 50);
+		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("general", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
+		enableRandomSkillSwords = config.get("general", "[Skill Swords] Enable randomized Skill Swords to appear as loot in various chests", true).getBoolean(true);
+		enableCreativeSkillSwords = config.get("general", "[Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples)", true).getBoolean(true);
+		skillSwordLevel = MathHelper.clamp_int(config.get("general", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt(), 1, 5);
+		requireFullHealth = config.get("general", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 		
 		String category = "enabledskills";
 		config.addCustomCategoryComment(category,
@@ -110,14 +110,14 @@ public class Config
 			enableSkill[skill.getId()] = config.get(category, "Enable use of the skill " + skill.getDisplayName(), true).getBoolean(true);
 		}
 		/*================== DROPS =====================*/
-		enablePlayerDrops = config.get("Drops", "[Player] Enable skill orbs to drop from players when killed in PvP", true).getBoolean(true);
-		playerDropFactor = MathHelper.clamp_int(config.get("Drops", "[Player] Factor by which to multiply chance for skill orb to drop by slain players [1-20]", 5).getInt(), 1, 20);
-		enableOrbDrops = config.get("Drops", "Enable skill orbs to drop as loot from mobs (may still be disabled individually)", true).getBoolean(true);
-		randomDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
-		genericMobDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
+		enablePlayerDrops = config.get("drops", "[Player] Enable skill orbs to drop from players when killed in PvP", true).getBoolean(true);
+		playerDropFactor = MathHelper.clamp_int(config.get("drops", "[Player] Factor by which to multiply chance for skill orb to drop by slain players [1-20]", 5).getInt(), 1, 20);
+		enableOrbDrops = config.get("drops", "Enable skill orbs to drop as loot from mobs (may still be disabled individually)", true).getBoolean(true);
+		randomDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("drops", "Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
+		genericMobDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("drops", "Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
 		orbDropChance = new HashMap<Byte, Float>(SkillBase.getNumSkills());
 		for (SkillBase skill : SkillBase.getSkills()) {
-			int i = MathHelper.clamp_int(config.get("Drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
+			int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
 			orbDropChance.put(skill.getId(), (0.001F * (float) i));
 		}
 		config.save();
