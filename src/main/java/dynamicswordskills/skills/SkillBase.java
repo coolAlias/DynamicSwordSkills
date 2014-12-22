@@ -127,11 +127,6 @@ public abstract class SkillBase
 		return (doesSkillExist(id) ? skillsMap.get((byte) id) : null);
 	}
 
-	/** Returns all registered skills' unlocalized names as an array */
-	public static final String[] getSkillNames() {
-		return skillNames.toArray(new String[skillNames.size()]);
-	}
-
 	/** Returns an iterable collection of all the skills in the map */
 	public static final Collection<SkillBase> getSkills() {
 		return skillsMap.values();
@@ -140,6 +135,11 @@ public abstract class SkillBase
 	/** Returns the total number of registered skills */
 	public static final int getNumSkills() {
 		return skillsMap.size();
+	}
+
+	/** Returns all registered skills' unlocalized names as an array */
+	public static final String[] getSkillNames() {
+		return skillNames.toArray(new String[skillNames.size()]);
 	}
 
 	/**
@@ -153,6 +153,7 @@ public abstract class SkillBase
 		}
 		return null;
 	}
+
 	/**
 	 * Returns a leveled skill from an ISkillItem using {@link ISkillProvider#getSkillId(ItemStack)}
 	 * and {@link ISkillProvider#getSkillLevel(ItemStack)}, or null if not possible

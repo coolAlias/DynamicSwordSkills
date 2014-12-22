@@ -122,11 +122,11 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	private void removeSkill(SkillBase skill) {
+		SkillBase dummy = skill.newInstance();
+		skills.put(dummy.getId(), dummy);
+		validateSkills();
+		skills.remove(dummy.getId());
 		if (player instanceof EntityPlayerMP) {
-			SkillBase dummy = skill.newInstance();
-			skills.put(dummy.getId(), dummy);
-			validateSkills();
-			skills.remove(dummy.getId());
 			PacketDispatcher.sendTo(new SyncSkillPacket(dummy), (EntityPlayerMP) player);
 		}
 	}
@@ -141,7 +141,9 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 		validateSkills();
 		skills.clear();
-		PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this).setReset(), (EntityPlayerMP) player);
+		if (player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this).setReset(), (EntityPlayerMP) player);
+		}
 	}
 
 	/** Returns true if the player has at least one level in the specified skill */
