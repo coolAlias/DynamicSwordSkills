@@ -640,11 +640,17 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * Call when the player logs in for the first time
 	 */
 	public void onPlayerLoggedIn() {
+		verifyStartingGear();
+	}
+
+	/**
+	 * Call each time the player joins the world to sync data to the client
+	 */
+	public void onJoinWorld() {
 		validateSkills();
 		if (player instanceof EntityPlayerMP) {
 			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
 		}
-		verifyStartingGear();
 	}
 
 	/**
@@ -654,8 +660,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		NBTTagCompound compound = new NBTTagCompound();
 		info.saveNBTData(compound);
 		this.loadNBTData(compound);
-		// validateSkills(); ?
-		// SyncPlayerInfoPacket ?
 	}
 
 	/**

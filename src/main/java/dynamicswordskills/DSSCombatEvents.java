@@ -42,6 +42,7 @@ import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
@@ -203,8 +204,13 @@ public class DSSCombatEvents
 
 	@SubscribeEvent
 	public void onPlayerLoggedIn(PlayerLoggedInEvent event) {
-		if (!event.player.worldObj.isRemote) {
-			DSSPlayerInfo.get(event.player).onPlayerLoggedIn();
+		DSSPlayerInfo.get(event.player).onPlayerLoggedIn();
+	}
+
+	@SubscribeEvent
+	public void onEntityJoinWorld(EntityJoinWorldEvent event) {
+		if (event.entity instanceof EntityPlayer) {
+			DSSPlayerInfo.get((EntityPlayer) event.entity).onJoinWorld();
 		}
 	}
 
@@ -214,8 +220,7 @@ public class DSSCombatEvents
 	}
 
 	/**
-	 * NOTE 1: Leaping Blow's onImpact method is client-side only
-	 * NOTE 2: LivingFallEvent is only called when not in Creative mode
+	 * NOTE: LivingFallEvent is only called when not in Creative mode
 	 */
 	@SubscribeEvent
 	public void onFall(LivingFallEvent event) {
@@ -232,9 +237,6 @@ public class DSSCombatEvents
 		}
 	}
 
-	/**
-	 * NOTE: Leaping Blow's onImpact method is client-side only
-	 */
 	@SubscribeEvent
 	public void onCreativeFall(PlayerFlyableFallEvent event) {
 		DSSPlayerInfo skills = DSSPlayerInfo.get(event.entityPlayer);
