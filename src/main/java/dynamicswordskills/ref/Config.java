@@ -39,14 +39,14 @@ public class Config
 	private static boolean autoTarget;
 	/** Whether players can be targeted */
 	private static boolean enablePlayerTarget;
-	/** Number of combo hits to display */
-	private static int hitsToDisplay;
 	/** Whether all players should start with a Basic Skill orb */
 	private static boolean enableBonusOrb;
 	/** Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10] */
 	private static int chestLootWeight;
 	/** [Back Slice] Allow Back Slice to potentially knock off player armor */
 	private static boolean allowDisarmorPlayer;
+	/** [Combo HUD] Max hits to display */
+	private static int hitsToDisplay;
 	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
 	private static boolean enableComboHud;
 	/** [Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50] */
@@ -87,10 +87,10 @@ public class Config
 		baseSwingSpeed = MathHelper.clamp_int(config.get("general", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
 		enablePlayerTarget = config.get("general", "Enable targeting of players by default (can be toggled in game)", true).getBoolean(true);
 		doubleTap = config.get("general", "Require double tap activation", true).getBoolean(true);
-		hitsToDisplay = Math.max(0, config.get("general", "Max hits to display in Combo HUD [0-12]", 3).getInt());
 		enableBonusOrb = config.get("general", "Whether all players should start with a Basic Skill orb", true).getBoolean(true);
 		chestLootWeight = MathHelper.clamp_int(config.get("general", "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10]", 1).getInt(), 0, 10);
 		allowDisarmorPlayer = config.get("general", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
+		hitsToDisplay = Math.max(0, config.get("general", "[Combo HUD] Max hits to display [0-12]", 3).getInt());
 		enableComboHud = config.get("general", "[Combo HUD] Whether the combo hit counter will display by default (may be toggled in game)", true).getBoolean(true);
 		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("general", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 50);
 		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("general", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
@@ -132,8 +132,8 @@ public class Config
 	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
 	public static boolean canTargetPlayers() { return enablePlayerTarget; }
 	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
-	public static boolean isComboHudEnabled() { return enableComboHud; }
 	public static int getHitsToDisplay() { return hitsToDisplay; }
+	public static boolean isComboHudEnabled() { return enableComboHud; }
 	public static boolean areRandomSwordsEnabled() { return enableRandomSkillSwords; }
 	public static boolean areCreativeSwordsEnabled() { return enableCreativeSkillSwords; }
 	public static boolean canDisarmorPlayers() { return allowDisarmorPlayer; }
