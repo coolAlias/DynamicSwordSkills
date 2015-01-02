@@ -20,6 +20,9 @@ package dynamicswordskills.api;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
@@ -28,8 +31,9 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraftforge.common.ChestGenHooks;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import dynamicswordskills.item.IModItem;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
@@ -46,13 +50,17 @@ import dynamicswordskills.skills.SkillBase;
  * they extend ItemSword instead of Item, but could just as well be anything.
  *
  */
-public class ItemRandomSkill extends ItemSword implements ISkillProvider
+public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvider
 {
 	/** The maximum level of the SkillBase.{skill} granted by this Item */
 	private final byte maxLevel;
 
-	public ItemRandomSkill(ToolMaterial material) {
+	/** String used in the ModelResourceLocation when registering to the ItemModelMesher */
+	private final String textureName;
+
+	public ItemRandomSkill(ToolMaterial material, String textureName) {
 		super(material);
+		this.textureName = textureName;
 		this.maxLevel = (byte)(2 + material.getHarvestLevel());
 		setCreativeTab(null);
 	}
@@ -103,6 +111,13 @@ public class ItemRandomSkill extends ItemSword implements ISkillProvider
 			}
 			list.addAll(skill.getDescription(player));
 		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerRenderer(ItemModelMesher mesher) {
+		ModelBakery.addVariantName(this, textureName);
+		mesher.register(this, 0, new ModelResourceLocation(textureName, "inventory"));
 	}
 
 	@Override

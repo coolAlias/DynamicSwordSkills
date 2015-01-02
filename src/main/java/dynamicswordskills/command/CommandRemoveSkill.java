@@ -25,6 +25,7 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.BlockPos;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.PlayerUtils;
@@ -36,7 +37,7 @@ public class CommandRemoveSkill extends CommandBase
 	public CommandRemoveSkill() {}
 
 	@Override
-	public String getCommandName() {
+	public String getName() {
 		return "removeskill";
 	}
 
@@ -54,7 +55,7 @@ public class CommandRemoveSkill extends CommandBase
 	}
 
 	@Override
-	public void processCommand(ICommandSender sender, String[] args) {
+	public void execute(ICommandSender sender, String[] args) throws CommandException {
 		if (args != null && args.length == 1) {
 			boolean all = ("all").equals(args[0]);
 			SkillBase skill = null;
@@ -67,15 +68,15 @@ public class CommandRemoveSkill extends CommandBase
 			EntityPlayerMP player = getCommandSenderAsPlayer(sender);
 			if (DSSPlayerInfo.get(player).removeSkill(args[0])) {
 				if (all) {
-					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.all", player.getCommandSenderName());
+					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.all", player.getDisplayName());
 				} else {
-					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.one", player.getCommandSenderName(), skill.getDisplayName());
+					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.one", player.getDisplayName(), skill.getDisplayName());
 				}
 			} else { // player didn't have this skill
 				if (all) {
-					throw new CommandException("commands.removeskill.failure.all", new Object[] {player.getCommandSenderName()});
+					throw new CommandException("commands.removeskill.failure.all", new Object[] {player.getDisplayName()});
 				} else {
-					throw new CommandException("commands.removeskill.failure.one", new Object[] {player.getCommandSenderName(), skill.getDisplayName()});
+					throw new CommandException("commands.removeskill.failure.one", new Object[] {player.getDisplayName(), skill.getDisplayName()});
 				}
 			}
 		} else {
@@ -84,7 +85,7 @@ public class CommandRemoveSkill extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+	public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		return args.length == 1 ? getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames()) : null;
 	}
 }

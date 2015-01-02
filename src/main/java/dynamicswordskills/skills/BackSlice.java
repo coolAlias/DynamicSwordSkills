@@ -32,8 +32,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
@@ -181,7 +181,7 @@ public class BackSlice extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
-			if (keyPressed != null && keyPressed.getIsKeyPressed() && key == mc.gameSettings.keyBindForward) {
+			if (keyPressed != null && keyPressed.isKeyDown() && key == mc.gameSettings.keyBindForward) {
 				if (ticksTilFail > 0) {
 					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
@@ -244,7 +244,7 @@ public class BackSlice extends SkillActive
 				speed = 1.0D;
 			}
 			double d = 0.15D * speed * speed;
-			if (player.isInWater() || player.handleLavaMovement()) {
+			if (player.isInWater() || player.isInLava()) {
 				d *= 0.15D;
 			}
 			Vec3 vec3 = player.getLookVec();

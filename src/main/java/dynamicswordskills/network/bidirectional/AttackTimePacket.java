@@ -18,9 +18,9 @@
 package dynamicswordskills.network.bidirectional;
 
 import io.netty.buffer.ByteBuf;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.DynamicSwordSkills;
 
 /**
@@ -51,7 +51,7 @@ public class AttackTimePacket implements IMessage
 	public static class Handler implements IMessageHandler<AttackTimePacket, IMessage> {
 		@Override
 		public IMessage onMessage(AttackTimePacket message, MessageContext ctx) {
-			DynamicSwordSkills.proxy.getPlayerEntity(ctx).attackTime = message.attackTime;
+			// TODO DynamicSwordSkills.proxy.getPlayerEntity(ctx).attackTime = message.attackTime;
 			return null;
 		}
 	}

@@ -50,9 +50,9 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
-import cpw.mods.fml.common.eventhandler.EventPriority;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
@@ -142,7 +142,7 @@ public class DSSCombatEvents
 	 */
 	public static void setPlayerAttackTime(EntityPlayer player) {
 		if (!player.capabilities.isCreativeMode) {
-			player.attackTime = Math.max(player.attackTime, Config.getBaseSwingSpeed());
+			// TODO player.attackTime = Math.max(player.attackTime, Config.getBaseSwingSpeed());
 		}
 	}
 

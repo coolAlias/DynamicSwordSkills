@@ -28,8 +28,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -144,8 +144,8 @@ public class MortalDraw extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.getIsKeyPressed()
-				|| DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getIsKeyPressed());
+		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown()
+				|| DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown());
 	}
 
 	@Override

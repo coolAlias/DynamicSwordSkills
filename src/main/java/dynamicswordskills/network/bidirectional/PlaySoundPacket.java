@@ -20,9 +20,9 @@ package dynamicswordskills.network.bidirectional;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
@@ -65,7 +65,7 @@ public class PlaySoundPacket implements IMessage
 	public PlaySoundPacket(String sound, float volume, float pitch) {
 		this(sound, volume, pitch, 0, 0, 0);
 	}
-	
+
 	@Override
 	public void fromBytes(ByteBuf buffer) {
 		sound = ByteBufUtils.readUTF8String(buffer);
@@ -85,14 +85,14 @@ public class PlaySoundPacket implements IMessage
 		buffer.writeDouble(y);
 		buffer.writeDouble(z);
 	}
-	
+
 	public static class Handler extends AbstractBiMessageHandler<PlaySoundPacket> {
 		@Override
 		public IMessage handleClientMessage(EntityPlayer player, PlaySoundPacket message, MessageContext ctx) {
 			player.playSound(message.sound, message.volume, message.pitch);
 			return null;
 		}
-		
+
 		@Override
 		public IMessage handleServerMessage(EntityPlayer player, PlaySoundPacket message, MessageContext ctx) {
 			player.worldObj.playSoundEffect(message.x, message.y, message.z, message.sound, message.volume, message.pitch);

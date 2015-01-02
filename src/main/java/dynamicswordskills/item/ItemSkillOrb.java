@@ -17,20 +17,24 @@
 
 package dynamicswordskills.item;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import com.google.common.collect.Lists;
+
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
@@ -38,11 +42,8 @@ import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.PlayerUtils;
 
-public class ItemSkillOrb extends Item
+public class ItemSkillOrb extends Item implements IModItem
 {
-	@SideOnly(Side.CLIENT)
-	private List<IIcon> icons;
-
 	public ItemSkillOrb() {
 		super();
 		setMaxDamage(0);
@@ -81,12 +82,6 @@ public class ItemSkillOrb extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int damage) {
-		return icons.get(damage % icons.size());
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
 		for (SkillBase skill : SkillBase.getSkills()) {
 			list.add(new ItemStack(item, 1, skill.getId()));
@@ -95,10 +90,14 @@ public class ItemSkillOrb extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		icons = new ArrayList<IIcon>(SkillBase.getNumSkills());
+	public void registerRenderer(ItemModelMesher mesher) {
+		String[] variants = new String[SkillBase.getNumSkills()];
 		for (SkillBase skill : SkillBase.getSkills()) {
-			icons.add(register.registerIcon(skill.getIconTexture()));
+			variants[skill.getId()] = skill.getIconTexture();
+		}
+		ModelBakery.addVariantName(this, variants);
+		for (SkillBase skill : SkillBase.getSkills()) {
+			mesher.register(this, skill.getId(), new ModelResourceLocation(skill.getIconTexture(), "inventory"));
 		}
 	}
 

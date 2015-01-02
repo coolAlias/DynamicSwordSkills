@@ -20,9 +20,10 @@ package dynamicswordskills.network.client;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 
 /**
@@ -34,6 +35,7 @@ public class SyncPlayerInfoPacket implements IMessage
 {
 	/** NBTTagCompound used to store and transfer the Player's Info */
 	private NBTTagCompound compound;
+
 	/** Whether skills should validate; only false when skills reset */
 	private boolean validate = true;
 
@@ -43,7 +45,7 @@ public class SyncPlayerInfoPacket implements IMessage
 		compound = new NBTTagCompound();
 		info.saveNBTData(compound);
 	}
-	
+
 	/**
 	 * Sets validate to false for reset skills packets
 	 */
@@ -51,24 +53,30 @@ public class SyncPlayerInfoPacket implements IMessage
 		validate = false;
 		return this;
 	}
-	
+
 	@Override
 	public void fromBytes(ByteBuf buffer) {
 		compound = ByteBufUtils.readTag(buffer);
 		validate = buffer.readBoolean();
 	}
-	
+
 	@Override
 	public void toBytes(ByteBuf buffer) {
 		ByteBufUtils.writeTag(buffer, compound);
 		buffer.writeBoolean(validate);
 	}
-	
+
 	public static class Handler extends AbstractClientMessageHandler<SyncPlayerInfoPacket> {
 		@Override
 		public IMessage handleClientMessage(EntityPlayer player, SyncPlayerInfoPacket message, MessageContext ctx) {
+			if (player == null) {
+				DynamicSwordSkills.logger.warn("Player was NULL while trying to handle SyncPlayerInfo Packet!");
+				return null;
+			}
 			DSSPlayerInfo info = DSSPlayerInfo.get(player);
-			if (info != null) {
+			if (info == null) {
+				DynamicSwordSkills.logger.warn("Player's extended properties were NULL while trying to handle SyncPlayerInfo Packet!");
+			} else {
 				info.loadNBTData(message.compound);
 				if (message.validate) {
 					info.validateSkills();

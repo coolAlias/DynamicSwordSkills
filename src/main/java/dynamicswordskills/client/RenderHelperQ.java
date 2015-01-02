@@ -19,6 +19,7 @@ package dynamicswordskills.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
@@ -36,12 +37,13 @@ public class RenderHelperQ {
 		double maxU = (double)(u + width) / (double)imageWidth;
 		double minV = (double)v / (double)imageHeight;
 		double maxV = (double)(v + height) / (double)imageHeight;
-		Tessellator tessellator = Tessellator.instance;
-		tessellator.startDrawingQuads();
-		tessellator.addVertexWithUV(x + scale*(double)width, y + scale*(double)height, 0, maxU, maxV);
-		tessellator.addVertexWithUV(x + scale*(double)width, y, 0, maxU, minV);
-		tessellator.addVertexWithUV(x, y, 0, minU, minV);
-		tessellator.addVertexWithUV(x, y + scale*(double)height, 0, minU, maxV);
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer renderer = tessellator.getWorldRenderer();
+		renderer.startDrawingQuads();
+		renderer.addVertexWithUV(x + scale*(double)width, y + scale*(double)height, 0, maxU, maxV);
+		renderer.addVertexWithUV(x + scale*(double)width, y, 0, maxU, minV);
+		renderer.addVertexWithUV(x, y, 0, minU, minV);
+		renderer.addVertexWithUV(x, y + scale*(double)height, 0, minU, maxV);
 		tessellator.draw();
 	}
 
@@ -65,12 +67,13 @@ public class RenderHelperQ {
 		double maxU = (double)(u + width) / (double)imageWidth;
 		double minV = (double)v / (double)imageHeight;
 		double maxV = (double)(v + height) / (double)imageHeight;
-		Tessellator tessellator = Tessellator.instance;
-		tessellator.startDrawingQuads();
-		tessellator.addVertexWithUV(x + scale*(double)width, y + scale*(double)height, 0, maxU, maxV);
-		tessellator.addVertexWithUV(x + scale*(double)width, y, 0, maxU, minV);
-		tessellator.addVertexWithUV(x, y, 0, minU, minV);
-		tessellator.addVertexWithUV(x, y + scale*(double)height, 0, minU, maxV);
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer renderer = tessellator.getWorldRenderer();
+		renderer.startDrawingQuads();
+		renderer.addVertexWithUV(x + scale*(double)width, y + scale*(double)height, 0, maxU, maxV);
+		renderer.addVertexWithUV(x + scale*(double)width, y, 0, maxU, minV);
+		renderer.addVertexWithUV(x, y, 0, minU, minV);
+		renderer.addVertexWithUV(x, y + scale*(double)height, 0, minU, maxV);
 		tessellator.draw();
 	}
 

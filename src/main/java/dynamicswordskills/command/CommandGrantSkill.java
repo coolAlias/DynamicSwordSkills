@@ -26,6 +26,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.SkillBase;
@@ -44,7 +45,7 @@ public class CommandGrantSkill extends CommandBase
 	public CommandGrantSkill() {}
 
 	@Override
-	public String getCommandName() {
+	public String getName() {
 		return "grantskill";
 	}
 
@@ -62,7 +63,7 @@ public class CommandGrantSkill extends CommandBase
 	}
 
 	@Override
-	public void processCommand(ICommandSender sender, String[] args) {
+	public void execute(ICommandSender sender, String[] args) throws CommandException {
 		EntityPlayerMP commandSender = getCommandSenderAsPlayer(sender);
 		EntityPlayerMP player = getPlayer(sender, args[0]);
 		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
@@ -76,17 +77,17 @@ public class CommandGrantSkill extends CommandBase
 			if (flag) {
 				PlayerUtils.sendTranslatedChat(player, "commands.grantskill.notify.all");
 				if (commandSender != player) {
-					PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.all", player.getCommandSenderName());
+					PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.all", player.getDisplayName());
 				}
 			} else {
-				PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.partial", player.getCommandSenderName());
+				PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.partial", player.getDisplayName());
 			}
 		} else if (args.length == 3) {
 			SkillBase skill = SkillBase.getSkillByName(args[1]);
 			if (skill == null) {
 				throw new CommandException("commands.skill.generic.unknown", args[1]);
 			}
-			int level = parseIntBounded(sender, args[2], 1, 10);
+			int level = parseInt(args[2], 1, 10);
 			int oldLevel = skills.getTrueSkillLevel(skill);
 			if (level > oldLevel) { // grants skill up to level or max level, whichever is reached first
 				if (!Config.isSkillEnabled(skill.getId())) {
@@ -94,13 +95,13 @@ public class CommandGrantSkill extends CommandBase
 				} else if (skills.grantSkill(skill.getId(), (byte) level)) {
 					PlayerUtils.sendFormattedChat(player, "commands.grantskill.notify.one", skill.getDisplayName(), skills.getTrueSkillLevel(skill));
 					if (commandSender != player) {
-						PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.one", player.getCommandSenderName(), skill.getDisplayName(), skills.getTrueSkillLevel(skill));
+						PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.one", player.getDisplayName(), skill.getDisplayName(), skills.getTrueSkillLevel(skill));
 					}
 				} else {
-					throw new CommandException("commands.grantskill.failure.player", player.getCommandSenderName(), skill.getDisplayName());
+					throw new CommandException("commands.grantskill.failure.player", player.getDisplayName(), skill.getDisplayName());
 				}
 			} else {
-				throw new CommandException("commands.grantskill.failure.low", player.getCommandSenderName(), skill.getDisplayName(), oldLevel);
+				throw new CommandException("commands.grantskill.failure.low", player.getDisplayName(), skill.getDisplayName(), oldLevel);
 			}
 		} else {
 			throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
@@ -108,7 +109,7 @@ public class CommandGrantSkill extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+	public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		switch(args.length) {
 		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
 		case 2: return getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());

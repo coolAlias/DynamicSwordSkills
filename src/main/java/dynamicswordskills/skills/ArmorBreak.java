@@ -26,8 +26,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -165,7 +165,7 @@ public class ArmorBreak extends SkillActive
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyPressed() {
-		return (DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getIsKeyPressed() || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.getIsKeyPressed()));
+		return (DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].isKeyDown() || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.isKeyDown()));
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class ArmorBreak extends SkillActive
 				if (charge == 0) {
 					// can't use the standard animation methods to prevent key/mouse input,
 					// since Armor Break will not return true for isActive
-					player.attackTime = 4; // flag for isAnimating? no player parameter
+					// TODO player.attackTime = 4; // flag for isAnimating? no player parameter
 					player.swingItem();
 					if (requiresReset) { // activated by vanilla attack key: manually unset the key state (fix for mouse event issues)
 						KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack.getKeyCode(), false);

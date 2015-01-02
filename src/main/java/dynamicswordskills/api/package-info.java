@@ -1,4 +1,5 @@
-@API(owner = "dynamicswordskills", provides = "DynamicSkillsAPI", apiVersion = "0.1")
+@API(owner = "dynamicswordskills", provides = "DynamicSkillsAPI", apiVersion = "1.8-0.1")
 package dynamicswordskills.api;
 
-import cpw.mods.fml.common.API;
+import net.minecraftforge.fml.common.API;
+

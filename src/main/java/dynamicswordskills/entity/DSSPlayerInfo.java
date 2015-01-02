@@ -36,8 +36,8 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.client.DSSKeyHandler;
@@ -540,9 +540,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			}
 		}
 		if (player.worldObj.isRemote) {
-			if (DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getIsKeyPressed() &&
-					isSkillActive(SkillBase.swordBasic) && player.getHeldItem() != null)
-			{
+			if (DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown() && isSkillActive(SkillBase.swordBasic) && player.getHeldItem() != null) {
 				Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
 			}
 		}
@@ -641,6 +639,10 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void onPlayerLoggedIn() {
 		verifyStartingGear();
+		// Send packet here, too, since client player is no longer valid when first joining the world with EntityJoinWorldEvent
+		if (player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
+		}
 	}
 
 	/**

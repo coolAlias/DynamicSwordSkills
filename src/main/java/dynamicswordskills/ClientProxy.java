@@ -19,10 +19,11 @@ package dynamicswordskills;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.client.ComboOverlay;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
@@ -31,8 +32,12 @@ import dynamicswordskills.client.RenderNothing;
 import dynamicswordskills.client.TargetingTickHandler;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
+import dynamicswordskills.item.IModItem;
+import dynamicswordskills.ref.Config;
 
-public class ClientProxy extends CommonProxy {
+public class ClientProxy extends CommonProxy
+{
+	private final Minecraft mc = Minecraft.getMinecraft();
 
 	@Override
 	public void registerRenderers() {
@@ -40,12 +45,30 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForge.EVENT_BUS.register(new DSSClientEvents());
 		FMLCommonHandler.instance().bus().register(new DSSKeyHandler());
 		FMLCommonHandler.instance().bus().register(new TargetingTickHandler());
-		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing());
-		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam());
+		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing(mc.getRenderManager()));
+		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam(mc.getRenderManager()));
+		registerItemRenderer((IModItem) DynamicSwordSkills.skillOrb);
+		if (Config.areCreativeSwordsEnabled()) {
+			for (Item item : DynamicSwordSkills.skillItems) {
+				registerItemRenderer((IModItem) item);
+			}
+		}
+		if (Config.areRandomSwordsEnabled()) {
+			registerItemRenderer((IModItem) DynamicSwordSkills.skillWood);
+			registerItemRenderer((IModItem) DynamicSwordSkills.skillStone);
+			registerItemRenderer((IModItem) DynamicSwordSkills.skillGold);
+			registerItemRenderer((IModItem) DynamicSwordSkills.skillIron);
+			registerItemRenderer((IModItem) DynamicSwordSkills.skillDiamond);
+		}
+	}
+
+	@Override
+	public void registerItemRenderer(IModItem item) {
+		item.registerRenderer(mc.getRenderItem().getItemModelMesher());
 	}
 
 	@Override
 	public EntityPlayer getPlayerEntity(MessageContext ctx) {
-		return (ctx.side.isClient() ? Minecraft.getMinecraft().thePlayer : super.getPlayerEntity(ctx));
+		return (ctx.side.isClient() ? mc.thePlayer : super.getPlayerEntity(ctx));
 	}
 }

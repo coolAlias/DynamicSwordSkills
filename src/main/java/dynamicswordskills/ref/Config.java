@@ -23,7 +23,7 @@ import java.util.Map;
 
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import dynamicswordskills.skills.SkillBase;
 
 public class Config

@@ -22,6 +22,7 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -29,6 +30,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
@@ -44,18 +48,18 @@ public class EntityLeapingBlow extends EntityThrowable
 {
 	/** Keeps track of entities already affected so they don't get attacked twice */
 	private List<Integer> affectedEntities = new ArrayList<Integer>(); 
-	
+
 	/** Base damage should be set from player's Leaping Blow skill */
 	private float damage = 2.0F;
-	
+
 	/** Base number of ticks this entity can exist */
 	private int lifespan = 12;
-	
+
 	/** Skill level of swordsman; used in many calculations */
 	private int level = 0;
-	
+
 	private static final float BASE_SIZE = 1.0F, HEIGHT = 0.5F;
-	
+
 	public EntityLeapingBlow(World world) {
 		super(world);
 		this.setSize(BASE_SIZE, HEIGHT);
@@ -66,14 +70,14 @@ public class EntityLeapingBlow extends EntityThrowable
 		this.setSize(BASE_SIZE, HEIGHT);
 		this.posY = thrower.posY + 0.2D;
 		this.motionY = 0.0D;
-		this.setThrowableHeading(motionX, motionY, motionZ, func_70182_d(), 1.0F);
+		this.setThrowableHeading(motionX, motionY, motionZ, getVelocity(), 1.0F);
 	}
 
 	public EntityLeapingBlow(World world, double x, double y, double z) {
 		super(world, x, y, z);
 		this.setSize(BASE_SIZE, HEIGHT);
 	}
-	
+
 	/**
 	 * Each level increases the distance traveled as well as the AoE
 	 */
@@ -82,7 +86,7 @@ public class EntityLeapingBlow extends EntityThrowable
 		this.lifespan += level;
 		return this;
 	}
-	
+
 	/**
 	 * Sets amount of damage that will be caused onImpact
 	 */
@@ -90,20 +94,20 @@ public class EntityLeapingBlow extends EntityThrowable
 		this.damage = amount;
 		return this;
 	}
-	
+
 	/** Max distance (squared) from thrower that damage can still be applied */
 	private double getRangeSquared() {
 		return (3.0D + level) * (3.0D + level);
 	}
-	
+
 	/** Duration of weakness effect */
 	private int getPotionDuration() {
 		return (50 + (level * 10));
 	}
-	
+
 	/** Returns area within which to search for targets each tick */
 	private AxisAlignedBB getAoE() {
-		return boundingBox.expand((0.25F * level), 0.0F, (0.25F * level));
+		return getEntityBoundingBox().expand((0.25F * level), 0.0F, (0.25F * level));
 	}
 
 	@Override
@@ -129,19 +133,21 @@ public class EntityLeapingBlow extends EntityThrowable
 				}
 			}
 		}
-		
+
 		/** Velocity x and z for spawning particles to left and right of entity */
 		double vX = motionZ;
 		double vZ = motionX;
-		
-		String particle = "crit";
-		Block block = worldObj.getBlock((int) (posX + (boundingBox.maxX - boundingBox.minX) / 2), (int) posY - 1, (int) (posZ + (boundingBox.maxZ - boundingBox.minZ) / 2));
-		if (block.getMaterial() != Material.air) {
-			particle = "blockcrack_" + Block.getIdFromBlock(block) + "_" + worldObj.getBlockMetadata((int) (posX + (boundingBox.maxX - boundingBox.minX) / 2), (int) posY - 1, (int) (posZ + (boundingBox.maxZ - boundingBox.minZ) / 2));
-		}
-		for (int i = 0; i < 4; ++i) {
-			worldObj.spawnParticle(particle, posX, posY, posZ, vX + rand.nextGaussian(), 0.01D, vZ + rand.nextGaussian());
-			worldObj.spawnParticle(particle, posX, posY, posZ, -vX + rand.nextGaussian(), 0.01D, -vZ + rand.nextGaussian());
+
+		AxisAlignedBB bb = getEntityBoundingBox();
+		int i = MathHelper.floor_double(posX + (bb.maxX - bb.minX) / 2);
+		int j = MathHelper.floor_double(posY) - 1;
+		int k = MathHelper.floor_double(posZ + (bb.maxZ - bb.minZ) / 2);
+		IBlockState state = worldObj.getBlockState(new BlockPos(i, j, k));
+		EnumParticleTypes particle = (state.getBlock().getMaterial() == Material.air ? EnumParticleTypes.CRIT : EnumParticleTypes.BLOCK_CRACK);
+		int[] stateId = new int[] {Block.getStateId(state)};
+		for (int n = 0; n < 4; ++n) {
+			worldObj.spawnParticle(particle, posX, posY, posZ, vX + rand.nextGaussian(), 0.01D, vZ + rand.nextGaussian(), stateId);
+			worldObj.spawnParticle(particle, posX, posY, posZ, -vX + rand.nextGaussian(), 0.01D, -vZ + rand.nextGaussian(), stateId);
 		}
 	}
 
@@ -160,7 +166,7 @@ public class EntityLeapingBlow extends EntityThrowable
 					}
 				}
 			} else {
-				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+				Block block = worldObj.getBlockState(mop.getBlockPos()).getBlock();
 				if (block.getMaterial().blocksMovement()) {
 					setDead();
 				}
@@ -168,9 +174,8 @@ public class EntityLeapingBlow extends EntityThrowable
 		}
 	}
 
-	/** Entity's velocity factor */
 	@Override
-	protected float func_70182_d() {
+	protected float getVelocity() {
 		return 0.5F;
 	}
 
@@ -178,7 +183,7 @@ public class EntityLeapingBlow extends EntityThrowable
 	public float getGravityVelocity() {
 		return 0.0F;
 	}
-	
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
@@ -187,7 +192,7 @@ public class EntityLeapingBlow extends EntityThrowable
 		compound.setInteger("lifespan", lifespan);
 		compound.setIntArray("affectedEntities", ArrayUtils.toPrimitive(affectedEntities.toArray(new Integer[affectedEntities.size()])));
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);

@@ -20,6 +20,9 @@ package dynamicswordskills.api;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -27,14 +30,16 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import com.google.common.collect.Multimap;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.item.IModItem;
 import dynamicswordskills.skills.SkillBase;
 
 /**
@@ -55,7 +60,7 @@ import dynamicswordskills.skills.SkillBase;
  * Easily create a new skill-providing weapon simply by extending this class.
  *
  */
-public class ItemSkillProvider extends Item implements ISkillProvider
+public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 {
 	/** The weapon's tool material determines damage and durability */
 	private final ToolMaterial material;
@@ -148,7 +153,7 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 
 	@Override
 	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.block;
+		return EnumAction.BLOCK;
 	}
 
 	@Override
@@ -158,7 +163,7 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
-		return material.func_150995_f() == stack.getItem() ? true : super.getIsRepairable(toRepair, stack);
+		return ItemStack.areItemsEqual(stack, material.getRepairItemStack()) || super.getIsRepairable(toRepair, stack);
 	}
 
 	@Override
@@ -167,8 +172,8 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	}
 
 	@Override
-	public boolean onBlockDestroyed(ItemStack stack, World world, Block block, int x, int y, int z, EntityLivingBase entity) {
-		if (block.getBlockHardness(world, x, y, z) != 0.0D) {
+	public boolean onBlockDestroyed(ItemStack stack, World world, Block block, BlockPos pos, EntityLivingBase entity) {
+		if (block.getBlockHardness(world, pos) != 0.0D) {
 			stack.damageItem(2, entity);
 		}
 		return true;
@@ -201,9 +206,16 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerRenderer(ItemModelMesher mesher) {
+		ModelBakery.addVariantName(this, "iron_sword");
+		mesher.register(this, 0, new ModelResourceLocation("iron_sword", "inventory"));
+	}
+
+	@Override
 	public Multimap getAttributeModifiers(ItemStack stack) {
 		Multimap multimap = super.getAttributeModifiers(stack);
-		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(field_111210_e, "Weapon modifier", weaponDamage, 0));
+		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(itemModifierUUID, "Weapon modifier", weaponDamage, 0));
 		return multimap;
 	}
 }

@@ -19,17 +19,26 @@ package dynamicswordskills;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.network.IGuiHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.network.IGuiHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.client.GuiSkills;
 import dynamicswordskills.inventory.ContainerSkills;
+import dynamicswordskills.item.IModItem;
 
 public class CommonProxy implements IGuiHandler
 {
 	/** Gui indices */
 	public static final int GUI_SKILLS = 0;
 
+	/**
+	 * Call during FMLInitializationEvent so that Minecraft's renderers are ready to use
+	 */
 	public void registerRenderers() {}
+
+	/**
+	 * Calls {@link IModItem#registerRenderer} for the item provided
+	 */
+	public void registerItemRenderer(IModItem item) {}
 	
 	/**
 	 * Returns a side-appropriate EntityPlayer for use during message handling

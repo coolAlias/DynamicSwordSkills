@@ -26,8 +26,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntitySwordBeam;
@@ -120,7 +120,8 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && checkHealth(player) && player.attackTime == 0 && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
+		// TODO return super.canUse(player) && checkHealth(player) && player.attackTime == 0 && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
+		return super.canUse(player) && checkHealth(player) && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
 	}
 
 	/**
@@ -160,7 +161,7 @@ public class SwordBeam extends SkillActive
 			world.spawnEntityInWorld(beam);
 		} else {
 			player.swingItem();
-			player.attackTime = (player.capabilities.isCreativeMode ? 0 : 20 - level);
+			// TODO player.attackTime = (player.capabilities.isCreativeMode ? 0 : 20 - level);
 		}
 		return true;
 	}

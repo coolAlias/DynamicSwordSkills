@@ -19,7 +19,6 @@ package dynamicswordskills.util;
 
 import java.util.Random;
 
-import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -55,7 +54,7 @@ public class PlayerUtils
 		if (player.isUsingItem()) {
 			return true;
 		} else if (DynamicSwordSkills.isBG2Enabled) {
-			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
+			// return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
 		}
 		return false;
 	}
@@ -158,7 +157,7 @@ public class PlayerUtils
 			entityitem.motionX = (-0.5F + world.rand.nextGaussian()) * f3;
 			entityitem.motionY = (4 + world.rand.nextGaussian()) * f3;
 			entityitem.motionZ = (-0.5F + world.rand.nextGaussian()) * f3;
-			entityitem.delayBeforeCanPickup = 10;
+			entityitem.setDefaultPickupDelay();
 			world.spawnEntityInWorld(entityitem);
 		}
 	}
@@ -198,7 +197,7 @@ public class PlayerUtils
 			drop.motionX += Math.cos((double) f1) * (double) f;
 			drop.motionY += (double)((entity.worldObj.rand.nextFloat() - entity.worldObj.rand.nextFloat()) * 0.1F);
 			drop.motionZ += Math.sin((double) f1) * (double) f;
-			drop.delayBeforeCanPickup = 40;
+			drop.setPickupDelay(40);
 			entity.worldObj.spawnEntityInWorld(drop);
 			entity.setCurrentItemOrArmor(0, (ItemStack) null);
 		}

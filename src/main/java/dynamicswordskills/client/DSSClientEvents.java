@@ -20,9 +20,9 @@ package dynamicswordskills.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.client.event.MouseEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
@@ -103,7 +103,8 @@ public class DSSClientEvents
 					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					event.setCanceled(true);
 				} else {
-					event.setCanceled(!skills.canInteract() || mc.thePlayer.attackTime > 0);
+					// TODO || mc.thePlayer.attackTime > 0
+					event.setCanceled(!skills.canInteract());
 				}
 			} else { // cancel mouse wheel and use key while animations are in progress
 				event.setCanceled(!skills.canInteract());

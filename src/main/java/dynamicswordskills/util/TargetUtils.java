@@ -28,8 +28,8 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 /**
@@ -69,26 +69,25 @@ public class TargetUtils
 	 * 
 	 */
 	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
-		Vec3 vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
-		Vec3 vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
-		// func_147447_a is the ray_trace method
-		MovingObjectPosition mop = world.func_147447_a(vec3, vec31, false, true, false);
-		vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
-		vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
+		Vec3 vec3 = new Vec3(entity.posX, entity.posY, entity.posZ);
+		Vec3 vec31 = new Vec3(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
+		MovingObjectPosition mop = world.rayTraceBlocks(vec3, vec31, false, true, false);
+		vec3 = new Vec3(entity.posX, entity.posY, entity.posZ);
+		vec31 = new Vec3(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
 
 		if (mop != null) {
-			vec31 = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
+			vec31 = new Vec3(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
 		}
 
 		Entity target = null;
-		List list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.boundingBox.addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
+		List list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox().addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
 		double d0 = 0.0D;
 		//double hitBox = 0.3D;
 
 		for (int i = 0; i < list.size(); ++i) {
 			Entity entity1 = (Entity) list.get(i);
 			if (entity1.canBeCollidedWith() && (entity1 != shooter || flag)) {
-				AxisAlignedBB axisalignedbb = entity1.boundingBox.expand(hitBox, hitBox, hitBox);
+				AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().expand(hitBox, hitBox, hitBox);
 				MovingObjectPosition mop1 = axisalignedbb.calculateIntercept(vec3, vec31);
 				if (mop1 != null) {
 					double d1 = vec3.distanceTo(mop1.hitVec);
@@ -163,8 +162,8 @@ public class TargetUtils
 			targetY += vec3.yCoord;
 			targetZ += vec3.zCoord;
 			distanceTraveled += vec3.lengthVector();
-			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
-					AxisAlignedBB.getBoundingBox(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius));
+			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
+			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
 				if (target != seeker && target.canBeCollidedWith() && isTargetInSight(vec3, seeker, target)) {
 					double newDistance = (closestToSeeker ? target.getDistanceSqToEntity(seeker) : target.getDistanceSq(targetX, targetY, targetZ));
@@ -199,8 +198,8 @@ public class TargetUtils
 			targetY += vec3.yCoord;
 			targetZ += vec3.zCoord;
 			distanceTraveled += vec3.lengthVector();
-			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
-					AxisAlignedBB.getBoundingBox(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius));
+			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
+			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
 				if (target != seeker && target.canBeCollidedWith() && isTargetInSight(vec3, seeker, target)) {
 					if (!targets.contains(target)) {

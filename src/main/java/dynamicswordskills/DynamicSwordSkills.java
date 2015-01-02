@@ -10,19 +10,19 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import org.apache.logging.log4j.Logger;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
 import dynamicswordskills.command.DSSCommands;
@@ -70,7 +70,7 @@ public class DynamicSwordSkills
 	public void preInit(FMLPreInitializationEvent event) {
 		logger = event.getModLog();
 		shouldLoad = !Loader.isModLoaded("zeldaswordskills");
-		isBG2Enabled = Loader.isModLoaded("battlegear2");
+		isBG2Enabled = false; // TODO when BG2 updates: Loader.isModLoaded("battlegear2");
 		if (shouldLoad) {
 			Config.init(event);
 			tabSkills = new CombatSkillsTab("dssTab");
@@ -78,26 +78,27 @@ public class DynamicSwordSkills
 			GameRegistry.registerItem(skillOrb, skillOrb.getUnlocalizedName().substring(5));
 			if (Config.areCreativeSwordsEnabled()) {
 				skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
+				Item item = null;
 				for (SkillBase skill : SkillBase.getSkills()) {
 					if (!(skill instanceof SkillActive)) {
 						continue;
 					}
 					int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
-					skillItems.add(new ItemSkillProvider(ToolMaterial.IRON, skill, (byte) level).
-							setUnlocalizedName("dss.skillitem" + skill.getId()).setCreativeTab(DynamicSwordSkills.tabSkills).setTextureName("iron_sword"));
-					GameRegistry.registerItem(skillItems.get(skillItems.size() - 1), skillItems.get(skillItems.size() - 1).getUnlocalizedName().substring(5));
+					item = new ItemSkillProvider(ToolMaterial.IRON, skill, (byte) level).setUnlocalizedName("dss.skillitem" + skill.getId()).setCreativeTab(DynamicSwordSkills.tabSkills);
+					skillItems.add(item);
+					GameRegistry.registerItem(item, item.getUnlocalizedName().substring(5));
 				}
 			}
 			if (Config.areRandomSwordsEnabled()) {
-				skillWood = new ItemRandomSkill(ToolMaterial.WOOD).setUnlocalizedName("dss.skillwood").setTextureName("wood_sword");
+				skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword").setUnlocalizedName("dss.skillwood");
 				GameRegistry.registerItem(skillWood, skillWood.getUnlocalizedName().substring(5));
-				skillStone = new ItemRandomSkill(ToolMaterial.STONE).setUnlocalizedName("dss.skillstone").setTextureName("stone_sword");
+				skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword").setUnlocalizedName("dss.skillstone");
 				GameRegistry.registerItem(skillStone, skillStone.getUnlocalizedName().substring(5));
-				skillGold = new ItemRandomSkill(ToolMaterial.GOLD).setUnlocalizedName("dss.skillgold").setTextureName("gold_sword");
+				skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword").setUnlocalizedName("dss.skillgold");
 				GameRegistry.registerItem(skillGold, skillGold.getUnlocalizedName().substring(5));
-				skillIron = new ItemRandomSkill(ToolMaterial.IRON).setUnlocalizedName("dss.skilliron").setTextureName("iron_sword");
+				skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword").setUnlocalizedName("dss.skilliron");
 				GameRegistry.registerItem(skillIron, skillIron.getUnlocalizedName().substring(5));
-				skillDiamond = new ItemRandomSkill(ToolMaterial.EMERALD).setUnlocalizedName("dss.skilldiamond").setTextureName("diamond_sword");
+				skillDiamond = new ItemRandomSkill(ToolMaterial.EMERALD, "diamond_sword").setUnlocalizedName("dss.skilldiamond");
 				GameRegistry.registerItem(skillDiamond, skillDiamond.getUnlocalizedName().substring(5));
 			}
 			EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, this, 64, 10, true);

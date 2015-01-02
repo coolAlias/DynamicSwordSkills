@@ -24,9 +24,9 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.EndComboPacket;
@@ -95,19 +95,19 @@ public class ComboOverlay extends Gui
 			if ((Minecraft.getSystemTime() - displayStartTime) < DISPLAY_TIME) {
 				if (shouldDisplay) {
 					String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
-					mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
-					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, 0xFFFFFF, true);
-					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
+					mc.fontRendererObj.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
+					mc.fontRendererObj.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, 0xFFFFFF, true);
+					mc.fontRendererObj.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
 					List<Float> damageList = combo.getDamageList();
 					for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
-						mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
+						mc.fontRendererObj.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
 					}
 				}
 				if (skills.canUseSkill(SkillBase.endingBlow)) {
 					ICombo skill = skills.getComboSkill();
 					ILockOnTarget target = skills.getTargetingSkill();
 					if (skill != null && skill.isComboInProgress() && target != null && target.getCurrentTarget() == skill.getCombo().getLastEntityHit()) {
-						mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.ending"), (event.resolution.getScaledWidth() / 2) - 15, 30, 0xFF0000, true);
+						mc.fontRendererObj.drawString(StatCollector.translateToLocal("combo.ending"), (event.resolution.getScaledWidth() / 2) - 15, 30, 0xFF0000, true);
 					}
 				}
 			}

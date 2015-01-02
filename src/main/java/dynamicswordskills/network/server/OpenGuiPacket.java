@@ -19,8 +19,8 @@ package dynamicswordskills.network.server;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.DynamicSwordSkills;
 
 public class OpenGuiPacket implements IMessage
@@ -42,7 +42,7 @@ public class OpenGuiPacket implements IMessage
 	public void toBytes(ByteBuf buffer) {
 		buffer.writeInt(id);
 	}
-	
+
 	public static class Handler extends AbstractServerMessageHandler<OpenGuiPacket> {
 		@Override
 		public IMessage handleServerMessage(EntityPlayer player, OpenGuiPacket message, MessageContext ctx) {

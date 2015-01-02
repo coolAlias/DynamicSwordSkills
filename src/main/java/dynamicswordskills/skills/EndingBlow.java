@@ -28,8 +28,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
@@ -210,8 +210,9 @@ public class EndingBlow extends SkillActive
 		if (isActive()) {
 			--activeTimer;
 			if (activeTimer == 0 && !player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
-				player.attackTime = getDuration() * 2;
-				PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
+				// TODO
+				// player.attackTime = getDuration() * 2;
+				// PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
 			}
 		}
 	}
@@ -231,8 +232,9 @@ public class EndingBlow extends SkillActive
 			} else {
 				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_HURT_FLESH, 0.3F, 0.8F);
 				if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
-					player.attackTime = getDuration();
-					PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
+					// TODO
+					// player.attackTime = getDuration();
+					// PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
 				}
 			}
 		}

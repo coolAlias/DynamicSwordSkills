@@ -27,8 +27,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.network.server.TargetIdPacket;
@@ -202,7 +202,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		double dx = player.posX - currentTarget.posX;
 		double dz = player.posZ - currentTarget.posZ;
 		double angle = Math.atan2(dz, dx) * 180 / Math.PI;
-		double pitch = Math.atan2(player.posY - (currentTarget.posY + (currentTarget.height / 2.0F)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
+		// Original code aims way too high; perhaps client posY is now the same as server (at feet of entity) ?
+		// double pitch = Math.atan2(player.posY - (currentTarget.posY + (currentTarget.height / 2.0F)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
+		double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (currentTarget.posY + (currentTarget.height / 2.0F)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
 		double distance = player.getDistanceToEntity(currentTarget);
 		float rYaw = (float)(angle - player.rotationYaw);
 		while (rYaw > 180) { rYaw -= 360; }

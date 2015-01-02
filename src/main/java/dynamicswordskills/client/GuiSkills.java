@@ -17,6 +17,7 @@
 
 package dynamicswordskills.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -137,8 +138,7 @@ public class GuiSkills extends GuiContainer
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
 		RenderHelperQ.drawTexturedRect(texture, guiLeft, guiTop, 0, 0, xSize, ySize, 284, 180);
-		// func_147046_a is drawEntityOnScreen
-		GuiInventory.func_147046_a(guiLeft + 73, guiTop + 105, 30, guiLeft + 73 - xSize_lo, guiTop + 55 - ySize_lo, mc.thePlayer);
+		GuiInventory.drawEntityOnScreen(guiLeft + 73, guiTop + 105, 30, guiLeft + 73 - xSize_lo, guiTop + 55 - ySize_lo, mc.thePlayer);
 	}
 
 	/**
@@ -182,7 +182,7 @@ public class GuiSkills extends GuiContainer
 	}
 
 	@Override
-	public void handleMouseInput() {
+	public void handleMouseInput() throws IOException {
 		super.handleMouseInput();
 		if (needsScrollBar()) {
 			int i = Mouse.getEventDWheel();
@@ -203,7 +203,8 @@ public class GuiSkills extends GuiContainer
 	}
 
 	@Override
-	protected void mouseMovedOrUp(int mouseX, int mouseY, int which) {
+	protected void mouseReleased(int mouseX, int mouseY, int state) {
+		// don't need to call super
 		Slot slot = this.getSlotAtPosition(mouseX, mouseY);
 		if (slot != null && slot.getStack() != null) {
 			int id = (slot.getStack().getItemDamage() % SkillBase.getNumSkills());
@@ -222,8 +223,7 @@ public class GuiSkills extends GuiContainer
 	private Slot getSlotAtPosition(int x, int y) {
 		for (int k = 0; k < inventorySlots.inventorySlots.size(); ++k) {
 			Slot slot = (Slot) inventorySlots.inventorySlots.get(k);
-			// func_146978_c is inPointInRegion
-			if (func_146978_c(slot.xDisplayPosition, slot.yDisplayPosition, 16, 16, x, y)) {
+			if (isPointInRegion(slot.xDisplayPosition, slot.yDisplayPosition, 16, 16, x, y)) {
 				return slot;
 			}
 		}

@@ -20,14 +20,14 @@ package dynamicswordskills.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Keyboard;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.CommonProxy;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -125,7 +125,7 @@ public class DSSKeyHandler
 			skill.getNextTarget(mc.thePlayer);
 		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
 			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK] : mc.gameSettings.keyBindAttack);
-			boolean flag = (mc.thePlayer.attackTime > 0);
+			boolean flag = true; // TODO (mc.thePlayer.attackTime > 0);
 			if (canInteract && !flag) {
 				KeyBinding.setKeyBindState(key.getKeyCode(), true);
 			} else if (!flag) {
@@ -139,7 +139,7 @@ public class DSSKeyHandler
 				}
 			}
 			// Only allow attack key to continue processing if it was set to pressed
-			if (key.getIsKeyPressed()) {
+			if (key.isKeyDown()) {
 				if (!skills.onKeyPressed(mc, key)) {
 					DSSClientEvents.performComboAttack(mc, skill);
 				}
