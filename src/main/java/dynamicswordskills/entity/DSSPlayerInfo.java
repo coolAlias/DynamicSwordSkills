@@ -31,6 +31,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
@@ -54,7 +55,13 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 {
 	private final static String EXT_PROP_NAME = "DSSPlayerInfo";
 
+	/** Maximum time the player may be prevented from taking a left-click action */
+	private final static int MAX_ATTACK_DELAY = 50;
+
 	private final EntityPlayer player;
+
+	/** Time remaining until player may perform another left-click action, such as an attack */
+	private int attackTime;
 
 	/** Stores information on the player's skills */
 	private final Map<Byte, SkillBase> skills;
@@ -94,6 +101,28 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 
 	@Override
 	public void init(Entity entity, World world) {}
+
+	/**
+	 * True if the player can perform a left-click action (i.e. the action timer is zero)
+	 */
+	public boolean canAttack() {
+		return attackTime == 0 || player.capabilities.isCreativeMode;
+	}
+
+	/**
+	 * Returns the current amount of time remaining before a left-click action may be performed
+	 */
+	public int getAttackTime() {
+		return attackTime;
+	}
+
+	/**
+	 * Sets the number of ticks remaining before another action may be performed, but
+	 * no less than the current value and no more than MAX_ATTACK_DELAY.
+	 */
+	public void setAttackTime(int ticks) {
+		this.attackTime = MathHelper.clamp_int(ticks, attackTime, MAX_ATTACK_DELAY);
+	}
 
 	/**
 	 * Removes the skill with the given name, or "all" skills
@@ -519,6 +548,9 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void onUpdate() {
 		updateISkillItem();
+		if (attackTime > 0) {
+			--attackTime;
+		}
 		if (itemSkill != null) {
 			itemSkill.onUpdate(player);
 		}

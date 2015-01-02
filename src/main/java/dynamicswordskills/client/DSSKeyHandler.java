@@ -125,10 +125,10 @@ public class DSSKeyHandler
 			skill.getNextTarget(mc.thePlayer);
 		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
 			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK] : mc.gameSettings.keyBindAttack);
-			boolean flag = true; // TODO (mc.thePlayer.attackTime > 0);
-			if (canInteract && !flag) {
+			boolean canAttack = skills.canAttack();
+			if (canInteract && canAttack) {
 				KeyBinding.setKeyBindState(key.getKeyCode(), true);
-			} else if (!flag) {
+			} else if (canAttack) {
 				// hack for Super Spin Attack, as it requires key press to be passed while animation is in progress
 				if (skills.isSkillActive(SkillBase.spinAttack)) {
 					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.thePlayer);

@@ -210,9 +210,9 @@ public class EndingBlow extends SkillActive
 		if (isActive()) {
 			--activeTimer;
 			if (activeTimer == 0 && !player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
-				// TODO
-				// player.attackTime = getDuration() * 2;
-				// PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
+				DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+				skills.setAttackTime(getDuration() * 2);
+				PacketDispatcher.sendTo(new AttackTimePacket(skills.getAttackTime()), (EntityPlayerMP) player);
 			}
 		}
 	}
@@ -232,9 +232,9 @@ public class EndingBlow extends SkillActive
 			} else {
 				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_HURT_FLESH, 0.3F, 0.8F);
 				if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
-					// TODO
-					// player.attackTime = getDuration();
-					// PacketDispatcher.sendTo(new AttackTimePacket(player.attackTime), (EntityPlayerMP) player);
+					DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+					skills.setAttackTime(getDuration());
+					PacketDispatcher.sendTo(new AttackTimePacket(skills.getAttackTime()), (EntityPlayerMP) player);
 				}
 			}
 		}

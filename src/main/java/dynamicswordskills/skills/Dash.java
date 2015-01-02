@@ -207,7 +207,7 @@ public class Dash extends SkillActive
 				if (mop != null) {
 					PacketDispatcher.sendToServer(new DashImpactPacket(player, mop));
 					// Player cannot attack directly after impacting something
-					// TODO player.attackTime = (player.capabilities.isCreativeMode ? 0 : 10 - level);
+					DSSPlayerInfo.get(player).setAttackTime(10 - level);
 					impactTime = 5;
 					if (mop.typeOfHit == MovingObjectType.ENTITY) {
 						target = mop.entityHit;

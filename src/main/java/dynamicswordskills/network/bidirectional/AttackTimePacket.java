@@ -22,6 +22,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.entity.DSSPlayerInfo;
 
 /**
  * 
@@ -51,7 +52,7 @@ public class AttackTimePacket implements IMessage
 	public static class Handler implements IMessageHandler<AttackTimePacket, IMessage> {
 		@Override
 		public IMessage onMessage(AttackTimePacket message, MessageContext ctx) {
-			// TODO DynamicSwordSkills.proxy.getPlayerEntity(ctx).attackTime = message.attackTime;
+			DSSPlayerInfo.get(DynamicSwordSkills.proxy.getPlayerEntity(ctx)).setAttackTime(message.attackTime);
 			return null;
 		}
 	}
