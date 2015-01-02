@@ -69,11 +69,12 @@ public class TargetUtils
 	 * 
 	 */
 	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
-		Vec3 vec3 = new Vec3(entity.posX, entity.posY, entity.posZ);
-		Vec3 vec31 = new Vec3(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
+		double posY = entity.posY + (entity.height / 2.0D);
+		Vec3 vec3 = new Vec3(entity.posX, posY, entity.posZ);
+		Vec3 vec31 = new Vec3(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
 		MovingObjectPosition mop = world.rayTraceBlocks(vec3, vec31, false, true, false);
-		vec3 = new Vec3(entity.posX, entity.posY, entity.posZ);
-		vec31 = new Vec3(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
+		vec3 = new Vec3(entity.posX, posY, entity.posZ);
+		vec31 = new Vec3(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
 
 		if (mop != null) {
 			vec31 = new Vec3(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
