@@ -18,6 +18,7 @@
 package dynamicswordskills.item;
 
 import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -27,6 +28,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  */
 public interface IModItem {
+
+	/**
+	 * Register any item variant names here using {@link ModelBakery#addVariantName}
+	 */
+	@SideOnly(Side.CLIENT)
+	public void registerVariants();
 
 	/**
 	 * Register all of the Item's renderers here, including for any subtypes.

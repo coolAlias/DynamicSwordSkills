@@ -40,6 +40,23 @@ public class ClientProxy extends CommonProxy
 	private final Minecraft mc = Minecraft.getMinecraft();
 
 	@Override
+	public void registerVariants() {
+		((IModItem) DynamicSwordSkills.skillOrb).registerVariants();
+		if (Config.areCreativeSwordsEnabled()) {
+			for (Item item : DynamicSwordSkills.skillItems) {
+				((IModItem) item).registerVariants();
+			}
+		}
+		if (Config.areRandomSwordsEnabled()) {
+			((IModItem) DynamicSwordSkills.skillWood).registerVariants();
+			((IModItem) DynamicSwordSkills.skillStone).registerVariants();
+			((IModItem) DynamicSwordSkills.skillIron).registerVariants();
+			((IModItem) DynamicSwordSkills.skillDiamond).registerVariants();
+			((IModItem) DynamicSwordSkills.skillGold).registerVariants();
+		}
+	}
+
+	@Override
 	public void registerRenderers() {
 		MinecraftForge.EVENT_BUS.register(new ComboOverlay());
 		MinecraftForge.EVENT_BUS.register(new DSSClientEvents());
@@ -56,9 +73,9 @@ public class ClientProxy extends CommonProxy
 		if (Config.areRandomSwordsEnabled()) {
 			registerItemRenderer((IModItem) DynamicSwordSkills.skillWood);
 			registerItemRenderer((IModItem) DynamicSwordSkills.skillStone);
-			registerItemRenderer((IModItem) DynamicSwordSkills.skillGold);
 			registerItemRenderer((IModItem) DynamicSwordSkills.skillIron);
 			registerItemRenderer((IModItem) DynamicSwordSkills.skillDiamond);
+			registerItemRenderer((IModItem) DynamicSwordSkills.skillGold);
 		}
 	}
 

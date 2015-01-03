@@ -63,7 +63,6 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		this.textureName = textureName;
 		this.maxLevel = (byte)(2 + material.getHarvestLevel());
 		setCreativeTab(null);
-		ModelBakery.addVariantName(this, textureName);
 	}
 
 	/**
@@ -112,6 +111,12 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 			}
 			list.addAll(skill.getDescription(player));
 		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerVariants() {
+		ModelBakery.addVariantName(this, textureName);
 	}
 
 	@Override

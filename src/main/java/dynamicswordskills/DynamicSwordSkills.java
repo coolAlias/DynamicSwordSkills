@@ -60,9 +60,9 @@ public class DynamicSwordSkills
 	public static Item
 	skillWood,
 	skillStone,
-	skillGold,
 	skillIron,
-	skillDiamond;
+	skillDiamond,
+	skillGold;
 
 	private boolean shouldLoad;
 
@@ -94,13 +94,14 @@ public class DynamicSwordSkills
 				GameRegistry.registerItem(skillWood, skillWood.getUnlocalizedName().substring(5));
 				skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword").setUnlocalizedName("dss.skillstone");
 				GameRegistry.registerItem(skillStone, skillStone.getUnlocalizedName().substring(5));
-				skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword").setUnlocalizedName("dss.skillgold");
-				GameRegistry.registerItem(skillGold, skillGold.getUnlocalizedName().substring(5));
 				skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword").setUnlocalizedName("dss.skilliron");
 				GameRegistry.registerItem(skillIron, skillIron.getUnlocalizedName().substring(5));
 				skillDiamond = new ItemRandomSkill(ToolMaterial.EMERALD, "diamond_sword").setUnlocalizedName("dss.skilldiamond");
 				GameRegistry.registerItem(skillDiamond, skillDiamond.getUnlocalizedName().substring(5));
+				skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword").setUnlocalizedName("dss.skillgold");
+				GameRegistry.registerItem(skillGold, skillGold.getUnlocalizedName().substring(5));
 			}
+			proxy.registerVariants();
 			EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, this, 64, 10, true);
 			EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", 1, this, 64, 10, true);
 			PacketDispatcher.initialize();

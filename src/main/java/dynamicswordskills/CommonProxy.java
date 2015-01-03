@@ -31,6 +31,12 @@ public class CommonProxy implements IGuiHandler
 	public static final int GUI_SKILLS = 0;
 
 	/**
+	 * Registers all model / texture variants for items and blocks
+	 * Call during FMLPreInitializationEvent after all Items and Blocks have been initialized
+	 */
+	public void registerVariants() {}
+
+	/**
 	 * Call during FMLInitializationEvent so that Minecraft's renderers are ready to use
 	 */
 	public void registerRenderers() {}

@@ -45,11 +45,6 @@ public class ItemSkillOrb extends Item implements IModItem
 		setMaxDamage(0);
 		setHasSubtypes(true);
 		setCreativeTab(DynamicSwordSkills.tabSkills);
-		String[] variants = new String[SkillBase.getNumSkills()];
-		for (SkillBase skill : SkillBase.getSkills()) {
-			variants[skill.getId()] = skill.getIconTexture();
-		}
-		ModelBakery.addVariantName(this, variants);
 	}
 
 	@Override
@@ -105,6 +100,16 @@ public class ItemSkillOrb extends Item implements IModItem
 				}
 			}
 		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerVariants() {
+		String[] variants = new String[SkillBase.getNumSkills()];
+		for (SkillBase skill : SkillBase.getSkills()) {
+			variants[skill.getId()] = skill.getIconTexture();
+		}
+		ModelBakery.addVariantName(this, variants);
 	}
 
 	@Override

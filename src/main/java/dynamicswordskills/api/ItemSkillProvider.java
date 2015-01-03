@@ -108,7 +108,6 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 		this.grantsBasicSkill = grantsBasicSkill;
 		setMaxDamage(this.material.getMaxUses());
 		setMaxStackSize(1);
-		ModelBakery.addVariantName(this, "iron_sword");
 	}
 
 	/**
@@ -204,6 +203,12 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 			}
 			list.addAll(skill.getDescription(player));
 		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerVariants() {
+		ModelBakery.addVariantName(this, "iron_sword");
 	}
 
 	@Override
