@@ -24,7 +24,6 @@ import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
@@ -32,9 +31,6 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import com.google.common.collect.Lists;
-
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
@@ -49,6 +45,11 @@ public class ItemSkillOrb extends Item implements IModItem
 		setMaxDamage(0);
 		setHasSubtypes(true);
 		setCreativeTab(DynamicSwordSkills.tabSkills);
+		String[] variants = new String[SkillBase.getNumSkills()];
+		for (SkillBase skill : SkillBase.getSkills()) {
+			variants[skill.getId()] = skill.getIconTexture();
+		}
+		ModelBakery.addVariantName(this, variants);
 	}
 
 	@Override
@@ -90,19 +91,6 @@ public class ItemSkillOrb extends Item implements IModItem
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderer(ItemModelMesher mesher) {
-		String[] variants = new String[SkillBase.getNumSkills()];
-		for (SkillBase skill : SkillBase.getSkills()) {
-			variants[skill.getId()] = skill.getIconTexture();
-		}
-		ModelBakery.addVariantName(this, variants);
-		for (SkillBase skill : SkillBase.getSkills()) {
-			mesher.register(this, skill.getId(), new ModelResourceLocation(skill.getIconTexture(), "inventory"));
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
 		if (SkillBase.doesSkillExist(stack.getItemDamage())) {
 			SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
@@ -116,6 +104,14 @@ public class ItemSkillOrb extends Item implements IModItem
 					list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.dss.skillorb.desc.0"));
 				}
 			}
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerRenderer(ItemModelMesher mesher) {
+		for (SkillBase skill : SkillBase.getSkills()) {
+			mesher.register(this, skill.getId(), new ModelResourceLocation(skill.getIconTexture(), "inventory"));
 		}
 	}
 }
