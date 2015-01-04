@@ -24,10 +24,10 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.Dash;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -92,7 +92,7 @@ public class DashImpactPacket implements IMessage
 					if (entityHit != null) {
 						mop = new MovingObjectPosition(entityHit);
 					} else {
-						DynamicSwordSkills.logger.warn("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
+						LogHelper.warn("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
 					}
 				}
 				dash.onImpact(player.worldObj, player, mop);

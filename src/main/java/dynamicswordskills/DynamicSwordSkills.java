@@ -20,9 +20,6 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-
-import org.apache.logging.log4j.Logger;
-
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
 import dynamicswordskills.command.DSSCommands;
@@ -35,6 +32,7 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.LogHelper;
 
 @Mod(modid = ModInfo.ID, version = ModInfo.VERSION)
 public class DynamicSwordSkills
@@ -44,8 +42,6 @@ public class DynamicSwordSkills
 
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
 	public static CommonProxy proxy;
-
-	public static Logger logger;
 
 	/** Whether Battlegear2 mod is loaded */
 	public static boolean isBG2Enabled;
@@ -68,7 +64,7 @@ public class DynamicSwordSkills
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		logger = event.getModLog();
+		LogHelper.init(event);
 		shouldLoad = !Loader.isModLoaded("zeldaswordskills");
 		isBG2Enabled = false; // TODO when BG2 updates: Loader.isModLoaded("battlegear2");
 		if (shouldLoad) {

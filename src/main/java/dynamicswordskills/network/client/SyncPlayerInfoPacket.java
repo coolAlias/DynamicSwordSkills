@@ -23,8 +23,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -70,12 +70,12 @@ public class SyncPlayerInfoPacket implements IMessage
 		@Override
 		public IMessage handleClientMessage(EntityPlayer player, SyncPlayerInfoPacket message, MessageContext ctx) {
 			if (player == null) {
-				DynamicSwordSkills.logger.warn("Player was NULL while trying to handle SyncPlayerInfo Packet!");
+				LogHelper.warn("Player was NULL while trying to handle SyncPlayerInfo Packet!");
 				return null;
 			}
 			DSSPlayerInfo info = DSSPlayerInfo.get(player);
 			if (info == null) {
-				DynamicSwordSkills.logger.warn("Player's extended properties were NULL while trying to handle SyncPlayerInfo Packet!");
+				LogHelper.warn("Player's extended properties were NULL while trying to handle SyncPlayerInfo Packet!");
 			} else {
 				info.loadNBTData(message.compound);
 				if (message.validate) {
