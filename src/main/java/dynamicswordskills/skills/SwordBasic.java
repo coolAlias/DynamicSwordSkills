@@ -202,8 +202,6 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		double dx = player.posX - currentTarget.posX;
 		double dz = player.posZ - currentTarget.posZ;
 		double angle = Math.atan2(dz, dx) * 180 / Math.PI;
-		// Original code aims way too high; perhaps client posY is now the same as server (at feet of entity) ?
-		// double pitch = Math.atan2(player.posY - (currentTarget.posY + (currentTarget.height / 2.0F)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
 		double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (currentTarget.posY + (currentTarget.height / 2.0F)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
 		double distance = player.getDistanceToEntity(currentTarget);
 		float rYaw = (float)(angle - player.rotationYaw);
