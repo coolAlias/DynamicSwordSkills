@@ -80,7 +80,7 @@ public class Combo
 
 	/**
 	 * Constructs a new Combo with specified max combo size and time limit and sends an update
-	 * packet to the player with the new Combo instance.
+	 * packet to the client player with the new Combo instance.
 	 * @param maxComboSize size at which the combo self-terminates
 	 * @param timeLimit damage of time allowed between strikes before combo self-terminates
 	 * @param xpType the Attribute that receives xp gained from combo
@@ -89,7 +89,9 @@ public class Combo
 		this.skillId = skill.getId();
 		this.maxComboSize = maxComboSize;
 		this.timeLimit = timeLimit;
-		PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
+		if (player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
+		}
 	}
 
 	/**
@@ -160,7 +162,9 @@ public class Combo
 			}
 			damageList.add(damage);
 			comboDamage += damage;
-			PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
+			if (player instanceof EntityPlayerMP) {
+				PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
+			}
 			if (getSize() == maxComboSize) {
 				endCombo(player);
 			} else {
@@ -180,7 +184,9 @@ public class Combo
 			if (getSize() == 0) {
 				comboTimer = timeLimit;
 			}
-			PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
+			if (player instanceof EntityPlayerMP) {
+				PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
+			}
 		}
 	}
 
@@ -192,7 +198,7 @@ public class Combo
 			isFinished = true;
 			lastEntityHit = null;
 			consecutiveHits = 0;
-			if (!player.worldObj.isRemote) {
+			if (player instanceof EntityPlayerMP) {
 				PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 			}
 		}
