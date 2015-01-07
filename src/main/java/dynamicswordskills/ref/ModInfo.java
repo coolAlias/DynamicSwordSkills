@@ -20,7 +20,7 @@ package dynamicswordskills.ref;
 public class ModInfo {
 	public static final String ID = "dynamicswordskills";
 	public static final String NAME = "Dynamic Sword Skills";
-	public static final String VERSION = "1.8-beta-0.1";
+	public static final String VERSION = "1.8-beta-0.2";
 	public static final String CHANNEL = "dsschannel";
 	public static final String CLIENT_PROXY = ID + ".ClientProxy";
 	public static final String COMMON_PROXY = ID + ".CommonProxy";
