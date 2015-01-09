@@ -45,7 +45,7 @@ public class RefreshSpinPacket implements IMessage
 
 	public static class Handler extends AbstractServerMessageHandler<RefreshSpinPacket> {
 		@Override
-		public IMessage handleServerMessage(EntityPlayer player, RefreshSpinPacket message, MessageContext ctx) {
+		public IMessage handleServerMessage(EntityPlayer player, RefreshSpinPacket msg, MessageContext ctx) {
 			SkillActive skill = DSSPlayerInfo.get(player).getActiveSkill(SkillBase.spinAttack);
 			if (skill instanceof SpinAttack && skill.isActive()) {
 				((SpinAttack) skill).refreshServerSpin(player);

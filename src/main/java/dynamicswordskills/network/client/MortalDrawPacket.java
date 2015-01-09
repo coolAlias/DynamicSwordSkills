@@ -41,7 +41,7 @@ public class MortalDrawPacket implements IMessage {
 
 	public static class Handler extends AbstractClientMessageHandler<MortalDrawPacket> {
 		@Override
-		public IMessage handleClientMessage(EntityPlayer player, MortalDrawPacket message, MessageContext ctx) {
+		public IMessage handleClientMessage(EntityPlayer player, MortalDrawPacket msg, MessageContext ctx) {
 			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 			if (skills.hasSkill(SkillBase.mortalDraw)) {
 				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);

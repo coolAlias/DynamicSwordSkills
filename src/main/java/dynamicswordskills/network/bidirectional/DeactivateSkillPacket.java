@@ -55,14 +55,14 @@ public class DeactivateSkillPacket implements IMessage
 
 	public static class Handler implements IMessageHandler<DeactivateSkillPacket, IMessage> {
 		@Override
-		public IMessage onMessage(DeactivateSkillPacket message, MessageContext ctx) {
+		public IMessage onMessage(DeactivateSkillPacket msg, MessageContext ctx) {
 			EntityPlayer player = DynamicSwordSkills.proxy.getPlayerEntity(ctx);
 			if (DSSPlayerInfo.get(player) != null) {
-				SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(message.skillId);
+				SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(msg.skillId);
 				if (skill instanceof SkillActive) {
 					((SkillActive) skill).deactivate(player);
 				} else {
-					LogHelper.warn("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + message.skillId + " was not valid for this player.");
+					LogHelper.warn("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + msg.skillId + " was not valid for this player.");
 				}
 			}
 			return null;

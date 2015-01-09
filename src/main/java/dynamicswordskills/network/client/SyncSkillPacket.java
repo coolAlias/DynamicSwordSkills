@@ -65,8 +65,8 @@ public class SyncSkillPacket implements IMessage
 
 	public static class Handler extends AbstractClientMessageHandler<SyncSkillPacket> {
 		@Override
-		public IMessage handleClientMessage(EntityPlayer player, SyncSkillPacket message, MessageContext ctx) {
-			DSSPlayerInfo.get(player).syncClientSideSkill(message.id, message.compound);
+		public IMessage handleClientMessage(EntityPlayer player, SyncSkillPacket msg, MessageContext ctx) {
+			DSSPlayerInfo.get(player).syncClientSideSkill(msg.id, msg.compound);
 			return null;
 		}
 	}

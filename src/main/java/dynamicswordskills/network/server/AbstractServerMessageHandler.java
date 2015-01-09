@@ -29,7 +29,7 @@ import dynamicswordskills.network.AbstractMessageHandler;
  * 
  */
 public abstract class AbstractServerMessageHandler<T extends IMessage> extends AbstractMessageHandler<T> {
-	public final IMessage handleClientMessage(EntityPlayer player, T message, MessageContext ctx) {
+	public final IMessage handleClientMessage(EntityPlayer player, T msg, MessageContext ctx) {
 		return null;
 	}
 }

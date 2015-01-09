@@ -56,8 +56,8 @@ public class UpdateComboPacket implements IMessage
 
 	public static class Handler extends AbstractClientMessageHandler<UpdateComboPacket> {
 		@Override
-		public IMessage handleClientMessage(EntityPlayer player, UpdateComboPacket message, MessageContext ctx) {
-			Combo combo = Combo.readFromNBT(message.compound);
+		public IMessage handleClientMessage(EntityPlayer player, UpdateComboPacket msg, MessageContext ctx) {
+			Combo combo = Combo.readFromNBT(msg.compound);
 			try {
 				ICombo skill = (ICombo) DSSPlayerInfo.get(player).getPlayerSkill(combo.getSkill());
 				if (skill != null) {

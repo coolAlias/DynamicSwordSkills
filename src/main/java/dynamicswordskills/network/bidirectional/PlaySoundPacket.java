@@ -88,14 +88,14 @@ public class PlaySoundPacket implements IMessage
 
 	public static class Handler extends AbstractBiMessageHandler<PlaySoundPacket> {
 		@Override
-		public IMessage handleClientMessage(EntityPlayer player, PlaySoundPacket message, MessageContext ctx) {
-			player.playSound(message.sound, message.volume, message.pitch);
+		public IMessage handleClientMessage(EntityPlayer player, PlaySoundPacket msg, MessageContext ctx) {
+			player.playSound(msg.sound, msg.volume, msg.pitch);
 			return null;
 		}
 
 		@Override
-		public IMessage handleServerMessage(EntityPlayer player, PlaySoundPacket message, MessageContext ctx) {
-			player.worldObj.playSoundEffect(message.x, message.y, message.z, message.sound, message.volume, message.pitch);
+		public IMessage handleServerMessage(EntityPlayer player, PlaySoundPacket msg, MessageContext ctx) {
+			player.worldObj.playSoundEffect(msg.x, msg.y, msg.z, msg.sound, msg.volume, msg.pitch);
 			return null;
 		}
 	}

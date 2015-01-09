@@ -24,6 +24,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -48,10 +49,15 @@ public abstract class AbstractMessageHandler<T extends IMessage> implements IMes
 
 	@Override
 	public IMessage onMessage(T message, MessageContext ctx) {
+		EntityPlayer player = DynamicSwordSkills.proxy.getPlayerEntity(ctx);
+		if (player == null) {
+			LogHelper.error("Unable to process " + message.getClass().getSimpleName() + " on " + ctx.side.name() + ": player was NULL");
+			return null;
+		}
 		if (ctx.side.isClient()) {
-			return handleClientMessage(DynamicSwordSkills.proxy.getPlayerEntity(ctx), message, ctx);
+			return handleClientMessage(player, message, ctx);
 		} else {
-			return handleServerMessage(DynamicSwordSkills.proxy.getPlayerEntity(ctx), message, ctx);
+			return handleServerMessage(player, message, ctx);
 		}
 	}
 }

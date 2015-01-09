@@ -65,13 +65,13 @@ public class ActivateSkillPacket implements IMessage
 
 	public static class Handler implements IMessageHandler<ActivateSkillPacket, IMessage> {
 		@Override
-		public IMessage onMessage(ActivateSkillPacket message, MessageContext ctx) {
+		public IMessage onMessage(ActivateSkillPacket msg, MessageContext ctx) {
 			EntityPlayer player = DynamicSwordSkills.proxy.getPlayerEntity(ctx);
 			if (DSSPlayerInfo.get(player) != null) {
-				if (message.wasTriggered) {
-					DSSPlayerInfo.get(player).triggerSkill(player.worldObj, message.skillId);
+				if (msg.wasTriggered) {
+					DSSPlayerInfo.get(player).triggerSkill(player.worldObj, msg.skillId);
 				} else {
-					DSSPlayerInfo.get(player).activateSkill(player.worldObj, message.skillId);
+					DSSPlayerInfo.get(player).activateSkill(player.worldObj, msg.skillId);
 				}
 			}
 			return null;

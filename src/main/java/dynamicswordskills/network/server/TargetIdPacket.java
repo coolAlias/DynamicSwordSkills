@@ -84,16 +84,16 @@ public class TargetIdPacket implements IMessage
 
 	public static class Handler extends AbstractServerMessageHandler<TargetIdPacket> {
 		@Override
-		public IMessage handleServerMessage(EntityPlayer player, TargetIdPacket message, MessageContext ctx) {
+		public IMessage handleServerMessage(EntityPlayer player, TargetIdPacket msg, MessageContext ctx) {
 			ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
 			if (skill != null) {
-				if (message.isNull) {
+				if (msg.isNull) {
 					skill.setCurrentTarget(null);
 				} else {
-					Entity entity = player.worldObj.getEntityByID(message.entityId);
+					Entity entity = player.worldObj.getEntityByID(msg.entityId);
 					skill.setCurrentTarget(entity);
 					if (entity == null) { // For some reason the target id is sometimes incorrect or out of date
-						LogHelper.warn("Invalid target; entity with id " + message.entityId + " is null");
+						LogHelper.warn("Invalid target; entity with id " + msg.entityId + " is null");
 					}
 				}
 			}

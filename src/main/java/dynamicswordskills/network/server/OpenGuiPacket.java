@@ -45,8 +45,8 @@ public class OpenGuiPacket implements IMessage
 
 	public static class Handler extends AbstractServerMessageHandler<OpenGuiPacket> {
 		@Override
-		public IMessage handleServerMessage(EntityPlayer player, OpenGuiPacket message, MessageContext ctx) {
-			player.openGui(DynamicSwordSkills.instance, message.id, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
+		public IMessage handleServerMessage(EntityPlayer player, OpenGuiPacket msg, MessageContext ctx) {
+			player.openGui(DynamicSwordSkills.instance, msg.id, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
 			return null;
 		}
 	}

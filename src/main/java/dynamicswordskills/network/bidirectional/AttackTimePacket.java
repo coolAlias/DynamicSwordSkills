@@ -51,8 +51,8 @@ public class AttackTimePacket implements IMessage
 
 	public static class Handler implements IMessageHandler<AttackTimePacket, IMessage> {
 		@Override
-		public IMessage onMessage(AttackTimePacket message, MessageContext ctx) {
-			DSSPlayerInfo.get(DynamicSwordSkills.proxy.getPlayerEntity(ctx)).setAttackTime(message.attackTime);
+		public IMessage onMessage(AttackTimePacket msg, MessageContext ctx) {
+			DSSPlayerInfo.get(DynamicSwordSkills.proxy.getPlayerEntity(ctx)).setAttackTime(msg.attackTime);
 			return null;
 		}
 	}

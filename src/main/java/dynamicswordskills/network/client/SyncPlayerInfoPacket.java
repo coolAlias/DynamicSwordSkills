@@ -68,17 +68,13 @@ public class SyncPlayerInfoPacket implements IMessage
 
 	public static class Handler extends AbstractClientMessageHandler<SyncPlayerInfoPacket> {
 		@Override
-		public IMessage handleClientMessage(EntityPlayer player, SyncPlayerInfoPacket message, MessageContext ctx) {
-			if (player == null) {
-				LogHelper.warn("Player was NULL while trying to handle SyncPlayerInfo Packet!");
-				return null;
-			}
+		public IMessage handleClientMessage(EntityPlayer player, SyncPlayerInfoPacket msg, MessageContext ctx) {
 			DSSPlayerInfo info = DSSPlayerInfo.get(player);
 			if (info == null) {
 				LogHelper.warn("Player's extended properties were NULL while trying to handle SyncPlayerInfo Packet!");
 			} else {
-				info.loadNBTData(message.compound);
-				if (message.validate) {
+				info.loadNBTData(msg.compound);
+				if (msg.validate) {
 					info.validateSkills();
 				}
 			}
