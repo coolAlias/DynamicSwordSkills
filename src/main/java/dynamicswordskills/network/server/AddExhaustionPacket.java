@@ -49,7 +49,7 @@ public class AddExhaustionPacket implements IMessage
 
 	public static class Handler extends AbstractServerMessageHandler<AddExhaustionPacket> {
 		@Override
-		public IMessage handleServerMessage(EntityPlayer player, AddExhaustionPacket msg, MessageContext ctx) {
+		protected IMessage handleServerMessage(EntityPlayer player, AddExhaustionPacket msg, MessageContext ctx) {
 			player.addExhaustion(msg.amount);
 			return null;
 		}

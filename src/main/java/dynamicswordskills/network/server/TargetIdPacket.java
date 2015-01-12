@@ -84,7 +84,7 @@ public class TargetIdPacket implements IMessage
 
 	public static class Handler extends AbstractServerMessageHandler<TargetIdPacket> {
 		@Override
-		public IMessage handleServerMessage(EntityPlayer player, TargetIdPacket msg, MessageContext ctx) {
+		protected IMessage handleServerMessage(EntityPlayer player, TargetIdPacket msg, MessageContext ctx) {
 			ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
 			if (skill != null) {
 				if (msg.isNull) {

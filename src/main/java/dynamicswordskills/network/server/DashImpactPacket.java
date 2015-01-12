@@ -83,7 +83,7 @@ public class DashImpactPacket implements IMessage
 
 	public static class Handler extends AbstractServerMessageHandler<DashImpactPacket> {
 		@Override
-		public IMessage handleServerMessage(EntityPlayer player, DashImpactPacket msg, MessageContext ctx) {
+		protected IMessage handleServerMessage(EntityPlayer player, DashImpactPacket msg, MessageContext ctx) {
 			Dash dash = (Dash) DSSPlayerInfo.get(player).getActiveSkill(SkillBase.dash);
 			if (dash != null && dash.isActive()) {
 				MovingObjectPosition mop = null;

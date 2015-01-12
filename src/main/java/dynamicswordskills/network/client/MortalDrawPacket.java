@@ -29,8 +29,8 @@ import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillBase;
 
-public class MortalDrawPacket implements IMessage {
-
+public class MortalDrawPacket implements IMessage
+{
 	public MortalDrawPacket() {}
 
 	@Override
@@ -41,7 +41,7 @@ public class MortalDrawPacket implements IMessage {
 
 	public static class Handler extends AbstractClientMessageHandler<MortalDrawPacket> {
 		@Override
-		public IMessage handleClientMessage(EntityPlayer player, MortalDrawPacket msg, MessageContext ctx) {
+		protected IMessage handleClientMessage(EntityPlayer player, MortalDrawPacket msg, MessageContext ctx) {
 			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 			if (skills.hasSkill(SkillBase.mortalDraw)) {
 				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);

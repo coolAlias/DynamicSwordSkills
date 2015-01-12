@@ -55,7 +55,7 @@ public class EndComboPacket implements IMessage
 
 	public static class Handler extends AbstractServerMessageHandler<EndComboPacket> {
 		@Override
-		public IMessage handleServerMessage(EntityPlayer player, EndComboPacket msg, MessageContext ctx) {
+		protected IMessage handleServerMessage(EntityPlayer player, EndComboPacket msg, MessageContext ctx) {
 			if (SkillBase.getSkill(msg.id) instanceof ICombo) {
 				ICombo skill = (ICombo) DSSPlayerInfo.get(player).getPlayerSkill(msg.id);
 				if (skill != null) {
