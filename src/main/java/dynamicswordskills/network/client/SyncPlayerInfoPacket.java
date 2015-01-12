@@ -24,7 +24,6 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -68,15 +67,11 @@ public class SyncPlayerInfoPacket implements IMessage
 
 	public static class Handler extends AbstractClientMessageHandler<SyncPlayerInfoPacket> {
 		@Override
-		public IMessage handleClientMessage(EntityPlayer player, SyncPlayerInfoPacket msg, MessageContext ctx) {
+		protected IMessage handleClientMessage(EntityPlayer player, SyncPlayerInfoPacket msg, MessageContext ctx) {
 			DSSPlayerInfo info = DSSPlayerInfo.get(player);
-			if (info == null) {
-				LogHelper.warn("Player's extended properties were NULL while trying to handle SyncPlayerInfo Packet!");
-			} else {
-				info.loadNBTData(msg.compound);
-				if (msg.validate) {
-					info.validateSkills();
-				}
+			info.loadNBTData(msg.compound);
+			if (msg.validate) {
+				info.validateSkills();
 			}
 			return null;
 		}

@@ -670,10 +670,8 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * Call when the player logs in for the first time
 	 */
 	public void onPlayerLoggedIn() {
-		verifyStartingGear();
-		// Send packet here, too, since client player is no longer valid when first joining the world with EntityJoinWorldEvent
-		if (player instanceof EntityPlayerMP) {
-			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
+		if (!player.worldObj.isRemote) {
+			verifyStartingGear();
 		}
 	}
 

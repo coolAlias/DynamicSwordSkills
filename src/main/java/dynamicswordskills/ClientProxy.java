@@ -20,6 +20,7 @@ package dynamicswordskills;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.util.IThreadListener;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -82,6 +83,11 @@ public class ClientProxy extends CommonProxy
 	@Override
 	public void registerItemRenderer(IModItem item) {
 		item.registerRenderer(mc.getRenderItem().getItemModelMesher());
+	}
+
+	@Override
+	public IThreadListener getThreadFromContext(MessageContext ctx) {
+		return (ctx.side.isClient() ? mc : super.getThreadFromContext(ctx));
 	}
 
 	@Override

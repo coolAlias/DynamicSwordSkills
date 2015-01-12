@@ -18,13 +18,13 @@
 package dynamicswordskills.network;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.IThreadListener;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -35,29 +35,54 @@ import dynamicswordskills.util.LogHelper;
 public abstract class AbstractMessageHandler<T extends IMessage> implements IMessageHandler <T, IMessage>
 {
 	/**
+	 * Allows reply message to be set during thread-checking
+	 * (but handler classes are declared as static inner classes - sounds like trouble...)
+	 */
+	private IMessage reply;
+
+	/**
 	 * Handle a message received on the client side
 	 * @return a message to send back to the Server, or null if no reply is necessary
 	 */
 	@SideOnly(Side.CLIENT)
-	public abstract IMessage handleClientMessage(EntityPlayer player, T message, MessageContext ctx);
+	protected abstract IMessage handleClientMessage(EntityPlayer player, T msg, MessageContext ctx);
 
 	/**
 	 * Handle a message received on the server side
 	 * @return a message to send back to the Client, or null if no reply is necessary
 	 */
-	public abstract IMessage handleServerMessage(EntityPlayer player, T message, MessageContext ctx);
+	protected abstract IMessage handleServerMessage(EntityPlayer player, T msg, MessageContext ctx);
 
 	@Override
-	public IMessage onMessage(T message, MessageContext ctx) {
+	public final IMessage onMessage(T msg, MessageContext ctx) {
+		return checkThreadAndEnqueue(msg, this, ctx);
+	}
+
+	/**
+	 * Passes the handling off to handleClientMessage or handleServerMessage, depending on side
+	 */
+	private final IMessage processMessage(T msg, MessageContext ctx) {
 		EntityPlayer player = DynamicSwordSkills.proxy.getPlayerEntity(ctx);
-		if (player == null) {
-			LogHelper.error("Unable to process " + message.getClass().getSimpleName() + " on " + ctx.side.name() + ": player was NULL");
-			return null;
-		}
 		if (ctx.side.isClient()) {
-			return handleClientMessage(player, message, ctx);
+			return handleClientMessage(player, msg, ctx);
 		} else {
-			return handleServerMessage(player, message, ctx);
+			return handleServerMessage(player, msg, ctx);
 		}
+	}
+
+	/**
+	 * Ensures that the message is being handled on the main thread
+	 * @return Optional reply message - see {@link IMessageHandler#onMessage}
+	 */
+	private static final IMessage checkThreadAndEnqueue(final IMessage msg, final AbstractMessageHandler handler, final MessageContext ctx) {
+		IThreadListener thread = DynamicSwordSkills.proxy.getThreadFromContext(ctx);
+		if (!thread.isCallingFromMinecraftThread()) {
+			thread.addScheduledTask(new Runnable() {
+				public void run() {
+					handler.reply = handler.processMessage(msg, ctx);
+				}
+			});
+		}
+		return handler.reply;
 	}
 }

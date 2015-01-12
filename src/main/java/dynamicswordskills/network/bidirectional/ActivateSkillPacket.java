@@ -20,9 +20,7 @@ package dynamicswordskills.network.bidirectional;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.SkillBase;
 
@@ -63,16 +61,13 @@ public class ActivateSkillPacket implements IMessage
 		buffer.writeByte(skillId);
 	}
 
-	public static class Handler implements IMessageHandler<ActivateSkillPacket, IMessage> {
+	public static class Handler extends AbstractBiMessageHandler<ActivateSkillPacket> {
 		@Override
-		public IMessage onMessage(ActivateSkillPacket msg, MessageContext ctx) {
-			EntityPlayer player = DynamicSwordSkills.proxy.getPlayerEntity(ctx);
-			if (DSSPlayerInfo.get(player) != null) {
-				if (msg.wasTriggered) {
-					DSSPlayerInfo.get(player).triggerSkill(player.worldObj, msg.skillId);
-				} else {
-					DSSPlayerInfo.get(player).activateSkill(player.worldObj, msg.skillId);
-				}
+		protected IMessage handleMessage(EntityPlayer player, ActivateSkillPacket msg, MessageContext ctx) {
+			if (msg.wasTriggered) {
+				DSSPlayerInfo.get(player).triggerSkill(player.worldObj, msg.skillId);
+			} else {
+				DSSPlayerInfo.get(player).activateSkill(player.worldObj, msg.skillId);
 			}
 			return null;
 		}

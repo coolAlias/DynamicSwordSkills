@@ -20,9 +20,7 @@ package dynamicswordskills.network.bidirectional;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
@@ -53,17 +51,14 @@ public class DeactivateSkillPacket implements IMessage
 		buffer.writeByte(skillId);
 	}
 
-	public static class Handler implements IMessageHandler<DeactivateSkillPacket, IMessage> {
+	public static class Handler extends AbstractBiMessageHandler<DeactivateSkillPacket> {
 		@Override
-		public IMessage onMessage(DeactivateSkillPacket msg, MessageContext ctx) {
-			EntityPlayer player = DynamicSwordSkills.proxy.getPlayerEntity(ctx);
-			if (DSSPlayerInfo.get(player) != null) {
-				SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(msg.skillId);
-				if (skill instanceof SkillActive) {
-					((SkillActive) skill).deactivate(player);
-				} else {
-					LogHelper.warn("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + msg.skillId + " was not valid for this player.");
-				}
+		protected IMessage handleMessage(EntityPlayer player, DeactivateSkillPacket msg, MessageContext ctx) {
+			SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(msg.skillId);
+			if (skill instanceof SkillActive) {
+				((SkillActive) skill).deactivate(player);
+			} else {
+				LogHelper.warn("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + msg.skillId + " was not valid for this player.");
 			}
 			return null;
 		}
