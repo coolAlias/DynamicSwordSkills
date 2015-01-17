@@ -17,20 +17,21 @@
 
 package dynamicswordskills.network.client;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage;
 
 /**
  * 
  * Synchronizes all PlayerInfo data on the client
  *
  */
-public class SyncPlayerInfoPacket implements IMessage
+public class SyncPlayerInfoPacket extends AbstractMessage
 {
 	/** NBTTagCompound used to store and transfer the Player's Info */
 	private NBTTagCompound compound;
@@ -54,26 +55,28 @@ public class SyncPlayerInfoPacket implements IMessage
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buffer) {
-		compound = ByteBufUtils.readTag(buffer);
+	protected void read(PacketBuffer buffer) throws IOException {
+		compound = buffer.readNBTTagCompoundFromBuffer();
 		validate = buffer.readBoolean();
 	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {
-		ByteBufUtils.writeTag(buffer, compound);
+	protected void write(PacketBuffer buffer) throws IOException {
+		buffer.writeNBTTagCompoundToBuffer(compound);
 		buffer.writeBoolean(validate);
 	}
 
-	public static class Handler extends AbstractClientMessageHandler<SyncPlayerInfoPacket> {
-		@Override
-		protected IMessage handleClientMessage(EntityPlayer player, SyncPlayerInfoPacket msg, MessageContext ctx) {
-			DSSPlayerInfo info = DSSPlayerInfo.get(player);
-			info.loadNBTData(msg.compound);
-			if (msg.validate) {
-				info.validateSkills();
-			}
-			return null;
+	@Override
+	protected boolean isValidOnSide(Side side) {
+		return side.isClient();
+	}
+
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		DSSPlayerInfo info = DSSPlayerInfo.get(player);
+		info.loadNBTData(compound);
+		if (validate) {
+			info.validateSkills();
 		}
 	}
 }

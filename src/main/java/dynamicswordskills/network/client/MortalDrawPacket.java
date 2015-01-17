@@ -17,40 +17,54 @@
 
 package dynamicswordskills.network.client;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillBase;
 
-public class MortalDrawPacket implements IMessage
+public class MortalDrawPacket extends AbstractMessage
 {
+	private int swordSlot;
+
 	public MortalDrawPacket() {}
 
-	@Override
-	public void fromBytes(ByteBuf buffer) {}
+	public MortalDrawPacket(int swordSlot) {
+		this.swordSlot = swordSlot;
+	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {}
+	protected void read(PacketBuffer buffer) throws IOException {
+		swordSlot = buffer.readInt();
+	}
 
-	public static class Handler extends AbstractClientMessageHandler<MortalDrawPacket> {
-		@Override
-		protected IMessage handleClientMessage(EntityPlayer player, MortalDrawPacket msg, MessageContext ctx) {
-			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-			if (skills.hasSkill(SkillBase.mortalDraw)) {
-				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
-				ILockOnTarget skill = skills.getTargetingSkill();
-				if (skill instanceof ICombo) {
-					DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), skill);
-				}
+	@Override
+	protected void write(PacketBuffer buffer) throws IOException {
+		buffer.writeInt(swordSlot);
+	}
+
+	@Override
+	protected boolean isValidOnSide(Side side) {
+		return side.isClient();
+	}
+
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+		if (skills.hasSkill(SkillBase.mortalDraw)) {
+			((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
+			ILockOnTarget skill = skills.getTargetingSkill();
+			if (skill instanceof ICombo) {
+				DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), skill);
 			}
-			return null;
 		}
 	}
 }

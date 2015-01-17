@@ -17,11 +17,13 @@
 
 package dynamicswordskills.network.server;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.skills.SpinAttack;
@@ -33,24 +35,26 @@ import dynamicswordskills.skills.SpinAttack;
  * It does not require any data to be sent other than the packet itself.
  *
  */
-public class RefreshSpinPacket implements IMessage
+public class RefreshSpinPacket extends AbstractMessage
 {
 	public RefreshSpinPacket() {}
 
 	@Override
-	public void fromBytes(ByteBuf buf) {}
+	protected void read(PacketBuffer buffer) throws IOException {}
 
 	@Override
-	public void toBytes(ByteBuf buf) {}
+	protected void write(PacketBuffer buffer) throws IOException {}
 
-	public static class Handler extends AbstractServerMessageHandler<RefreshSpinPacket> {
-		@Override
-		protected IMessage handleServerMessage(EntityPlayer player, RefreshSpinPacket msg, MessageContext ctx) {
-			SkillActive skill = DSSPlayerInfo.get(player).getActiveSkill(SkillBase.spinAttack);
-			if (skill instanceof SpinAttack && skill.isActive()) {
-				((SpinAttack) skill).refreshServerSpin(player);
-			}
-			return null;
+	@Override
+	protected boolean isValidOnSide(Side side) {
+		return side.isServer();
+	}
+
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		SkillActive skill = DSSPlayerInfo.get(player).getActiveSkill(SkillBase.spinAttack);
+		if (skill instanceof SpinAttack && skill.isActive()) {
+			((SpinAttack) skill).refreshServerSpin(player);
 		}
 	}
 }

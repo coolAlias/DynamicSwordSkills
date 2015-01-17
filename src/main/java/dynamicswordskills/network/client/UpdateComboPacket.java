@@ -17,13 +17,14 @@
 
 package dynamicswordskills.network.client;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.Combo;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.util.LogHelper;
@@ -33,7 +34,7 @@ import dynamicswordskills.util.LogHelper;
  * Packet responsible for keeping attack Combos synchronized between server and client.
  *
  */
-public class UpdateComboPacket implements IMessage
+public class UpdateComboPacket extends AbstractMessage
 {
 	/** Stores data of combo to be updated */
 	private NBTTagCompound compound;
@@ -45,29 +46,31 @@ public class UpdateComboPacket implements IMessage
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buffer) {
-		compound = ByteBufUtils.readTag(buffer);
+	protected void read(PacketBuffer buffer) throws IOException {
+		compound = buffer.readNBTTagCompoundFromBuffer();
 	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {
-		ByteBufUtils.writeTag(buffer, compound);
+	protected void write(PacketBuffer buffer) throws IOException {
+		buffer.writeNBTTagCompoundToBuffer(compound);
 	}
 
-	public static class Handler extends AbstractClientMessageHandler<UpdateComboPacket> {
-		@Override
-		protected IMessage handleClientMessage(EntityPlayer player, UpdateComboPacket msg, MessageContext ctx) {
-			Combo combo = Combo.readFromNBT(msg.compound);
-			try {
-				ICombo skill = (ICombo) DSSPlayerInfo.get(player).getPlayerSkill(combo.getSkill());
-				if (skill != null) {
-					combo.getEntityFromWorld(player.worldObj);
-					skill.setCombo(combo);
-				}
-			} catch (ClassCastException e) {
-				LogHelper.error("Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
+	@Override
+	protected boolean isValidOnSide(Side side) {
+		return side.isClient();
+	}
+
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		Combo combo = Combo.readFromNBT(compound);
+		try {
+			ICombo skill = (ICombo) DSSPlayerInfo.get(player).getPlayerSkill(combo.getSkill());
+			if (skill != null) {
+				combo.getEntityFromWorld(player.worldObj);
+				skill.setCombo(combo);
 			}
-			return null;
+		} catch (ClassCastException e) {
+			LogHelper.error("Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
 		}
 	}
 }

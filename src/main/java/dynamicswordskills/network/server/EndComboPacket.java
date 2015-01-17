@@ -17,11 +17,13 @@
 
 package dynamicswordskills.network.server;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.SkillBase;
 
@@ -32,7 +34,7 @@ import dynamicswordskills.skills.SkillBase;
  * directly instead of sending a packet.
  *
  */
-public class EndComboPacket implements IMessage
+public class EndComboPacket extends AbstractMessage
 {
 	/** Id of skill that implements ICombo */
 	private byte id;
@@ -44,29 +46,31 @@ public class EndComboPacket implements IMessage
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buffer) {
+	protected void read(PacketBuffer buffer) throws IOException {
 		id = buffer.readByte();
 	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {
+	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeByte(id);
 	}
 
-	public static class Handler extends AbstractServerMessageHandler<EndComboPacket> {
-		@Override
-		protected IMessage handleServerMessage(EntityPlayer player, EndComboPacket msg, MessageContext ctx) {
-			if (SkillBase.getSkill(msg.id) instanceof ICombo) {
-				ICombo skill = (ICombo) DSSPlayerInfo.get(player).getPlayerSkill(msg.id);
-				if (skill != null) {
-					if (skill.isComboInProgress()) {
-						skill.getCombo().endCombo(player);
-					} else {
-						skill.setCombo(null);
-					}
+	@Override
+	protected boolean isValidOnSide(Side side) {
+		return side.isServer();
+	}
+
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		if (SkillBase.getSkill(id) instanceof ICombo) {
+			ICombo skill = (ICombo) DSSPlayerInfo.get(player).getPlayerSkill(id);
+			if (skill != null) {
+				if (skill.isComboInProgress()) {
+					skill.getCombo().endCombo(player);
+				} else {
+					skill.setCombo(null);
 				}
 			}
-			return null;
 		}
 	}
 }

@@ -17,17 +17,19 @@
 
 package dynamicswordskills.network.server;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
+import dynamicswordskills.network.AbstractMessage;
 
 /**
  * 
  * Used for skills that activate client-side only and need to add exhaustion to the player.
  *
  */
-public class AddExhaustionPacket implements IMessage
+public class AddExhaustionPacket extends AbstractMessage
 {
 	private float amount;
 
@@ -38,20 +40,22 @@ public class AddExhaustionPacket implements IMessage
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buffer) {
+	protected void read(PacketBuffer buffer) throws IOException {
 		this.amount = buffer.readFloat();
 	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {
+	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeFloat(amount);
 	}
 
-	public static class Handler extends AbstractServerMessageHandler<AddExhaustionPacket> {
-		@Override
-		protected IMessage handleServerMessage(EntityPlayer player, AddExhaustionPacket msg, MessageContext ctx) {
-			player.addExhaustion(msg.amount);
-			return null;
-		}
+	@Override
+	protected boolean isValidOnSide(Side side) {
+		return side.isServer();
+	}
+
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		player.addExhaustion(amount);
 	}
 }
