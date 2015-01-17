@@ -37,7 +37,7 @@ public interface ILockOnTarget
 	public Entity getCurrentTarget();
 
 	/** Should only use on the server side */
-	public void setCurrentTarget(Entity entity);
+	public void setCurrentTarget(EntityPlayer player, Entity entity);
 
 	/** Should find and return the next valid target or null */
 	@SideOnly(Side.CLIENT)

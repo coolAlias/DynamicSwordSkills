@@ -94,10 +94,10 @@ public class TargetIdPacket extends AbstractMessage
 		ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
 		if (skill != null) {
 			if (isNull) {
-				skill.setCurrentTarget(null);
+				skill.setCurrentTarget(player, null);
 			} else {
 				Entity entity = player.worldObj.getEntityByID(entityId);
-				skill.setCurrentTarget(entity);
+				skill.setCurrentTarget(player, entity);
 				if (entity == null) { // For some reason the target id is sometimes incorrect or out of date
 					LogHelper.warn("Invalid target; entity with id " + entityId + " is null");
 				}
