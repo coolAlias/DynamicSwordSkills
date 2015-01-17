@@ -36,7 +36,7 @@ commands.removeskill.success.all=Removed all skills
 commands.removeskill.success.one=Removed all levels of %2$s
 commands.removeskill.usage=/removeskill <skill> OR /removeskill all
 
-creativetab.dss.skill=动态技能
+itemGroup.dss.skills=动态技能
 
 death.attack.armorBreak=%1$s的护甲被%2$s刺穿了
 death.attack.armorBreak.item=%1$s的护甲被%2$s使用%3$s刺穿了

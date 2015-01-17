@@ -20,12 +20,13 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
 import dynamicswordskills.command.DSSCommands;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
-import dynamicswordskills.item.CombatSkillsTab;
 import dynamicswordskills.item.ItemSkillOrb;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.ref.Config;
@@ -69,7 +70,13 @@ public class DynamicSwordSkills
 		isBG2Enabled = false; // TODO when BG2 updates: Loader.isModLoaded("battlegear2");
 		if (shouldLoad) {
 			Config.init(event);
-			tabSkills = new CombatSkillsTab("dssTab");
+			tabSkills = new CreativeTabs("dss.skills") {
+				@Override
+				@SideOnly(Side.CLIENT)
+				public Item getTabIconItem() {
+					return DynamicSwordSkills.skillOrb;
+				}
+			};
 			skillOrb = new ItemSkillOrb().setUnlocalizedName("dss.skillorb");
 			GameRegistry.registerItem(skillOrb, skillOrb.getUnlocalizedName().substring(5));
 			if (Config.areCreativeSwordsEnabled()) {

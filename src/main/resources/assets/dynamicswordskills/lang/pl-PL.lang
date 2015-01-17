@@ -37,7 +37,7 @@ commands.removeskill.success.all=Removed all skills
 commands.removeskill.success.one=Removed all levels of %2$s
 commands.removeskill.usage=/removeskill <skill> OR /removeskill all
 
-creativetab.dss.skill=DSS - umiejętności
+itemGroup.dss.skills=DSS - umiejętności
 
 death.attack.armorBreak=Zbroja gracza %1$s została przebita przez %2$s
 death.attack.armorBreak.item=Zbroja gracza %1$s została przebita przez %2$s używając %3$s

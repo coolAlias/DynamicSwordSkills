@@ -37,7 +37,7 @@ commands.removeskill.success.all=Removed all skills
 commands.removeskill.success.one=Removed all levels of %2$s
 commands.removeskill.usage=/removeskill <skill> OR /removeskill all
 
-creativetab.dss.skill=Habilidades DSS
+itemGroup.dss.skills=Habilidades DSS
 
 death.attack.armorBreak=%1$s's armor was pierced by %2$s
 death.attack.armorBreak.item=%1$s's armor was pierced by %2$s using %3$s
