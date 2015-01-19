@@ -35,6 +35,7 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
+import dynamicswordskills.util.TargetUtils;
 
 /**
  * 
@@ -108,13 +109,13 @@ public class LeapingBlow extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
+		return super.canUse(player) && !isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this) && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return !isActive() && player.onGround && PlayerUtils.isUsingItem(player);
+		return !isActive() && player.onGround && PlayerUtils.isUsingItem(player) && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
@@ -146,8 +147,16 @@ public class LeapingBlow extends SkillActive
 		isActive = false;
 	}
 
+	@Override
+	public void onUpdate(EntityPlayer player) {
+		// Handle on client because onGround is always true on the server
+		if (player.worldObj.isRemote && isActive() && (player.onGround || TargetUtils.isInLiquid(player))) {
+			deactivate(player);
+		}
+	}
+
 	/**
-	 * Called from Forge fall Events
+	 * Called from Forge fall Events (note that these are not fired if player lands in liquid!)
 	 * @param distance distance fallen, passed from Forge fall Event
 	 */
 	public void onImpact(EntityPlayer player, float distance) {
