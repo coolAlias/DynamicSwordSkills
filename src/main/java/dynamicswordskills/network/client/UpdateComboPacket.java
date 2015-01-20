@@ -23,10 +23,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.Combo;
 import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -65,7 +65,7 @@ public class UpdateComboPacket implements IMessage
 					skill.setCombo(combo);
 				}
 			} catch (ClassCastException e) {
-				DynamicSwordSkills.logger.error("Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
+				LogHelper.error("Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
 			}
 			return null;
 		}

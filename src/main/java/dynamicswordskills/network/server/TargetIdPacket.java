@@ -22,10 +22,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -93,7 +93,7 @@ public class TargetIdPacket implements IMessage
 					Entity entity = player.worldObj.getEntityByID(message.entityId);
 					skill.setCurrentTarget(entity);
 					if (entity == null) { // For some reason the target id is sometimes incorrect or out of date
-						DynamicSwordSkills.logger.warn("Invalid target; entity with id " + message.entityId + " is null");
+						LogHelper.warn("Invalid target; entity with id " + message.entityId + " is null");
 					}
 				}
 			}

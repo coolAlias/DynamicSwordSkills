@@ -26,6 +26,7 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -61,7 +62,7 @@ public class DeactivateSkillPacket implements IMessage
 				if (skill instanceof SkillActive) {
 					((SkillActive) skill).deactivate(player);
 				} else {
-					DynamicSwordSkills.logger.warn("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + message.skillId + " was not valid for this player.");
+					LogHelper.warn("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + message.skillId + " was not valid for this player.");
 				}
 			}
 			return null;

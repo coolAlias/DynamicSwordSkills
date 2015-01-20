@@ -10,9 +10,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.MinecraftForge;
-
-import org.apache.logging.log4j.Logger;
-
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
@@ -36,6 +33,7 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.LogHelper;
 
 @Mod(modid = ModInfo.ID, version = ModInfo.VERSION)
 public class DynamicSwordSkills
@@ -45,8 +43,6 @@ public class DynamicSwordSkills
 
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
 	public static CommonProxy proxy;
-
-	public static Logger logger;
 
 	/** Whether Battlegear2 mod is loaded */
 	public static boolean isBG2Enabled;
@@ -69,7 +65,7 @@ public class DynamicSwordSkills
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		logger = event.getModLog();
+		LogHelper.init(event);
 		shouldLoad = !Loader.isModLoaded("zeldaswordskills");
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
 		if (shouldLoad) {

@@ -31,11 +31,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncSkillPacket;
 import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -95,7 +95,7 @@ public abstract class SkillBase
 		this.id = skillIndex++;
 		if (register) {
 			if (skillsMap.containsKey(id)) {
-				DynamicSwordSkills.logger.warn("CONFLICT @ skill " + id + " id already occupied by "
+				LogHelper.warn("CONFLICT @ skill " + id + " id already occupied by "
 						+ skillsMap.get(id).unlocalizedName + " while adding " + name);
 			}
 			skillsMap.put(id, this);
