@@ -23,12 +23,13 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
 import dynamicswordskills.command.DSSCommands;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
-import dynamicswordskills.item.CombatSkillsTab;
 import dynamicswordskills.item.ItemSkillOrb;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.ref.Config;
@@ -73,7 +74,13 @@ public class DynamicSwordSkills
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
 		if (shouldLoad) {
 			Config.init(event);
-			tabSkills = new CombatSkillsTab("dssTab");
+			tabSkills = new CreativeTabs("dss.skills") {
+				@Override
+				@SideOnly(Side.CLIENT)
+				public Item getTabIconItem() {
+					return DynamicSwordSkills.skillOrb;
+				}
+			};
 			skillOrb = new ItemSkillOrb().setUnlocalizedName("dss.skillorb");
 			GameRegistry.registerItem(skillOrb, skillOrb.getUnlocalizedName().substring(5));
 			if (Config.areCreativeSwordsEnabled()) {

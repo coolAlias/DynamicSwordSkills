@@ -37,8 +37,6 @@ commands.removeskill.success.all=Removed all skills
 commands.removeskill.success.one=Removed all levels of %2$s
 commands.removeskill.usage=/removeskill <skill> OR /removeskill all
 
-creativetab.dss.skill=DSS - umiejętności
-
 death.attack.armorBreak=Zbroja gracza %1$s została przebita przez %2$s
 death.attack.armorBreak.item=Zbroja gracza %1$s została przebita przez %2$s używając %3$s
 death.attack.indirectSword=%1$s został zabity przez %2$s
@@ -47,6 +45,7 @@ death.attack.indirectSword.item=%1$s został zabity przez %2$s używając %3$s
 entity.dynamicswordskills.leapingblow.name=Obszerny podmuch
 entity.dynamicswordskills.swordbeam.name=Sword Beam
 
+itemGroup.dss.skills=DSS - umiejętności
 item.dss.skillorb.name=Skill Orb of
 item.dss.skillitem.name=Sword of
 tooltip.dss.skillorb.desc.level=Level: %1$s/%2$s

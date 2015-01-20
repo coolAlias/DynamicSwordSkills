@@ -37,8 +37,6 @@ commands.removeskill.success.all=Removed all skills
 commands.removeskill.success.one=Removed all levels of %2$s
 commands.removeskill.usage=/removeskill <skill> OR /removeskill all
 
-creativetab.dss.skill=Habilidades DSS
-
 death.attack.armorBreak=%1$s's armor was pierced by %2$s
 death.attack.armorBreak.item=%1$s's armor was pierced by %2$s using %3$s
 death.attack.indirectSword=%1$s was slain by %2$s
@@ -47,8 +45,14 @@ death.attack.indirectSword.item=%1$s was slain by %2$s using %3$s
 entity.dynamicswordskills.leapingblow.name=Golpe aéreo
 entity.dynamicswordskills.swordbeam.name=Sword Beam
 
+itemGroup.dss.skills=Habilidades DSS
 item.dss.skillorb.name=Orbe de habilidad 
+item.dss.skillitem.name=Sword of
+tooltip.dss.skillorb.desc.level=Level: %1$s/%2$s
 tooltip.dss.skillorb.desc.0=Right click para aprender
+tooltip.dss.skillprovider.desc.skill=Grants wielder %s
+tooltip.dss.skillprovider.desc.level=Grants Skill Level: %1$s/%2$s
+tooltip.dss.skillprovider.desc.provider=Provides %s
 
 key.dss.label=Teclas DSS
 key.dss.activate.desc=Fijar Objetivo

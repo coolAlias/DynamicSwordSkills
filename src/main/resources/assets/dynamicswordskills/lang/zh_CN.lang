@@ -36,8 +36,6 @@ commands.removeskill.success.all=Removed all skills
 commands.removeskill.success.one=Removed all levels of %2$s
 commands.removeskill.usage=/removeskill <skill> OR /removeskill all
 
-creativetab.dss.skill=动态技能
-
 death.attack.armorBreak=%1$s的护甲被%2$s刺穿了
 death.attack.armorBreak.item=%1$s的护甲被%2$s使用%3$s刺穿了
 death.attack.indirectSword=%1$s被%2$s杀死
@@ -46,8 +44,14 @@ death.attack.indirectSword.item=%1$s被%2$s使用%3$s杀死
 entity.dynamicswordskills.leapingblow.name=跳劈
 entity.dynamicswordskills.swordbeam.name=Sword Beam
 
+itemGroup.dss.skills=动态技能
 item.dss.skillorb.name=技能球
+item.dss.skillitem.name=Sword of
+tooltip.dss.skillorb.desc.level=Level: %1$s/%2$s
 tooltip.dss.skillorb.desc.0=该技能球的功能未知
+tooltip.dss.skillprovider.desc.skill=Grants wielder %s
+tooltip.dss.skillprovider.desc.level=Grants Skill Level: %1$s/%2$s
+tooltip.dss.skillprovider.desc.provider=Provides %s
 
 key.dss.label=动态技能按键
 key.dss.activate.desc=Z-瞄准目标
