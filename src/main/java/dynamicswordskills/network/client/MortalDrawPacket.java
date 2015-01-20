@@ -33,23 +33,13 @@ import dynamicswordskills.skills.SkillBase;
 
 public class MortalDrawPacket extends AbstractMessage
 {
-	private int swordSlot;
-
 	public MortalDrawPacket() {}
 
-	public MortalDrawPacket(int swordSlot) {
-		this.swordSlot = swordSlot;
-	}
+	@Override
+	protected void read(PacketBuffer buffer) throws IOException {}
 
 	@Override
-	protected void read(PacketBuffer buffer) throws IOException {
-		swordSlot = buffer.readInt();
-	}
-
-	@Override
-	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeInt(swordSlot);
-	}
+	protected void write(PacketBuffer buffer) throws IOException {}
 
 	@Override
 	protected boolean isValidOnSide(Side side) {
