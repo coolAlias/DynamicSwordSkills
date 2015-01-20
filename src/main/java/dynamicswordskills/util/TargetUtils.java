@@ -20,11 +20,14 @@ package dynamicswordskills.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -242,6 +245,25 @@ public class TargetUtils
 	 */
 	private static final boolean isTargetInSight(Vec3 vec3, EntityLivingBase seeker, Entity target) {
 		return seeker.canEntityBeSeen(target) && isTargetInFrontOf(seeker, target, 60);
+	}
+
+	/**
+	 * Returns the chunk coordinates for the entity's current position
+	 */
+	public static ChunkCoordinates getEntityCoordinates(Entity entity) {
+		int i = MathHelper.floor_double(entity.posX + 0.5D);
+		int j = MathHelper.floor_double(entity.posY + 0.5D - (entity.worldObj.isRemote ? entity.yOffset : 0D));
+		int k = MathHelper.floor_double(entity.posZ + 0.5D);
+		return new ChunkCoordinates(i,j,k);
+	}
+
+	/**
+	 * Whether the entity is currently standing in any liquid
+	 */
+	public static boolean isInLiquid(Entity entity) {
+		ChunkCoordinates cc = getEntityCoordinates(entity);
+		Block block = entity.worldObj.getBlock(cc.posX, cc.posY, cc.posZ);
+		return block.getMaterial().isLiquid();
 	}
 
 	/**
