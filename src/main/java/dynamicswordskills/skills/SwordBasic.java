@@ -224,9 +224,11 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
-	public void setCurrentTarget(Entity entity) {
-		if (entity == null || entity instanceof EntityLivingBase) {
-			currentTarget = (EntityLivingBase) entity;
+	public void setCurrentTarget(EntityPlayer player, Entity target) {
+		if (target instanceof EntityLivingBase) {
+			currentTarget = (EntityLivingBase) target;
+		} else {
+			deactivate(player);
 		}
 	}
 
