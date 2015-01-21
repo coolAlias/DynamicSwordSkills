@@ -24,14 +24,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 
 /**
  * 
  * Synchronizes all PlayerInfo data on the client
  *
  */
-public class SyncPlayerInfoPacket extends AbstractMessage
+public class SyncPlayerInfoPacket extends AbstractClientMessage
 {
 	/** NBTTagCompound used to store and transfer the Player's Info */
 	private NBTTagCompound compound;
@@ -64,11 +64,6 @@ public class SyncPlayerInfoPacket extends AbstractMessage
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeNBTTagCompoundToBuffer(compound);
 		buffer.writeBoolean(validate);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

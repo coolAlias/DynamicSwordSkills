@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.skills.SpinAttack;
@@ -35,7 +35,7 @@ import dynamicswordskills.skills.SpinAttack;
  * It does not require any data to be sent other than the packet itself.
  *
  */
-public class RefreshSpinPacket extends AbstractMessage
+public class RefreshSpinPacket extends AbstractServerMessage
 {
 	public RefreshSpinPacket() {}
 
@@ -44,11 +44,6 @@ public class RefreshSpinPacket extends AbstractMessage
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
-	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {

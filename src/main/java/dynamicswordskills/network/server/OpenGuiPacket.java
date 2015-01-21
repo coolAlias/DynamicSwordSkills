@@ -23,9 +23,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 
-public class OpenGuiPacket extends AbstractMessage
+public class OpenGuiPacket extends AbstractServerMessage
 {
 	private int id;
 
@@ -43,11 +43,6 @@ public class OpenGuiPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeInt(id);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

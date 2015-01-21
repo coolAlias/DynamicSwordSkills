@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.SkillBase;
 
@@ -34,7 +34,7 @@ import dynamicswordskills.skills.SkillBase;
  * directly instead of sending a packet.
  *
  */
-public class EndComboPacket extends AbstractMessage
+public class EndComboPacket extends AbstractServerMessage
 {
 	/** Id of skill that implements ICombo */
 	private byte id;
@@ -53,11 +53,6 @@ public class EndComboPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeByte(id);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

@@ -64,11 +64,6 @@ public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 	}
 
 	@Override
-	protected boolean isValidOnSide(Side side) {
-		return true;
-	}
-
-	@Override
 	protected void process(EntityPlayer player, Side side) {
 		// handled identically on both sides
 		if (wasTriggered) {

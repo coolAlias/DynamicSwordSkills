@@ -26,7 +26,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.Dash;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.LogHelper;
@@ -46,7 +46,7 @@ import dynamicswordskills.util.LogHelper;
  * Also need to send the player's motionX and motionZ, as the server values are typically zero.
  *
  */
-public class DashImpactPacket extends AbstractMessage
+public class DashImpactPacket extends AbstractServerMessage
 {
 	/** Stores the type of hit, as a byte (0: None 1: BLOCK 2: ENTITY) */
 	private byte hitType;
@@ -81,11 +81,6 @@ public class DashImpactPacket extends AbstractMessage
 		if (hitType == MovingObjectType.ENTITY.ordinal()) {
 			buffer.writeInt(entityId);
 		}
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

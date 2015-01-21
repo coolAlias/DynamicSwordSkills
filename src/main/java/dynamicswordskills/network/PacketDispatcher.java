@@ -19,6 +19,7 @@ package dynamicswordskills.network;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -52,7 +53,7 @@ public class PacketDispatcher
 	private static final SimpleNetworkWrapper dispatcher = NetworkRegistry.INSTANCE.newSimpleChannel(ModInfo.CHANNEL);
 
 	/**
-	 *  Registers all packets and handlers - call this during {@code FMLPreInitializationEvent}
+	 *  Registers all packets and handlers - call this during {@link FMLPreInitializationEvent}
 	 */
 	public static final void initialize() {
 		// Bidirectional packets
@@ -62,37 +63,36 @@ public class PacketDispatcher
 		registerMessage(DeactivateSkillPacket.class);
 
 		// Packets handled on CLIENT
-		registerMessage(MortalDrawPacket.class, Side.CLIENT);
-		registerMessage(SyncPlayerInfoPacket.class, Side.CLIENT);
-		registerMessage(SyncSkillPacket.class, Side.CLIENT);
-		registerMessage(UpdateComboPacket.class, Side.CLIENT);
+		registerMessage(MortalDrawPacket.class);
+		registerMessage(SyncPlayerInfoPacket.class);
+		registerMessage(SyncSkillPacket.class);
+		registerMessage(UpdateComboPacket.class);
 
 		// Packets handled on SERVER
-		registerMessage(AddExhaustionPacket.class, Side.SERVER);
-		registerMessage(DashImpactPacket.class, Side.SERVER);
-		registerMessage(EndComboPacket.class, Side.SERVER);
-		registerMessage(OpenGuiPacket.class, Side.SERVER);
-		registerMessage(RefreshSpinPacket.class, Side.SERVER);
-		registerMessage(TargetIdPacket.class, Side.SERVER);
+		registerMessage(AddExhaustionPacket.class);
+		registerMessage(DashImpactPacket.class);
+		registerMessage(EndComboPacket.class);
+		registerMessage(OpenGuiPacket.class);
+		registerMessage(RefreshSpinPacket.class);
+		registerMessage(TargetIdPacket.class);
 	}
 
 	/**
-	 * Registers an AbstractMessage to one side
-	 */
-	private static final <T extends AbstractMessage<T> & IMessageHandler<T, IMessage>> void registerMessage(Class<T> clazz, Side side) {
-		PacketDispatcher.dispatcher.registerMessage(clazz, clazz, packetId++, side);
-	}
-
-	/**
-	 * Registers an AbstractMessage to both sides (bidirectional message)
+	 * Registers an {@link AbstractMessage} to the appropriate side(s)
 	 */
 	private static final <T extends AbstractMessage<T> & IMessageHandler<T, IMessage>> void registerMessage(Class<T> clazz) {
-		PacketDispatcher.dispatcher.registerMessage(clazz, clazz, packetId, Side.CLIENT);
-		PacketDispatcher.dispatcher.registerMessage(clazz, clazz, packetId++, Side.SERVER);
+		if (AbstractMessage.AbstractClientMessage.class.isAssignableFrom(clazz)) {
+			PacketDispatcher.dispatcher.registerMessage(clazz, clazz, packetId++, Side.CLIENT);
+		} else if (AbstractMessage.AbstractServerMessage.class.isAssignableFrom(clazz)) {
+			PacketDispatcher.dispatcher.registerMessage(clazz, clazz, packetId++, Side.SERVER);
+		} else {
+			PacketDispatcher.dispatcher.registerMessage(clazz, clazz, packetId, Side.CLIENT);
+			PacketDispatcher.dispatcher.registerMessage(clazz, clazz, packetId++, Side.SERVER);
+		}
 	}
 
 	/**
-	 * Send this message to the specified player.
+	 * Send this message to the specified player's client-side counterpart.
 	 * See {@link SimpleNetworkWrapper#sendTo(IMessage, EntityPlayerMP)}
 	 */
 	public static final void sendTo(IMessage message, EntityPlayerMP player) {
@@ -109,7 +109,7 @@ public class PacketDispatcher
 
 	/**
 	 * Send this message to everyone within a certain range of a point.
-	 * See {@link SimpleNetworkWrapper#sendToDimension(IMessage, NetworkRegistry.TargetPoint)}
+	 * See {@link SimpleNetworkWrapper#sendToAllAround(IMessage, NetworkRegistry.TargetPoint)}
 	 */
 	public static final void sendToAllAround(IMessage message, NetworkRegistry.TargetPoint point) {
 		PacketDispatcher.dispatcher.sendToAllAround(message, point);
@@ -117,6 +117,7 @@ public class PacketDispatcher
 
 	/**
 	 * Sends a message to everyone within a certain range of the coordinates in the same dimension.
+	 * Shortcut to {@link SimpleNetworkWrapper#sendToAllAround(IMessage, NetworkRegistry.TargetPoint)}
 	 */
 	public static final void sendToAllAround(IMessage message, int dimension, double x, double y, double z, double range) {
 		PacketDispatcher.sendToAllAround(message, new NetworkRegistry.TargetPoint(dimension, x, y, z, range));
@@ -124,6 +125,7 @@ public class PacketDispatcher
 
 	/**
 	 * Sends a message to everyone within a certain range of the player provided.
+	 * Shortcut to {@link SimpleNetworkWrapper#sendToAllAround(IMessage, NetworkRegistry.TargetPoint)}
 	 */
 	public static final void sendToAllAround(IMessage message, EntityPlayer player, double range) {
 		PacketDispatcher.sendToAllAround(message, player.worldObj.provider.getDimensionId(), player.posX, player.posY, player.posZ, range);

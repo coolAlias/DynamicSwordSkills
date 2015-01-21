@@ -22,14 +22,14 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
-import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 
 /**
  * 
  * Used for skills that activate client-side only and need to add exhaustion to the player.
  *
  */
-public class AddExhaustionPacket extends AbstractMessage
+public class AddExhaustionPacket extends AbstractServerMessage
 {
 	private float amount;
 
@@ -47,11 +47,6 @@ public class AddExhaustionPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeFloat(amount);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

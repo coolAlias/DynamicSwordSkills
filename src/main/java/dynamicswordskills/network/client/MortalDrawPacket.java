@@ -25,13 +25,13 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillBase;
 
-public class MortalDrawPacket extends AbstractMessage
+public class MortalDrawPacket extends AbstractClientMessage
 {
 	public MortalDrawPacket() {}
 
@@ -40,11 +40,6 @@ public class MortalDrawPacket extends AbstractMessage
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
-	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {

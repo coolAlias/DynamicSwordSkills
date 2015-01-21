@@ -24,7 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.LogHelper;
@@ -34,7 +34,7 @@ import dynamicswordskills.util.LogHelper;
  * This packet updates the server with the current target for currently active ILockOnTarget skill.
  *
  */
-public class TargetIdPacket extends AbstractMessage
+public class TargetIdPacket extends AbstractServerMessage
 {
 	/** Id of ILockOnTarget skill */
 	private byte skillId;
@@ -82,11 +82,6 @@ public class TargetIdPacket extends AbstractMessage
 		} else {
 			buffer.writeByte((byte) 0);
 		}
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

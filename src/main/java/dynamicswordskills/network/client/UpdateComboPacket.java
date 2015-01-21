@@ -24,7 +24,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 import dynamicswordskills.skills.Combo;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.util.LogHelper;
@@ -34,7 +34,7 @@ import dynamicswordskills.util.LogHelper;
  * Packet responsible for keeping attack Combos synchronized between server and client.
  *
  */
-public class UpdateComboPacket extends AbstractMessage
+public class UpdateComboPacket extends AbstractClientMessage
 {
 	/** Stores data of combo to be updated */
 	private NBTTagCompound compound;
@@ -53,11 +53,6 @@ public class UpdateComboPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeNBTTagCompoundToBuffer(compound);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override
