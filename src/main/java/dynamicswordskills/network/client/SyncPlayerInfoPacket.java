@@ -17,23 +17,25 @@
 
 package dynamicswordskills.network.client;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 
 /**
  * 
  * Synchronizes all PlayerInfo data on the client
  *
  */
-public class SyncPlayerInfoPacket implements IMessage
+public class SyncPlayerInfoPacket extends AbstractClientMessage
 {
 	/** NBTTagCompound used to store and transfer the Player's Info */
 	private NBTTagCompound compound;
+
 	/** Whether skills should validate; only false when skills reset */
 	private boolean validate = true;
 
@@ -43,7 +45,7 @@ public class SyncPlayerInfoPacket implements IMessage
 		compound = new NBTTagCompound();
 		info.saveNBTData(compound);
 	}
-	
+
 	/**
 	 * Sets validate to false for reset skills packets
 	 */
@@ -51,30 +53,25 @@ public class SyncPlayerInfoPacket implements IMessage
 		validate = false;
 		return this;
 	}
-	
+
 	@Override
-	public void fromBytes(ByteBuf buffer) {
-		compound = ByteBufUtils.readTag(buffer);
+	protected void read(PacketBuffer buffer) throws IOException {
+		compound = buffer.readNBTTagCompoundFromBuffer();
 		validate = buffer.readBoolean();
 	}
-	
+
 	@Override
-	public void toBytes(ByteBuf buffer) {
-		ByteBufUtils.writeTag(buffer, compound);
+	protected void write(PacketBuffer buffer) throws IOException {
+		buffer.writeNBTTagCompoundToBuffer(compound);
 		buffer.writeBoolean(validate);
 	}
-	
-	public static class Handler extends AbstractClientMessageHandler<SyncPlayerInfoPacket> {
-		@Override
-		public IMessage handleClientMessage(EntityPlayer player, SyncPlayerInfoPacket message, MessageContext ctx) {
-			DSSPlayerInfo info = DSSPlayerInfo.get(player);
-			if (info != null) {
-				info.loadNBTData(message.compound);
-				if (message.validate) {
-					info.validateSkills();
-				}
-			}
-			return null;
+
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		DSSPlayerInfo info = DSSPlayerInfo.get(player);
+		info.loadNBTData(compound);
+		if (validate) {
+			info.validateSkills();
 		}
 	}
 }

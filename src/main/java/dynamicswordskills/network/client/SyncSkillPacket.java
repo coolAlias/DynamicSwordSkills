@@ -17,13 +17,14 @@
 
 package dynamicswordskills.network.client;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 import dynamicswordskills.skills.SkillBase;
 
 /**
@@ -31,7 +32,7 @@ import dynamicswordskills.skills.SkillBase;
  * Synchronizes the client-side version of a skill with the server-side data.
  *
  */
-public class SyncSkillPacket implements IMessage
+public class SyncSkillPacket extends AbstractClientMessage
 {
 	/** The ID of the skill to update */
 	private byte id;
@@ -50,24 +51,21 @@ public class SyncSkillPacket implements IMessage
 		compound = new NBTTagCompound();
 		skill.writeToNBT(compound);
 	}
-	
-	@Override
-	public void toBytes(ByteBuf buffer) {
-		buffer.writeByte(id);
-		ByteBufUtils.writeTag(buffer, compound);
-	}
 
 	@Override
-	public void fromBytes(ByteBuf buffer) {
+	protected void read(PacketBuffer buffer) throws IOException {
 		id = buffer.readByte();
-		compound = ByteBufUtils.readTag(buffer);
+		compound = buffer.readNBTTagCompoundFromBuffer();
 	}
 
-	public static class Handler extends AbstractClientMessageHandler<SyncSkillPacket> {
-		@Override
-		public IMessage handleClientMessage(EntityPlayer player, SyncSkillPacket message, MessageContext ctx) {
-			DSSPlayerInfo.get(player).syncClientSideSkill(message.id, message.compound);
-			return null;
-		}
+	@Override
+	protected void write(PacketBuffer buffer) throws IOException {
+		buffer.writeByte(id);
+		buffer.writeNBTTagCompoundToBuffer(compound);
+	}
+
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		DSSPlayerInfo.get(player).syncClientSideSkill(id, compound);
 	}
 }

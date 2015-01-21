@@ -17,12 +17,14 @@
 
 package dynamicswordskills.network.server;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.LogHelper;
@@ -32,7 +34,7 @@ import dynamicswordskills.util.LogHelper;
  * This packet updates the server with the current target for currently active ILockOnTarget skill.
  *
  */
-public class TargetIdPacket implements IMessage
+public class TargetIdPacket extends AbstractServerMessage
 {
 	/** Id of ILockOnTarget skill */
 	private byte skillId;
@@ -57,7 +59,7 @@ public class TargetIdPacket implements IMessage
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buffer) {
+	protected void read(PacketBuffer buffer) throws IOException {
 		if (buffer.readByte() == 1) {
 			this.skillId = buffer.readByte();
 			this.entityId = buffer.readInt();
@@ -67,7 +69,7 @@ public class TargetIdPacket implements IMessage
 	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {
+	protected void write(PacketBuffer buffer) throws IOException {
 		if (targetEntity != null) {
 			buffer.writeByte((byte) 1);
 			buffer.writeByte(skillId);
@@ -77,22 +79,19 @@ public class TargetIdPacket implements IMessage
 		}
 	}
 
-	public static class Handler extends AbstractServerMessageHandler<TargetIdPacket> {
-		@Override
-		public IMessage handleServerMessage(EntityPlayer player, TargetIdPacket message, MessageContext ctx) {
-			ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
-			if (skill != null) {
-				if (message.isNull) {
-					skill.setCurrentTarget(player, null);
-				} else {
-					Entity target = player.worldObj.getEntityByID(message.entityId);
-					skill.setCurrentTarget(player, target);
-					if (target == null) { // For some reason the target id is sometimes incorrect or out of date
-						LogHelper.warn("Invalid target; entity with id " + message.entityId + " is null");
-					}
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
+		if (skill != null) {
+			if (isNull) {
+				skill.setCurrentTarget(player, null);
+			} else {
+				targetEntity = player.worldObj.getEntityByID(entityId);
+				skill.setCurrentTarget(player, targetEntity);
+				if (targetEntity == null) { // For some reason the target id is sometimes incorrect or out of date
+					LogHelper.warn("Invalid target; entity with id " + entityId + " is null");
 				}
 			}
-			return null;
 		}
 	}
 }

@@ -17,13 +17,13 @@
 
 package dynamicswordskills.network.bidirectional;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.DynamicSwordSkills;
+import net.minecraft.network.PacketBuffer;
+import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.SkillBase;
 
 /**
@@ -32,9 +32,9 @@ import dynamicswordskills.skills.SkillBase;
  * sent to the client, so skills shouldn't be manually activated client side.
  *
  */
-public class ActivateSkillPacket implements IMessage
+public class ActivateSkillPacket extends AbstractMessage
 {
-	/** If true, calls triggerSkill(), otherwise uses activateSkill() */
+	/** If true, calls {@link DSSPlayerInfo#triggerSkill}, otherwise uses {@link DSSPlayerInfo#activateSkill} */
 	private boolean wasTriggered = false;
 
 	/** Skill to activate */
@@ -52,29 +52,24 @@ public class ActivateSkillPacket implements IMessage
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buffer) {
+	protected void read(PacketBuffer buffer) throws IOException {
 		wasTriggered = buffer.readBoolean();
 		skillId = buffer.readByte();
 	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {
+	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeBoolean(wasTriggered);
 		buffer.writeByte(skillId);
 	}
 
-	public static class Handler implements IMessageHandler<ActivateSkillPacket, IMessage> {
-		@Override
-		public IMessage onMessage(ActivateSkillPacket message, MessageContext ctx) {
-			EntityPlayer player = DynamicSwordSkills.proxy.getPlayerEntity(ctx);
-			if (DSSPlayerInfo.get(player) != null) {
-				if (message.wasTriggered) {
-					DSSPlayerInfo.get(player).triggerSkill(player.worldObj, message.skillId);
-				} else {
-					DSSPlayerInfo.get(player).activateSkill(player.worldObj, message.skillId);
-				}
-			}
-			return null;
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		// handled identically on both sides
+		if (wasTriggered) {
+			DSSPlayerInfo.get(player).triggerSkill(player.worldObj, skillId);
+		} else {
+			DSSPlayerInfo.get(player).activateSkill(player.worldObj, skillId);
 		}
 	}
 }

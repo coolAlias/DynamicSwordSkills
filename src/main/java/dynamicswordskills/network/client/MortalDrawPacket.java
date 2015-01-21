@@ -17,40 +17,39 @@
 
 package dynamicswordskills.network.client;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillBase;
 
-public class MortalDrawPacket implements IMessage {
+public class MortalDrawPacket extends AbstractClientMessage {
 
 	public MortalDrawPacket() {}
-	
-	@Override
-	public void fromBytes(ByteBuf buffer) {}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {}
+	protected void read(PacketBuffer buffer) throws IOException {}
 
-	public static class Handler extends AbstractClientMessageHandler<MortalDrawPacket> {
-		@Override
-		public IMessage handleClientMessage(EntityPlayer player, MortalDrawPacket message, MessageContext ctx) {
-			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-			if (skills.hasSkill(SkillBase.mortalDraw)) {
-				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
-				ILockOnTarget skill = skills.getTargetingSkill();
-				if (skill instanceof ICombo) {
-					DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), skill);
-				}
+	@Override
+	protected void write(PacketBuffer buffer) throws IOException {}
+
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+		if (skills.hasSkill(SkillBase.mortalDraw)) {
+			((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
+			ILockOnTarget skill = skills.getTargetingSkill();
+			if (skill instanceof ICombo) {
+				DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), skill);
 			}
-			return null;
 		}
 	}
 }

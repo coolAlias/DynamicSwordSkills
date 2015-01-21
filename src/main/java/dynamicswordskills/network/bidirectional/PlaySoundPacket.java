@@ -17,19 +17,21 @@
 
 package dynamicswordskills.network.bidirectional;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.Side;
+import dynamicswordskills.network.AbstractMessage;
 
 /**
  * 
  * Plays a sound on the client or server side
  *
  */
-public class PlaySoundPacket implements IMessage
+public class PlaySoundPacket extends AbstractMessage
 {
 	private String sound;
 
@@ -65,9 +67,9 @@ public class PlaySoundPacket implements IMessage
 	public PlaySoundPacket(String sound, float volume, float pitch) {
 		this(sound, volume, pitch, 0, 0, 0);
 	}
-	
+
 	@Override
-	public void fromBytes(ByteBuf buffer) {
+	protected void read(PacketBuffer buffer) throws IOException {
 		sound = ByteBufUtils.readUTF8String(buffer);
 		volume = buffer.readFloat();
 		pitch = buffer.readFloat();
@@ -77,7 +79,7 @@ public class PlaySoundPacket implements IMessage
 	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {
+	protected void write(PacketBuffer buffer) throws IOException {
 		ByteBufUtils.writeUTF8String(buffer, sound);
 		buffer.writeFloat(volume);
 		buffer.writeFloat(pitch);
@@ -85,18 +87,13 @@ public class PlaySoundPacket implements IMessage
 		buffer.writeDouble(y);
 		buffer.writeDouble(z);
 	}
-	
-	public static class Handler extends AbstractBiMessageHandler<PlaySoundPacket> {
-		@Override
-		public IMessage handleClientMessage(EntityPlayer player, PlaySoundPacket message, MessageContext ctx) {
-			player.playSound(message.sound, message.volume, message.pitch);
-			return null;
-		}
-		
-		@Override
-		public IMessage handleServerMessage(EntityPlayer player, PlaySoundPacket message, MessageContext ctx) {
-			player.worldObj.playSoundEffect(message.x, message.y, message.z, message.sound, message.volume, message.pitch);
-			return null;
+
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		if (side.isClient()) {
+			player.playSound(sound, volume, pitch);
+		} else {
+			player.worldObj.playSoundEffect(x, y, z, sound, volume, pitch);
 		}
 	}
 }

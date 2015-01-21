@@ -17,14 +17,16 @@
 
 package dynamicswordskills.network.server;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.Dash;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.LogHelper;
@@ -44,7 +46,7 @@ import dynamicswordskills.util.LogHelper;
  * Also need to send the player's motionX and motionZ, as the server values are typically zero.
  *
  */
-public class DashImpactPacket implements IMessage
+public class DashImpactPacket extends AbstractServerMessage
 {
 	/** Stores the type of hit, as a byte (0: None 1: BLOCK 2: ENTITY) */
 	private byte hitType;
@@ -59,14 +61,14 @@ public class DashImpactPacket implements IMessage
 	 * @param mop Must not be null
 	 */
 	public DashImpactPacket(EntityPlayer player, MovingObjectPosition mop) {
-		this.hitType = (mop != null ? (byte) mop.typeOfHit.ordinal() : (byte) 0);
+		this.hitType = (byte) mop.typeOfHit.ordinal();
 		if (this.hitType == MovingObjectType.ENTITY.ordinal()) {
 			this.entityId = mop.entityHit.getEntityId();
 		}
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buffer) {
+	protected void read(PacketBuffer buffer) throws IOException {
 		hitType = buffer.readByte();
 		if (hitType == MovingObjectType.ENTITY.ordinal()) {
 			entityId = buffer.readInt();
@@ -74,30 +76,27 @@ public class DashImpactPacket implements IMessage
 	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {
+	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeByte(hitType);
 		if (hitType == MovingObjectType.ENTITY.ordinal()) {
 			buffer.writeInt(entityId);
 		}
 	}
 
-	public static class Handler extends AbstractServerMessageHandler<DashImpactPacket> {
-		@Override
-		public IMessage handleServerMessage(EntityPlayer player, DashImpactPacket message, MessageContext ctx) {
-			Dash dash = (Dash) DSSPlayerInfo.get(player).getActiveSkill(SkillBase.dash);
-			if (dash != null && dash.isActive()) {
-				MovingObjectPosition mop = null;
-				if (message.hitType == MovingObjectType.ENTITY.ordinal()) {
-					Entity entityHit = player.worldObj.getEntityByID(message.entityId);
-					if (entityHit != null) {
-						mop = new MovingObjectPosition(entityHit);
-					} else {
-						LogHelper.warn("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
-					}
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		Dash dash = (Dash) DSSPlayerInfo.get(player).getActiveSkill(SkillBase.dash);
+		if (dash != null && dash.isActive()) {
+			MovingObjectPosition mop = null;
+			if (hitType == MovingObjectType.ENTITY.ordinal()) {
+				Entity entityHit = player.worldObj.getEntityByID(entityId);
+				if (entityHit != null) {
+					mop = new MovingObjectPosition(entityHit);
+				} else {
+					LogHelper.warn("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
 				}
-				dash.onImpact(player.worldObj, player, mop);
 			}
-			return null;
+			dash.onImpact(player.worldObj, player, mop);
 		}
 	}
 }

@@ -17,13 +17,13 @@
 
 package dynamicswordskills.network.bidirectional;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+
 import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.DynamicSwordSkills;
+import net.minecraft.network.PacketBuffer;
+import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.LogHelper;
@@ -33,8 +33,9 @@ import dynamicswordskills.util.LogHelper;
  * Send to either side to {@link SkillActive#deactivate deactivate} a skill.
  *
  */
-public class DeactivateSkillPacket implements IMessage
+public class DeactivateSkillPacket extends AbstractMessage
 {
+	/** Skill to deactivate */
 	private byte skillId;
 
 	public DeactivateSkillPacket() {}
@@ -44,28 +45,22 @@ public class DeactivateSkillPacket implements IMessage
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buffer) {
+	protected void read(PacketBuffer buffer) throws IOException {
 		skillId = buffer.readByte();
 	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {
+	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeByte(skillId);
 	}
 
-	public static class Handler implements IMessageHandler<DeactivateSkillPacket, IMessage> {
-		@Override
-		public IMessage onMessage(DeactivateSkillPacket message, MessageContext ctx) {
-			EntityPlayer player = DynamicSwordSkills.proxy.getPlayerEntity(ctx);
-			if (DSSPlayerInfo.get(player) != null) {
-				SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(message.skillId);
-				if (skill instanceof SkillActive) {
-					((SkillActive) skill).deactivate(player);
-				} else {
-					LogHelper.warn("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + message.skillId + " was not valid for this player.");
-				}
-			}
-			return null;
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(skillId);
+		if (skill instanceof SkillActive) {
+			((SkillActive) skill).deactivate(player);
+		} else {
+			LogHelper.warn("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + skillId + " was not valid for this player.");
 		}
 	}
 }

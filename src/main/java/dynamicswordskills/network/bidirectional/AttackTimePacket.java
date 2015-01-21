@@ -17,18 +17,19 @@
 
 package dynamicswordskills.network.bidirectional;
 
-import io.netty.buffer.ByteBuf;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.DynamicSwordSkills;
+import java.io.IOException;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
+import cpw.mods.fml.relauncher.Side;
+import dynamicswordskills.network.AbstractMessage;
 
 /**
  * 
  * Sets the player's attack time on either the client or the server
  *
  */
-public class AttackTimePacket implements IMessage
+public class AttackTimePacket extends AbstractMessage
 {
 	private int attackTime;
 
@@ -39,20 +40,17 @@ public class AttackTimePacket implements IMessage
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buffer) {
+	protected void read(PacketBuffer buffer) throws IOException {
 		this.attackTime = buffer.readInt();
 	}
 
 	@Override
-	public void toBytes(ByteBuf buffer) {
+	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeInt(attackTime);
 	}
 
-	public static class Handler implements IMessageHandler<AttackTimePacket, IMessage> {
-		@Override
-		public IMessage onMessage(AttackTimePacket message, MessageContext ctx) {
-			DynamicSwordSkills.proxy.getPlayerEntity(ctx).attackTime = message.attackTime;
-			return null;
-		}
+	@Override
+	protected void process(EntityPlayer player, Side side) {
+		player.attackTime = attackTime;
 	}
 }
