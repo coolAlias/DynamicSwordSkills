@@ -272,7 +272,7 @@ public abstract class SkillBase
 	 */
 	@SideOnly(Side.CLIENT)
 	public final List<String> getTranslatedTooltip(EntityPlayer player) {
-		List<String> desc = new ArrayList(tooltip.size());
+		List<String> desc = new ArrayList<String>(tooltip.size());
 		for (String s : tooltip) {
 			desc.add(StatCollector.translateToLocal(s));
 		}
@@ -285,7 +285,7 @@ public abstract class SkillBase
 	/** Returns the translated list containing Strings for tooltip display */
 	@SideOnly(Side.CLIENT)
 	public final List<String> getDescription() {
-		List<String> desc = new ArrayList(tooltip.size());
+		List<String> desc = new ArrayList<String>(tooltip.size());
 		for (String s : tooltip) {
 			desc.add(StatCollector.translateToLocal(s));
 		}

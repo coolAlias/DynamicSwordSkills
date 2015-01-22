@@ -119,7 +119,7 @@ public class Combo
 	public float getDamage() { return comboDamage; }
 
 	/** Returns a copy of the current damage list */
-	public List<Float> getDamageList() { return new ArrayList(damageList); }
+	public List<Float> getDamageList() { return new ArrayList<Float>(damageList); }
 
 	/** Returns the last entity directly hit during the combo */
 	public Entity getLastEntityHit() { return lastEntityHit; }
