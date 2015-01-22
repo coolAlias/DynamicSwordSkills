@@ -33,7 +33,7 @@ import dynamicswordskills.util.LogHelper;
  * Send to either side to {@link SkillActive#deactivate deactivate} a skill.
  *
  */
-public class DeactivateSkillPacket extends AbstractMessage
+public class DeactivateSkillPacket extends AbstractMessage<DeactivateSkillPacket>
 {
 	private byte skillId;
 

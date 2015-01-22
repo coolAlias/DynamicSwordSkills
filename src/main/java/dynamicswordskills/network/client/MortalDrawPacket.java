@@ -31,7 +31,7 @@ import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillBase;
 
-public class MortalDrawPacket extends AbstractClientMessage
+public class MortalDrawPacket extends AbstractClientMessage<MortalDrawPacket>
 {
 	public MortalDrawPacket() {}
 

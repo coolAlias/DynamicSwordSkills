@@ -30,7 +30,7 @@ import dynamicswordskills.network.AbstractMessage;
  * Sets the player's attack time on either the client or the server
  *
  */
-public class AttackTimePacket extends AbstractMessage
+public class AttackTimePacket extends AbstractMessage<AttackTimePacket>
 {
 	private int attackTime;
 

@@ -35,7 +35,7 @@ import dynamicswordskills.skills.SpinAttack;
  * It does not require any data to be sent other than the packet itself.
  *
  */
-public class RefreshSpinPacket extends AbstractServerMessage
+public class RefreshSpinPacket extends AbstractServerMessage<RefreshSpinPacket>
 {
 	public RefreshSpinPacket() {}
 

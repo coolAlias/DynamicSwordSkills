@@ -112,7 +112,7 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements I
 	/**
 	 * Ensures that the message is being handled on the main thread
 	 */
-	private static final void checkThreadAndEnqueue(final AbstractMessage msg, final MessageContext ctx) {
+	private static final <T extends AbstractMessage<T>> void checkThreadAndEnqueue(final AbstractMessage<T> msg, final MessageContext ctx) {
 		IThreadListener thread = DynamicSwordSkills.proxy.getThreadFromContext(ctx);
 		if (!thread.isCallingFromMinecraftThread()) {
 			thread.addScheduledTask(new Runnable() {
@@ -126,7 +126,7 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements I
 	/**
 	 * Messages that can only be sent from the server to the client should use this class
 	 */
-	public static abstract class AbstractClientMessage extends AbstractMessage {
+	public static abstract class AbstractClientMessage<T extends AbstractMessage<T>> extends AbstractMessage<T> {
 		@Override
 		protected final boolean isValidOnSide(Side side) {
 			return side.isClient();
@@ -136,7 +136,7 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements I
 	/**
 	 * Messages that can only be sent from the client to the server should use this class
 	 */
-	public static abstract class AbstractServerMessage extends AbstractMessage {
+	public static abstract class AbstractServerMessage<T extends AbstractMessage<T>> extends AbstractMessage<T> {
 		@Override
 		protected final boolean isValidOnSide(Side side) {
 			return side.isServer();
