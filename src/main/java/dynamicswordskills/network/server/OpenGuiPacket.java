@@ -25,7 +25,7 @@ import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 
-public class OpenGuiPacket extends AbstractServerMessage
+public class OpenGuiPacket extends AbstractServerMessage<OpenGuiPacket>
 {
 	private int id;
 

@@ -32,7 +32,7 @@ import dynamicswordskills.skills.SkillBase;
  * sent to the client, so skills shouldn't be manually activated client side.
  *
  */
-public class ActivateSkillPacket extends AbstractMessage
+public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 {
 	/** If true, calls {@link DSSPlayerInfo#triggerSkill}, otherwise uses {@link DSSPlayerInfo#activateSkill} */
 	private boolean wasTriggered = false;

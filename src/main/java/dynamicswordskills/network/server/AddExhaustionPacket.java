@@ -29,7 +29,7 @@ import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
  * Used for skills that activate client-side only and need to add exhaustion to the player.
  *
  */
-public class AddExhaustionPacket extends AbstractServerMessage
+public class AddExhaustionPacket extends AbstractServerMessage<AddExhaustionPacket>
 {
 	private float amount;
 
