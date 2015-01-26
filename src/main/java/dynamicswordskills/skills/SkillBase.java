@@ -19,6 +19,7 @@ package dynamicswordskills.skills;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +130,7 @@ public abstract class SkillBase
 
 	/** Returns an iterable collection of all the skills in the map */
 	public static final Collection<SkillBase> getSkills() {
-		return skillsMap.values();
+		return Collections.unmodifiableCollection(skillsMap.values());
 	}
 
 	/** Returns the total number of registered skills */
