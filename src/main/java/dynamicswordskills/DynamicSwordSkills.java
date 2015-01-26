@@ -32,6 +32,7 @@ import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLInterModComms;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -140,6 +141,8 @@ public class DynamicSwordSkills
 			}
 			NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
 		}
+		String link = "https://github.com/coolAlias/DynamicSwordSkills/tree/1.7.10/src/main/resources/versionlist.json";
+		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", link);
 	}
 
 	@Mod.EventHandler
