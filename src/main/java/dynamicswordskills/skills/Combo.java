@@ -1,7 +1,7 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
-    This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
+    This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
     General Public License as published by the Free Software Foundation,
     either version 3 of the License, or (at your option) any later version.
@@ -18,6 +18,7 @@
 package dynamicswordskills.skills;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.entity.Entity;
@@ -119,7 +120,7 @@ public class Combo
 	public float getDamage() { return comboDamage; }
 
 	/** Returns a copy of the current damage list */
-	public List<Float> getDamageList() { return new ArrayList(damageList); }
+	public List<Float> getDamageList() { return Collections.unmodifiableList(damageList); }
 
 	/** Returns the last entity directly hit during the combo */
 	public Entity getLastEntityHit() { return lastEntityHit; }

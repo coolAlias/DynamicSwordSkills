@@ -1,7 +1,7 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
-    This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
+    This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
     General Public License as published by the Free Software Foundation,
     either version 3 of the License, or (at your option) any later version.
@@ -19,6 +19,7 @@ package dynamicswordskills.skills;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +130,7 @@ public abstract class SkillBase
 
 	/** Returns an iterable collection of all the skills in the map */
 	public static final Collection<SkillBase> getSkills() {
-		return skillsMap.values();
+		return Collections.unmodifiableCollection(skillsMap.values());
 	}
 
 	/** Returns the total number of registered skills */
@@ -272,7 +273,7 @@ public abstract class SkillBase
 	 */
 	@SideOnly(Side.CLIENT)
 	public final List<String> getTranslatedTooltip(EntityPlayer player) {
-		List<String> desc = new ArrayList(tooltip.size());
+		List<String> desc = new ArrayList<String>(tooltip.size());
 		for (String s : tooltip) {
 			desc.add(StatCollector.translateToLocal(s));
 		}
@@ -285,7 +286,7 @@ public abstract class SkillBase
 	/** Returns the translated list containing Strings for tooltip display */
 	@SideOnly(Side.CLIENT)
 	public final List<String> getDescription() {
-		List<String> desc = new ArrayList(tooltip.size());
+		List<String> desc = new ArrayList<String>(tooltip.size());
 		for (String s : tooltip) {
 			desc.add(StatCollector.translateToLocal(s));
 		}

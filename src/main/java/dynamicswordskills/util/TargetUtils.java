@@ -1,7 +1,7 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
-    This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
+    This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
     General Public License as published by the Free Software Foundation,
     either version 3 of the License, or (at your option) any later version.
@@ -84,12 +84,12 @@ public class TargetUtils
 		}
 
 		Entity target = null;
-		List list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox().addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
+		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox().addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
 		double d0 = 0.0D;
 		//double hitBox = 0.3D;
 
 		for (int i = 0; i < list.size(); ++i) {
-			Entity entity1 = (Entity) list.get(i);
+			Entity entity1 = list.get(i);
 			if (entity1.canBeCollidedWith() && (entity1 != shooter || flag)) {
 				AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().expand(hitBox, hitBox, hitBox);
 				MovingObjectPosition mop1 = axisalignedbb.calculateIntercept(vec3, vec31);
