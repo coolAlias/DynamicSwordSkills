@@ -1,7 +1,7 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
-    This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
+    This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
     General Public License as published by the Free Software Foundation,
     either version 3 of the License, or (at your option) any later version.
@@ -17,22 +17,16 @@
 
 package dynamicswordskills.util;
 
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import dynamicswordskills.ref.ModInfo;
 
 public class LogHelper
 {
-	private static Logger logger;
+	private static final Logger logger = LogManager.getLogger(ModInfo.ID);
 
 	protected LogHelper() {}
-
-	/**
-	 * Initializes the logger; call this method before attempting to log any messages
-	 */
-	public static void init(FMLPreInitializationEvent event) {
-		logger = event.getModLog();
-	}
 
 	/**
 	 * Fatal error causes program to exit with message
