@@ -1,7 +1,7 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
-    This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
+    This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
     General Public License as published by the Free Software Foundation,
     either version 3 of the License, or (at your option) any later version.
@@ -60,7 +60,7 @@ public class DeactivateSkillPacket extends AbstractMessage<DeactivateSkillPacket
 		if (skill instanceof SkillActive) {
 			((SkillActive) skill).deactivate(player);
 		} else {
-			LogHelper.warn("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + skillId + " was not valid for this player.");
+			LogHelper.warn(String.format("Skill with ID %d was not valid for %s while processing DeactivateSkillPacket", skillId, player));
 		}
 	}
 }
