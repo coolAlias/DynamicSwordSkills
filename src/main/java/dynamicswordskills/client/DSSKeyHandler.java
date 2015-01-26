@@ -90,7 +90,7 @@ public class DSSKeyHandler
 				}
 			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
-					PlayerUtils.sendFormattedChat(mc.thePlayer, "key.dss.togglept",
+					PlayerUtils.sendFormattedChat(mc.thePlayer, "key.dss.toggletp",
 							(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("key.dss.enable")
 									: StatCollector.translateToLocal("key.dss.disable")));
 				} else {
