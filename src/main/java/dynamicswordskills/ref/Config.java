@@ -24,7 +24,9 @@ import java.util.Map;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.LogHelper;
 
 public class Config
 {
@@ -42,7 +44,7 @@ public class Config
 	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
 	private static boolean enablePlayerTarget;
 	/*================== GENERAL =====================*/
-	/** Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20] */
+	/** [SYNC] Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20] */
 	private static int baseSwingSpeed;
 	/** Whether all players should start with a Basic Skill orb */
 	private static boolean enableBonusOrb;
@@ -60,7 +62,7 @@ public class Config
 	private static boolean enableCreativeSkillSwords;
 	/** [Skill Swords] Skill level provided by the Creative Tab Skill Swords */
 	private static int skillSwordLevel;
-	/** [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
+	/** [SYNC] [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
 	private static boolean requireFullHealth;
 	/** Enable use of a skill */
 	private static boolean[] enableSkill;
@@ -157,5 +159,17 @@ public class Config
 	public static float getRandomMobDropChance() { return genericMobDropChance; }
 	public static float getDropChance(int orbID) {
 		return (orbDropChance.containsKey((byte) orbID) ? orbDropChance.get((byte) orbID) : 0.0F);
+	}
+
+	/**
+	 * Updates client settings from server packet
+	 */
+	public static void syncClientSettings(SyncConfigPacket msg) {
+		if (!msg.isMessageValid()) {
+			LogHelper.error("Invalid SyncConfigPacket attempting to process!");
+			return;
+		}
+		Config.baseSwingSpeed = msg.baseSwingSpeed;
+		Config.requireFullHealth = msg.requireFullHealth;
 	}
 }
