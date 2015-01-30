@@ -30,6 +30,7 @@ import dynamicswordskills.network.bidirectional.AttackTimePacket;
 import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
 import dynamicswordskills.network.bidirectional.PlaySoundPacket;
 import dynamicswordskills.network.client.MortalDrawPacket;
+import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.network.client.SyncSkillPacket;
 import dynamicswordskills.network.client.UpdateComboPacket;
@@ -64,6 +65,7 @@ public class PacketDispatcher
 
 		// Packets handled on CLIENT
 		registerMessage(MortalDrawPacket.class);
+		registerMessage(SyncConfigPacket.class);
 		registerMessage(SyncPlayerInfoPacket.class);
 		registerMessage(SyncSkillPacket.class);
 		registerMessage(UpdateComboPacket.class);
