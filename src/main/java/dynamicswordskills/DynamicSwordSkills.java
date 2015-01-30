@@ -141,7 +141,7 @@ public class DynamicSwordSkills
 			}
 			NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
 		}
-		String link = "https://raw.githubusercontent.com/coolAlias/DynamicSwordSkills/1.7.10/src/main/resources/versionlist.json";
+		String link = "https://raw.githubusercontent.com/coolAlias/DynamicSwordSkills/master/src/main/resources/versionlist.json";
 		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", link);
 	}
 
