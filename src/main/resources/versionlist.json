@@ -2,7 +2,7 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.8",
-			"modVersion":"2.0",
+			"modVersion":"1.8-2.0",
 			"changeLog": [
 	               "Added support for Version Checker",
 	               "See main mod page for full change log"
@@ -13,7 +13,7 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"1.6.5",
+			"modVersion":"1.7.10-1.6.5",
 			"changeLog": [
 	               "Added support for Version Checker",
 	               "See main mod page for full change log"
