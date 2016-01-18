@@ -25,11 +25,11 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import cpw.mods.fml.relauncher.Side;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.Dash;
 import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -93,7 +93,7 @@ public class DashImpactPacket extends AbstractServerMessage<DashImpactPacket>
 				if (entityHit != null) {
 					mop = new MovingObjectPosition(entityHit);
 				} else {
-					LogHelper.warn("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
+					DynamicSwordSkills.logger.warn("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
 				}
 			}
 			dash.onImpact(player.worldObj, player, mop);

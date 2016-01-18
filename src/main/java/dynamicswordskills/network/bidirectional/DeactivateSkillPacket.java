@@ -22,11 +22,11 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import cpw.mods.fml.relauncher.Side;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.LogHelper;
 
 /**
  * 
@@ -60,7 +60,7 @@ public class DeactivateSkillPacket extends AbstractMessage<DeactivateSkillPacket
 		if (skill instanceof SkillActive) {
 			((SkillActive) skill).deactivate(player);
 		} else {
-			LogHelper.warn(String.format("Skill with ID %d was not valid for %s while processing DeactivateSkillPacket", skillId, player));
+			DynamicSwordSkills.logger.warn(String.format("Skill with ID %d was not valid for %s while processing DeactivateSkillPacket", skillId, player));
 		}
 	}
 }
