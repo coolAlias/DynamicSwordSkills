@@ -28,11 +28,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.util.LogHelper;
 import dynamicswordskills.util.PlayerUtils;
 
 /**
@@ -202,7 +202,7 @@ public abstract class SkillActive extends SkillBase
 		if (isActive()) {
 			onDeactivated(player.worldObj, player);
 			if (isActive()) {
-				LogHelper.error(getDisplayName() + " is still active after onDeactivated called - this may result in SEVERE errors or even crashes!!!");
+				DynamicSwordSkills.logger.error(getDisplayName() + " is still active after onDeactivated called - this may result in SEVERE errors or even crashes!!!");
 			} else if (player.worldObj.isRemote) {
 				PacketDispatcher.sendToServer(new DeactivateSkillPacket(this));
 			} else {

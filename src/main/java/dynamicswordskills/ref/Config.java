@@ -24,9 +24,9 @@ import java.util.Map;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.LogHelper;
 
 public class Config
 {
@@ -166,7 +166,7 @@ public class Config
 	 */
 	public static void syncClientSettings(SyncConfigPacket msg) {
 		if (!msg.isMessageValid()) {
-			LogHelper.error("Invalid SyncConfigPacket attempting to process!");
+			DynamicSwordSkills.logger.error("Invalid SyncConfigPacket attempting to process!");
 			return;
 		}
 		Config.baseSwingSpeed = msg.baseSwingSpeed;

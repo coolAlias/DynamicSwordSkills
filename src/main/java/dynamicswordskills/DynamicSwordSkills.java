@@ -40,6 +40,10 @@ import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
 import dynamicswordskills.command.DSSCommands;
@@ -60,6 +64,8 @@ public class DynamicSwordSkills
 
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
 	public static CommonProxy proxy;
+
+	public static final Logger logger = LogManager.getLogger(ModInfo.ID);
 
 	/** Whether Battlegear2 mod is loaded */
 	public static boolean isBG2Enabled;
