@@ -28,7 +28,7 @@ import net.minecraft.item.ItemStack;
  * Either of those can be extended directly as well, if desired.
  *
  */
-public interface ISkillProvider extends ISkillItem {
+public interface ISkillProvider extends IWeapon {
 
 	/**
 	 * Returns the ID of the skill this Item provides; should return SkillBase.{skill}.id

@@ -49,8 +49,9 @@ import dynamicswordskills.skills.SkillBase;
  * without actually being a sword.
  * 
  * If the item cannot for some reason extend {@link #ItemSword} but should still be
- * considered a sword, {@link ISword} should also be implemented. This will allow
- * the item to be used with skills that require swords, such as Mortal Draw.
+ * considered a sword, simply return true from {@link IWeapon#isSword}. This will
+ * allow the item to be used with skills that require swords, such as Mortal Draw,
+ * even if it does not itself provide that skill.
  * 
  * Note that an ISkillProvider item will always be able to use the skill it provides,
  * even if the item is not a sword and the skill would otherwise require such.
@@ -108,6 +109,16 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 		this.grantsBasicSkill = grantsBasicSkill;
 		setMaxDamage(this.material.getMaxUses());
 		setMaxStackSize(1);
+	}
+
+	@Override
+	public boolean isSword(ItemStack stack) {
+		return false;
+	}
+
+	@Override
+	public boolean isWeapon(ItemStack stack) {
+		return true;
 	}
 
 	/**

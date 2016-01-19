@@ -33,6 +33,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -46,6 +47,7 @@ import org.apache.logging.log4j.Logger;
 
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
+import dynamicswordskills.api.WeaponRegistry;
 import dynamicswordskills.command.DSSCommands;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
@@ -150,8 +152,20 @@ public class DynamicSwordSkills
 	}
 
 	@Mod.EventHandler
+	public void postInit(FMLPostInitializationEvent event) {
+		Config.postInit();
+	}
+
+	@Mod.EventHandler
 	public void onServerStarting(FMLServerStartingEvent event) {
 		DSSCommands.registerCommands(event);
+	}
+
+	@Mod.EventHandler
+	public void processMessages(FMLInterModComms.IMCEvent event) {
+		for (final FMLInterModComms.IMCMessage msg : event.getMessages()) {
+			WeaponRegistry.INSTANCE.processMessage(msg);
+		}
 	}
 
 	private void registerSkillOrbLoot() {
