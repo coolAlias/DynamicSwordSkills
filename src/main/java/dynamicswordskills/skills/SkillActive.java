@@ -23,6 +23,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -230,7 +231,7 @@ public abstract class SkillActive extends SkillBase
 	 */
 	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
 		if (!Config.isSkillEnabled(getId())) {
-			PlayerUtils.sendFormattedChat(player, "chat.dss.skill.use.disabled", getDisplayName());
+			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new ChatComponentTranslation(getTranslationString()));
 			return false;
 		} else if (canUse(player)) {
 			if (autoAddExhaustion() && !player.capabilities.isCreativeMode) {
@@ -244,7 +245,7 @@ public abstract class SkillActive extends SkillBase
 			return onActivated(world, player);
 		} else {
 			if (level > 0) {
-				PlayerUtils.sendFormattedChat(player, "chat.dss.skill.use.fail", getDisplayName());
+				PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new ChatComponentTranslation(getTranslationString()));
 			}
 			return false;
 		}

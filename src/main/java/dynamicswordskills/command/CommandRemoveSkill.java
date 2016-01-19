@@ -26,6 +26,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.PlayerUtils;
@@ -62,25 +63,25 @@ public class CommandRemoveSkill extends CommandBase
 			if (!all) {
 				skill = SkillBase.getSkillByName(args[0]);
 				if (skill == null) {
-					throw new CommandException("commands.skill.generic.unknown", new Object[] {args[0]});
+					throw new CommandException("commands.skill.generic.unknown", args[0]);
 				}
 			}
 			EntityPlayerMP player = getCommandSenderAsPlayer(sender);
 			if (DSSPlayerInfo.get(player).removeSkill(args[0])) {
 				if (all) {
-					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.all", player.getDisplayName());
+					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.success.all", player.getDisplayName());
 				} else {
-					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.one", player.getDisplayName(), skill.getDisplayName());
+					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.success.one", player.getDisplayName(), new ChatComponentTranslation(skill.getTranslationString()));
 				}
 			} else { // player didn't have this skill
 				if (all) {
-					throw new CommandException("commands.removeskill.failure.all", new Object[] {player.getDisplayName()});
+					throw new CommandException("commands.removeskill.failure.all", player.getDisplayName());
 				} else {
-					throw new CommandException("commands.removeskill.failure.one", new Object[] {player.getDisplayName(), skill.getDisplayName()});
+					throw new CommandException("commands.removeskill.failure.one", player.getDisplayName(), new ChatComponentTranslation(skill.getTranslationString()));
 				}
 			}
 		} else {
-			throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
+			throw new WrongUsageException(getCommandUsage(sender));
 		}
 	}
 
