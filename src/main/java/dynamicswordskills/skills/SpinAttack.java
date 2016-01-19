@@ -163,7 +163,7 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
+		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
 	}
 
 	@Override
@@ -171,7 +171,7 @@ public class SpinAttack extends SkillActive
 	public boolean canExecute(EntityPlayer player) {
 		// return super.canUse instead of this.canUse to avoid !isActive() check; allows
 		// canExecute to be checked when refreshing super spin attack
-		return super.canUse(player) && PlayerUtils.isHoldingSkillItem(player);
+		return super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem());
 	}
 
 	/**
@@ -249,7 +249,7 @@ public class SpinAttack extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		// isCharging can only be true on the client, which is where charging is handled
 		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
-			if (PlayerUtils.isHoldingSkillItem(player) && player.worldObj.isRemote && isKeyPressed()) {
+			if (PlayerUtils.isWeapon(player.getHeldItem()) && player.worldObj.isRemote && isKeyPressed()) {
 				if (charge < (getChargeTime() - 1)) {
 					Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
 				}
@@ -268,7 +268,7 @@ public class SpinAttack extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
-		if (PlayerUtils.isHoldingSkillItem(player)) {
+		if (PlayerUtils.isWeapon(player.getHeldItem())) {
 			List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D);
 			for (EntityLivingBase target : list) {
 				if (targets != null && targets.contains(target)) {
@@ -334,7 +334,7 @@ public class SpinAttack extends SkillActive
 	 * Called on the server after receiving the {@link RefreshSpinPacket}
 	 */
 	public void refreshServerSpin(EntityPlayer player) {
-		if (canRefresh() && super.canUse(player) && PlayerUtils.isHoldingSkillItem(player)) {
+		if (canRefresh() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem())) {
 			arc += 360F;
 		}
 	}

@@ -57,6 +57,16 @@ public class ItemRandomSkill extends ItemSword implements ISkillProvider
 		setCreativeTab(null);
 	}
 
+	@Override
+	public boolean isSword(ItemStack stack) {
+		return true;
+	}
+
+	@Override
+	public boolean isWeapon(ItemStack stack) {
+		return true;
+	}
+
 	/**
 	 * A convenience method for ensuring the stack has an NBT tag before retrieving the skill instance
 	 * using the method {@link SkillBase#getSkillFromItem(ItemStack, ISkillProvider) SkillBase.getSkillFromItem}

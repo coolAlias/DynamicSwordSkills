@@ -339,7 +339,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 			}
 		}
 		if (event.source.damageType.equals("player")) {
-			String sound = (PlayerUtils.isHoldingSword(player) ? ModInfo.SOUND_SWORDCUT : ModInfo.SOUND_HURT_FLESH);
+			String sound = (PlayerUtils.isSword(player.getHeldItem()) ? ModInfo.SOUND_SWORDCUT : ModInfo.SOUND_HURT_FLESH);
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, sound, 0.4F, 0.5F);
 		}
 	}

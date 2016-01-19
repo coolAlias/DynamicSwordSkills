@@ -18,12 +18,15 @@
 package dynamicswordskills.ref;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.WeaponRegistry;
 import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.skills.SkillBase;
 
@@ -42,6 +45,15 @@ public class Config
 	private static boolean autoTarget;
 	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
 	private static boolean enablePlayerTarget;
+	/*================== WEAPON REGISTRY =====================*/
+	/** Items that are considered Swords for all intents and purposes */
+	private static String[] swords = new String[0];
+	/** Items that are considered Melee Weapons for all intents and purposes */
+	private static String[] weapons = new String[0];
+	/** Items that are forbidden from being considered as Swords */
+	private static String[] forbidden_swords = new String[0];
+	/** Items that are forbidden from being considered as Melee Weapons */
+	private static String[] forbidden_weapons = new String[0];
 	/*================== GENERAL =====================*/
 	/** [SYNC] Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20] */
 	private static int baseSwingSpeed;
@@ -91,6 +103,22 @@ public class Config
 		doubleTap = config.get(category, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", true).getBoolean(true);
 		autoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
 		enablePlayerTarget = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
+		/*================== WEAPON REGISTRY =====================*/
+		swords = config.get("Weapon Registry", "[Allowed Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item so that it is considered a SWORD by ZSS, i.e. it be used with skills that\nrequire swords, as well as other interactions that require swords, such as cutting grass.\nAll swords are also considered WEAPONS.").getStringList();
+		Arrays.sort(swords);
+		weapons = config.get("Weapon Registry", "[Allowed Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item as a generic melee WEAPON. This means it can be used for all\nskills except those that specifically require a sword, as well as some other things.").getStringList();
+		Arrays.sort(weapons);
+		// Battlegear2 weapons ALL extend ItemSword, but are not really swords
+		String[] forbidden = new String[]{
+				"battlegear2:dagger.wood","battlegear2:dagger.stone","battlegear2:dagger.gold","battlegear2:dagger.iron","battlegear2:dagger.diamond",	
+				"battlegear2:mace.wood","battlegear2:mace.stone","battlegear2:mace.gold","battlegear2:mace.iron","battlegear2:mace.diamond",
+				"battlegear2:spear.wood","battlegear2:spear.stone","battlegear2:spear.gold","battlegear2:spear.iron","battlegear2:spear.diamond",
+				"battlegear2:waraxe.wood","battlegear2:waraxe.stone","battlegear2:waraxe.gold","battlegear2:waraxe.iron","battlegear2:waraxe.diamond"
+		};
+		forbidden_swords = config.get("Weapon Registry", "[Forbidden Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", forbidden, "Forbid one or more items from acting as SWORDs, e.g. if a mod item extends ItemSword but is not really a sword").getStringList();
+		Arrays.sort(forbidden_swords);
+		forbidden_weapons = config.get("Weapon Registry", "[Forbidden Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Forbid one or more items from acting as WEAPONs, e.g. if an item is added by IMC and you don't want it to be usable with skills.\nNote that this will also prevent the item from behaving as a SWORD.").getStringList();
+		Arrays.sort(forbidden_weapons);
 		/*================== GENERAL =====================*/
 		baseSwingSpeed = MathHelper.clamp_int(config.get("general", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
 		enableBonusOrb = config.get("general", "Whether all players should start with a Basic Skill orb", true).getBoolean(true);
@@ -125,6 +153,12 @@ public class Config
 			orbDropChance.put(skill.getId(), (0.001F * (float) i));
 		}
 		config.save();
+	}
+	public static void postInit() {
+		WeaponRegistry.INSTANCE.registerItems(swords, "Config", true);
+		WeaponRegistry.INSTANCE.registerItems(weapons, "Config", false);
+		WeaponRegistry.INSTANCE.forbidItems(forbidden_swords, "Config", true);
+		WeaponRegistry.INSTANCE.forbidItems(forbidden_weapons, "Config", false);
 	}
 	/*================== CLIENT SIDE SETTINGS  =====================*/
 	public static boolean isComboHudEnabled() { return enableComboHud; }

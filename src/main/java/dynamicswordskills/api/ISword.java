@@ -17,18 +17,10 @@
 
 package dynamicswordskills.api;
 
-import dynamicswordskills.skills.LeapingBlow;
-import dynamicswordskills.skills.MortalDraw;
-import dynamicswordskills.skills.RisingCut;
-
 /**
  * 
- * For the purpose of using certain skills, this item will be considered a sword.
- * 
- * Skills which require a sword are:
- * {@link LeapingBlow}, {@link MortalDraw}, and {@link RisingCut}
+ * This interface is no longer used: see {@link IWeapon} and the {@link WeaponRegistry}
  *
  */
-public interface ISword {
-
-}
+@Deprecated
+public interface ISword {}

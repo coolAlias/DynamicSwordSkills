@@ -17,16 +17,10 @@
 
 package dynamicswordskills.api;
 
-import net.minecraft.item.ItemSword;
-
 /**
  * 
- * Allows the item to count as a weapon for skills that require the player to be
- * wielding some kind of weapon; note that some skills specifically require a
- * sword, in which case the item must either extend the vanilla {@link ItemSword}
- * directly or implement {@link ISword}.
+ * This interface is no longer used: see {@link IWeapon} and the {@link WeaponRegistry}
  *
  */
-public interface ISkillItem {
-
-}
+@Deprecated
+public interface ISkillItem {}

@@ -37,6 +37,7 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLInterModComms;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -46,6 +47,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
+import dynamicswordskills.api.WeaponRegistry;
 import dynamicswordskills.command.DSSCommands;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
@@ -148,8 +150,20 @@ public class DynamicSwordSkills
 	}
 
 	@Mod.EventHandler
+	public void postInit(FMLPostInitializationEvent event) {
+		Config.postInit();
+	}
+
+	@Mod.EventHandler
 	public void onServerStarting(FMLServerStartingEvent event) {
 		DSSCommands.registerCommands(event);
+	}
+
+	@Mod.EventHandler
+	public void processMessages(FMLInterModComms.IMCEvent event) {
+		for (final FMLInterModComms.IMCMessage msg : event.getMessages()) {
+			WeaponRegistry.INSTANCE.processMessage(msg);
+		}
 	}
 
 	private void registerSkillOrbLoot() {
