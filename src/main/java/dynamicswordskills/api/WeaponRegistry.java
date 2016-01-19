@@ -22,8 +22,8 @@ import java.util.Set;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemSword;
-import net.minecraftforge.fml.common.event.FMLInterModComms;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.event.FMLInterModComms;
+import cpw.mods.fml.common.registry.GameRegistry;
 import dynamicswordskills.DynamicSwordSkills;
 
 /**
