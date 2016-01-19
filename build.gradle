@@ -17,18 +17,20 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.6.5"
+version = "1.7"
 group= "com.google.coolalias008.dynamicswordskills" 
 archivesBaseName = "1.7.10-dynamicswordskills"
 
+sourceCompatibility = targetCompatibility = "1.6"
+
 dependencies {
 	compile files (
-		"eclipse/mods/1.7.10-Battlegear-Bin-1.0.6.2.jar"
+		"eclipse/mods/1.7.10-Battlegear-Bin-1.0.7.0.jar"
 	)
 }
 
 minecraft {
-    version = "1.7.10-10.13.2.1230"
+    version = "1.7.10-10.13.4.1448-1.7.10"
     runDir = "eclipse"
 }
 

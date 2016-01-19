@@ -2,9 +2,9 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"1.6.5",
+			"modVersion":"1.7",
 			"changeLog": [
-	               "Added support for Version Checker"
+	               "Added Weapon Registry"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1294232",
 			"isDirectLink":"false",
