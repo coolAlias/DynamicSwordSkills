@@ -78,78 +78,72 @@ public class DynamicSwordSkills
 	skillIron,
 	skillDiamond;
 
-	private boolean shouldLoad;
-
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		shouldLoad = !Loader.isModLoaded("zeldaswordskills");
-		isBG2Enabled = Loader.isModLoaded("battlegear2");
-		if (shouldLoad) {
-			Config.init(event);
-			tabSkills = new CreativeTabs("dss.skills") {
-				@Override
-				@SideOnly(Side.CLIENT)
-				public Item getTabIconItem() {
-					return DynamicSwordSkills.skillOrb;
-				}
-			};
-			skillOrb = new ItemSkillOrb().setUnlocalizedName("dss.skillorb");
-			GameRegistry.registerItem(skillOrb, skillOrb.getUnlocalizedName().substring(5));
-			if (Config.areCreativeSwordsEnabled()) {
-				skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
-				for (SkillBase skill : SkillBase.getSkills()) {
-					if (!(skill instanceof SkillActive)) {
-						continue;
-					}
-					int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
-					skillItems.add(new ItemSkillProvider(ToolMaterial.IRON, skill, (byte) level).
-							setUnlocalizedName("dss.skillitem" + skill.getId()).setCreativeTab(DynamicSwordSkills.tabSkills).setTextureName("iron_sword"));
-					GameRegistry.registerItem(skillItems.get(skillItems.size() - 1), skillItems.get(skillItems.size() - 1).getUnlocalizedName().substring(5));
-				}
-			}
-			if (Config.areRandomSwordsEnabled()) {
-				skillWood = new ItemRandomSkill(ToolMaterial.WOOD).setUnlocalizedName("dss.skillwood").setTextureName("wood_sword");
-				GameRegistry.registerItem(skillWood, skillWood.getUnlocalizedName().substring(5));
-				skillStone = new ItemRandomSkill(ToolMaterial.STONE).setUnlocalizedName("dss.skillstone").setTextureName("stone_sword");
-				GameRegistry.registerItem(skillStone, skillStone.getUnlocalizedName().substring(5));
-				skillGold = new ItemRandomSkill(ToolMaterial.GOLD).setUnlocalizedName("dss.skillgold").setTextureName("gold_sword");
-				GameRegistry.registerItem(skillGold, skillGold.getUnlocalizedName().substring(5));
-				skillIron = new ItemRandomSkill(ToolMaterial.IRON).setUnlocalizedName("dss.skilliron").setTextureName("iron_sword");
-				GameRegistry.registerItem(skillIron, skillIron.getUnlocalizedName().substring(5));
-				skillDiamond = new ItemRandomSkill(ToolMaterial.EMERALD).setUnlocalizedName("dss.skilldiamond").setTextureName("diamond_sword");
-				GameRegistry.registerItem(skillDiamond, skillDiamond.getUnlocalizedName().substring(5));
-			}
-			EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, this, 64, 10, true);
-			EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", 1, this, 64, 10, true);
-			PacketDispatcher.initialize();
+		if (Loader.isModLoaded("zeldaswordskills")) {
+			throw new RuntimeException("Dynamic Sword Skills may not be loaded at the same time as Zelda Sword Skills! Please remove one or the other.");
 		}
+		isBG2Enabled = Loader.isModLoaded("battlegear2");
+		Config.init(event);
+		tabSkills = new CreativeTabs("dss.skills") {
+			@Override
+			@SideOnly(Side.CLIENT)
+			public Item getTabIconItem() {
+				return DynamicSwordSkills.skillOrb;
+			}
+		};
+		skillOrb = new ItemSkillOrb().setUnlocalizedName("dss.skillorb");
+		GameRegistry.registerItem(skillOrb, skillOrb.getUnlocalizedName().substring(5));
+		if (Config.areCreativeSwordsEnabled()) {
+			skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
+			for (SkillBase skill : SkillBase.getSkills()) {
+				if (!(skill instanceof SkillActive)) {
+					continue;
+				}
+				int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
+				skillItems.add(new ItemSkillProvider(ToolMaterial.IRON, skill, (byte) level).
+						setUnlocalizedName("dss.skillitem" + skill.getId()).setCreativeTab(DynamicSwordSkills.tabSkills).setTextureName("iron_sword"));
+				GameRegistry.registerItem(skillItems.get(skillItems.size() - 1), skillItems.get(skillItems.size() - 1).getUnlocalizedName().substring(5));
+			}
+		}
+		if (Config.areRandomSwordsEnabled()) {
+			skillWood = new ItemRandomSkill(ToolMaterial.WOOD).setUnlocalizedName("dss.skillwood").setTextureName("wood_sword");
+			GameRegistry.registerItem(skillWood, skillWood.getUnlocalizedName().substring(5));
+			skillStone = new ItemRandomSkill(ToolMaterial.STONE).setUnlocalizedName("dss.skillstone").setTextureName("stone_sword");
+			GameRegistry.registerItem(skillStone, skillStone.getUnlocalizedName().substring(5));
+			skillGold = new ItemRandomSkill(ToolMaterial.GOLD).setUnlocalizedName("dss.skillgold").setTextureName("gold_sword");
+			GameRegistry.registerItem(skillGold, skillGold.getUnlocalizedName().substring(5));
+			skillIron = new ItemRandomSkill(ToolMaterial.IRON).setUnlocalizedName("dss.skilliron").setTextureName("iron_sword");
+			GameRegistry.registerItem(skillIron, skillIron.getUnlocalizedName().substring(5));
+			skillDiamond = new ItemRandomSkill(ToolMaterial.EMERALD).setUnlocalizedName("dss.skilldiamond").setTextureName("diamond_sword");
+			GameRegistry.registerItem(skillDiamond, skillDiamond.getUnlocalizedName().substring(5));
+		}
+		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, this, 64, 10, true);
+		EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", 1, this, 64, 10, true);
+		PacketDispatcher.initialize();
 	}
 
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent event) {
-		if (shouldLoad) {
-			proxy.registerRenderers();
-			DSSCombatEvents events = new DSSCombatEvents();
-			MinecraftForge.EVENT_BUS.register(events);
-			FMLCommonHandler.instance().bus().register(events); // for PlayerLoggedInEvent
-			DSSCombatEvents.initializeDrops();
-			if (Config.getLootWeight() > 0) {
-				registerSkillOrbLoot();
-			}
-			if (Config.areRandomSwordsEnabled()) {
-				registerRandomSwordLoot();
-			}
-			NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
+		proxy.registerRenderers();
+		DSSCombatEvents events = new DSSCombatEvents();
+		MinecraftForge.EVENT_BUS.register(events);
+		FMLCommonHandler.instance().bus().register(events); // for PlayerLoggedInEvent
+		DSSCombatEvents.initializeDrops();
+		if (Config.getLootWeight() > 0) {
+			registerSkillOrbLoot();
 		}
+		if (Config.areRandomSwordsEnabled()) {
+			registerRandomSwordLoot();
+		}
+		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
 		String link = "https://raw.githubusercontent.com/coolAlias/DynamicSwordSkills/master/src/main/resources/versionlist.json";
 		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", link);
 	}
 
 	@Mod.EventHandler
 	public void onServerStarting(FMLServerStartingEvent event) {
-		if (shouldLoad) {
-			DSSCommands.registerCommands(event);
-		}
+		DSSCommands.registerCommands(event);
 	}
 
 	private void registerSkillOrbLoot() {
