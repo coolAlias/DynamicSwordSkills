@@ -25,6 +25,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
@@ -56,16 +57,16 @@ public class ItemSkillOrb extends Item
 			SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
 			if (skill != null) {
 				if (!Config.isSkillEnabled(skill.getId())) {
-					PlayerUtils.sendFormattedChat(player, "chat.dss.skill.use.disabled", skill.getDisplayName());
+					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new ChatComponentTranslation(skill.getTranslationString()));
 				} else if (DSSPlayerInfo.get(player).grantSkill(skill)) {
 					world.playSoundAtEntity(player, ModInfo.SOUND_LEVELUP, 1.0F, 1.0F);
-					PlayerUtils.sendFormattedChat(player, "chat.dss.skill.levelup",
-							skill.getDisplayName(), DSSPlayerInfo.get(player).getTrueSkillLevel(skill));
+					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.levelup",
+							new ChatComponentTranslation(skill.getTranslationString()), DSSPlayerInfo.get(player).getTrueSkillLevel(skill));
 					if (!player.capabilities.isCreativeMode) {
 						--stack.stackSize;
 					}
 				} else {
-					PlayerUtils.sendFormattedChat(player, "chat.dss.skill.maxlevel", skill.getDisplayName());
+					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.maxlevel", new ChatComponentTranslation(skill.getTranslationString()));
 				}
 			}
 		}

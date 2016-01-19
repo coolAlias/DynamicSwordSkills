@@ -90,11 +90,11 @@ public class DSSKeyHandler
 				}
 			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
-					PlayerUtils.sendFormattedChat(mc.thePlayer, "key.dss.toggletp",
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggletp",
 							(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("key.dss.enable")
 									: StatCollector.translateToLocal("key.dss.disable")));
 				} else {
-					PlayerUtils.sendFormattedChat(mc.thePlayer, "key.dss.toggleat",
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggleat",
 							(Config.toggleAutoTarget() ? StatCollector.translateToLocal("key.dss.enable")
 									: StatCollector.translateToLocal("key.dss.disable")));
 				}
@@ -102,7 +102,7 @@ public class DSSKeyHandler
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
 			}  else if (kb == keys[KEY_TOGGLE_HUD].getKeyCode()) {
 				ComboOverlay.shouldDisplay = !ComboOverlay.shouldDisplay;
-				PlayerUtils.sendFormattedChat(mc.thePlayer, "key.dss.togglehud",
+				PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.togglehud",
 						(ComboOverlay.shouldDisplay ? StatCollector.translateToLocal("key.dss.enable")
 								: StatCollector.translateToLocal("key.dss.disable")));
 			} else {

@@ -204,6 +204,11 @@ public abstract class SkillBase
 		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".name");
 	}
 
+	/** Returns the string used to translate this skill's name */
+	public final String getTranslationString() {
+		return getFullUnlocalizedName() + ".name";
+	}
+
 	/** Returns the unlocalized name with no prefix, exactly as the skill was registered */
 	public final String getUnlocalizedName() {
 		return unlocalizedName;
