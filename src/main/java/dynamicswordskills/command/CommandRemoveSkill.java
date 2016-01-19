@@ -38,7 +38,7 @@ public class CommandRemoveSkill extends CommandBase
 	public CommandRemoveSkill() {}
 
 	@Override
-	public String getName() {
+	public String getCommandName() {
 		return "removeskill";
 	}
 
@@ -56,7 +56,7 @@ public class CommandRemoveSkill extends CommandBase
 	}
 
 	@Override
-	public void execute(ICommandSender sender, String[] args) throws CommandException {
+	public void processCommand(ICommandSender sender, String[] args) throws CommandException {
 		if (args != null && args.length == 1) {
 			boolean all = ("all").equals(args[0]);
 			SkillBase skill = null;

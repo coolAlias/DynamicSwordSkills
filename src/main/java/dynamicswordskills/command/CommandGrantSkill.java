@@ -46,7 +46,7 @@ public class CommandGrantSkill extends CommandBase
 	public CommandGrantSkill() {}
 
 	@Override
-	public String getName() {
+	public String getCommandName() {
 		return "grantskill";
 	}
 
@@ -64,7 +64,7 @@ public class CommandGrantSkill extends CommandBase
 	}
 
 	@Override
-	public void execute(ICommandSender sender, String[] args) throws CommandException {
+	public void processCommand(ICommandSender sender, String[] args) throws CommandException {
 		EntityPlayerMP commandSender = getCommandSenderAsPlayer(sender);
 		EntityPlayerMP player = getPlayer(sender, args[0]);
 		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
