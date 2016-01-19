@@ -27,5 +27,6 @@ public class DSSCommands
 	public static void registerCommands(FMLServerStartingEvent event) {
 		event.registerServerCommand(CommandGrantSkill.INSTANCE);
 		event.registerServerCommand(CommandRemoveSkill.INSTANCE);
+		event.registerServerCommand(CommandWeaponRegistry.INSTANCE);
 	}
 }
