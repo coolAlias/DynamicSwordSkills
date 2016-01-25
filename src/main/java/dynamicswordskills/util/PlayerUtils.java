@@ -48,10 +48,10 @@ import dynamicswordskills.skills.SkillBase;
 public class PlayerUtils
 {
 	/**
-	 * Returns whether the player is using an item, accounting for possibility of Battlegear2 offhand item use
+	 * Returns whether the player is blocking, accounting for possibility of Battlegear2 shield item use
 	 */
-	public static boolean isUsingItem(EntityPlayer player) {
-		if (player.isUsingItem()) {
+	public static boolean isBlocking(EntityPlayer player) {
+		if (player.isBlocking()) {
 			return true;
 		} else if (DynamicSwordSkills.isBG2Enabled) {
 			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
