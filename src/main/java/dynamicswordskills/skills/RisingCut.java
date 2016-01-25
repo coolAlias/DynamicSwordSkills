@@ -93,7 +93,7 @@ public class RisingCut extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
+		return super.canUse(player) && !isActive() && !player.isUsingItem() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
 	}
 
 	@Override
