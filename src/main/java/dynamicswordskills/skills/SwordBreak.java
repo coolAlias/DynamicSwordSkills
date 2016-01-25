@@ -120,7 +120,7 @@ public class SwordBreak extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return canUse(player) && PlayerUtils.isUsingItem(player);
+		return canUse(player) && PlayerUtils.isBlocking(player);
 	}
 
 	@Override

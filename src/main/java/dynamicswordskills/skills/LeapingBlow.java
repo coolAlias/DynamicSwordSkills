@@ -115,7 +115,7 @@ public class LeapingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return !isActive() && player.onGround && PlayerUtils.isUsingItem(player) && !TargetUtils.isInLiquid(player);
+		return !isActive() && player.onGround && PlayerUtils.isBlocking(player) && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
