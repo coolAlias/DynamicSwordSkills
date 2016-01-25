@@ -24,9 +24,9 @@ archivesBaseName = "1.8-dynamicswordskills"
 sourceCompatibility = targetCompatibility = "1.6"
 
 dependencies {
-	//compile files (
-	//	"eclipse/mods/1.7.10-Battlegear-Bin-1.0.6.2.jar"
-	//)
+    compile files (
+        "eclipse/mods/1.8-Battlegear-Bin-1.0.10.0.jar"
+    )
 }
 
 minecraft {

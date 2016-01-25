@@ -19,6 +19,7 @@ package dynamicswordskills.util;
 
 import java.util.Random;
 
+import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -53,7 +54,7 @@ public class PlayerUtils
 		if (player.isBlocking()) {
 			return true;
 		} else if (DynamicSwordSkills.isBG2Enabled) {
-			// return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
+			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
 		}
 		return false;
 	}
