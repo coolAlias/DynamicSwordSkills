@@ -40,7 +40,7 @@ public class TargetIdPacket extends AbstractServerMessage<TargetIdPacket>
 	private byte skillId;
 
 	/** Current target from ILockOnTarget skill */
-	private Entity entity;
+	private Entity targetEntity;
 
 	/** Entity Id of above entity */
 	private int entityId;
@@ -57,7 +57,7 @@ public class TargetIdPacket extends AbstractServerMessage<TargetIdPacket>
 	public TargetIdPacket(SkillBase skill) throws IllegalArgumentException {
 		if (skill instanceof ILockOnTarget) {
 			this.skillId = skill.getId();
-			this.entity = ((ILockOnTarget) skill).getCurrentTarget();
+			this.targetEntity = ((ILockOnTarget) skill).getCurrentTarget();
 		} else {
 			throw new IllegalArgumentException("Parameter 'skill' must be an instance of ILockOnTarget while constructing TargetIdPacket");
 		}
@@ -75,10 +75,10 @@ public class TargetIdPacket extends AbstractServerMessage<TargetIdPacket>
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		if (entity != null) {
+		if (targetEntity != null) {
 			buffer.writeByte((byte) 1);
 			buffer.writeByte(skillId);
-			buffer.writeInt(entity.getEntityId());
+			buffer.writeInt(targetEntity.getEntityId());
 		} else {
 			buffer.writeByte((byte) 0);
 		}
@@ -91,9 +91,9 @@ public class TargetIdPacket extends AbstractServerMessage<TargetIdPacket>
 			if (isNull) {
 				skill.setCurrentTarget(player, null);
 			} else {
-				Entity entity = player.worldObj.getEntityByID(entityId);
-				skill.setCurrentTarget(player, entity);
-				if (entity == null) { // For some reason the target id is sometimes incorrect or out of date
+				targetEntity = player.worldObj.getEntityByID(entityId);
+				skill.setCurrentTarget(player, targetEntity);
+				if (targetEntity == null) { // For some reason the target id is sometimes incorrect or out of date
 					LogHelper.warn("Invalid target; entity with id " + entityId + " is null");
 				}
 			}

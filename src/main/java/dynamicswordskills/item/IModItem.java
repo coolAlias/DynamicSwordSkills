@@ -31,12 +31,14 @@ public interface IModItem {
 
 	/**
 	 * Register any item variant names here using {@link ModelBakery#addVariantName}
+	 * This MUST be called during {@code FMLPreInitializationEvent}
 	 */
 	@SideOnly(Side.CLIENT)
 	public void registerVariants();
 
 	/**
 	 * Register all of the Item's renderers here, including for any subtypes.
+	 * This MUST be called during {@code FMLInitializationEvent}
 	 * 
 	 * A default implementation to register an item with modid:itemname would be:
 	 *

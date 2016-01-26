@@ -27,7 +27,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -69,25 +68,20 @@ public class TargetUtils
 	 * @param shooter	An entity not to be collided with, generally the shooter
 	 * @param hitBox	The amount by which to expand the collided entities' bounding boxes when checking for impact (may be negative)
 	 * @param flag		Optional flag to allow collision with shooter, e.g. (ticksInAir >= 5)
-	 * 
 	 */
 	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
-		double posY = entity.posY + (entity.height / 2.0D);
+		double posY = entity.posY + (entity.height / 2.0D); // fix for Dash
 		Vec3 vec3 = new Vec3(entity.posX, posY, entity.posZ);
 		Vec3 vec31 = new Vec3(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
 		MovingObjectPosition mop = world.rayTraceBlocks(vec3, vec31, false, true, false);
 		vec3 = new Vec3(entity.posX, posY, entity.posZ);
 		vec31 = new Vec3(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
-
 		if (mop != null) {
 			vec31 = new Vec3(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
 		}
-
 		Entity target = null;
 		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox().addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
 		double d0 = 0.0D;
-		//double hitBox = 0.3D;
-
 		for (int i = 0; i < list.size(); ++i) {
 			Entity entity1 = list.get(i);
 			if (entity1.canBeCollidedWith() && (entity1 != shooter || flag)) {
@@ -102,11 +96,9 @@ public class TargetUtils
 				}
 			}
 		}
-
 		if (target != null) {
 			mop = new MovingObjectPosition(target);
 		}
-
 		if (mop != null && mop.entityHit instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) mop.entityHit;
 			if (player.capabilities.disableDamage || (shooter instanceof EntityPlayer
@@ -115,7 +107,6 @@ public class TargetUtils
 				mop = null;
 			}
 		}
-
 		return mop;
 	}
 
@@ -248,20 +239,10 @@ public class TargetUtils
 	}
 
 	/**
-	 * Returns the chunk coordinates for the entity's current position
-	 */
-	public static BlockPos getEntityCoordinates(Entity entity) {
-		int i = MathHelper.floor_double(entity.posX + 0.5D);
-		int j = MathHelper.floor_double(entity.posY + 0.5D);
-		int k = MathHelper.floor_double(entity.posZ + 0.5D);
-		return new BlockPos(i,j,k);
-	}
-
-	/**
 	 * Whether the entity is currently standing in any liquid
 	 */
 	public static boolean isInLiquid(Entity entity) {
-		BlockPos pos = getEntityCoordinates(entity);
+		BlockPos pos = new BlockPos(entity);
 		Block block = entity.worldObj.getBlockState(pos).getBlock();
 		return block.getMaterial().isLiquid();
 	}
