@@ -199,7 +199,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
-		return StatCollector.translateToLocal("item.dss.skillitem.name") + (skill != null ? (" " + skill.getDisplayName()) : "");
+		return StatCollector.translateToLocalFormatted("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName()));
 	}
 
 	@Override
