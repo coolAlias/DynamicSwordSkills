@@ -44,10 +44,15 @@ death.attack.indirectSword=%1$s被%2$s杀死
 death.attack.indirectSword.item=%1$s被%2$s使用%3$s杀死
 
 entity.dynamicswordskills.leapingblow.name=跳劈
-entity.dynamicswordskills.swordbeam.name=Sword Beam
+entity.dynamicswordskills.swordbeam.name=剑气
 
-item.dss.skillorb.name=技能球
+item.dss.skillorb.name=%s技能球
+item.dss.skillitem.name=%s剑
+tooltip.dss.skillorb.desc.level=等级: %1$s/%2$s
 tooltip.dss.skillorb.desc.0=该技能球的功能未知
+tooltip.dss.skillprovider.desc.skill=Grants wielder %s
+tooltip.dss.skillprovider.desc.level=Grants Skill Level: %1$s/%2$s
+tooltip.dss.skillprovider.desc.provider=Provides %s
 
 key.dss.label=动态技能按键
 key.dss.activate.desc=Z-瞄准目标
