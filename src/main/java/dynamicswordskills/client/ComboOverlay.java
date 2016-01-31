@@ -100,7 +100,7 @@ public class ComboOverlay extends Gui
 					mc.fontRendererObj.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
 					List<Float> damageList = combo.getDamageList();
 					for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
-						mc.fontRendererObj.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
+						mc.fontRendererObj.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 30 + mc.fontRendererObj.FONT_HEIGHT * (i + 1), 0xFFFFFF, true);
 					}
 				}
 				if (skills.canUseSkill(SkillBase.endingBlow)) {
