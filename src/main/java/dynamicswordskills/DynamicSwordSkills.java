@@ -56,7 +56,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.WeaponRegistry;
 
-@Mod(modid = ModInfo.ID, version = ModInfo.VERSION)
+@Mod(modid = ModInfo.ID, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST)
 public class DynamicSwordSkills
 {
 	@Mod.Instance(ModInfo.ID)
@@ -143,8 +143,7 @@ public class DynamicSwordSkills
 			registerRandomSwordLoot();
 		}
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
-		String link = "https://raw.githubusercontent.com/coolAlias/DynamicSwordSkills/master/src/main/resources/versionlist.json";
-		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", link);
+		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", ModInfo.VERSION_LIST);
 	}
 
 	@Mod.EventHandler
