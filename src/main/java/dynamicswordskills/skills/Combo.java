@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.UpdateComboPacket;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -29,8 +31,6 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.client.UpdateComboPacket;
 
 /**
  * 
@@ -110,11 +110,11 @@ public class Combo
 	/** Returns the skill id associated with this Combo */
 	public byte getSkill() { return skillId; }
 
-	/** Returns current combo size */
-	public int getSize() { return damageList.size(); }
+	/** Returns current number of hits */
+	public int getNumHits() { return damageList.size(); }
 
-	/** Returns current combo's maximum size */
-	public int getMaxSize() { return maxComboSize; }
+	/** Returns maximum number of hits allowed before the combo self-terminates */
+	public int getMaxNumHits() { return maxComboSize; }
 
 	/** Returns current damage total for this combo */
 	public float getDamage() { return comboDamage; }
@@ -133,7 +133,7 @@ public class Combo
 
 	/** Returns translated current description of combo; e.g. "Great" */
 	public String getLabel() {
-		return StatCollector.translateToLocal("combo.label." + Math.min(getSize(), 10));
+		return StatCollector.translateToLocal("combo.label." + Math.min(getNumHits(), 10));
 	}
 
 	/**
@@ -154,7 +154,7 @@ public class Combo
 	 * @param target used to track consecutive hits on a single target
 	 */
 	public void add(EntityPlayer player, Entity target, float damage) {
-		if (getSize() < maxComboSize && (comboTimer > 0 || getSize() == 0)) {
+		if (getNumHits() < maxComboSize && (comboTimer > 0 || getNumHits() == 0)) {
 			if (target != null && target == lastEntityHit) {
 				++consecutiveHits;
 			} else {
@@ -166,7 +166,7 @@ public class Combo
 			if (player instanceof EntityPlayerMP) {
 				PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 			}
-			if (getSize() == maxComboSize) {
+			if (getNumHits() == maxComboSize) {
 				endCombo(player);
 			} else {
 				comboTimer = timeLimit;
@@ -182,7 +182,7 @@ public class Combo
 	public void addDamageOnly(EntityPlayer player, float damage) {
 		if (!isFinished()) {
 			comboDamage += damage;
-			if (getSize() == 0) {
+			if (getNumHits() == 0) {
 				comboTimer = timeLimit;
 			}
 			if (player instanceof EntityPlayerMP) {
@@ -221,8 +221,8 @@ public class Combo
 		compound.setByte("SkillID", skillId);
 		compound.setInteger("MaxSize", maxComboSize);
 		compound.setInteger("TimeLimit", timeLimit);
-		compound.setInteger("CurrentSize", getSize());
-		for (int i = 0; i < getSize(); ++i) {
+		compound.setInteger("CurrentSize", getNumHits());
+		for (int i = 0; i < getNumHits(); ++i) {
 			compound.setFloat("Dmg" + i, damageList.get(i));
 		}
 		compound.setFloat("TotalDamage", comboDamage);

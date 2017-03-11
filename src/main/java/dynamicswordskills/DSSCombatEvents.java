@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -168,7 +168,7 @@ public class DSSCombatEvents
 			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 			ICombo combo = skills.getComboSkill();
 			if (combo != null && combo.getCombo() != null && !combo.getCombo().isFinished()) {
-				event.ammount += combo.getCombo().getSize();
+				event.ammount += combo.getCombo().getNumHits();
 			}
 			if (skills.isSkillActive(SkillBase.armorBreak)) {
 				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).onImpact(player, event);
