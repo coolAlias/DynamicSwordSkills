@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,36 +17,27 @@
 
 package dynamicswordskills;
 
+import dynamicswordskills.client.GuiSkills;
+import dynamicswordskills.inventory.ContainerSkills;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.IThreadListener;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.client.GuiSkills;
-import dynamicswordskills.inventory.ContainerSkills;
-import dynamicswordskills.item.IModItem;
 
 public class CommonProxy implements IGuiHandler
 {
 	/** Gui indices */
 	public static final int GUI_SKILLS = 0;
 
-	/**
-	 * Registers all model / texture variants for items and blocks
-	 * Call during FMLPreInitializationEvent after all Items and Blocks have been initialized
-	 */
-	public void registerVariants() {}
+	/** Called during {@link FMLPreInitializationEvent} */
+	public void preInit() {}
 
-	/**
-	 * Call during FMLInitializationEvent so that Minecraft's renderers are ready to use
-	 */
-	public void registerRenderers() {}
+	/** Called during {@link FMLInitializationEvent} */
+	public void init() {}
 
-	/**
-	 * Calls {@link IModItem#registerRenderer} for the item provided
-	 */
-	public void registerItemRenderer(IModItem item) {}
-	
 	/**
 	 * Returns the current thread based on side during message handling,
 	 * used for ensuring that the message is being handled by the main thread

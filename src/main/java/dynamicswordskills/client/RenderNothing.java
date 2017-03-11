@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -30,7 +31,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  */
 @SideOnly(Side.CLIENT)
-public class RenderNothing extends Render {
+public class RenderNothing extends Render<Entity> {
 
 	public RenderNothing(RenderManager renderManager) {
 		super(renderManager);
@@ -42,4 +43,10 @@ public class RenderNothing extends Render {
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) { return null; }
 
+	public static class Factory implements IRenderFactory<Entity> {
+		@Override
+		public Render<? super Entity> createRenderFor(RenderManager manager) {
+			return new RenderNothing(manager);
+		}
+	}
 }

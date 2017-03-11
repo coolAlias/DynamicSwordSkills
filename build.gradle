@@ -1,38 +1,58 @@
+// For those who want the bleeding edge
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
         maven {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
     }
 }
+apply plugin: 'net.minecraftforge.gradle.forge'
 
-apply plugin: 'forge'
+/*
+// for people who want stable - not yet functional for MC 1.8.8 - we require the forgegradle 2.1 snapshot
+plugins {
+    id "net.minecraftforge.gradle.forge" version "2.0.2"
+}
+*/
 
 version = "2.1"
-group= "com.google.coolalias008.dynamicswordskills" 
-archivesBaseName = "1.8-dynamicswordskills"
+group = "com.google.coolalias008.dynamicswordskills"
+archivesBaseName = "1.8.9-dynamicswordskills"
 
-sourceCompatibility = targetCompatibility = "1.6"
+sourceCompatibility = targetCompatibility = "1.7"
 
 dependencies {
     compile files (
-        "eclipse/mods/1.8-Battlegear-Bin-1.0.10.0.jar"
+        "eclipse/mods/1.8.9-Battlegear-Bin-1.0.10.2.jar",
     )
 }
 
 minecraft {
-    version = "1.8-11.14.3.1464"
+    version = "1.8.9-11.15.1.1902-1.8.9"
     runDir = "eclipse"
-    mappings = "snapshot_20150617"
+    mappings = "snapshot_20160301"
+}
+
+processResources
+{
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+    // copy everything other than mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
 }
 
 task deobfJar(type: Jar) {
@@ -40,31 +60,7 @@ task deobfJar(type: Jar) {
     classifier = 'deobf'
 }
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
-}
-
-tasks.build.dependsOn('sourceJar', 'deobfJar')
-
-processResources
-{
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-                
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
-        
-    // copy everything else, thats not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
-
 artifacts {
 	archives deobfJar
 	archives sourceJar
-	archives jar
 }

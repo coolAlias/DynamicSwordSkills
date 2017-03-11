@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,32 +17,34 @@
 
 package dynamicswordskills.client;
 
+import org.lwjgl.opengl.GL11;
+
+import dynamicswordskills.ref.ModInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import org.lwjgl.opengl.GL11;
-
-import dynamicswordskills.ref.ModInfo;
-
 @SideOnly(Side.CLIENT)
-public class RenderEntitySwordBeam extends Render
+public class RenderEntitySwordBeam extends Render<EntityThrowable>
 {
-	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/entity/sword_beam.png");
+	private static final ResourceLocation TEXTURE = new ResourceLocation(ModInfo.ID + ":textures/entity/sword_beam.png");
 
 	public RenderEntitySwordBeam(RenderManager renderManager) {
 		super(renderManager);
-		shadowSize = 0.25F;
-		shadowOpaque = 0.75F;
+		this.shadowSize = 0.25F;
+		this.shadowOpaque = 0.75F;
 	}
 
-	public void renderBeam(Entity entity, double x, double y, double z, float yaw, float partialTick) {
+	@Override
+	public void doRender(EntityThrowable entity, double x, double y, double z, float yaw, float partialTick) {
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);
 		GlStateManager.pushAttrib();
@@ -50,30 +52,32 @@ public class RenderEntitySwordBeam extends Render
 		GlStateManager.enableLighting();
 		GlStateManager.enableTexture2D();
 		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GlStateManager.scale(1.5F, 1.25F, 1.5F);
-		bindTexture(texture);
+		GlStateManager.scale(1.5F, 0.5F, 1.5F);
+		this.bindTexture(this.getEntityTexture(entity));
 		Tessellator tessellator = Tessellator.getInstance();
 		WorldRenderer renderer = tessellator.getWorldRenderer();
 		GlStateManager.rotate(180.0F - renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
 		GlStateManager.rotate(-renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
-		renderer.startDrawingQuads();
-		renderer.setNormal(0.0F, 1.0F, 0.0F);
-		renderer.addVertexWithUV(-0.5D, -0.25D, 0.0D, 0, 1);
-		renderer.addVertexWithUV(0.5D, -0.25D, 0.0D, 1, 1);
-		renderer.addVertexWithUV(0.5D, 0.75D, 0.0D, 1, 0);
-		renderer.addVertexWithUV(-0.5D, 0.75D, 0.0D, 0, 0);
+		GlStateManager.color(1.0F, 1.0F, 1.0F);
+		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+		renderer.pos(-0.5D, -0.25D, 0.0D).tex(0, 1).normal(0.0F, 1.0F, 0.0F).endVertex();
+		renderer.pos(0.5D, -0.25D, 0.0D).tex(1, 1).normal(0.0F, 1.0F, 0.0F).endVertex();
+		renderer.pos(0.5D, 0.75D, 0.0D).tex(1, 0).normal(0.0F, 1.0F, 0.0F).endVertex();
+		renderer.pos(-0.5D, 0.75D, 0.0D).tex(0, 0).normal(0.0F, 1.0F, 0.0F).endVertex();
 		tessellator.draw();
 		GlStateManager.popAttrib();
 		GlStateManager.popMatrix();
 	}
 
 	@Override
-	public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick) {
-		renderBeam(entity, x, y, z, yaw, partialTick);
+	protected ResourceLocation getEntityTexture(EntityThrowable entity) {
+		return RenderEntitySwordBeam.TEXTURE;
 	}
 
-	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
-		return texture;
+	public static class Factory implements IRenderFactory<EntityThrowable> {
+		@Override
+		public Render<? super EntityThrowable> createRenderFor(RenderManager manager) {
+			return new RenderEntitySwordBeam(manager);
+		}
 	}
 }

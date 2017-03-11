@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -110,7 +110,7 @@ public class CommandGrantSkill extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		switch(args.length) {
 		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
 		case 2: return getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());

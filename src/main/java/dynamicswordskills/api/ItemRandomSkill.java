@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,11 @@ package dynamicswordskills.api;
 import java.util.List;
 import java.util.Random;
 
-import net.minecraft.client.renderer.ItemModelMesher;
-import net.minecraft.client.resources.model.ModelBakery;
+import dynamicswordskills.item.IModItem;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.skills.SkillActive;
+import dynamicswordskills.skills.SkillBase;
+import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -30,13 +33,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.WeightedRandomChestContent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.item.IModItem;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.skills.SkillActive;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 
@@ -55,12 +55,12 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	/** The maximum level of the SkillBase.{skill} granted by this Item */
 	private final byte maxLevel;
 
-	/** String used in the ModelResourceLocation when registering to the ItemModelMesher */
-	private final String textureName;
+	/** String used as the ModelResourceLocation for this item's model */
+	private final String texture;
 
 	public ItemRandomSkill(ToolMaterial material, String textureName) {
 		super(material);
-		this.textureName = textureName;
+		this.texture = textureName;
 		this.maxLevel = (byte)(2 + material.getHarvestLevel());
 		setCreativeTab(null);
 	}
@@ -111,7 +111,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null) {
 			list.add(StatCollector.translateToLocalFormatted("tooltip.dss.skillprovider.desc.skill", EnumChatFormatting.GOLD + skill.getDisplayName()));
@@ -124,15 +124,20 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerVariants() {
-		ModelBakery.addVariantName(this, textureName);
+	public String[] getVariants() {
+		return null;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderer(ItemModelMesher mesher) {
-		mesher.register(this, 0, new ModelResourceLocation(textureName, "inventory"));
+	public void registerResources() {
+		ModelLoader.registerItemVariants(this, new ModelResourceLocation(texture, "inventory"));
+		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return ModelLoader.getInventoryVariant(texture);
+			} 
+		});
 	}
 
 	@Override
@@ -146,7 +151,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		}
 		ItemStack loot = new ItemStack(this);
 		loot.setTagCompound(getRandomSkillTag(skill, rand));
-		return new WeightedRandomChestContent(loot, original.theMinimumChanceToGenerateItem, original.theMaximumChanceToGenerateItem, original.itemWeight);
+		return new WeightedRandomChestContent(loot, original.minStackSize, original.maxStackSize, original.itemWeight);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,7 @@
 
 package dynamicswordskills.item;
 
-import net.minecraft.client.renderer.ItemModelMesher;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -30,23 +29,28 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public interface IModItem {
 
 	/**
-	 * Register any item variant names here using {@link ModelBakery#addVariantName}
-	 * This MUST be called during {@code FMLPreInitializationEvent}
+	 * Returns an array of variant names to be used in {@link #registerResources()} and possible {@link #registerRenderers() registerRenderer()} 
+	 * Typical variant name is "mod_id:" plus the item's unlocalized name, minus any leading prefixes (e.g. 'item.')
+	 * @return Return null if there are no variants (e.g. standard generic item)
 	 */
-	@SideOnly(Side.CLIENT)
-	public void registerVariants();
+	String[] getVariants();
 
 	/**
-	 * Register all of the Item's renderers here, including for any subtypes.
-	 * This MUST be called during {@code FMLInitializationEvent}
+	 * Register any item variant names here using e.g. {@link ModelLoader#registerItemVariants} or {@link ModelLoader#setCustomMeshDefinition}.
+	 * This MUST be called during {@code FMLPreInitializationEvent}
 	 * 
-	 * A default implementation to register an item with modid:itemname would be:
-	 *
-	 *	String name = getUnlocalizedName();
-	 *	name = YourMod.MODID + ":" + name.substring(name.lastIndexOf(".") + 1);
-	 *	mesher.register(this, 0, new ModelResourceLocation(name, "inventory"));
+	 * Typical implementation taking advantage of {@link #getVariants()}:
+	 * 
+	 *	String[] variants = getVariants();
+	 *	if (variants == null || variants.length < 1) {
+	 *		String name = getUnlocalizedName();
+	 *		variants = new String[]{ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1)};
+	 *	}
+	 *	for (int i = 0; i < variants.length; ++i) {
+	 *		ModelLoader.setCustomModelResourceLocation(this, i, new ModelResourceLocation(variants[i], "inventory"));
+	 *	}
 	 */
 	@SideOnly(Side.CLIENT)
-	public void registerRenderer(ItemModelMesher mesher);
+	void registerResources();
 
 }

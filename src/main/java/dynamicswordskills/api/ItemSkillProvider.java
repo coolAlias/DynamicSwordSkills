@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,12 @@ package dynamicswordskills.api;
 
 import java.util.List;
 
+import com.google.common.collect.Multimap;
+
+import dynamicswordskills.item.IModItem;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.ItemModelMesher;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -34,13 +37,9 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import com.google.common.collect.Multimap;
-
-import dynamicswordskills.item.IModItem;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 
@@ -66,6 +65,9 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	/** The weapon's tool material determines damage and durability */
 	private final ToolMaterial material;
 
+	/** String used as the ModelResourceLocation for this item's model */
+	private final String texture;
+
 	/** Weapon damage is based on tool material, just like swords */
 	private float weaponDamage;
 
@@ -83,26 +85,29 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	 * the main skill designated by the skill id below.
 	 * Standard sword-like weapon with max stack size of 1; be sure to set the unlocalized
 	 * name, texture, and creative tab using chained methods if using the class as is.
-	 * @param material	the tool material determines both durability and damage
-	 * @param skill		use SkillBase.{skill} during construction to ensure a valid skill
-	 * @param level		should be at least 1, and will be capped automatically at the skill's max level
+	 * @param material the tool material determines both durability and damage
+	 * @param texture  the string used as the ModelResourceLocation for this item's model
+	 * @param skill    use SkillBase.{skill} during construction to ensure a valid skill
+	 * @param level    should be at least 1, and will be capped automatically at the skill's max level
 	 */
-	public ItemSkillProvider(ToolMaterial material, SkillBase skill, byte level) {
-		this(material, skill, level, true);
+	public ItemSkillProvider(ToolMaterial material, String texture, SkillBase skill, byte level) {
+		this(material, texture, skill, level, true);
 	}
 
 	/**
 	 * Standard sword-like weapon with max stack size of 1; be sure to set the unlocalized
 	 * name, texture, and creative tab using chained methods if using the class as is.
-	 * @param material			the tool material determines both durability and damage
-	 * @param skill				use SkillBase.{skill} during construction to ensure a valid skill
-	 * @param level				should be at least 1, and will be capped automatically at the skill's max level
-	 * @param grantsBasicSkill	if true, the player will be temporarily granted Basic Sword skill in
-	 * 							order to use the ISkillItem's main skill, if other than Basic Sword
+	 * @param material         the tool material determines both durability and damage
+	 * @param texture          the string used as the ModelResourceLocation for this item's model
+	 * @param skill            use SkillBase.{skill} during construction to ensure a valid skill
+	 * @param level            should be at least 1, and will be capped automatically at the skill's max level
+	 * @param grantsBasicSkill if true, the player will be temporarily granted Basic Sword skill in
+	 *                         order to use the ISkillItem's main skill, if other than Basic Sword
 	 */
-	public ItemSkillProvider(ToolMaterial material, SkillBase skill, byte level, boolean grantsBasicSkill) {
+	public ItemSkillProvider(ToolMaterial material, String texture, SkillBase skill, byte level, boolean grantsBasicSkill) {
 		super();
 		this.material = material;
+		this.texture = texture;
 		this.weaponDamage = 4.0F + this.material.getDamageVsEntity();
 		this.skillId = skill.getId();
 		this.level = level;
@@ -204,7 +209,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null) {
 			list.add(StatCollector.translateToLocalFormatted("tooltip.dss.skillprovider.desc.skill", EnumChatFormatting.GOLD + skill.getDisplayName()));
@@ -217,20 +222,25 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerVariants() {
-		ModelBakery.addVariantName(this, "iron_sword");
+	public String[] getVariants() {
+		return null;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderer(ItemModelMesher mesher) {
-		mesher.register(this, 0, new ModelResourceLocation("iron_sword", "inventory"));
+	public void registerResources() {
+		ModelLoader.registerItemVariants(this, new ModelResourceLocation(texture, "inventory"));
+		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return ModelLoader.getInventoryVariant(texture);
+			} 
+		});
 	}
 
 	@Override
-	public Multimap getAttributeModifiers(ItemStack stack) {
-		Multimap multimap = super.getAttributeModifiers(stack);
+	public Multimap<String, AttributeModifier> getAttributeModifiers(ItemStack stack) {
+		Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(stack);
 		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(itemModifierUUID, "Weapon modifier", weaponDamage, 0));
 		return multimap;
 	}

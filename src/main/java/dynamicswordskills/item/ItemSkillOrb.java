@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,12 @@ package dynamicswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.ItemModelMesher;
-import net.minecraft.client.resources.model.ModelBakery;
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,14 +34,9 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.PlayerUtils;
 
 public class ItemSkillOrb extends Item implements IModItem
 {
@@ -79,7 +78,7 @@ public class ItemSkillOrb extends Item implements IModItem
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(Item item, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (SkillBase skill : SkillBase.getSkills()) {
 			list.add(new ItemStack(item, 1, skill.getId()));
 		}
@@ -87,7 +86,7 @@ public class ItemSkillOrb extends Item implements IModItem
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
 		if (SkillBase.doesSkillExist(stack.getItemDamage())) {
 			SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
 			if (skill != null) {
@@ -104,20 +103,20 @@ public class ItemSkillOrb extends Item implements IModItem
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerVariants() {
+	public String[] getVariants() {
 		String[] variants = new String[SkillBase.getNumSkills()];
 		for (SkillBase skill : SkillBase.getSkills()) {
 			variants[skill.getId()] = skill.getIconTexture();
 		}
-		ModelBakery.addVariantName(this, variants);
+		return variants;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderer(ItemModelMesher mesher) {
-		for (SkillBase skill : SkillBase.getSkills()) {
-			mesher.register(this, skill.getId(), new ModelResourceLocation(skill.getIconTexture(), "inventory"));
+	public void registerResources() {
+		String[] variants = getVariants();
+		for (int i = 0; i < variants.length; ++i) {
+			ModelLoader.setCustomModelResourceLocation(this, i, new ModelResourceLocation(variants[i], "inventory"));
 		}
 	}
 }

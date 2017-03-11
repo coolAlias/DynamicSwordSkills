@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -109,7 +108,7 @@ public class DynamicSwordSkills
 					continue;
 				}
 				int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
-				item = new ItemSkillProvider(ToolMaterial.IRON, skill, (byte) level).setUnlocalizedName("dss.skillitem" + skill.getId()).setCreativeTab(DynamicSwordSkills.tabSkills);
+				item = new ItemSkillProvider(ToolMaterial.IRON, "iron_sword", skill, (byte) level).setUnlocalizedName("dss.skillitem" + skill.getId()).setCreativeTab(DynamicSwordSkills.tabSkills);
 				skillItems.add(item);
 				GameRegistry.registerItem(item, item.getUnlocalizedName().substring(5));
 			}
@@ -126,7 +125,7 @@ public class DynamicSwordSkills
 			skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword").setUnlocalizedName("dss.skillgold");
 			GameRegistry.registerItem(skillGold, skillGold.getUnlocalizedName().substring(5));
 		}
-		proxy.registerVariants();
+		proxy.preInit();
 		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, this, 64, 10, true);
 		EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", 1, this, 64, 10, true);
 		PacketDispatcher.initialize();
@@ -134,10 +133,8 @@ public class DynamicSwordSkills
 
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent event) {
-		proxy.registerRenderers();
-		DSSCombatEvents events = new DSSCombatEvents();
-		MinecraftForge.EVENT_BUS.register(events);
-		FMLCommonHandler.instance().bus().register(events); // for PlayerLoggedInEvent
+		proxy.init();
+		MinecraftForge.EVENT_BUS.register(new DSSCombatEvents());
 		DSSCombatEvents.initializeDrops();
 		if (Config.getLootWeight() > 0) {
 			registerSkillOrbLoot();
