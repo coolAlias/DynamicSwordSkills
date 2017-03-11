@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -134,7 +134,7 @@ public class EntitySwordBeam extends EntityThrowable
 					if (skill != null) {
 						skill.onImpact(player, false);
 					}
-					if (entity.attackEntityFrom(DamageSource.causePlayerDamage(player), damage)) {
+					if (entity.attackEntityFrom(DamageSource.causePlayerDamage(player).setProjectile(), damage)) {
 						PlayerUtils.playSoundAtEntity(worldObj, entity, ModInfo.SOUND_HURT_FLESH, 0.4F, 0.5F);
 					}
 					damage *= 0.8F;
