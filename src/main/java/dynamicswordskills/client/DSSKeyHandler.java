@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -101,9 +101,9 @@ public class DSSKeyHandler
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
 			}  else if (kb == keys[KEY_TOGGLE_HUD].getKeyCode()) {
-				ComboOverlay.shouldDisplay = !ComboOverlay.shouldDisplay;
+				Config.isComboHudEnabled = !Config.isComboHudEnabled;
 				PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.togglehud",
-						(ComboOverlay.shouldDisplay ? StatCollector.translateToLocal("key.dss.enable")
+						(Config.isComboHudEnabled ? StatCollector.translateToLocal("key.dss.enable")
 								: StatCollector.translateToLocal("key.dss.disable")));
 			} else {
 				handleTargetingKeys(mc, kb, skills);

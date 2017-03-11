@@ -23,7 +23,6 @@ import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import dynamicswordskills.client.ComboOverlay;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.client.RenderEntitySwordBeam;
@@ -36,7 +35,6 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void registerRenderers() {
-		MinecraftForge.EVENT_BUS.register(new ComboOverlay());
 		MinecraftForge.EVENT_BUS.register(new DSSClientEvents());
 		FMLCommonHandler.instance().bus().register(new DSSKeyHandler());
 		FMLCommonHandler.instance().bus().register(new TargetingTickHandler());

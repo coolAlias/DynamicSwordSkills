@@ -64,7 +64,7 @@ public class ComboOverlay extends Gui
 	public ComboOverlay() {
 		super();
 		this.mc = Minecraft.getMinecraft();
-		shouldDisplay = Config.isComboHudEnabled();
+		shouldDisplay = Config.isComboHudEnabled;
 	}
 
 	@SubscribeEvent

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,8 @@ import net.minecraftforge.common.config.Configuration;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.WeaponRegistry;
+import dynamicswordskills.client.gui.IGuiOverlay.HALIGN;
+import dynamicswordskills.client.gui.IGuiOverlay.VALIGN;
 import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.skills.SkillBase;
 
@@ -34,13 +36,31 @@ public class Config
 {
 	/*================== CLIENT SIDE SETTINGS  =====================*/
 	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
-	private static boolean enableComboHud;
+	public static boolean isComboHudEnabled;
 	/** [Combo HUD] Number of combo hits to display */
 	private static int hitsToDisplay;
+	/** [Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN comboHudHAlign;
+	/** [Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN comboHudVAlign;
+	/** [Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int comboHudOffsetX;
+	/** [Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int comboHudOffsetY;
 	/** [Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry */
 	private static boolean allowVanillaControls;
 	/** [Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme) */
 	private static boolean doubleTap;
+	/** [Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use) */
+	public static boolean isEndingBlowHudEnabled;
+	/** [Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN endingBlowHudHAlign;
+	/** [Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN endingBlowHudVAlign;
+	/** [Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int endingBlowHudOffsetX;
+	/** [Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int endingBlowHudOffsetY;
 	/** [Targeting] Whether auto-targeting is enabled or not (toggle in game by pressing '.') */
 	private static boolean autoTarget;
 	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
@@ -97,10 +117,19 @@ public class Config
 		/*================== CLIENT SIDE SETTINGS  =====================*/
 		String category = "client";
 		config.addCustomCategoryComment(category, "This category contains client side settings; i.e. they are not synchronized with the server.");
-		enableComboHud = config.get(category, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')", true).getBoolean(true);
+		isComboHudEnabled = config.get(category, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')", true).getBoolean(true);
 		hitsToDisplay = MathHelper.clamp_int(config.get(category, "[Combo HUD] Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
+		comboHudHAlign = HALIGN.fromString(config.get(category, "[Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "left").getString());
+		comboHudVAlign = VALIGN.fromString(config.get(category, "[Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
+		comboHudOffsetX = config.get(category, "[Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
+		comboHudOffsetY = config.get(category, "[Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 0).getInt();
 		allowVanillaControls = config.get(category, "[Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry", true).getBoolean(true);
 		doubleTap = config.get(category, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", true).getBoolean(true);
+		isEndingBlowHudEnabled = config.get(category, "[Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use))", true).getBoolean(true);
+		endingBlowHudHAlign = HALIGN.fromString(config.get(category, "[Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "center").getString());
+		endingBlowHudVAlign = VALIGN.fromString(config.get(category, "[Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
+		endingBlowHudOffsetX = config.get(category, "[Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
+		endingBlowHudOffsetY = config.get(category, "[Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 30).getInt();
 		autoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
 		enablePlayerTarget = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
 		/*================== WEAPON REGISTRY =====================*/
@@ -161,7 +190,6 @@ public class Config
 		WeaponRegistry.INSTANCE.forbidItems(forbidden_weapons, "Config", false);
 	}
 	/*================== CLIENT SIDE SETTINGS  =====================*/
-	public static boolean isComboHudEnabled() { return enableComboHud; }
 	public static int getHitsToDisplay() { return hitsToDisplay; }
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
 	public static boolean requiresDoubleTap() { return doubleTap; }
