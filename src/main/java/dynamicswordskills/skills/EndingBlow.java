@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,18 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.client.DSSClientEvents;
+import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.entity.DirtyEntityAccessor;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.network.bidirectional.AttackTimePacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,15 +39,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.network.bidirectional.AttackTimePacket;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.util.PlayerUtils;
 
 /**
  * 
