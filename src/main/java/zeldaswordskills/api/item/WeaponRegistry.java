@@ -1,7 +1,7 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
-    This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
+    This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
     General Public License as published by the Free Software Foundation,
     either version 3 of the License, or (at your option) any later version.
@@ -15,16 +15,16 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dynamicswordskills.api;
+package zeldaswordskills.api.item;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import dynamicswordskills.DynamicSwordSkills;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemSword;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import dynamicswordskills.DynamicSwordSkills;
 
 /**
  * 
@@ -39,10 +39,10 @@ import dynamicswordskills.DynamicSwordSkills;
 public class WeaponRegistry
 {
 	/** FML Inter-Mod Communication key for registering items as swords */
-	public static final String IMC_SWORD_KEY = "DssRegisterSword";
+	public static final String IMC_SWORD_KEY = "ZssRegisterSword";
 
 	/** FML Inter-Mod Communication key for registering items as non-sword weapons */
-	public static final String IMC_WEAPON_KEY = "DssRegisterWeapon";
+	public static final String IMC_WEAPON_KEY = "ZssRegisterWeapon";
 
 	private final Set<Item> swords = new HashSet<Item>();
 

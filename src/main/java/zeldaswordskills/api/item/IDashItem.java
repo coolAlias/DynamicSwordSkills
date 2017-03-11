@@ -1,7 +1,7 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
-    This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
+    This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
     General Public License as published by the Free Software Foundation,
     either version 3 of the License, or (at your option) any later version.
@@ -15,12 +15,15 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dynamicswordskills.api;
+package zeldaswordskills.api.item;
 
 /**
  * 
- * This interface is no longer used: see {@link IWeapon} and the {@link WeaponRegistry}
+ * Allows an item to be used with the Dash skill, but does not provide the skill.
+ * Note that the item must be usable, i.e. the item is set in use when the player
+ * presses the use item key.
  *
  */
-@Deprecated
-public interface ISword {}
+public interface IDashItem {
+
+}
