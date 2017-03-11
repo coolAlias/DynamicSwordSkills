@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,19 +17,26 @@
 
 package dynamicswordskills.client;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraftforge.client.event.MouseEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import java.util.ArrayList;
+import java.util.List;
+
 import dynamicswordskills.DSSCombatEvents;
+import dynamicswordskills.client.gui.ComboOverlay;
+import dynamicswordskills.client.gui.GuiEndingBlowOverlay;
+import dynamicswordskills.client.gui.IGuiOverlay;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.TargetUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -40,6 +47,12 @@ import dynamicswordskills.util.TargetUtils;
 public class DSSClientEvents
 {
 	private final Minecraft mc;
+
+	/** List of all GUI Overlays that may need rendering */
+	private final List<IGuiOverlay> overlays = new ArrayList<IGuiOverlay>();
+
+	/** List of GUI overlays that have rendered this tick */
+	private final List<IGuiOverlay> rendered = new ArrayList<IGuiOverlay>();
 
 	/** Store the current key code for mouse buttons */
 	private int mouseKey;
@@ -52,6 +65,21 @@ public class DSSClientEvents
 
 	public DSSClientEvents() {
 		this.mc = Minecraft.getMinecraft();
+		overlays.add(new ComboOverlay(mc));
+		overlays.add(new GuiEndingBlowOverlay(mc));
+	}
+
+	@SubscribeEvent
+	public void onRenderExperienceBar(RenderGameOverlayEvent.Post event) {
+		if (event.type != RenderGameOverlayEvent.ElementType.EXPERIENCE) {
+			return;
+		}
+		for (IGuiOverlay overlay : this.overlays) {
+			if (overlay.shouldRender() && overlay.renderOverlay(event.resolution, this.rendered)) {
+				this.rendered.add(overlay);
+			}
+		}
+		this.rendered.clear();
 	}
 
 	/**

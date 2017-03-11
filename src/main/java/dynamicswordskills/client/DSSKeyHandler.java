@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,15 +17,6 @@
 
 package dynamicswordskills.client;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.util.StatCollector;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import org.lwjgl.input.Keyboard;
 
 import dynamicswordskills.CommonProxy;
@@ -37,6 +28,14 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.PlayerUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.StatCollector;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class DSSKeyHandler
@@ -101,9 +100,9 @@ public class DSSKeyHandler
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
 			}  else if (kb == keys[KEY_TOGGLE_HUD].getKeyCode()) {
-				ComboOverlay.shouldDisplay = !ComboOverlay.shouldDisplay;
+				Config.isComboHudEnabled = !Config.isComboHudEnabled;
 				PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.togglehud",
-						(ComboOverlay.shouldDisplay ? StatCollector.translateToLocal("key.dss.enable")
+						(Config.isComboHudEnabled ? StatCollector.translateToLocal("key.dss.enable")
 								: StatCollector.translateToLocal("key.dss.disable")));
 			} else {
 				handleTargetingKeys(mc, kb, skills);
