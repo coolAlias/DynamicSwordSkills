@@ -121,7 +121,7 @@ public class EndingBlow extends SkillActive
 			ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
 			if (skill != null && skill.isComboInProgress()) {
 				if (lastNumHits > 0) {
-					return skill.getCombo().getConsecutiveHits() > 1 && skill.getCombo().getSize() > lastNumHits + 2;
+					return skill.getCombo().getConsecutiveHits() > 1 && skill.getCombo().getNumHits() > lastNumHits + 2;
 				} else {
 					return skill.getCombo().getConsecutiveHits() > 1;
 				}
@@ -169,7 +169,7 @@ public class EndingBlow extends SkillActive
 		activeTimer = 3; // gives server some time for client attack to occur
 		ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
 		if (skill.getCombo() != null) {
-			lastNumHits = skill.getCombo().getSize();
+			lastNumHits = skill.getCombo().getNumHits();
 		}
 		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
 			DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), DSSPlayerInfo.get(player).getTargetingSkill());
