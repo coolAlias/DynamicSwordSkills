@@ -22,6 +22,7 @@ import java.util.List;
 import com.google.common.collect.Multimap;
 
 import dynamicswordskills.item.IModItem;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
@@ -115,6 +116,8 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 		this.grantsBasicSkill = grantsBasicSkill;
 		setMaxDamage(this.material.getMaxUses());
 		setMaxStackSize(1);
+		setRegistryName(ModInfo.ID, "skillitem_" + skill.getUnlocalizedName());
+		setUnlocalizedName("dss.skillitem" + skill.getId());
 	}
 
 	@Override

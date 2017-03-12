@@ -95,8 +95,8 @@ public class DynamicSwordSkills
 				return DynamicSwordSkills.skillOrb;
 			}
 		};
-		skillOrb = new ItemSkillOrb().setUnlocalizedName("dss.skillorb");
-		GameRegistry.registerItem(skillOrb, skillOrb.getUnlocalizedName().substring(5));
+		skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
+		GameRegistry.register(skillOrb);
 		if (Config.areCreativeSwordsEnabled()) {
 			skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
 			Item item = null;
@@ -105,22 +105,22 @@ public class DynamicSwordSkills
 					continue;
 				}
 				int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
-				item = new ItemSkillProvider(ToolMaterial.IRON, "iron_sword", skill, (byte) level).setUnlocalizedName("dss.skillitem" + skill.getId()).setCreativeTab(DynamicSwordSkills.tabSkills);
+				item = new ItemSkillProvider(ToolMaterial.IRON, "iron_sword", skill, (byte) level).setCreativeTab(DynamicSwordSkills.tabSkills);
 				skillItems.add(item);
-				GameRegistry.registerItem(item, item.getUnlocalizedName().substring(5));
+				GameRegistry.register(item);
 			}
 		}
 		if (Config.areRandomSwordsEnabled()) {
-			skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword").setUnlocalizedName("dss.skillwood");
-			GameRegistry.registerItem(skillWood, skillWood.getUnlocalizedName().substring(5));
-			skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword").setUnlocalizedName("dss.skillstone");
-			GameRegistry.registerItem(skillStone, skillStone.getUnlocalizedName().substring(5));
-			skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword").setUnlocalizedName("dss.skilliron");
-			GameRegistry.registerItem(skillIron, skillIron.getUnlocalizedName().substring(5));
-			skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword").setUnlocalizedName("dss.skillgold");
-			GameRegistry.registerItem(skillGold, skillGold.getUnlocalizedName().substring(5));
-			skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword").setUnlocalizedName("dss.skilldiamond");
-			GameRegistry.registerItem(skillDiamond, skillDiamond.getUnlocalizedName().substring(5));
+			skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword");
+			GameRegistry.register(skillWood);
+			skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword");
+			GameRegistry.register(skillStone);
+			skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword");
+			GameRegistry.register(skillIron);
+			skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword");
+			GameRegistry.register(skillGold);
+			skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword");
+			GameRegistry.register(skillDiamond);
 		}
 		proxy.preInit();
 		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, this, 64, 10, true);

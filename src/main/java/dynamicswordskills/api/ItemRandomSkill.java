@@ -23,6 +23,7 @@ import java.util.Random;
 import dynamicswordskills.item.IModItem;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.SkillActive;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -63,6 +64,8 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		this.texture = textureName;
 		this.maxLevel = (byte)(2 + material.getHarvestLevel());
 		setCreativeTab(null);
+		setRegistryName(ModInfo.ID, "skillsword_" + material.name());
+		setUnlocalizedName("dss.skill" + material.name());
 	}
 
 	@Override
