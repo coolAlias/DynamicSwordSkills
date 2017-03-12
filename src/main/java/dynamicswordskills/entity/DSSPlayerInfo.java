@@ -36,7 +36,6 @@ import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -44,17 +43,15 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IExtendedEntityProperties;
+import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class DSSPlayerInfo implements IExtendedEntityProperties
+public class DSSPlayerInfo
 {
-	private final static String EXT_PROP_NAME = "DSSPlayerInfo";
-
 	/** Maximum time the player may be prevented from taking a left-click action */
 	private final static int MAX_ATTACK_DELAY = 50;
 
@@ -98,9 +95,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		this.player = player;
 		this.skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
 	}
-
-	@Override
-	public void init(Entity entity, World world) {}
 
 	/**
 	 * True if the player can perform a left-click action (i.e. the action timer is zero)
@@ -659,14 +653,10 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 	}
 
-	/** Used to register these extended properties for the player during EntityConstructing event */
-	public static final void register(EntityPlayer player) {
-		player.registerExtendedProperties(EXT_PROP_NAME, new DSSPlayerInfo(player));
-	}
-
 	/** Returns ExtendedPlayer properties for player */
 	public static final DSSPlayerInfo get(EntityPlayer player) {
-		return (DSSPlayerInfo) player.getExtendedProperties(EXT_PROP_NAME);
+		IPlayerInfo info = player.getCapability(IPlayerInfo.CapabilityPlayerInfo.PLAYER_INFO, null);
+		return info == null ? null : info.get();
 	}
 
 	/**
@@ -693,8 +683,8 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void copy(DSSPlayerInfo info) {
 		NBTTagCompound compound = new NBTTagCompound();
-		info.saveNBTData(compound);
-		this.loadNBTData(compound);
+		info.writeNBT(compound);
+		this.readNBT(compound);
 	}
 
 	/**
@@ -706,8 +696,10 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 	}
 
-	@Override
-	public void saveNBTData(NBTTagCompound compound) {
+	/**
+	 * Call from {@link IStorage#writeNBT} 
+	 */
+	public NBTTagCompound writeNBT(NBTTagCompound compound) {
 		NBTTagList taglist = new NBTTagList();
 		for (SkillBase skill : skills.values()) {
 			NBTTagCompound skillTag = new NBTTagCompound();
@@ -716,10 +708,13 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 		compound.setTag("DynamicSwordSkills", taglist);
 		compound.setBoolean("receivedGear", receivedGear);
+		return compound;
 	}
 
-	@Override
-	public void loadNBTData(NBTTagCompound compound) {
+	/**
+	 * Call from {@link IStorage#readNBT} 
+	 */
+	public void readNBT(NBTTagCompound compound) {
 		skills.clear(); // allows skills to reset on client without re-adding all the skills
 		NBTTagList taglist = compound.getTagList("DynamicSwordSkills", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < taglist.tagCount(); ++i) {

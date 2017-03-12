@@ -53,7 +53,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
-import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -190,13 +189,6 @@ public class DSSCombatEvents
 	public void onLivingUpdate(LivingUpdateEvent event) {
 		if (event.getEntity() instanceof EntityPlayer) {
 			DSSPlayerInfo.get((EntityPlayer) event.getEntity()).onUpdate();
-		}
-	}
-
-	@SubscribeEvent
-	public void onEntityConstructing(EntityConstructing event) {
-		if (event.getEntity() instanceof EntityPlayer && DSSPlayerInfo.get((EntityPlayer) event.getEntity()) == null) {
-			DSSPlayerInfo.register((EntityPlayer) event.getEntity());
 		}
 	}
 

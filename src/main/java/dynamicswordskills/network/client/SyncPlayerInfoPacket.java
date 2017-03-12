@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public class SyncPlayerInfoPacket extends AbstractClientMessage<SyncPlayerInfoPa
 
 	public SyncPlayerInfoPacket(DSSPlayerInfo info) {
 		compound = new NBTTagCompound();
-		info.saveNBTData(compound);
+		info.writeNBT(compound);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class SyncPlayerInfoPacket extends AbstractClientMessage<SyncPlayerInfoPa
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		DSSPlayerInfo info = DSSPlayerInfo.get(player);
-		info.loadNBTData(compound);
+		info.readNBT(compound);
 		if (validate) {
 			info.validateSkills();
 		}
