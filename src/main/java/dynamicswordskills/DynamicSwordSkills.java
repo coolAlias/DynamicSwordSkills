@@ -26,6 +26,8 @@ import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraftforge.common.ChestGenHooks;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -123,6 +125,7 @@ public class DynamicSwordSkills
 			GameRegistry.register(skillDiamond);
 		}
 		proxy.preInit();
+		registerSounds();
 		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, this, 64, 10, true);
 		EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", 1, this, 64, 10, true);
 		PacketDispatcher.initialize();
@@ -158,6 +161,20 @@ public class DynamicSwordSkills
 		for (final FMLInterModComms.IMCMessage msg : event.getMessages()) {
 			WeaponRegistry.INSTANCE.processMessage(msg);
 		}
+	}
+
+	/**
+	 * Call during mod initialization to register all mod sounds
+	 */
+	private void registerSounds() {
+		String[] sounds = {"armor_break","hurt_flesh","leaping_blow","level_up","mortal_draw","slam","special_drop","spin_attack","sword_cut","sword_miss","sword_strike","whoosh"};
+		for (String sound : sounds) {
+			registerSound(new ResourceLocation(ModInfo.ID, sound));
+		}
+	}
+
+	private void registerSound(ResourceLocation location) {
+		GameRegistry.register(new SoundEvent(location).setRegistryName(location));
 	}
 
 	private void registerSkillOrbLoot() {

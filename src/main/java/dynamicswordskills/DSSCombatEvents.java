@@ -24,7 +24,7 @@ import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.skills.ArmorBreak;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.LeapingBlow;
@@ -52,6 +52,7 @@ import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.SoundCategory;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -130,7 +131,7 @@ public class DSSCombatEvents
 				float baseChance = Config.getDropChance(orb.getItemDamage());
 				if (baseChance > 0.0F && mob.worldObj.rand.nextFloat() < (baseChance + (0.005F * event.getLootingLevel()))) {
 					event.getDrops().add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
-					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
+					mob.worldObj.playSound(null, mob.posX, mob.posY, mob.posZ, ModSounds.SPECIAL_DROP, SoundCategory.PLAYERS, 1.0F, 1.0F);
 				}
 			}
 		}

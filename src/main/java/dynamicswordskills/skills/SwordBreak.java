@@ -23,16 +23,18 @@ import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -172,7 +174,7 @@ public class SwordBreak extends SkillActive
 		if (isActive()) {
 			if (--breakTimer <= getUseDelay() && playMissSound) {
 				playMissSound = false;
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
+				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			}
 		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
@@ -186,13 +188,13 @@ public class SwordBreak extends SkillActive
 			ItemStack stackToDamage = attacker.getHeldItemMainhand();
 			if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 				breakTimer = getUseDelay(); // only block one attack
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_SWORDSTRIKE, 0.4F, 0.5F);
+				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SWORD_STRIKE, SoundCategory.PLAYERS, 0.4F, 0.5F);
 				playMissSound = false;
 				if (!player.worldObj.isRemote) {
 					int dmg = Math.max(getMaxDamage() / 3, player.worldObj.rand.nextInt(getMaxDamage()));
 					stackToDamage.damageItem(dmg, attacker);
 					if (stackToDamage.stackSize <= 0) {
-						player.worldObj.playSoundAtEntity(attacker, "random.break", 0.8F, 0.8F + player.worldObj.rand.nextFloat() * 0.4F);
+						PlayerUtils.playSoundAtEntity(attacker.worldObj, attacker, SoundEvents.ITEM_SHIELD_BREAK, SoundCategory.PLAYERS, 0.8F, 0.8F + player.worldObj.rand.nextFloat() * 0.4F);
 						attacker.setHeldItem(EnumHand.MAIN_HAND, null);
 					}
 				}

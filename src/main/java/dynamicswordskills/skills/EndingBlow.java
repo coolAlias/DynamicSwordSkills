@@ -27,7 +27,7 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.AttackTimePacket;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
@@ -35,6 +35,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -241,7 +242,7 @@ public class EndingBlow extends SkillActive
 					PlayerUtils.spawnXPOrbsWithRandom(player.worldObj, player.worldObj.rand, entityHit.getPosition(), xp);
 				}
 			} else {
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_HURT_FLESH, 0.3F, 0.8F);
+				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.3F, 0.8F);
 				if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
 					DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 					skills.setAttackTime(getDuration());
@@ -260,7 +261,7 @@ public class EndingBlow extends SkillActive
 		ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
 		if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
 			amount *= 1.0F + (level * 0.2F);
-			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_MORTALDRAW, 0.4F, 0.5F);
+			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			entityHit = entity;
 			xp = level + 1 + player.worldObj.rand.nextInt(Math.max(2, MathHelper.ceiling_float_int(entity.getHealth())));
 		}

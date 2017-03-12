@@ -23,6 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.SoundEvent;
 
 /**
  * 
@@ -84,7 +85,7 @@ public class DamageUtils
 		}
 
 		@Override
-		public String getHitSound(EntityPlayer player) {
+		public SoundEvent getHitSound(EntityPlayer player) {
 			return null;
 		}
 	}
@@ -147,7 +148,7 @@ public class DamageUtils
 		}
 
 		@Override
-		public String getHitSound(EntityPlayer player) {
+		public SoundEvent getHitSound(EntityPlayer player) {
 			return null;
 		}
 	}

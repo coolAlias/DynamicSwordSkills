@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
@@ -36,6 +36,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -155,7 +156,7 @@ public class EntityLeapingBlow extends EntityThrowable
 				if (entity instanceof EntityLivingBase && !affectedEntities.contains(entity.getEntityId()) && entity != getThrower()) {
 					affectedEntities.add(entity.getEntityId());
 					if (entity.attackEntityFrom(DamageUtils.causeIndirectSwordDamage(this, getThrower()), damage)) {
-						PlayerUtils.playSoundAtEntity(worldObj, entity, ModInfo.SOUND_HURT_FLESH, 0.4F, 0.5F);
+						PlayerUtils.playSoundAtEntity(worldObj, entity, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.4F, 0.5F);
 						((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.POISON, 60));
 					}
 				}

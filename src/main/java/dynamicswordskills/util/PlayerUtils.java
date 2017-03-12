@@ -35,6 +35,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -102,11 +104,11 @@ public class PlayerUtils
 	 * sends a packet to the server to play a sound on the server for all to hear.
 	 * To avoid playing a sound twice, only call the method from one side or the other, not both.
 	 */
-	public static void playSound(EntityPlayer player, String sound, float volume, float pitch) {
+	public static void playSound(EntityPlayer player, SoundEvent sound, SoundCategory category, float volume, float pitch) {
 		if (player.worldObj.isRemote) {
-			PacketDispatcher.sendToServer(new PlaySoundPacket(sound, volume, pitch, player));
+			PacketDispatcher.sendToServer(new PlaySoundPacket(sound, category, volume, pitch, player));
 		} else {
-			PacketDispatcher.sendTo(new PlaySoundPacket(sound, volume, pitch), (EntityPlayerMP) player);
+			PacketDispatcher.sendTo(new PlaySoundPacket(sound, category, volume, pitch), (EntityPlayerMP) player);
 		}
 	}
 
@@ -118,10 +120,10 @@ public class PlayerUtils
 	 * @param f		Volume: nextFloat() * f + add
 	 * @param add	Pitch: 1.0F / (nextFloat() * f + add)
 	 */
-	public static void playRandomizedSound(EntityPlayer player, String sound, float f, float add) {
+	public static void playRandomizedSound(EntityPlayer player, SoundEvent sound, SoundCategory category, float f, float add) {
 		float volume = player.worldObj.rand.nextFloat() * f + add;
 		float pitch = 1.0F / (player.worldObj.rand.nextFloat() * f + add);
-		playSound(player, sound, volume, pitch);
+		playSound(player, sound, category, volume, pitch);
 	}
 
 	/**
@@ -129,10 +131,10 @@ public class PlayerUtils
 	 * @param f		Volume: nextFloat() * f + add
 	 * @param add	Pitch: 1.0F / (nextFloat() * f + add)
 	 */
-	public static void playSoundAtEntity(World world, Entity entity, String sound, float f, float add) {
+	public static void playSoundAtEntity(World world, Entity entity, SoundEvent sound, SoundCategory category, float f, float add) {
 		float volume = world.rand.nextFloat() * f + add;
 		float pitch = 1.0F / (world.rand.nextFloat() * f + add);
-		world.playSoundAtEntity(entity, sound, volume, pitch);
+		world.playSound(null, entity.getPosition(), sound, category, volume, pitch);
 	}
 
 	/**

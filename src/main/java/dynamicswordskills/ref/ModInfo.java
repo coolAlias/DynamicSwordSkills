@@ -26,19 +26,4 @@ public class ModInfo {
 	public static final String CLIENT_PROXY = ID + ".ClientProxy";
 	public static final String COMMON_PROXY = ID + ".CommonProxy";
 	public static final String CONFIG_PATH = ("/" + ID + ".cfg");
-	
-	/** Sound file names (must NOT have a numeral suffix when referenced) */
-	public static final String SOUND_ARMORBREAK = ID + ":armorbreak";
-	public static final String SOUND_HURT_FLESH = ID + ":hurtflesh";
-	public static final String SOUND_LEAPINGBLOW = ID + ":leapingblow";
-	public static final String SOUND_MORTALDRAW = ID + ":mortaldraw";
-	public static final String SOUND_SLAM = ID + ":slam";
-	public static final String SOUND_SPECIAL_DROP = ID + ":special_drop";
-	public static final String SOUND_SPINATTACK = ID + ":spinattack";
-	public static final String SOUND_SWORDCUT = ID + ":swordcut";
-	public static final String SOUND_SWORDMISS = ID + ":swordmiss";
-	public static final String SOUND_SWORDSTRIKE = ID + ":swordstrike";
-	public static final String SOUND_WHOOSH = ID + ":whoosh";
-	public static final String SOUND_LEVELUP = ID + ":levelup";
-
 }

@@ -19,6 +19,16 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.api.IDashItem;
+import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.network.server.DashImpactPacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModSounds;
+import dynamicswordskills.util.PlayerUtils;
+import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -29,22 +39,13 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.api.IDashItem;
-import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.network.server.DashImpactPacket;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.util.PlayerUtils;
-import dynamicswordskills.util.TargetUtils;
 
 /**
  * 
@@ -256,7 +257,7 @@ public class Dash extends SkillActive
 				}
 			}
 		}
-		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_SLAM, 0.4F, 0.5F);
+		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SLAM, SoundCategory.PLAYERS, 0.4F, 0.5F);
 		setNotDashing();
 	}
 

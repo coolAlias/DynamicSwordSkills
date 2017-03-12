@@ -26,7 +26,7 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
@@ -42,6 +42,7 @@ import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
@@ -202,7 +203,7 @@ public class BackSlice extends SkillActive
 				mc.playerController.attackEntity(mc.thePlayer, target);
 			} else {
 				player.resetCooldown();
-				PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
+				PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
 				ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
 				if (combo.isComboInProgress()) {
 					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) combo));
@@ -287,7 +288,7 @@ public class BackSlice extends SkillActive
 			if (targeting != null && targeting.getCurrentTarget() == entity) {
 				if (!TargetUtils.isTargetInFrontOf(entity, player, getAttackAngle())) {
 					amount *= 1.0F + (level * 0.1F);
-					PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_MORTALDRAW, 0.4F, 0.5F);
+					PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
 					if (Config.canDisarmorPlayers() || !(entity instanceof EntityPlayer)) {
 						ItemStack armor = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
 						if (armor != null && player.worldObj.rand.nextFloat() < getDisarmorChance(armor, player.getHeldItemMainhand(), level)) {

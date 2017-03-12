@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,12 +19,15 @@ package dynamicswordskills.network.bidirectional;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.Validate;
+
+import dynamicswordskills.network.AbstractMessage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import dynamicswordskills.network.AbstractMessage;
 
 /**
  * 
@@ -33,19 +36,19 @@ import dynamicswordskills.network.AbstractMessage;
  */
 public class PlaySoundPacket extends AbstractMessage<PlaySoundPacket>
 {
-	private String sound;
-
+	private SoundEvent sound;
+	private SoundCategory category;
 	private float volume;
-
 	private float pitch;
-
 	/** Coordinates at which to play the sound; used on the server side */
 	private double x, y, z;
 
 	public PlaySoundPacket() {}
 
-	public PlaySoundPacket(String sound, float volume, float pitch, double x, double y, double z) {
+	public PlaySoundPacket(SoundEvent sound, SoundCategory category, float volume, float pitch, double x, double y, double z) {
+		Validate.notNull(sound, "sound", new Object[0]);
 		this.sound = sound;
+		this.category = category;
 		this.volume = volume;
 		this.pitch = pitch;
 		this.x = x;
@@ -57,20 +60,21 @@ public class PlaySoundPacket extends AbstractMessage<PlaySoundPacket>
 	 * Use only when sending to the SERVER to use the entity's coordinates as the center;
 	 * if sent to the client, the position coordinates will be ignored.
 	 */
-	public PlaySoundPacket(String sound, float volume, float pitch, Entity entity) {
-		this(sound, volume, pitch, entity.posX, entity.posY, entity.posZ);
+	public PlaySoundPacket(SoundEvent sound, SoundCategory category, float volume, float pitch, Entity entity) {
+		this(sound, category, volume, pitch, entity.posX, entity.posY, entity.posZ);
 	}
 
 	/**
 	 * Use only when sending to the CLIENT - the sound will play at the player's position
 	 */
-	public PlaySoundPacket(String sound, float volume, float pitch) {
-		this(sound, volume, pitch, 0, 0, 0);
+	public PlaySoundPacket(SoundEvent sound, SoundCategory category, float volume, float pitch) {
+		this(sound, category, volume, pitch, 0, 0, 0);
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		sound = ByteBufUtils.readUTF8String(buffer);
+		this.sound = (SoundEvent) SoundEvent.REGISTRY.getObjectById(buffer.readVarIntFromBuffer());
+		this.category = (SoundCategory) buffer.readEnumValue(SoundCategory.class);
 		volume = buffer.readFloat();
 		pitch = buffer.readFloat();
 		x = buffer.readDouble();
@@ -80,7 +84,8 @@ public class PlaySoundPacket extends AbstractMessage<PlaySoundPacket>
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		ByteBufUtils.writeUTF8String(buffer, sound);
+		buffer.writeVarIntToBuffer(SoundEvent.REGISTRY.getIDForObject(this.sound));
+		buffer.writeEnumValue(this.category);
 		buffer.writeFloat(volume);
 		buffer.writeFloat(pitch);
 		buffer.writeDouble(x);
@@ -93,7 +98,8 @@ public class PlaySoundPacket extends AbstractMessage<PlaySoundPacket>
 		if (side.isClient()) {
 			player.playSound(sound, volume, pitch);
 		} else {
-			player.worldObj.playSoundEffect(x, y, z, sound, volume, pitch);
+			// pass 'null' player so they will hear the sound, too
+			player.worldObj.playSound(null, x, y, z, sound, category, volume, pitch);
 		}
 	}
 }

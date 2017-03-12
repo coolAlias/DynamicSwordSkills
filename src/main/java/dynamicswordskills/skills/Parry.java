@@ -24,7 +24,7 @@ import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
@@ -33,6 +33,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -195,7 +196,7 @@ public class Parry extends SkillActive
 		if (isActive()) {
 			if (--parryTimer <= getParryDelay() && playMissSound) {
 				playMissSound = false;
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
+				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			}
 		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
@@ -211,7 +212,7 @@ public class Parry extends SkillActive
 					PlayerUtils.dropHeldItem(attacker);
 				}
 				++attacksParried; // increment after disarm
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_SWORDSTRIKE, 0.4F, 0.5F);
+				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SWORD_STRIKE, SoundCategory.PLAYERS, 0.4F, 0.5F);
 				playMissSound = false;
 				TargetUtils.knockTargetBack(attacker, player);
 				return true;

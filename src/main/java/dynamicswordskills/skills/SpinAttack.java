@@ -25,7 +25,7 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.server.RefreshSpinPacket;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
@@ -34,6 +34,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
@@ -297,7 +298,7 @@ public class SpinAttack extends SkillActive
 				targets.remove(player);
 			}
 		} else {
-			PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SPINATTACK, 0.4F, 0.5F);
+			PlayerUtils.playRandomizedSound(player, ModSounds.SPIN_ATTACK, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			if (refreshed > 1) {
 				player.addExhaustion(getExhaustion());
 			}

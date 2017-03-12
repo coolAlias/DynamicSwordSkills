@@ -19,6 +19,7 @@ package dynamicswordskills.api;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundEvent;
 
 /**
  * 
@@ -60,7 +61,7 @@ public interface IComboDamage {
 		 * Return the sound to play on a successful hit, or null to not play any sound.
 		 * Only used if {@link #playDefaultSound} returns false.
 		 */
-		String getHitSound(EntityPlayer player);
+		SoundEvent getHitSound(EntityPlayer player);
 
 	}
 }
