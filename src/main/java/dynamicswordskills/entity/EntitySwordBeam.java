@@ -23,7 +23,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
@@ -32,6 +31,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.skills.SwordBeam;
+import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
 
 /**
@@ -134,7 +134,7 @@ public class EntitySwordBeam extends EntityThrowable
 					if (skill != null) {
 						skill.onImpact(player, false);
 					}
-					if (entity.attackEntityFrom(DamageSource.causePlayerDamage(player).setProjectile(), damage)) {
+					if (entity.attackEntityFrom(DamageUtils.causeIndirectComboDamage(this, player).setProjectile(), damage)) {
 						PlayerUtils.playSoundAtEntity(worldObj, entity, ModInfo.SOUND_HURT_FLESH, 0.4F, 0.5F);
 					}
 					damage *= 0.8F;
