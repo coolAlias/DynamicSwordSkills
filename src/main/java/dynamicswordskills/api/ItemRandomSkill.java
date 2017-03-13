@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Random;
 
 import dynamicswordskills.item.IModItem;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.renderer.ItemMeshDefinition;
@@ -31,11 +29,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -53,8 +49,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvider
 {
-	/** The maximum level of the SkillBase.{skill} granted by this Item */
-	private final byte maxLevel;
+	/** Item quality based on tool material; higher quality tends toward higher levels */
+	private final int quality;
 
 	/** String used as the ModelResourceLocation for this item's model */
 	private final String texture;
@@ -62,7 +58,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	public ItemRandomSkill(ToolMaterial material, String textureName) {
 		super(material);
 		this.texture = textureName;
-		this.maxLevel = (byte)(2 + material.getHarvestLevel());
+		this.quality = material.getHarvestLevel() + (material == ToolMaterial.GOLD ? 3 : 0);
 		setCreativeTab(null);
 		setRegistryName(ModInfo.ID, "skillsword_" + material.name());
 		setUnlocalizedName("dss.skill" + material.name());
@@ -144,31 +140,20 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		});
 	}
 
-	@Override
-	public WeightedRandomChestContent getChestGenBase(ChestGenHooks chest, Random rand, WeightedRandomChestContent original) {
-		SkillBase skill = null;
-		while (skill == null) {
-			skill = SkillBase.getSkill(rand.nextInt(SkillBase.getNumSkills()));
-			if (!(skill instanceof SkillActive) || !Config.isSkillEnabled(skill.getId())) {
-				skill = null;
-			}
-		}
-		ItemStack loot = new ItemStack(this);
-		loot.setTagCompound(getRandomSkillTag(skill, rand));
-		return new WeightedRandomChestContent(loot, original.minStackSize, original.maxStackSize, original.itemWeight);
-	}
-
 	/**
-	 * Creates a new NBTTagCompound containing all necessary skill data:
-	 * id, random level not exceeding the maximum, and random ability
-	 * to grant basic sword skill
+	 * Adds all necessary skill data to the stack's NBT Tag:
+	 * skill id, random level not exceeding the maximum, and
+	 * random ability to grant basic sword skill
 	 */
-	private NBTTagCompound getRandomSkillTag(SkillBase skill, Random rand) {
-		NBTTagCompound tag = new NBTTagCompound();
+	public void generateSkillTag(ItemStack stack, SkillBase skill, Random rand) {
+		if (!stack.hasTagCompound()) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		NBTTagCompound tag = stack.getTagCompound();
 		tag.setInteger("ItemSkillId", skill.getId());
-		int level = 1 + rand.nextInt(Math.min(maxLevel, skill.getMaxLevel()));
+		int level = 1 + rand.nextInt(Math.min(this.quality + 2, skill.getMaxLevel()));
 		tag.setByte("ItemSkillLevel", (byte) level);
-		tag.setBoolean("grantsBasicSword", (skill.getId() != SkillBase.swordBasic.getId() && rand.nextInt(16) > 4));
-		return tag;
+		boolean flag = (skill.getId() != SkillBase.swordBasic.getId() && rand.nextInt(16) > 9 - this.quality); 
+		tag.setBoolean("grantsBasicSword", flag);
 	}
 }

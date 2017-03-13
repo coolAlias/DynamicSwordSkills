@@ -20,12 +20,26 @@ package dynamicswordskills;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import dynamicswordskills.api.ItemRandomSkill;
+import dynamicswordskills.api.ItemSkillProvider;
+import dynamicswordskills.api.WeaponRegistry;
+import dynamicswordskills.command.DSSCommands;
+import dynamicswordskills.entity.EntityLeapingBlow;
+import dynamicswordskills.entity.EntitySwordBeam;
+import dynamicswordskills.entity.IPlayerInfo.CapabilityPlayerInfo;
+import dynamicswordskills.item.ItemSkillOrb;
+import dynamicswordskills.loot.LootHandler;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.SkillActive;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.WeightedRandomChestContent;
-import net.minecraftforge.common.ChestGenHooks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -42,23 +56,6 @@ import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import dynamicswordskills.api.ItemRandomSkill;
-import dynamicswordskills.api.ItemSkillProvider;
-import dynamicswordskills.api.WeaponRegistry;
-import dynamicswordskills.command.DSSCommands;
-import dynamicswordskills.entity.EntityLeapingBlow;
-import dynamicswordskills.entity.EntitySwordBeam;
-import dynamicswordskills.entity.IPlayerInfo.CapabilityPlayerInfo;
-import dynamicswordskills.item.ItemSkillOrb;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.skills.SkillActive;
-import dynamicswordskills.skills.SkillBase;
 
 @Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST)
 public class DynamicSwordSkills
@@ -141,13 +138,8 @@ public class DynamicSwordSkills
 	public void init(FMLInitializationEvent event) {
 		proxy.init();
 		MinecraftForge.EVENT_BUS.register(new DSSCombatEvents());
+		MinecraftForge.EVENT_BUS.register(new LootHandler());
 		DSSCombatEvents.initializeDrops();
-		if (Config.getLootWeight() > 0) {
-			registerSkillOrbLoot();
-		}
-		if (Config.areRandomSwordsEnabled()) {
-			registerRandomSwordLoot();
-		}
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
 		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", ModInfo.VERSION_LIST);
 	}
@@ -181,38 +173,5 @@ public class DynamicSwordSkills
 
 	private void registerSound(ResourceLocation location) {
 		GameRegistry.register(new SoundEvent(location).setRegistryName(location));
-	}
-
-	private void registerSkillOrbLoot() {
-		for (SkillBase skill : SkillBase.getSkills()) {
-			if (Config.isSkillEnabled(skill.getId())) {
-				addLootToAll(new WeightedRandomChestContent(new ItemStack(skillOrb, 1, skill.getId()), 1, 1, Config.getLootWeight()), false);
-			}
-		}
-	}
-
-	private void registerRandomSwordLoot() {
-		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillWood), 1, 1, 4), false);
-		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillStone), 1, 1, 3), false);
-		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillGold), 1, 1, 2), false);
-		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillIron), 1, 1, 2), false);
-		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillDiamond), 1, 1, 1), false);
-	}
-
-	/**
-	 * Adds weighted chest contents to all ChestGenHooks, with possible exception of Bonus Chest
-	 */
-	private void addLootToAll(WeightedRandomChestContent loot, boolean bonus) {
-		ChestGenHooks.getInfo(ChestGenHooks.MINESHAFT_CORRIDOR).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_DESERT_CHEST).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_JUNGLE_CHEST).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CORRIDOR).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_LIBRARY).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CROSSING).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.VILLAGE_BLACKSMITH).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.DUNGEON_CHEST).addItem(loot);
-		if (bonus) {
-			ChestGenHooks.getInfo(ChestGenHooks.BONUS_CHEST).addItem(loot);
-		}
 	}
 }

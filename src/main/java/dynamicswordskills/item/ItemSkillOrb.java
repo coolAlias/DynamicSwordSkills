@@ -121,4 +121,6 @@ public class ItemSkillOrb extends Item implements IModItem
 			ModelLoader.setCustomModelResourceLocation(this, i, new ModelResourceLocation(variants[i], "inventory"));
 		}
 	}
+
+	//public static final LootFunction LOOT_FUNCTION = new SetMetadata(new LootCondition[]{}, SKILL_SELECTOR);
 }
