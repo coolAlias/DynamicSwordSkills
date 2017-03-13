@@ -32,11 +32,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.api.damage.IComboDamage;
+import zeldaswordskills.api.damage.IComboDamage.IComboDamageFull;
 
 /**
  * 
@@ -326,22 +329,38 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event) {
-		if (event.source.isProjectile()) { return; }
+		if (!isValidComboDamage(player, event.source)) { return; }
 		if (combo == null || combo.isFinished()) {
 			combo = new Combo(player, this, getMaxComboSize(), getComboTimeLimit());
 		}
 		float damage = DirtyEntityAccessor.getModifiedDamage(event.entityLiving, event.source, event.ammount);
 		if (damage > 0) {
-			if (event.source.damageType.equals(DamageUtils.INDIRECT_SWORD)) {
-				combo.addDamageOnly(player, damage);
-			} else {
+			if (!(event.source instanceof IComboDamageFull) || ((IComboDamageFull) event.source).increaseComboCount(player)) {
 				combo.add(player, event.entityLiving, damage);
+			} else {
+				combo.addDamageOnly(player, damage);
 			}
 		}
-		if (event.source.damageType.equals("player")) {
-			String sound = (PlayerUtils.isSword(player.getHeldItem()) ? ModInfo.SOUND_SWORDCUT : ModInfo.SOUND_HURT_FLESH);
+		String sound = getComboDamageSound(player, event.source);
+		if (sound != null) {
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, sound, 0.4F, 0.5F);
 		}
+	}
+
+	private boolean isValidComboDamage(EntityPlayer player, DamageSource source) {
+		if (source instanceof IComboDamage) {
+			return ((IComboDamage) source).isComboDamage(player);
+		}
+		return !source.isProjectile();
+	}
+
+	private String getComboDamageSound(EntityPlayer player, DamageSource source) {
+		if (source instanceof IComboDamageFull && !((IComboDamageFull) source).playDefaultSound(player)) {
+			return ((IComboDamageFull) source).getHitSound(player);
+		} else if (source.getDamageType().equals("player")) {
+			return (PlayerUtils.isSword(player.getHeldItem()) ? ModInfo.SOUND_SWORDCUT : ModInfo.SOUND_HURT_FLESH);
+		}
+		return null;
 	}
 
 	@Override
