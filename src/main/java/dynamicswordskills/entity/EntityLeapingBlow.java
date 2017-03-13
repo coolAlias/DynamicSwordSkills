@@ -62,6 +62,7 @@ public class EntityLeapingBlow extends EntityThrowable
 	public EntityLeapingBlow(World world) {
 		super(world);
 		this.setSize(BASE_SIZE, HEIGHT);
+		this.motionY = 0.0D;
 	}
 
 	public EntityLeapingBlow(World world, EntityLivingBase thrower) {
@@ -74,6 +75,17 @@ public class EntityLeapingBlow extends EntityThrowable
 	public EntityLeapingBlow(World world, double x, double y, double z) {
 		super(world, x, y, z);
 		this.setSize(BASE_SIZE, HEIGHT);
+		this.motionY = 0.0D;
+	}
+
+	/**
+	 * Ensure this has a motionY of 0 in all constructors and when setting the heading to
+	 * prevent leaping blow entity from crashing into the ground and dying prematurely.
+	 */
+	@Override
+	public void setHeadingFromThrower(Entity thrower, float rotationPitch, float rotationYaw, float pitchOffset, float velocity, float inaccuracy) {
+		super.setHeadingFromThrower(thrower, rotationPitch, rotationYaw, pitchOffset, velocity, inaccuracy);
+		this.motionY = 0.0D;
 	}
 
 	/**
