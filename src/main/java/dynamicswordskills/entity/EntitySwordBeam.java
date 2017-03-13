@@ -131,6 +131,7 @@ public class EntitySwordBeam extends EntityThrowable
 			SwordBeam skill = (player != null ? (SwordBeam) DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
 			if (mop.typeOfHit == MovingObjectType.ENTITY) {
 				Entity entity = mop.entityHit;
+				if (entity == player) { return; }
 				if (player != null) {
 					if (skill != null) {
 						skill.onImpact(player, false);
