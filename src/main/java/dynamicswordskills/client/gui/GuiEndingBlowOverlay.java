@@ -19,20 +19,22 @@ package dynamicswordskills.client.gui;
 
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.skills.ICombo;
-import dynamicswordskills.skills.ILockOnTarget;
-import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.EndingBlow;
+import dynamicswordskills.skills.SkillActive;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 {
 	/** Time at which the current combo first started displaying */
 	private long displayStartTime;
 
 	/** Length of time combo pop-up will display */
-	private static final long DISPLAY_TIME = 5000;
+	private static final long DISPLAY_TIME = 1000;
 
 	public GuiEndingBlowOverlay(Minecraft mc) {
 		super(mc);
@@ -53,14 +55,13 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 		if (!Config.isEndingBlowHudEnabled) {
 			return false;
 		}
-		DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
-		// Call #canUse instead of #canExecute to determine whether notification should be displayed
-		if (skills.getActiveSkill(SkillBase.endingBlow) != null && skills.getActiveSkill(SkillBase.endingBlow).canUse(this.mc.thePlayer)) {
-			ICombo skill = skills.getComboSkill();
-			ILockOnTarget target = skills.getTargetingSkill();
-			if (skill != null && skill.isComboInProgress() && target != null && target.getCurrentTarget() == skill.getCombo().getLastEntityHit()) {
-				this.displayStartTime = Minecraft.getSystemTime();
-			}
+		SkillActive skill = DSSPlayerInfo.get(mc.thePlayer).getActiveSkill(SkillActive.endingBlow);
+		if (skill == null) {
+			this.displayStartTime = 0;
+		} else if (skill.canUse(this.mc.thePlayer)) {
+			this.displayStartTime = Minecraft.getSystemTime();
+		} else if (((EndingBlow) skill).getLastActivationTime() < this.displayStartTime) {
+			this.displayStartTime = 0; // unable to use and was not activated during this opportunity window
 		}
 		return ((Minecraft.getSystemTime() - this.displayStartTime) < DISPLAY_TIME);
 	}
