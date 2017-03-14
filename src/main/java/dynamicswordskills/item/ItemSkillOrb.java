@@ -55,7 +55,7 @@ public class ItemSkillOrb extends Item implements IModItem
 				if (!Config.isSkillEnabled(skill.getId())) {
 					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new ChatComponentTranslation(skill.getTranslationString()));
 				} else if (DSSPlayerInfo.get(player).grantSkill(skill)) {
-					world.playSoundAtEntity(player, ModInfo.SOUND_LEVELUP, 1.0F, 1.0F);
+					PlayerUtils.playSound(player, ModInfo.SOUND_LEVELUP, 1.0F, 1.0F);
 					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.levelup",
 							new ChatComponentTranslation(skill.getTranslationString()), DSSPlayerInfo.get(player).getTrueSkillLevel(skill));
 					if (!player.capabilities.isCreativeMode) {
