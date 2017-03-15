@@ -173,7 +173,15 @@ public class SpinAttack extends SkillActive
 	public boolean canExecute(EntityPlayer player) {
 		// return super.canUse instead of this.canUse to avoid !isActive() check; allows
 		// canExecute to be checked when refreshing super spin attack
-		return super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItemMainhand());
+		return super.canUse(player) && this.checkActiveHand(player) && PlayerUtils.isWeapon(player.getHeldItemMainhand());
+	}
+
+	/**
+	 * Returns true if active hand state is appropriate for charging up Spin Attack.
+	 * Blocking is allowed at this time, but not using other items such as food.
+	 */
+	private boolean checkActiveHand(EntityPlayer player) {
+		return !player.isHandActive() || player.isActiveItemStackBlocking();
 	}
 
 	/**
@@ -236,6 +244,12 @@ public class SpinAttack extends SkillActive
 		refreshed = 0;
 		superLevel = (checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
 		isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
+		if (player.isHandActive()) {
+			player.stopActiveHand();
+			if (world.isRemote && Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown()) {
+				KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
+			}
+		}
 		startSpin(world, player);
 		return true;
 	}
