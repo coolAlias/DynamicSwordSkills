@@ -91,12 +91,12 @@ public class DSSClientEvents
 	@SideOnly(Side.CLIENT)
 	public static void performComboAttack(Minecraft mc, ILockOnTarget skill) {
 		if (!mc.thePlayer.isHandActive()) {
-			mc.thePlayer.swingArm(EnumHand.MAIN_HAND);
-			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
 			if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
 				Entity entity = TargetUtils.getMouseOverEntity();
 				mc.playerController.attackEntity(mc.thePlayer, (entity != null ? entity : skill.getCurrentTarget()));
 			}
+			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
+			mc.thePlayer.swingArm(EnumHand.MAIN_HAND);
 		}
 	}
 
