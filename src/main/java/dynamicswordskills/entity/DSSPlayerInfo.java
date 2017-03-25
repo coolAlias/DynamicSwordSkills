@@ -90,6 +90,9 @@ public class DSSPlayerInfo
 	/** Reduces fall damage next impact; used for Rising Cut */
 	public float reduceFallAmount = 0.0F;
 
+	/** Used by certain skills for controlling the player's main arm rendering */
+	public float armSwing = 0.0F;
+
 	public DSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
 		this.skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());

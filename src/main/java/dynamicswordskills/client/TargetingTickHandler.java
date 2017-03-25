@@ -17,13 +17,13 @@
 
 package dynamicswordskills.client;
 
+import dynamicswordskills.entity.DSSPlayerInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.entity.DSSPlayerInfo;
 
 /**
  * 
@@ -44,6 +44,11 @@ public class TargetingTickHandler
 		if (event.phase == Phase.START) {
 			if (mc.thePlayer != null && DSSPlayerInfo.get(mc.thePlayer) != null) {
 				DSSPlayerInfo.get(mc.thePlayer).onRenderTick(event.renderTickTime);
+				float swing = DSSPlayerInfo.get(mc.thePlayer).armSwing;
+				if (swing > 0.0F) {
+					mc.thePlayer.swingProgress = swing;
+					mc.thePlayer.prevSwingProgress = swing;
+				}
 			}
 		}
 	}
