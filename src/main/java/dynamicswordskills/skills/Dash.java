@@ -206,8 +206,7 @@ public class Dash extends SkillActive
 				RayTraceResult result = TargetUtils.checkForImpact(player.worldObj, player, player, 0.5D, false);
 				if (result != null) {
 					PacketDispatcher.sendToServer(new DashImpactPacket(player, result));
-					// Player cannot attack directly after impacting something
-					DSSPlayerInfo.get(player).setAttackTime((player.capabilities.isCreativeMode ? 0 : 10 - level));
+					player.resetCooldown(); // player effectively made an attack
 					impactTime = 5;
 					if (result.typeOfHit == RayTraceResult.Type.ENTITY) {
 						target = result.entityHit;
