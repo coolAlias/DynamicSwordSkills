@@ -21,6 +21,7 @@ import java.util.List;
 
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.client.MortalDrawPacket;
@@ -241,6 +242,8 @@ public class MortalDraw extends SkillActive
 				player.inventory.setInventorySlotContents(swordSlot, null);
 			}
 			player.setHeldItem(EnumHand.MAIN_HAND, sword);
+			// Prevent cooldown from resetting after switching weapons
+			DirtyEntityAccessor.setItemStackMainHand(player, sword);
 			// attack will happen before entity#onUpdate refreshes equipment, so apply it now:
 			player.getAttributeMap().applyAttributeModifiers(sword.getAttributeModifiers(EntityEquipmentSlot.MAINHAND));
 			ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();

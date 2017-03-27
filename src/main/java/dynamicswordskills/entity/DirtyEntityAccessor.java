@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
@@ -33,6 +35,8 @@ public class DirtyEntityAccessor {
 	private static Method applyPotionDamageCalculations;
 	/** Accessible reference to {@code EntityLiving#experienceValue */
 	private static Field experienceValue;
+	/** Accessible reference to {@code EntityPlayer#itemStackMainHand} */
+	private static Field itemStackMainHand;
 
 	/** Damages the target for the amount of damage using the vanilla method; posts LivingHurtEvent */
 	public static void damageEntity(EntityLivingBase target, DamageSource source, float amount) {
@@ -75,6 +79,20 @@ public class DirtyEntityAccessor {
 		try {
 			int value = experienceValue.getInt(entity);
 			experienceValue.set(entity, (add ? value + xp : xp));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Use to e.g. prevent setting the main hand stack from resetting the cooldown timer
+	 */
+	public static void setItemStackMainHand(EntityPlayer player, ItemStack stack) {
+		if (itemStackMainHand == null) {
+			itemStackMainHand = ReflectionHelper.findField(EntityPlayer.class, "field_184831_bT", "itemStackMainHand");
+		}
+		try {
+			itemStackMainHand.set(player, stack == null ? null : stack.copy());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
