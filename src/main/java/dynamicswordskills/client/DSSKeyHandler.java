@@ -70,6 +70,8 @@ public class DSSKeyHandler
 	public void onKeyInput(KeyInputEvent event) {
 		if (Keyboard.getEventKeyState()) {
 			onKeyPressed(mc, Keyboard.getEventKey());
+		} else if (Keyboard.getEventKey() == keys[KEY_BLOCK].getKeyCode()) {
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
 		}
 	}
 
@@ -152,6 +154,10 @@ public class DSSKeyHandler
 			KeyBinding key = getKeyBindFromCode(mc, kb);
 			if (key != null) {
 				KeyBinding.setKeyBindState(kb, true);
+				// Piggy-back on vanilla use item key so shield blocking will work with custom keybinding
+				if (kb == keys[KEY_BLOCK].getKeyCode()) {
+					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), true);
+				}
 				skills.onKeyPressed(mc, key);
 			}
 		}
