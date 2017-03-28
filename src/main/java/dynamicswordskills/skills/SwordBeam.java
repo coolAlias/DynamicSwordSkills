@@ -50,15 +50,8 @@ import dynamicswordskills.util.PlayerUtils;
  * 	- May only be used while locked on to a target
  *  - Amount of health required decreases with skill level, down to 1-1/2 hearts below max
  *  - Hitting a target with the beam counts as a direct strike for combos
- *  - Using the Master Sword will shoot a beam that can penetrate multiple targets
+ *  - At max level, the beam can penetrate multiple targets
  *  - Each additional target receives 20% less damage than the previous
- * 
- * Sword beam shot from Link's sword when at full health. Inflicts the sword's full
- * base damage, not including enchantment or other bonuses, to the first entity struck.
- * 
- * If using the Master Sword, the beam will shoot through enemies, hitting all targets
- * in its direct path.
- * 
  */
 public class SwordBeam extends SkillActive
 {
