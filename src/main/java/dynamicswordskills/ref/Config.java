@@ -93,6 +93,8 @@ public class Config
 	private static boolean enableCreativeSkillSwords;
 	/** [Skill Swords] Skill level provided by the Creative Tab Skill Swords */
 	private static int skillSwordLevel;
+	/** [Skill Swords][Super Spin Attack] Require player to have at least one level in Spin Attack to perform extra spins using a skill item */
+	private static boolean requireSpinAttack;
 	/** [SYNC] [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
 	private static boolean requireFullHealth;
 	/** Enable use of a skill */
@@ -158,6 +160,7 @@ public class Config
 		enableRandomSkillSwords = config.get("general", "[Skill Swords] Enable randomized Skill Swords to appear as loot in various chests", true).getBoolean(true);
 		enableCreativeSkillSwords = config.get("general", "[Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples)", true).getBoolean(true);
 		skillSwordLevel = MathHelper.clamp_int(config.get("general", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt(), 1, 5);
+		requireSpinAttack = config.get("general", "[Skill Swords][Super Spin Attack] Require player to have at least one level in Spin Attack to perform extra spins using a skill item", false).getBoolean(false);
 		requireFullHealth = config.get("general", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 
 		category = "enabledskills";
@@ -207,6 +210,7 @@ public class Config
 	public static float getDisarmPenalty() { return disarmPenalty; }
 	public static float getDisarmTimingBonus() { return disarmTimingBonus; }
 	public static int getSkillSwordLevel() { return skillSwordLevel; }
+	public static boolean isSpinAttackRequired() { return requireSpinAttack; }
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));
