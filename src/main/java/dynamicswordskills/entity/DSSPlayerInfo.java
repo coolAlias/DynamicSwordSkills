@@ -374,7 +374,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			return itemSkill;
 		} else if (id == SkillBase.spinAttack.getId() && itemSkill != null && itemSkill.getId() == SkillBase.superSpinAttack.getId()) {
 			SkillBase skill = getTruePlayerSkill(id);
-			return (skill == null ? itemSkill : skill);
+			return (skill == null && !Config.isSpinAttackRequired() ? itemSkill : skill);
 		} else if (id == SkillBase.swordBasic.getId()) {
 			if (player.getHeldItem() == null) {
 				retrieveDummySwordSkill();
