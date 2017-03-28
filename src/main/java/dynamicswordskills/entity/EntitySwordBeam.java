@@ -141,7 +141,9 @@ public class EntitySwordBeam extends EntityThrowable
 					}
 					damage *= 0.8F;
 				}
-				setDead();
+				if (this.level < SkillBase.swordBeam.getMaxLevel()) {
+					setDead();
+				}
 			} else {
 				Block block = worldObj.getBlockState(mop.getBlockPos()).getBlock();
 				if (block.getMaterial().blocksMovement()) {
