@@ -23,6 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,11 +35,12 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.client.DSSClientEvents;
+import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.ArmorIndex;
@@ -193,7 +195,19 @@ public class BackSlice extends SkillActive
 				keyPressed = key;
 			}
 		} else if (isActive() && (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK])) {
-			DSSClientEvents.performComboAttack(mc, DSSPlayerInfo.get(player).getTargetingSkill());
+			// Attack targeted entity directly rather than using mouse cursor object due to camera funkiness
+			Entity target = DSSPlayerInfo.get(player).getTargetingSkill().getCurrentTarget();
+			if (target != null && TargetUtils.canReachTarget(player, target)) {
+				mc.playerController.attackEntity(mc.thePlayer, target);
+			} else {
+				PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
+				ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
+				if (combo.isComboInProgress()) {
+					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) combo));
+				}
+			}
+			player.swingItem();
+			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
 		}
 		return false; // allow other skills to receive this key press (e.g. Spin Attack)
 	}
