@@ -25,12 +25,12 @@ sourceCompatibility = targetCompatibility = "1.6"
 
 dependencies {
 	compile files (
-		"eclipse/mods/1.7.10-Battlegear-Bin-1.0.7.0.jar"
+		"eclipse/mods/1.7.10-Battlegear-Bin-1.0.8.2.jar"
 	)
 }
 
 minecraft {
-    version = "1.7.10-10.13.4.1448-1.7.10"
+    version = "1.7.10-10.13.4.1558-1.7.10"
     runDir = "eclipse"
 }
 
