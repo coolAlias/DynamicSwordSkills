@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,11 +20,11 @@ package dynamicswordskills.api;
 import java.util.HashSet;
 import java.util.Set;
 
+import dynamicswordskills.DynamicSwordSkills;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemSword;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import dynamicswordskills.DynamicSwordSkills;
 
 /**
  * 
@@ -124,7 +124,7 @@ public class WeaponRegistry
 		for (String s : names) {
 			String[] parts = parseString(s);
 			if (parts != null) {
-				Item item = GameRegistry.findItem(parts[0], parts[1]);
+				Item item = Item.REGISTRY.getObject(new ResourceLocation(parts[0], parts[1]));
 				if (item == null) {
 					DynamicSwordSkills.logger.warn(String.format("[WeaponRegistry] [%s] %s:%s could not be found - the mod may not be installed, or you may have typed it incorrectly", origin, parts[0], parts[1]));
 				} else if (isSword) {

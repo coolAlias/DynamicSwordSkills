@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,15 +20,14 @@ package dynamicswordskills.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -73,15 +72,15 @@ public class TargetUtils
 	 * @param hitBox	The amount by which to expand the collided entities' bounding boxes when checking for impact (may be negative)
 	 * @param flag		Optional flag to allow collision with shooter, e.g. (ticksInAir >= 5)
 	 */
-	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
+	public static RayTraceResult checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
 		double posY = entity.posY + (entity.height / 2.0D); // fix for Dash
-		Vec3 vec3 = new Vec3(entity.posX, posY, entity.posZ);
-		Vec3 vec31 = new Vec3(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
-		MovingObjectPosition mop = world.rayTraceBlocks(vec3, vec31, false, true, false);
-		vec3 = new Vec3(entity.posX, posY, entity.posZ);
-		vec31 = new Vec3(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
-		if (mop != null) {
-			vec31 = new Vec3(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
+		Vec3d vec3 = new Vec3d(entity.posX, posY, entity.posZ);
+		Vec3d vec31 = new Vec3d(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
+		RayTraceResult result = world.rayTraceBlocks(vec3, vec31, false, true, false);
+		vec3 = new Vec3d(entity.posX, posY, entity.posZ);
+		vec31 = new Vec3d(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
+		if (result != null) {
+			vec31 = new Vec3d(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord);
 		}
 		Entity target = null;
 		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox().addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
@@ -90,9 +89,9 @@ public class TargetUtils
 			Entity entity1 = list.get(i);
 			if (entity1.canBeCollidedWith() && (entity1 != shooter || flag)) {
 				AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().expand(hitBox, hitBox, hitBox);
-				MovingObjectPosition mop1 = axisalignedbb.calculateIntercept(vec3, vec31);
-				if (mop1 != null) {
-					double d1 = vec3.distanceTo(mop1.hitVec);
+				RayTraceResult result1 = axisalignedbb.calculateIntercept(vec3, vec31);
+				if (result1 != null) {
+					double d1 = vec3.distanceTo(result1.hitVec);
 					if (d1 < d0 || d0 == 0.0D) {
 						target = entity1;
 						d0 = d1;
@@ -101,17 +100,17 @@ public class TargetUtils
 			}
 		}
 		if (target != null) {
-			mop = new MovingObjectPosition(target);
+			result = new RayTraceResult(target);
 		}
-		if (mop != null && mop.entityHit instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) mop.entityHit;
+		if (result != null && result.entityHit instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) result.entityHit;
 			if (player.capabilities.disableDamage || (shooter instanceof EntityPlayer
 					&& !((EntityPlayer) shooter).canAttackPlayer(player)))
 			{
-				mop = null;
+				result = null;
 			}
 		}
-		return mop;
+		return result;
 	}
 
 	/**
@@ -119,8 +118,8 @@ public class TargetUtils
 	 */
 	@SideOnly(Side.CLIENT)
 	public static boolean isMouseOverEntity(Entity entity) {
-		MovingObjectPosition mop = Minecraft.getMinecraft().objectMouseOver;
-		return (mop != null && mop.entityHit == entity);
+		RayTraceResult result = Minecraft.getMinecraft().objectMouseOver;
+		return (result != null && result.entityHit == entity);
 	}
 
 	/**
@@ -128,8 +127,8 @@ public class TargetUtils
 	 */
 	@SideOnly(Side.CLIENT)
 	public static Entity getMouseOverEntity() {
-		MovingObjectPosition mop = Minecraft.getMinecraft().objectMouseOver;
-		return (mop == null ? null : mop.entityHit);
+		RayTraceResult result = Minecraft.getMinecraft().objectMouseOver;
+		return (result == null ? null : result.entityHit);
 	}
 
 	/** Returns the EntityLivingBase closest to the point at which the seeker is looking and within the distance and radius specified */
@@ -150,7 +149,7 @@ public class TargetUtils
 		}
 		EntityLivingBase currentTarget = null;
 		double currentDistance = MAX_DISTANCE_SQ;
-		Vec3 vec3 = seeker.getLookVec();
+		Vec3d vec3 = seeker.getLookVec();
 		double targetX = seeker.posX;
 		double targetY = seeker.posY + seeker.getEyeHeight() - 0.10000000149011612D;
 		double targetZ = seeker.posZ;
@@ -186,7 +185,7 @@ public class TargetUtils
 			distance = MAX_DISTANCE;
 		}
 		List<EntityLivingBase> targets = new ArrayList<EntityLivingBase>();
-		Vec3 vec3 = seeker.getLookVec();
+		Vec3d vec3 = seeker.getLookVec();
 		double targetX = seeker.posX;
 		double targetY = seeker.posY + seeker.getEyeHeight() - 0.10000000149011612D;
 		double targetZ = seeker.posZ;
@@ -238,7 +237,7 @@ public class TargetUtils
 	/**
 	 * Returns true if the target's position is within the area that the seeker is facing and the target can be seen
 	 */
-	private static final boolean isTargetInSight(Vec3 vec3, EntityLivingBase seeker, Entity target) {
+	private static final boolean isTargetInSight(Vec3d vec3, EntityLivingBase seeker, Entity target) {
 		return seeker.canEntityBeSeen(target) && isTargetInFrontOf(seeker, target, 60);
 	}
 
@@ -246,9 +245,7 @@ public class TargetUtils
 	 * Whether the entity is currently standing in any liquid
 	 */
 	public static boolean isInLiquid(Entity entity) {
-		BlockPos pos = new BlockPos(entity);
-		Block block = entity.worldObj.getBlockState(pos).getBlock();
-		return block.getMaterial().isLiquid();
+		return entity.worldObj.getBlockState(new BlockPos(entity)).getMaterial().isLiquid();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -23,22 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.common.IExtendedEntityProperties;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.client.DSSKeyHandler;
@@ -50,6 +34,22 @@ import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
+import net.minecraftforge.common.IExtendedEntityProperties;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class DSSPlayerInfo implements IExtendedEntityProperties
 {
@@ -198,7 +198,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		if (itemSkill != null && itemSkill.getId() == id) {
 			level = itemSkill.getLevel();
 		} else if (id == SkillBase.swordBasic.getId()) {
-			if (player.getHeldItem() == null) {
+			if (player.getHeldItemMainhand() == null) {
 				retrieveDummySwordSkill();
 			}
 			if (dummySwordSkill != null) {
@@ -319,13 +319,13 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void onBeingAttacked(LivingAttackEvent event) {
 		for (SkillActive skill : activeSkills) {
-			if (skill.isActive() && skill.onBeingAttacked(player, event.source)) {
+			if (skill.isActive() && skill.onBeingAttacked(player, event.getSource())) {
 				event.setCanceled(true);
 				return;
 			}
 		}
 		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
-			((SkillActive) itemSkill).onBeingAttacked(player, event.source);
+			((SkillActive) itemSkill).onBeingAttacked(player, event.getSource());
 		}
 	}
 
@@ -337,11 +337,11 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	public void onPostImpact(LivingHurtEvent event) {
 		for (SkillActive skill : activeSkills) {
 			if (skill.isActive()) {
-				event.ammount = skill.postImpact(player, event.entityLiving, event.ammount);
+				event.setAmount(skill.postImpact(player, event.getEntityLiving(), event.getAmount()));
 			}
 		}
 		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
-			event.ammount = ((SkillActive) itemSkill).postImpact(player, event.entityLiving, event.ammount);
+			event.setAmount(((SkillActive) itemSkill).postImpact(player, event.getEntityLiving(), event.getAmount()));
 		}
 		// combo gets updated last, after all damage modifications are completed
 		if (getComboSkill() != null) {
@@ -405,7 +405,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			SkillBase skill = getTruePlayerSkill(id);
 			return (skill == null && !Config.isSpinAttackRequired() ? itemSkill : skill);
 		} else if (id == SkillBase.swordBasic.getId()) {
-			if (player.getHeldItem() == null) {
+			if (player.getHeldItemMainhand() == null) {
 				retrieveDummySwordSkill();
 			}
 			return (dummySwordSkill == null ? getTruePlayerSkill(id) : dummySwordSkill);
@@ -575,8 +575,8 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			}
 		}
 		if (player.worldObj.isRemote) {
-			if (DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown() && isSkillActive(SkillBase.swordBasic) && player.getHeldItem() != null) {
-				Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
+			if (DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown() && isSkillActive(SkillBase.swordBasic) && player.getHeldItemMainhand() != null) {
+				Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItemMainhand());
 			}
 		}
 	}
@@ -585,7 +585,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * Updates the current itemSkill and dummySwordSkill based on the player's currently held item
 	 */
 	private void updateISkillItem() {
-		ItemStack stack = player.getHeldItem();
+		ItemStack stack = player.getHeldItemMainhand();
 		if (itemSkill != null && itemSkill.getId() == SkillBase.mortalDraw.getId() &&
 				(stack == null || ((SkillActive) itemSkill).isActive()))
 		{

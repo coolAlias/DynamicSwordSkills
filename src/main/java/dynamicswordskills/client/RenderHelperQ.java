@@ -21,7 +21,7 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 
@@ -39,12 +39,12 @@ public class RenderHelperQ {
 		double minV = (double)v / (double)imageHeight;
 		double maxV = (double)(v + height) / (double)imageHeight;
 		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer renderer = tessellator.getWorldRenderer();
-		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		renderer.pos(x + scale*(double)width, y + scale*(double)height, 0).tex(maxU, maxV).endVertex();
-		renderer.pos(x + scale*(double)width, y, 0).tex(maxU, minV).endVertex();
-		renderer.pos(x, y, 0).tex(minU, minV).endVertex();
-		renderer.pos(x, y + scale*(double)height, 0).tex(minU, maxV).endVertex();
+		VertexBuffer buffer = tessellator.getBuffer();
+		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		buffer.pos(x + scale*(double)width, y + scale*(double)height, 0).tex(maxU, maxV).endVertex();
+		buffer.pos(x + scale*(double)width, y, 0).tex(maxU, minV).endVertex();
+		buffer.pos(x, y, 0).tex(minU, minV).endVertex();
+		buffer.pos(x, y + scale*(double)height, 0).tex(minU, maxV).endVertex();
 		tessellator.draw();
 	}
 
@@ -69,12 +69,12 @@ public class RenderHelperQ {
 		double minV = (double)v / (double)imageHeight;
 		double maxV = (double)(v + height) / (double)imageHeight;
 		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer renderer = tessellator.getWorldRenderer();
-		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		renderer.pos(x + scale*(double)width, y + scale*(double)height, 0).tex(maxU, maxV).endVertex();
-		renderer.pos(x + scale*(double)width, y, 0).tex(maxU, minV).endVertex();
-		renderer.pos(x, y, 0).tex(minU, minV).endVertex();
-		renderer.pos(x, y + scale*(double)height, 0).tex(minU, maxV).endVertex();
+		VertexBuffer buffer = tessellator.getBuffer();
+		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		buffer.pos(x + scale*(double)width, y + scale*(double)height, 0).tex(maxU, maxV).endVertex();
+		buffer.pos(x + scale*(double)width, y, 0).tex(maxU, minV).endVertex();
+		buffer.pos(x, y, 0).tex(minU, minV).endVertex();
+		buffer.pos(x, y + scale*(double)height, 0).tex(minU, maxV).endVertex();
 		tessellator.draw();
 	}
 

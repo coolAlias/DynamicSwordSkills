@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,15 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiInventory;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Slot;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
-
 import org.lwjgl.input.Mouse;
 
 import dynamicswordskills.entity.DSSPlayerInfo;
@@ -37,6 +28,14 @@ import dynamicswordskills.inventory.ContainerSkills;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Slot;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.translation.I18n;
 
 public class GuiSkills extends GuiContainer
 {
@@ -113,7 +112,7 @@ public class GuiSkills extends GuiContainer
 			RenderHelperQ.drawTexturedRect(259, 61 + (int)(scrollY * 81), 282, 10, 3, 7, 285, 180);
 			GlStateManager.popAttrib();
 		}
-		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : StatCollector.translateToLocal("skill.dss.gui.description"));
+		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : I18n.translateToLocal("skill.dss.gui.description"));
 		isUnicode = fontRendererObj.getUnicodeFlag();
 		fontRendererObj.setUnicodeFlag(true);
 		fontRendererObj.drawString(s, 158, 38, 4210752);
@@ -121,7 +120,7 @@ public class GuiSkills extends GuiContainer
 			if (Config.isSkillEnabled(currentSkill.getId())) {
 				s = currentSkill.getLevelDisplay(false);
 			} else {
-				s = (EnumChatFormatting.DARK_RED + StatCollector.translateToLocal("skill.dss.disabled"));
+				s = (TextFormatting.DARK_RED + I18n.translateToLocal("skill.dss.disabled"));
 			}
 			fontRendererObj.drawString(s, 262 - fontRendererObj.getStringWidth(s), 38, 4210752);
 		}
@@ -149,15 +148,15 @@ public class GuiSkills extends GuiContainer
 			return;
 		}
 		if (currentSkill != null) {
-			desc.add(StatCollector.translateToLocal("skill.dss.gui.summary"));
+			desc.add(I18n.translateToLocal("skill.dss.gui.summary"));
 			currentSkill.addInformation(desc, mc.thePlayer);
 			desc.add("");
-			desc.add(StatCollector.translateToLocal("skill.dss.gui.activation"));
+			desc.add(I18n.translateToLocal("skill.dss.gui.activation"));
 			desc.addAll(fontRendererObj.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
 			desc.add("");
 		}
-		desc.add(StatCollector.translateToLocal("skill.dss.gui.description"));
-		String[] temp = (currentSkill != null ? currentSkill.getFullDescription().split("\\\\n") : StatCollector.translateToLocal("skill.dss.gui.explanation").split("\\\\n"));
+		desc.add(I18n.translateToLocal("skill.dss.gui.description"));
+		String[] temp = (currentSkill != null ? currentSkill.getFullDescription().split("\\\\n") : I18n.translateToLocal("skill.dss.gui.explanation").split("\\\\n"));
 		for (String s : temp) {
 			desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
 			desc.add("");

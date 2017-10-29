@@ -19,16 +19,19 @@ package dynamicswordskills.command;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import dynamicswordskills.api.WeaponRegistry;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.item.Item;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import dynamicswordskills.api.WeaponRegistry;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class CommandWeaponRegistry extends CommandBase
 {
@@ -55,13 +58,13 @@ public class CommandWeaponRegistry extends CommandBase
 	}
 
 	@Override
-	public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
 		if (args == null || args.length != 3) {
 			throw new WrongUsageException(getCommandUsage(sender));
 		}
 		String[] parts = WeaponRegistry.parseString(args[2]);
 		if (parts != null) {
-			Item item = GameRegistry.findItem(parts[0], parts[1]);
+			Item item = Item.REGISTRY.getObject(new ResourceLocation(parts[0], parts[1]));
 			if (item == null) {
 				throw new WrongUsageException("commands.dssweaponregistry.item.unknown", parts[1], parts[0]);
 			}
@@ -86,7 +89,7 @@ public class CommandWeaponRegistry extends CommandBase
 					msg += "fail";
 				}
 			}
-			sender.addChatMessage(new ChatComponentTranslation(msg, args[2]));
+			sender.addChatMessage(new TextComponentTranslation(msg, args[2]));
 		} else {
 			throw new WrongUsageException(getCommandUsage(sender));
 		}
@@ -111,10 +114,10 @@ public class CommandWeaponRegistry extends CommandBase
 	}
 
 	@Override
-	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+	public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
 		switch (args.length) {
-		case 1: return getListOfStringsMatchingLastWord(args, "allow", "forbid");
-		case 2: return getListOfStringsMatchingLastWord(args, "sword", "weapon");
+		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, "allow", "forbid");
+		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, "sword", "weapon");
 		}
 		return null;
 	}

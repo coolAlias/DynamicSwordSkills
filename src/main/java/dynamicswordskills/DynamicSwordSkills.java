@@ -117,10 +117,10 @@ public class DynamicSwordSkills
 			GameRegistry.registerItem(skillStone, skillStone.getUnlocalizedName().substring(5));
 			skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword").setUnlocalizedName("dss.skilliron");
 			GameRegistry.registerItem(skillIron, skillIron.getUnlocalizedName().substring(5));
-			skillDiamond = new ItemRandomSkill(ToolMaterial.EMERALD, "diamond_sword").setUnlocalizedName("dss.skilldiamond");
-			GameRegistry.registerItem(skillDiamond, skillDiamond.getUnlocalizedName().substring(5));
 			skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword").setUnlocalizedName("dss.skillgold");
 			GameRegistry.registerItem(skillGold, skillGold.getUnlocalizedName().substring(5));
+			skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword").setUnlocalizedName("dss.skilldiamond");
+			GameRegistry.registerItem(skillDiamond, skillDiamond.getUnlocalizedName().substring(5));
 		}
 		proxy.preInit();
 		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, this, 64, 10, true);

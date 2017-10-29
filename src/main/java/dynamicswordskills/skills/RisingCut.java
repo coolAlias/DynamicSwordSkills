@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,13 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.client.DSSClientEvents;
+import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -28,13 +35,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.util.PlayerUtils;
 
 /**
  * 
@@ -93,7 +93,7 @@ public class RisingCut extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && !player.isUsingItem() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
+		return super.canUse(player) && !isActive() && !player.isHandActive() && PlayerUtils.isSwordOrProvider(player.getHeldItemMainhand(), this);
 	}
 
 	@Override
@@ -117,7 +117,7 @@ public class RisingCut extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (key == mc.gameSettings.keyBindJump) {
-			if (!isActive() && !player.isUsingItem() && player.isSneaking()) {
+			if (!isActive() && !player.isHandActive() && player.isSneaking()) {
 				ticksTilFail = 3; // this allows canExecute to return true for 3 ticks
 				return true;
 			}
@@ -155,7 +155,7 @@ public class RisingCut extends SkillActive
 					double addY = 0.3D + (0.125D * level);
 					double resist = 1.0D;
 					if (entityHit instanceof EntityLivingBase) {
-						resist = 1.0D - ((EntityLivingBase) entityHit).getEntityAttribute(SharedMonsterAttributes.knockbackResistance).getAttributeValue();
+						resist = 1.0D - ((EntityLivingBase) entityHit).getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getAttributeValue();
 					}
 					entityHit.addVelocity(0.0D, addY * resist, 0.0D);
 				}

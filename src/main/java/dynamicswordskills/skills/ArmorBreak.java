@@ -32,6 +32,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -125,7 +126,7 @@ public class ArmorBreak extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
+		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand());
 	}
 
 	/**
@@ -197,10 +198,10 @@ public class ArmorBreak extends SkillActive
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		if (isCharging(player)) {
-			if (isKeyPressed() && PlayerUtils.isWeapon(player.getHeldItem())) {
+			if (isKeyPressed() && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 				if (!player.isSwingInProgress) {
 					if (charge < (getChargeTime(player) - 1)) {
-						Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
+						Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItemMainhand());
 					}
 					--charge;
 				}
@@ -209,7 +210,7 @@ public class ArmorBreak extends SkillActive
 					// can't use the standard animation methods to prevent key/mouse input,
 					// since Armor Break will not return true for isActive
 					DSSPlayerInfo.get(player).setAttackTime(4); // flag for isAnimating? no player parameter
-					player.swingItem();
+					player.swingArm(EnumHand.MAIN_HAND);
 					if (requiresReset) { // activated by vanilla attack key: manually unset the key state (fix for mouse event issues)
 						KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack.getKeyCode(), false);
 					}
@@ -240,7 +241,7 @@ public class ArmorBreak extends SkillActive
 	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
 		activeTimer = 0;
 		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_ARMORBREAK, 0.4F, 0.5F);
-		DirtyEntityAccessor.damageEntity(event.entityLiving, DamageUtils.causeArmorBreakDamage(player), event.ammount);
-		event.ammount = 0.0F;
+		DirtyEntityAccessor.damageEntity(event.getEntityLiving(), DamageUtils.causeArmorBreakDamage(player), event.getAmount());
+		event.setAmount(0.0F);
 	}
 }

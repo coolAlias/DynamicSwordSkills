@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,17 +19,6 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.StatCollector;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -39,6 +28,17 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -111,7 +111,7 @@ public class SpinAttack extends SkillActive
 		}
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1).replace("super", ""), superLevel + 1));
+		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1).replace("super", ""), superLevel + 1));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 		level = temp;
 	}
@@ -164,7 +164,7 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
+		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand());
 	}
 
 	@Override
@@ -172,7 +172,7 @@ public class SpinAttack extends SkillActive
 	public boolean canExecute(EntityPlayer player) {
 		// return super.canUse instead of this.canUse to avoid !isActive() check; allows
 		// canExecute to be checked when refreshing super spin attack
-		return super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem());
+		return super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItemMainhand());
 	}
 
 	/**
@@ -250,7 +250,7 @@ public class SpinAttack extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		// isCharging can only be true on the client, which is where charging is handled
 		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
-			if (PlayerUtils.isWeapon(player.getHeldItem()) && player.worldObj.isRemote && isKeyPressed()) {
+			if (PlayerUtils.isWeapon(player.getHeldItemMainhand()) && player.worldObj.isRemote && isKeyPressed()) {
 				if (charge < (getChargeTime() - 1)) {
 					Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
 				}
@@ -269,7 +269,7 @@ public class SpinAttack extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
-		if (PlayerUtils.isWeapon(player.getHeldItem())) {
+		if (PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 			List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D);
 			for (EntityLivingBase target : list) {
 				if (targets != null && targets.contains(target)) {
@@ -322,7 +322,7 @@ public class SpinAttack extends SkillActive
 	private void spawnParticles(EntityPlayer player) {
 		// TODO these will not be seen by other players
 		EnumParticleTypes particle = (isFlaming ? EnumParticleTypes.FLAME : (superLevel > 0 ? EnumParticleTypes.CRIT_MAGIC : EnumParticleTypes.CRIT));
-		Vec3 vec3 = player.getLookVec();
+		Vec3d vec3 = player.getLookVec();
 		double posX = player.posX + (vec3.xCoord * getRange());
 		double posY = player.posY + player.getEyeHeight() - 0.1D;
 		double posZ = player.posZ + (vec3.zCoord * getRange());
@@ -335,7 +335,7 @@ public class SpinAttack extends SkillActive
 	 * Called on the server after receiving the {@link RefreshSpinPacket}
 	 */
 	public void refreshServerSpin(EntityPlayer player) {
-		if (canRefresh() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem())) {
+		if (canRefresh() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 			arc += 360F;
 		}
 	}

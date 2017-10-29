@@ -25,14 +25,14 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.renderer.ItemMeshDefinition;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.StatCollector;
 import net.minecraft.util.WeightedRandomChestContent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.fml.relauncher.Side;
@@ -106,7 +106,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
-		return StatCollector.translateToLocalFormatted("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName()));
+		return I18n.translateToLocalFormatted("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName()));
 	}
 
 	@Override
@@ -114,10 +114,10 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null) {
-			list.add(StatCollector.translateToLocalFormatted("tooltip.dss.skillprovider.desc.skill", EnumChatFormatting.GOLD + skill.getDisplayName()));
-			list.add(StatCollector.translateToLocalFormatted("tooltip.dss.skillprovider.desc.level", skill.getLevel(), skill.getMaxLevel()));
+			list.add(I18n.translateToLocalFormatted("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()));
+			list.add(I18n.translateToLocalFormatted("tooltip.dss.skillprovider.desc.level", skill.getLevel(), skill.getMaxLevel()));
 			if (grantsBasicSwordSkill(stack)) {
-				list.add(StatCollector.translateToLocalFormatted("tooltip.dss.skillprovider.desc.provider", EnumChatFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName()));
+				list.add(I18n.translateToLocalFormatted("tooltip.dss.skillprovider.desc.provider", TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName()));
 			}
 			list.addAll(skill.getDescription(player));
 		}

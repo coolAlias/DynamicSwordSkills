@@ -27,7 +27,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -133,7 +133,7 @@ public class Combo
 
 	/** Returns translated current description of combo; e.g. "Great" */
 	public String getLabel() {
-		return StatCollector.translateToLocal("combo.label." + Math.min(getNumHits(), 10));
+		return I18n.translateToLocal("combo.label." + Math.min(getNumHits(), 10));
 	}
 
 	/**

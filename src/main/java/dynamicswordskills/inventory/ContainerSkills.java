@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,14 +17,15 @@
 
 package dynamicswordskills.inventory;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 
@@ -76,7 +77,7 @@ public class ContainerSkills extends Container
 	}
 
 	@Override
-	public ItemStack slotClick(int slotIndex, int button, int par3, EntityPlayer player) {
+	public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
 		return null;
 	}
 }

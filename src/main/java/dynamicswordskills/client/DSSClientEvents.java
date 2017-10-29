@@ -32,6 +32,7 @@ import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.EnumHand;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -71,11 +72,11 @@ public class DSSClientEvents
 
 	@SubscribeEvent
 	public void onRenderExperienceBar(RenderGameOverlayEvent.Post event) {
-		if (event.type != RenderGameOverlayEvent.ElementType.EXPERIENCE) {
+		if (event.getType() != RenderGameOverlayEvent.ElementType.EXPERIENCE) {
 			return;
 		}
 		for (IGuiOverlay overlay : this.overlays) {
-			if (overlay.shouldRender() && overlay.renderOverlay(event.resolution, this.rendered)) {
+			if (overlay.shouldRender() && overlay.renderOverlay(event.getResolution(), this.rendered)) {
 				this.rendered.add(overlay);
 			}
 		}
@@ -89,8 +90,8 @@ public class DSSClientEvents
 	 */
 	@SideOnly(Side.CLIENT)
 	public static void performComboAttack(Minecraft mc, ILockOnTarget skill) {
-		if (!mc.thePlayer.isUsingItem()) {
-			mc.thePlayer.swingItem();
+		if (!mc.thePlayer.isHandActive()) {
+			mc.thePlayer.swingArm(EnumHand.MAIN_HAND);
 			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
 			if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
 				Entity entity = TargetUtils.getMouseOverEntity();
@@ -108,20 +109,20 @@ public class DSSClientEvents
 	 */
 	@SubscribeEvent
 	public void onMouseChanged(MouseEvent event) {
-		mouseKey = event.button - 100;
+		mouseKey = event.getButton() - 100;
 		isAttackKey = (mouseKey == mc.gameSettings.keyBindAttack.getKeyCode());
 		isUseKey = (mouseKey == mc.gameSettings.keyBindUseItem.getKeyCode());
-		if ((event.button == -1 && event.dwheel == 0)) {
+		if ((event.getButton() == -1 && event.getDwheel() == 0)) {
 			return;
 		} else if ((!isAttackKey && !isUseKey)) {
 			// pass mouse clicks to custom key handler when pressed, as KeyInputEvent no longer receives these
-			if (event.buttonstate) {
+			if (event.isButtonstate()) {
 				DSSKeyHandler.onKeyPressed(mc, mouseKey);
 			}
 			return;
 		}
 		DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
-		if (event.buttonstate || event.dwheel != 0) {
+		if (event.isButtonstate() || event.getDwheel() != 0) {
 			if (isAttackKey) {
 				// hack for spin attack: allows key press information to be received while animating
 				if (skills.isSkillActive(SkillBase.spinAttack) && skills.getActiveSkill(SkillBase.spinAttack).isAnimating()) {
@@ -137,7 +138,7 @@ public class DSSClientEvents
 				event.setCanceled(!skills.canInteract());
 			}
 		}
-		if (event.isCanceled() || !event.buttonstate) {
+		if (event.isCanceled() || !event.isButtonstate()) {
 			return;
 		}
 

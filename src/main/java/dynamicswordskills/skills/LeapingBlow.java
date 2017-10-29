@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,14 +19,6 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
@@ -36,6 +28,14 @@ import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumHand;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -99,7 +99,7 @@ public class LeapingBlow extends SkillActive
 
 	/** Returns player's base damage (which includes all attribute bonuses) plus 1.0F per level */
 	private float getDamage(EntityPlayer player) {
-		return (float)(level + player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue());
+		return (float)(level + player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
 	}
 
 	/** Duration of weakness effect; used for tooltip display only */
@@ -109,7 +109,7 @@ public class LeapingBlow extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this) && !TargetUtils.isInLiquid(player);
+		return super.canUse(player) && !isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItemMainhand(), this) && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
@@ -161,17 +161,18 @@ public class LeapingBlow extends SkillActive
 	 */
 	public void onImpact(EntityPlayer player, float distance) {
 		SwordBasic swordSkill = (SwordBasic) DSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
-		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this)) {
+		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItemMainhand(), this)) {
 			if (player.worldObj.isRemote) {
 				if (distance < 1.0F) {
 					DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);
 				} else {
-					player.swingItem();
+					player.swingArm(EnumHand.MAIN_HAND);
 				}
 			} else if (distance >= 1.0F) {
 				// add exhaustion here, now that skill has truly activated:
 				player.addExhaustion(getExhaustion());
-				Entity entity = new EntityLeapingBlow(player.worldObj, player).setDamage(getDamage(player)).setLevel(level);
+				EntityLeapingBlow entity = new EntityLeapingBlow(player.worldObj, player).setDamage(getDamage(player)).setLevel(level);
+				entity.setHeadingFromThrower(player, player.rotationPitch, player.rotationYaw, 0.0F, entity.getVelocity(), 1.0F);
 				player.worldObj.spawnEntityInWorld(entity);
 				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_LEAPINGBLOW, 0.4F, 0.5F);
 			}

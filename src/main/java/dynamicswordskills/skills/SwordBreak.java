@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,16 +19,6 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.StatCollector;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
@@ -36,6 +26,17 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -79,7 +80,7 @@ public class SwordBreak extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), getMaxDamage()));
+		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1), getMaxDamage()));
 		desc.add(getTimeLimitDisplay(getActiveTime() - getUseDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
@@ -111,7 +112,7 @@ public class SwordBreak extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
+		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand());
 	}
 
 	/**
@@ -156,7 +157,7 @@ public class SwordBreak extends SkillActive
 		if (world.isRemote) {
 			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
 			KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
-			player.swingItem();
+			player.swingArm(EnumHand.MAIN_HAND);
 		}
 		return isActive();
 	}
@@ -182,8 +183,8 @@ public class SwordBreak extends SkillActive
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
 		if (source.getSourceOfDamage() instanceof EntityLivingBase) {
 			EntityLivingBase attacker = (EntityLivingBase) source.getSourceOfDamage();
-			ItemStack stackToDamage = attacker.getHeldItem();
-			if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isWeapon(player.getHeldItem())) {
+			ItemStack stackToDamage = attacker.getHeldItemMainhand();
+			if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 				breakTimer = getUseDelay(); // only block one attack
 				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_SWORDSTRIKE, 0.4F, 0.5F);
 				playMissSound = false;
@@ -192,7 +193,7 @@ public class SwordBreak extends SkillActive
 					stackToDamage.damageItem(dmg, attacker);
 					if (stackToDamage.stackSize <= 0) {
 						player.worldObj.playSoundAtEntity(attacker, "random.break", 0.8F, 0.8F + player.worldObj.rand.nextFloat() * 0.4F);
-						attacker.setCurrentItemOrArmor(0, null);
+						attacker.setHeldItem(EnumHand.MAIN_HAND, null);
 					}
 				}
 				TargetUtils.knockTargetBack(attacker, player);

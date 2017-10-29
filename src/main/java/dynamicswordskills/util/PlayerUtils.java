@@ -19,6 +19,12 @@ package dynamicswordskills.util;
 
 import java.util.Random;
 
+import dynamicswordskills.api.ISkillProvider;
+import dynamicswordskills.api.IWeapon;
+import dynamicswordskills.api.WeaponRegistry;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.PlaySoundPacket;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -28,16 +34,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.api.ISkillProvider;
-import dynamicswordskills.api.IWeapon;
-import dynamicswordskills.api.WeaponRegistry;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.PlaySoundPacket;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 
@@ -93,7 +94,7 @@ public class PlayerUtils
 
 	/** Sends a translated chat message with optional arguments to the player */
 	public static void sendTranslatedChat(EntityPlayer player, String message, Object... args) {
-		player.addChatMessage(new ChatComponentTranslation(message, args));
+		player.addChatMessage(new TextComponentTranslation(message, args));
 	}
 
 	/**
@@ -156,14 +157,14 @@ public class PlayerUtils
 	/**
 	 * Spawns XP Orbs for the amount given with randomized position and motion
 	 */
-	public static void spawnXPOrbsWithRandom(World world, Random rand, int x, int y, int z, int xpAmount) {
+	public static void spawnXPOrbsWithRandom(World world, Random rand, BlockPos pos, int xpAmount) {
 		if (!world.isRemote) {
 			while (xpAmount > 0) {
 				int xp = (xpAmount > 50 ? 50 : EntityXPOrb.getXPSplit(xpAmount));
 				xpAmount -= xp;
-				float spawnX = x + rand.nextFloat();
-				float spawnY = y + rand.nextFloat();
-				float spawnZ = z + rand.nextFloat();
+				float spawnX = pos.getX() + rand.nextFloat();
+				float spawnY = pos.getY() + rand.nextFloat();
+				float spawnZ = pos.getZ() + rand.nextFloat();
 				EntityXPOrb xpOrb = new EntityXPOrb(world, spawnX, spawnY, spawnZ, xp);
 				xpOrb.motionY += (4 + rand.nextGaussian()) * 0.05F;
 				world.spawnEntityInWorld(xpOrb);
@@ -172,13 +173,13 @@ public class PlayerUtils
 	}
 
 	/**
-	 * Drops the entity's currently held item into the world
+	 * Drops any item in the entity's main hand and spawns it into the world
 	 */
 	public static void dropHeldItem(EntityLivingBase entity) {
-		if (!entity.worldObj.isRemote && entity.getHeldItem() != null) {
+		if (!entity.worldObj.isRemote && entity.getHeldItemMainhand() != null) {
 			EntityItem drop = new EntityItem(entity.worldObj, entity.posX,
 					entity.posY - 0.30000001192092896D + (double) entity.getEyeHeight(),
-					entity.posZ, entity.getHeldItem().copy());
+					entity.posZ, entity.getHeldItemMainhand().copy());
 			float f = 0.3F;
 			float f1 = entity.worldObj.rand.nextFloat() * (float) Math.PI * 2.0F;
 			drop.motionX = (double)(-MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f);
@@ -190,7 +191,7 @@ public class PlayerUtils
 			drop.motionZ += Math.sin((double) f1) * (double) f;
 			drop.setPickupDelay(40);
 			entity.worldObj.spawnEntityInWorld(drop);
-			entity.setCurrentItemOrArmor(0, (ItemStack) null);
+			entity.setHeldItem(EnumHand.MAIN_HAND, null);
 		}
 	}
 }

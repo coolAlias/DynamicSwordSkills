@@ -20,6 +20,16 @@ package dynamicswordskills;
 import java.util.HashMap;
 import java.util.Map;
 
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.SyncConfigPacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.ArmorBreak;
+import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.LeapingBlow;
+import dynamicswordskills.skills.MortalDraw;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityBlaze;
@@ -54,16 +64,6 @@ import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.client.SyncConfigPacket;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.skills.ArmorBreak;
-import dynamicswordskills.skills.ICombo;
-import dynamicswordskills.skills.LeapingBlow;
-import dynamicswordskills.skills.MortalDraw;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 
@@ -108,37 +108,33 @@ public class DSSCombatEvents
 	private static ItemStack getOrbDrop(EntityLivingBase mob) {
 		if (dropsList.get(mob.getClass()) != null && mob.worldObj.rand.nextFloat() > Config.getChanceForRandomDrop()) {
 			return dropsList.get(mob.getClass());
-		} else {
-			ItemStack orb = null;
-			boolean flag = mob instanceof EntityPlayer;
-			int id = mob.worldObj.rand.nextInt(SkillBase.getNumSkills());
-			if (SkillBase.doesSkillExist(id) && (!flag || Config.arePlayerDropsEnabled())) {
-				float chance = (flag ? Config.getPlayerDropFactor() : 1) * Config.getRandomMobDropChance();
-				if (dropsList.get(mob.getClass()) != null || mob.worldObj.rand.nextFloat() < chance) {
-					orb = new ItemStack(DynamicSwordSkills.skillOrb, 1, id);
-				}
-			}
-
-			return orb;
 		}
+		ItemStack orb = null;
+		boolean flag = mob instanceof EntityPlayer;
+		int id = mob.worldObj.rand.nextInt(SkillBase.getNumSkills());
+		if (SkillBase.doesSkillExist(id) && (!flag || Config.arePlayerDropsEnabled())) {
+			float chance = (flag ? Config.getPlayerDropFactor() : 1) * Config.getRandomMobDropChance();
+			if (dropsList.get(mob.getClass()) != null || mob.worldObj.rand.nextFloat() < chance) {
+				orb = new ItemStack(DynamicSwordSkills.skillOrb, 1, id);
+			}
+		}
+		return orb;
 	}
 
 	@SubscribeEvent
 	public void onLivingDrops(LivingDropsEvent event) {
-		if (event.source.getEntity() instanceof EntityPlayer) {
-			EntityLivingBase mob = event.entityLiving;
+		if (event.getSource().getEntity() instanceof EntityPlayer) {
+			EntityLivingBase mob = event.getEntityLiving();
 			ItemStack orb = getOrbDrop(mob);
-			if (orb != null && (Config.areOrbDropsEnabled() || (Config.arePlayerDropsEnabled() && event.entity instanceof EntityPlayer))) {
+			if (orb != null && (Config.areOrbDropsEnabled() || (Config.arePlayerDropsEnabled() && event.getEntity() instanceof EntityPlayer))) {
 				float baseChance = Config.getDropChance(orb.getItemDamage());
-				if (baseChance > 0.0F && mob.worldObj.rand.nextFloat() < (baseChance + (0.005F * event.lootingLevel))) {
-					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
+				if (baseChance > 0.0F && mob.worldObj.rand.nextFloat() < (baseChance + (0.005F * event.getLootingLevel()))) {
+					event.getDrops().add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
 					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
 				}
 			}
 		}
 	}
-
-
 
 	/**
 	 * Used for anti-spam of left click, if enabled in the configuration settings.
@@ -153,8 +149,8 @@ public class DSSCombatEvents
 	 */
 	@SubscribeEvent
 	public void onAttacked(LivingAttackEvent event) {
-		if (!event.isCanceled() && event.entity instanceof EntityPlayer) {
-			DSSPlayerInfo.get((EntityPlayer) event.entity).onBeingAttacked(event);
+		if (!event.isCanceled() && event.getEntity() instanceof EntityPlayer) {
+			DSSPlayerInfo.get((EntityPlayer) event.getEntity()).onBeingAttacked(event);
 		}
 	}
 
@@ -163,12 +159,12 @@ public class DSSCombatEvents
 	 */
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onHurt(LivingHurtEvent event) {
-		if (event.source.getEntity() instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.source.getEntity();
+		if (event.getSource().getEntity() instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) event.getSource().getEntity();
 			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 			ICombo combo = skills.getComboSkill();
 			if (combo != null && combo.getCombo() != null && !combo.getCombo().isFinished()) {
-				event.ammount += combo.getCombo().getNumHits();
+				event.setAmount(event.getAmount() + combo.getCombo().getNumHits());
 			}
 			if (skills.isSkillActive(SkillBase.armorBreak)) {
 				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).onImpact(player, event);
@@ -177,29 +173,29 @@ public class DSSCombatEvents
 				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).onImpact(player, event);
 			}
 		}
-		if (event.ammount > 0.0F && event.entity instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.entity;
+		if (event.getAmount() > 0.0F && event.getEntity() instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) event.getEntity();
 			ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
-			if (combo != null && event.ammount > 0) {
+			if (combo != null && event.getAmount() > 0) {
 				combo.onPlayerHurt(player, event);
 			}
 		}
-		if (event.ammount > 0.0F && event.source.getEntity() instanceof EntityPlayer) {
-			DSSPlayerInfo.get((EntityPlayer) event.source.getEntity()).onPostImpact(event);
+		if (event.getAmount() > 0.0F && event.getSource().getEntity() instanceof EntityPlayer) {
+			DSSPlayerInfo.get((EntityPlayer) event.getSource().getEntity()).onPostImpact(event);
 		}
 	}
 
 	@SubscribeEvent
 	public void onLivingUpdate(LivingUpdateEvent event) {
-		if (event.entity instanceof EntityPlayer) {
-			DSSPlayerInfo.get((EntityPlayer) event.entity).onUpdate();
+		if (event.getEntity() instanceof EntityPlayer) {
+			DSSPlayerInfo.get((EntityPlayer) event.getEntity()).onUpdate();
 		}
 	}
 
 	@SubscribeEvent
 	public void onEntityConstructing(EntityConstructing event) {
-		if (event.entity instanceof EntityPlayer && DSSPlayerInfo.get((EntityPlayer) event.entity) == null) {
-			DSSPlayerInfo.register((EntityPlayer) event.entity);
+		if (event.getEntity() instanceof EntityPlayer && DSSPlayerInfo.get((EntityPlayer) event.getEntity()) == null) {
+			DSSPlayerInfo.register((EntityPlayer) event.getEntity());
 		}
 	}
 
@@ -213,14 +209,14 @@ public class DSSCombatEvents
 
 	@SubscribeEvent
 	public void onEntityJoinWorld(EntityJoinWorldEvent event) {
-		if (event.entity instanceof EntityPlayer) {
-			DSSPlayerInfo.get((EntityPlayer) event.entity).onJoinWorld();
+		if (event.getEntity() instanceof EntityPlayer) {
+			DSSPlayerInfo.get((EntityPlayer) event.getEntity()).onJoinWorld();
 		}
 	}
 
 	@SubscribeEvent
 	public void onClonePlayer(PlayerEvent.Clone event) {
-		DSSPlayerInfo.get(event.entityPlayer).copy(DSSPlayerInfo.get(event.original));
+		DSSPlayerInfo.get(event.getEntityPlayer()).copy(DSSPlayerInfo.get(event.getOriginal()));
 	}
 
 	/**
@@ -228,14 +224,14 @@ public class DSSCombatEvents
 	 */
 	@SubscribeEvent
 	public void onFall(LivingFallEvent event) {
-		if (event.entity instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.entity;
+		if (event.getEntity() instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) event.getEntity();
 			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 			if (skills.isSkillActive(SkillBase.leapingBlow)) {
-				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(player, event.distance);
+				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(player, event.getDistance());
 			}
 			if (skills.reduceFallAmount > 0.0F) {
-				event.distance -= skills.reduceFallAmount;
+				event.setDistance(event.getDistance() - skills.reduceFallAmount);
 				skills.reduceFallAmount = 0.0F;
 			}
 		}
@@ -243,10 +239,10 @@ public class DSSCombatEvents
 
 	@SubscribeEvent
 	public void onCreativeFall(PlayerFlyableFallEvent event) {
-		DSSPlayerInfo skills = DSSPlayerInfo.get(event.entityPlayer);
+		DSSPlayerInfo skills = DSSPlayerInfo.get(event.getEntityPlayer());
 		if (skills != null) {
 			if (skills.isSkillActive(SkillBase.leapingBlow)) {
-				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(event.entityPlayer, event.distance);
+				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(event.getEntityPlayer(), event.getDistance());
 			}
 		}
 	}

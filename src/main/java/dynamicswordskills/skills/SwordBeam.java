@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,15 +19,6 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.StatCollector;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntitySwordBeam;
@@ -36,6 +27,15 @@ import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -76,7 +76,7 @@ public class SwordBeam extends SkillActive
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(getDamageFactor(player), false) + "%");
 		desc.add(getRangeDisplay(12 + level));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
+		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1),
 				String.format("%.1f", Config.getHealthAllowance(level) / 2.0F)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
@@ -108,12 +108,12 @@ public class SwordBeam extends SkillActive
 
 	/** Returns player's base damage (with sword) plus 1.0F per level */
 	private float getDamage(EntityPlayer player) {
-		return (float)((double)(getDamageFactor(player)) * 0.01D * player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue());
+		return (float)((double)(getDamageFactor(player)) * 0.01D * player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
 	}
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && checkHealth(player) && DSSPlayerInfo.get(player).canAttack() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
+		return super.canUse(player) && checkHealth(player) && DSSPlayerInfo.get(player).canAttack() && PlayerUtils.isSwordOrProvider(player.getHeldItemMainhand(), this);
 	}
 
 	/**
@@ -146,12 +146,11 @@ public class SwordBeam extends SkillActive
 		if (!world.isRemote) {
 			missTimer = 12 + level;
 			PlayerUtils.playSoundAtEntity(world, player, ModInfo.SOUND_WHOOSH, 0.4F, 0.5F);
-			Vec3 vec3 = player.getLookVec();
 			EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level).setDamage(getDamage(player));
-			beam.setPosition(beam.posX + vec3.xCoord * 0.5, beam.posY + vec3.yCoord * 0.5, beam.posZ + vec3.zCoord * 0.5);
+			beam.setHeadingFromThrower(player, player.rotationPitch, player.rotationYaw, 0.0F, beam.getVelocity(), 1.0F);
 			world.spawnEntityInWorld(beam);
 		} else {
-			player.swingItem();
+			player.swingArm(EnumHand.MAIN_HAND);
 			DSSPlayerInfo.get(player).setAttackTime(20 - level);
 		}
 		return true;

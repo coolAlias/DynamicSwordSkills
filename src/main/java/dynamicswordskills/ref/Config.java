@@ -28,7 +28,7 @@ import dynamicswordskills.client.gui.IGuiOverlay.HALIGN;
 import dynamicswordskills.client.gui.IGuiOverlay.VALIGN;
 import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.skills.SkillBase;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
@@ -209,7 +209,7 @@ public class Config
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));
 	}
-	public static final boolean isSkillEnabled(byte id) { return (id > -1 && id < enableSkill.length ? enableSkill[id] : false); }
+	public static final boolean isSkillEnabled(int id) { return (id > -1 && id < enableSkill.length ? enableSkill[id] : false); }
 	/*================== DROPS =====================*/
 	public static boolean arePlayerDropsEnabled() { return enablePlayerDrops; }
 	public static float getPlayerDropFactor() { return playerDropFactor; }

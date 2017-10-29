@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,17 +19,6 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.StatCollector;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -37,6 +26,17 @@ import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -87,9 +87,9 @@ public class Dodge extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
+		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1),
 				(int)(getBaseDodgeChance(player) * 100)));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
+		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 2),
 				(getDodgeTime() + level - 5) * 2)); // don't use real time bonus, since timer is zero
 		desc.add(getTimeLimitDisplay(getDodgeTime()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
@@ -111,7 +111,7 @@ public class Dodge extends SkillActive
 
 	/** Returns player's base chance to successfully evade an attack, including bonuses from buffs */
 	private float getBaseDodgeChance(EntityPlayer player) {
-		float speedBonus = 2.0F * (float)(player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - Dash.BASE_MOVE);
+		float speedBonus = 2.0F * (float)(player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - Dash.BASE_MOVE);
 		return ((level * 0.1F) + speedBonus);
 	}
 
@@ -201,13 +201,13 @@ public class Dodge extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
-		double speed = 1.0D + 10.0D * (player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - Dash.BASE_MOVE);
+		double speed = 1.0D + 10.0D * (player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - Dash.BASE_MOVE);
 		if (speed > 1.0D) {
 			speed = 1.0D;
 		}
 		// TODO reduce speed in liquids?
 		double d = 0.15D * speed * speed;
-		Vec3 vec3 = player.getLookVec();
+		Vec3d vec3 = player.getLookVec();
 		if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
 			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
 		} else {

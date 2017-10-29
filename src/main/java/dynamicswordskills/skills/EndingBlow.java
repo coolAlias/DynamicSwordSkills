@@ -35,7 +35,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -127,7 +127,7 @@ public class EndingBlow extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		if (!isActive() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem())) {
+		if (!isActive() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 			ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
 			ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
 			if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
@@ -238,8 +238,7 @@ public class EndingBlow extends SkillActive
 				if (entityHit instanceof EntityLiving) {
 					DirtyEntityAccessor.setLivingXp((EntityLiving) entityHit, xp, true);
 				} else {
-					PlayerUtils.spawnXPOrbsWithRandom(player.worldObj, player.worldObj.rand, MathHelper.floor_double(entityHit.posX),
-							MathHelper.floor_double(entityHit.posY), MathHelper.floor_double(entityHit.posZ), xp);
+					PlayerUtils.spawnXPOrbsWithRandom(player.worldObj, player.worldObj.rand, entityHit.getPosition(), xp);
 				}
 			} else {
 				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_HURT_FLESH, 0.3F, 0.8F);

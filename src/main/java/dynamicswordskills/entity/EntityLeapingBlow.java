@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,29 +20,27 @@ package dynamicswordskills.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.world.World;
-
 import org.apache.commons.lang3.ArrayUtils;
 
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.init.MobEffects;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.World;
 
 public class EntityLeapingBlow extends EntityThrowable
 {
@@ -70,7 +68,6 @@ public class EntityLeapingBlow extends EntityThrowable
 		this.setSize(BASE_SIZE, HEIGHT);
 		this.posY = thrower.posY + 0.2D;
 		this.motionY = 0.0D;
-		this.setThrowableHeading(motionX, motionY, motionZ, getVelocity(), 1.0F);
 	}
 
 	public EntityLeapingBlow(World world, double x, double y, double z) {
@@ -128,54 +125,52 @@ public class EntityLeapingBlow extends EntityThrowable
 						if (d < 0.5D) { return; }
 					}
 					if (target.attackEntityFrom(DamageUtils.causeIndirectSwordDamage(this, getThrower()), d)) {
-						target.addPotionEffect(new PotionEffect(Potion.weakness.id, getPotionDuration()));
+						target.addPotionEffect(new PotionEffect(MobEffects.POISON, getPotionDuration()));
 					}
 				}
 			}
-		}
-
-		/** Velocity x and z for spawning particles to left and right of entity */
-		double vX = motionZ;
-		double vZ = motionX;
-
-		AxisAlignedBB bb = getEntityBoundingBox();
-		int i = MathHelper.floor_double(posX + (bb.maxX - bb.minX) / 2);
-		int j = MathHelper.floor_double(posY) - 1;
-		int k = MathHelper.floor_double(posZ + (bb.maxZ - bb.minZ) / 2);
-		IBlockState state = worldObj.getBlockState(new BlockPos(i, j, k));
-		EnumParticleTypes particle = (state.getBlock().getMaterial() == Material.air ? EnumParticleTypes.CRIT : EnumParticleTypes.BLOCK_CRACK);
-		int[] stateId = new int[] {Block.getStateId(state)};
-		for (int n = 0; n < 4; ++n) {
-			worldObj.spawnParticle(particle, posX, posY, posZ, vX + rand.nextGaussian(), 0.01D, vZ + rand.nextGaussian(), stateId);
-			worldObj.spawnParticle(particle, posX, posY, posZ, -vX + rand.nextGaussian(), 0.01D, -vZ + rand.nextGaussian(), stateId);
+		} else {
+			/** Velocity x and z for spawning particles to left and right of entity */
+			double vX = motionZ;
+			double vZ = motionX;
+			AxisAlignedBB bb = getEntityBoundingBox();
+			int i = MathHelper.floor_double(posX + (bb.maxX - bb.minX) / 2);
+			int j = MathHelper.floor_double(posY) - 1;
+			int k = MathHelper.floor_double(posZ + (bb.maxZ - bb.minZ) / 2);
+			IBlockState state = worldObj.getBlockState(new BlockPos(i, j, k));
+			EnumParticleTypes particle = (state.getRenderType() == EnumBlockRenderType.INVISIBLE ? EnumParticleTypes.CRIT : EnumParticleTypes.BLOCK_CRACK);
+			int[] stateId = (state.getRenderType() == EnumBlockRenderType.INVISIBLE ? new int[]{} : new int[] {Block.getStateId(state)});
+			for (int n = 0; n < 4; ++n) {
+				worldObj.spawnParticle(particle, posX, posY, posZ, vX + rand.nextGaussian(), 0.01D, vZ + rand.nextGaussian(), stateId);
+				worldObj.spawnParticle(particle, posX, posY, posZ, -vX + rand.nextGaussian(), 0.01D, -vZ + rand.nextGaussian(), stateId);
+			}
 		}
 	}
 
 	@Override
-	protected void onImpact(MovingObjectPosition mop) {
+	protected void onImpact(RayTraceResult result) {
 		if (!worldObj.isRemote) {
-			if (mop.typeOfHit == MovingObjectType.ENTITY) {
-				Entity entity = mop.entityHit;
+			if (result.typeOfHit == RayTraceResult.Type.ENTITY) {
+				Entity entity = result.entityHit;
 				if (entity instanceof EntityLivingBase && !affectedEntities.contains(entity.getEntityId()) && entity != getThrower()) {
 					affectedEntities.add(entity.getEntityId());
 					if (entity.attackEntityFrom(DamageUtils.causeIndirectSwordDamage(this, getThrower()), damage)) {
 						PlayerUtils.playSoundAtEntity(worldObj, entity, ModInfo.SOUND_HURT_FLESH, 0.4F, 0.5F);
-						if (entity instanceof EntityLivingBase) {
-							((EntityLivingBase) entity).addPotionEffect(new PotionEffect(Potion.weakness.id, 60));
-						}
+						((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.POISON, 60));
 					}
 				}
 			} else {
-				Block block = worldObj.getBlockState(mop.getBlockPos()).getBlock();
-				if (block.getMaterial().blocksMovement()) {
+				if (worldObj.getBlockState(result.getBlockPos()).getMaterial().blocksMovement()) {
 					setDead();
 				}
 			}
 		}
 	}
 
-	@Override
-	protected float getVelocity() {
+	/**
+	 * Returns the velocity to use for {@link EntityThrowable#setHeadingFromThrower}
+	 */
+	public float getVelocity() {
 		return 0.5F;
 	}
 

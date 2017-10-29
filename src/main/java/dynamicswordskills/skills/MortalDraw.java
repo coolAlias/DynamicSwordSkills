@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,17 +19,6 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -38,6 +27,19 @@ import dynamicswordskills.network.client.MortalDrawPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
+import net.minecraft.world.World;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -129,7 +131,7 @@ public class MortalDraw extends SkillActive
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		swordSlot = -1;
-		if (super.canUse(player) && player.getHeldItem() == null && attackTimer == 0) {
+		if (super.canUse(player) && player.getHeldItemMainhand() == null && attackTimer == 0) {
 			for (int i = 0; i < 9; ++i) {
 				ItemStack stack = player.inventory.getStackInSlot(i);
 				if (stack != null && PlayerUtils.isSwordOrProvider(stack, this)) {
@@ -144,7 +146,7 @@ public class MortalDraw extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown()
+		return player.getHeldItemMainhand() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown()
 				|| DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown());
 	}
 
@@ -184,7 +186,7 @@ public class MortalDraw extends SkillActive
 			--attackTimer;
 			if (attackTimer == DELAY && !player.worldObj.isRemote) {
 				drawSword(player, null);
-				if (player.getHeldItem() != null) {
+				if (player.getHeldItemMainhand() != null) {
 					PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
 				}
 			}
@@ -218,7 +220,7 @@ public class MortalDraw extends SkillActive
 		// need to check time again, due to 2-tick delay for damage prevention
 		if (attackTimer > DELAY) {
 			attackTimer = DELAY;
-			event.ammount *= (1.0F + ((float) getDamageMultiplier() / 100F));
+			event.setAmount(event.getAmount() * (1.0F + ((float) getDamageMultiplier() / 100F)));
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_MORTALDRAW, 0.4F, 0.5F);
 		} else { // too late - didn't defend against this target!
 			target = null;
@@ -232,14 +234,14 @@ public class MortalDraw extends SkillActive
 	public boolean drawSword(EntityPlayer player, Entity attacker) {
 		boolean flag = false;
 		// letting this run on both sides is fine - client will sync from server later anyway
-		if (swordSlot > -1 && swordSlot != player.inventory.currentItem && player.getHeldItem() == null) {
+		if (swordSlot > -1 && swordSlot != player.inventory.currentItem && player.getHeldItemMainhand() == null) {
 			ItemStack sword = player.inventory.getStackInSlot(swordSlot);
 			if (!player.worldObj.isRemote) {
 				player.inventory.setInventorySlotContents(swordSlot, null);
 			}
-			player.setCurrentItemOrArmor(0, sword);
+			player.setHeldItem(EnumHand.MAIN_HAND, sword);
 			// attack will happen before entity#onUpdate refreshes equipment, so apply it now:
-			player.getAttributeMap().applyAttributeModifiers(sword.getAttributeModifiers());
+			player.getAttributeMap().applyAttributeModifiers(sword.getAttributeModifiers(EntityEquipmentSlot.MAINHAND));
 			ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
 			flag = (skill != null && skill.getCurrentTarget() == attacker);
 		}

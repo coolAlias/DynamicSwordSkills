@@ -23,7 +23,7 @@ import dynamicswordskills.skills.EndingBlow;
 import dynamicswordskills.skills.SkillActive;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -69,13 +69,13 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 	@Override
 	protected void setup(ScaledResolution resolution) {
 		this.height = this.mc.fontRendererObj.FONT_HEIGHT;
-		this.width = this.mc.fontRendererObj.getStringWidth(StatCollector.translateToLocal("combo.ending"));
+		this.width = this.mc.fontRendererObj.getStringWidth(I18n.translateToLocal("combo.ending"));
 		this.setPosX(resolution, Config.endingBlowHudOffsetX);
 		this.setPosY(resolution, Config.endingBlowHudOffsetY);
 	}
 
 	@Override
 	protected void render(ScaledResolution resolution) {
-		this.mc.fontRendererObj.drawString(StatCollector.translateToLocal("combo.ending"), this.x, this.y, 0xFF0000, true);
+		this.mc.fontRendererObj.drawString(I18n.translateToLocal("combo.ending"), this.x, this.y, 0xFF0000, true);
 	}
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,24 +17,24 @@
 
 package dynamicswordskills.skills;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.util.PlayerUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.World;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -231,7 +231,7 @@ public abstract class SkillActive extends SkillBase
 	 */
 	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
 		if (!Config.isSkillEnabled(getId())) {
-			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new ChatComponentTranslation(getTranslationString()));
+			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(getTranslationString()));
 			return false;
 		} else if (canUse(player)) {
 			if (autoAddExhaustion() && !player.capabilities.isCreativeMode) {
@@ -245,7 +245,7 @@ public abstract class SkillActive extends SkillBase
 			return onActivated(world, player);
 		} else {
 			if (level > 0) {
-				PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new ChatComponentTranslation(getTranslationString()));
+				PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new TextComponentTranslation(getTranslationString()));
 			}
 			return false;
 		}

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,17 +19,16 @@ package dynamicswordskills.network.server;
 
 import java.io.IOException;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.Dash;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * 
@@ -60,17 +59,17 @@ public class DashImpactPacket extends AbstractServerMessage<DashImpactPacket>
 	 * Creates dash packet with given moving object position
 	 * @param mop Must not be null
 	 */
-	public DashImpactPacket(EntityPlayer player, MovingObjectPosition mop) {
-		this.hitType = (mop != null ? (byte) mop.typeOfHit.ordinal() : (byte) 0);
-		if (this.hitType == MovingObjectType.ENTITY.ordinal()) {
-			this.entityId = mop.entityHit.getEntityId();
+	public DashImpactPacket(EntityPlayer player, RayTraceResult result) {
+		this.hitType = (result != null ? (byte) result.typeOfHit.ordinal() : (byte) 0);
+		if (this.hitType == RayTraceResult.Type.ENTITY.ordinal()) {
+			this.entityId = result.entityHit.getEntityId();
 		}
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
 		hitType = buffer.readByte();
-		if (hitType == MovingObjectType.ENTITY.ordinal()) {
+		if (hitType == RayTraceResult.Type.ENTITY.ordinal()) {
 			entityId = buffer.readInt();
 		}
 	}
@@ -78,7 +77,7 @@ public class DashImpactPacket extends AbstractServerMessage<DashImpactPacket>
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeByte(hitType);
-		if (hitType == MovingObjectType.ENTITY.ordinal()) {
+		if (hitType == RayTraceResult.Type.ENTITY.ordinal()) {
 			buffer.writeInt(entityId);
 		}
 	}
@@ -87,16 +86,16 @@ public class DashImpactPacket extends AbstractServerMessage<DashImpactPacket>
 	protected void process(EntityPlayer player, Side side) {
 		Dash dash = (Dash) DSSPlayerInfo.get(player).getActiveSkill(SkillBase.dash);
 		if (dash != null && dash.isActive()) {
-			MovingObjectPosition mop = null;
-			if (hitType == MovingObjectType.ENTITY.ordinal()) {
+			RayTraceResult result = null;
+			if (hitType == RayTraceResult.Type.ENTITY.ordinal()) {
 				Entity entityHit = player.worldObj.getEntityByID(entityId);
 				if (entityHit != null) {
-					mop = new MovingObjectPosition(entityHit);
+					result = new RayTraceResult(entityHit);
 				} else {
 					DynamicSwordSkills.logger.warn("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
 				}
 			}
-			dash.onImpact(player.worldObj, player, mop);
+			dash.onImpact(player.worldObj, player, result);
 		}
 	}
 }

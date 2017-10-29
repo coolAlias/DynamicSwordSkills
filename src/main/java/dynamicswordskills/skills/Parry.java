@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,15 +19,6 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.StatCollector;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -36,6 +27,16 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -87,11 +88,11 @@ public class Parry extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
+		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1),
 				(int)(getDisarmChance(player, null) * 100)));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
+		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 2),
 				(int)(2.5F * (getActiveTime() - getParryDelay()))));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 3), getMaxParries()));
+		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 3), getMaxParries()));
 		desc.add(getTimeLimitDisplay(getActiveTime() - getParryDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
@@ -137,7 +138,7 @@ public class Parry extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
+		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand());
 	}
 
 	/**
@@ -180,7 +181,7 @@ public class Parry extends SkillActive
 		parryTimer = getActiveTime();
 		attacksParried = 0;
 		playMissSound = true;
-		player.swingItem();
+		player.swingArm(EnumHand.MAIN_HAND);
 		return isActive();
 	}
 
@@ -205,7 +206,7 @@ public class Parry extends SkillActive
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
 		if (source.getEntity() instanceof EntityLivingBase) {
 			EntityLivingBase attacker = (EntityLivingBase) source.getEntity();
-			if (attacksParried < getMaxParries() && parryTimer > getParryDelay() && attacker.getHeldItem() != null && PlayerUtils.isWeapon(player.getHeldItem())) {
+			if (attacksParried < getMaxParries() && parryTimer > getParryDelay() && attacker.getHeldItemMainhand() != null && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 				if (player.worldObj.rand.nextFloat() < getDisarmChance(player, attacker)) {
 					PlayerUtils.dropHeldItem(attacker);
 				}

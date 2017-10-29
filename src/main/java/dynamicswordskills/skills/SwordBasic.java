@@ -27,7 +27,6 @@ import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.network.server.TargetIdPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
@@ -35,7 +34,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -119,9 +118,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), getMaxComboSize()));
+		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1), getMaxComboSize()));
 		desc.add(getTimeLimitDisplay(getComboTimeLimit()));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), String.format("%.1f", (0.5F * level))));
+		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 2), String.format("%.1f", (0.5F * level))));
 	}
 
 	@Override
@@ -329,19 +328,19 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event) {
-		if (!isLockedOn() || !isValidComboDamage(player, event.source)) { return; }
+		if (!isLockedOn() || !isValidComboDamage(player, event.getSource())) { return; }
 		if (combo == null || combo.isFinished()) {
 			combo = new Combo(player, this, getMaxComboSize(), getComboTimeLimit());
 		}
-		float damage = DirtyEntityAccessor.getModifiedDamage(event.entityLiving, event.source, event.ammount);
+		float damage = DirtyEntityAccessor.getModifiedDamage(event.getEntityLiving(), event.getSource(), event.getAmount());
 		if (damage > 0) {
-			if (!(event.source instanceof IComboDamageFull) || ((IComboDamageFull) event.source).increaseComboCount(player)) {
-				combo.add(player, event.entityLiving, damage);
+			if (!(event.getSource() instanceof IComboDamageFull) || ((IComboDamageFull) event.getSource()).increaseComboCount(player)) {
+				combo.add(player, event.getEntityLiving(), damage);
 			} else {
 				combo.addDamageOnly(player, damage);
 			}
 		}
-		String sound = getComboDamageSound(player, event.source);
+		String sound = getComboDamageSound(player, event.getSource());
 		if (sound != null) {
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, sound, 0.4F, 0.5F);
 		}
@@ -358,14 +357,14 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		if (source instanceof IComboDamageFull && !((IComboDamageFull) source).playDefaultSound(player)) {
 			return ((IComboDamageFull) source).getHitSound(player);
 		} else if (source.getDamageType().equals("player")) {
-			return (PlayerUtils.isSword(player.getHeldItem()) ? ModInfo.SOUND_SWORDCUT : ModInfo.SOUND_HURT_FLESH);
+			return (PlayerUtils.isSword(player.getHeldItemMainhand()) ? ModInfo.SOUND_SWORDCUT : ModInfo.SOUND_HURT_FLESH);
 		}
 		return null;
 	}
 
 	@Override
 	public void onPlayerHurt(EntityPlayer player, LivingHurtEvent event) {
-		if (isComboInProgress() && DirtyEntityAccessor.getModifiedDamage(player, event.source, event.ammount) > (0.5F * level)) {
+		if (isComboInProgress() && DirtyEntityAccessor.getModifiedDamage(player, event.getSource(), event.getAmount()) > (0.5F * level)) {
 			combo.endCombo(player);
 		}
 	}

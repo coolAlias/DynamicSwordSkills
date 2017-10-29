@@ -17,23 +17,20 @@
 
 package dynamicswordskills.entity;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.skills.SwordBeam;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -90,8 +87,10 @@ public class EntitySwordBeam extends EntityThrowable
 		return this;
 	}
 
-	@Override
-	protected float getVelocity() {
+	/**
+	 * Returns the velocity to use for {@link EntityThrowable#setHeadingFromThrower}
+	 */
+	public float getVelocity() {
 		return 1.0F + (level * 0.15F);
 	}
 
@@ -125,19 +124,18 @@ public class EntitySwordBeam extends EntityThrowable
 	}
 
 	@Override
-	protected void onImpact(MovingObjectPosition mop) {
+	protected void onImpact(RayTraceResult result) {
 		if (!worldObj.isRemote) {
 			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
 			SwordBeam skill = (player != null ? (SwordBeam) DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
-			if (mop.typeOfHit == MovingObjectType.ENTITY) {
-				Entity entity = mop.entityHit;
-				if (entity == player) { return; }
+			if (result.typeOfHit == RayTraceResult.Type.ENTITY) {
+				if (result.entityHit == player) { return; }
 				if (player != null) {
 					if (skill != null) {
 						skill.onImpact(player, false);
 					}
-					if (entity.attackEntityFrom(DamageUtils.causeIndirectComboDamage(this, player).setProjectile(), damage)) {
-						PlayerUtils.playSoundAtEntity(worldObj, entity, ModInfo.SOUND_HURT_FLESH, 0.4F, 0.5F);
+					if (result.entityHit.attackEntityFrom(DamageUtils.causeIndirectComboDamage(this, player).setProjectile(), damage)) {
+						PlayerUtils.playSoundAtEntity(worldObj, result.entityHit, ModInfo.SOUND_HURT_FLESH, 0.4F, 0.5F);
 					}
 					damage *= 0.8F;
 				}
@@ -145,8 +143,7 @@ public class EntitySwordBeam extends EntityThrowable
 					setDead();
 				}
 			} else {
-				Block block = worldObj.getBlockState(mop.getBlockPos()).getBlock();
-				if (block.getMaterial().blocksMovement()) {
+				if (worldObj.getBlockState(result.getBlockPos()).getMaterial().blocksMovement()) {
 					if (player != null && skill != null) {
 						skill.onImpact(player, true);
 					}

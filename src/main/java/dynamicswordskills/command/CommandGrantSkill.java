@@ -19,6 +19,12 @@ package dynamicswordskills.command;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
@@ -26,12 +32,8 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.PlayerUtils;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 
 /**
  * 
@@ -64,9 +66,9 @@ public class CommandGrantSkill extends CommandBase
 	}
 
 	@Override
-	public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-		EntityPlayerMP commandSender = getCommandSenderAsPlayer(sender);
-		EntityPlayerMP player = getPlayer(sender, args[0]);
+	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+		EntityPlayerMP commandSender = CommandBase.getCommandSenderAsPlayer(sender);
+		EntityPlayerMP player = CommandBase.getPlayer(server, sender, args[0]);
 		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 		if (args.length == 2 && ("all").equals(args[1])) {
 			boolean flag = true;
@@ -88,21 +90,21 @@ public class CommandGrantSkill extends CommandBase
 			if (skill == null) {
 				throw new CommandException("commands.skill.generic.unknown", args[1]);
 			}
-			int level = parseInt(args[2], 1, 10);
+			int level = CommandBase.parseInt(args[2], 1, 10);
 			int oldLevel = skills.getTrueSkillLevel(skill);
 			if (level > oldLevel) { // grants skill up to level or max level, whichever is reached first
 				if (!Config.isSkillEnabled(skill.getId())) {
-					throw new CommandException("commands.grantskill.failure.disabled", new ChatComponentTranslation(skill.getTranslationString()));
+					throw new CommandException("commands.grantskill.failure.disabled", new TextComponentTranslation(skill.getTranslationString()));
 				} else if (skills.grantSkill(skill.getId(), (byte) level)) {
-					PlayerUtils.sendTranslatedChat(player, "commands.grantskill.notify.one", new ChatComponentTranslation(skill.getTranslationString()), skills.getTrueSkillLevel(skill));
+					PlayerUtils.sendTranslatedChat(player, "commands.grantskill.notify.one", new TextComponentTranslation(skill.getTranslationString()), skills.getTrueSkillLevel(skill));
 					if (commandSender != player) {
-						PlayerUtils.sendTranslatedChat(commandSender, "commands.grantskill.success.one", player.getDisplayName(), new ChatComponentTranslation(skill.getTranslationString()), skills.getTrueSkillLevel(skill));
+						PlayerUtils.sendTranslatedChat(commandSender, "commands.grantskill.success.one", player.getDisplayName(), new TextComponentTranslation(skill.getTranslationString()), skills.getTrueSkillLevel(skill));
 					}
 				} else {
-					throw new CommandException("commands.grantskill.failure.player", player.getDisplayName(), new ChatComponentTranslation(skill.getTranslationString()));
+					throw new CommandException("commands.grantskill.failure.player", player.getDisplayName(), new TextComponentTranslation(skill.getTranslationString()));
 				}
 			} else {
-				throw new CommandException("commands.grantskill.failure.low", player.getDisplayName(), new ChatComponentTranslation(skill.getTranslationString()), oldLevel);
+				throw new CommandException("commands.grantskill.failure.low", player.getDisplayName(), new TextComponentTranslation(skill.getTranslationString()), oldLevel);
 			}
 		} else {
 			throw new WrongUsageException(getCommandUsage(sender));
@@ -110,15 +112,11 @@ public class CommandGrantSkill extends CommandBase
 	}
 
 	@Override
-	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+	public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
 		switch(args.length) {
-		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
-		case 2: return getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
+		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
 		default: return null;
 		}
-	}
-
-	protected String[] getPlayers() {
-		return MinecraftServer.getServer().getAllUsernames();
 	}
 }
