@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,12 @@
 
 package dynamicswordskills.api;
 
-import net.minecraft.item.ItemStack;
 import dynamicswordskills.skills.LeapingBlow;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.RisingCut;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.skills.SwordBeam;
+import net.minecraft.item.ItemStack;
 
 /**
  * 

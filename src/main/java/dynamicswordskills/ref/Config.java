@@ -22,8 +22,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.util.MathHelper;
-import net.minecraftforge.common.config.Configuration;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.WeaponRegistry;
@@ -31,6 +29,8 @@ import dynamicswordskills.client.gui.IGuiOverlay.HALIGN;
 import dynamicswordskills.client.gui.IGuiOverlay.VALIGN;
 import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.util.MathHelper;
+import net.minecraftforge.common.config.Configuration;
 
 public class Config
 {
