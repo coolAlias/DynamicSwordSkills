@@ -17,9 +17,9 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.7"
+version = "1.7.1"
 group= "com.google.coolalias008.dynamicswordskills" 
-archivesBaseName = "1.7.10-dynamicswordskills"
+archivesBaseName = "1.7.10-DynamicSwordSkills"
 
 sourceCompatibility = targetCompatibility = "1.6"
 
