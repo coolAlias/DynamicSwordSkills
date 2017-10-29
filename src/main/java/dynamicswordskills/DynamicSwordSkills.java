@@ -57,7 +57,7 @@ import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.MinecraftForge;
 
-@Mod(modid = ModInfo.ID, version = ModInfo.VERSION)
+@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION)
 public class DynamicSwordSkills
 {
 	@Mod.Instance(ModInfo.ID)
