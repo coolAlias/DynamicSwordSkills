@@ -20,9 +20,9 @@ plugins {
 }
 */
 
-version = "2.5"
+version = "2.5.1"
 group = "com.google.coolalias008.dynamicswordskills"
-archivesBaseName = "1.8.9-dynamicswordskills"
+archivesBaseName = "1.8.9-DynamicSwordSkills"
 
 sourceCompatibility = targetCompatibility = "1.7"
 
