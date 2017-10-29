@@ -57,7 +57,7 @@ import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 
-@Mod(modid = ModInfo.ID, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST)
+@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST)
 public class DynamicSwordSkills
 {
 	@Mod.Instance(ModInfo.ID)
