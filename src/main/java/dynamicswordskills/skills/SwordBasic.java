@@ -19,6 +19,8 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.api.IComboDamage;
+import dynamicswordskills.api.IComboDamage.IComboDamageFull;
 import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.EndComboPacket;
@@ -38,8 +40,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import zeldaswordskills.api.damage.IComboDamage;
-import zeldaswordskills.api.damage.IComboDamage.IComboDamageFull;
 
 /**
  * 

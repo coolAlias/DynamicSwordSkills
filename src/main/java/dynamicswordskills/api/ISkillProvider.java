@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2016> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package dynamicswordskills.api;
 
 import net.minecraft.item.ItemStack;
-import zeldaswordskills.api.item.IWeapon;
 
 /**
  * 

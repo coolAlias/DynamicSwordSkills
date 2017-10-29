@@ -20,20 +20,6 @@ package dynamicswordskills;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import dynamicswordskills.api.ItemRandomSkill;
-import dynamicswordskills.api.ItemSkillProvider;
-import dynamicswordskills.command.DSSCommands;
-import dynamicswordskills.entity.EntityLeapingBlow;
-import dynamicswordskills.entity.EntitySwordBeam;
-import dynamicswordskills.item.ItemSkillOrb;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.skills.SkillActive;
-import dynamicswordskills.skills.SkillBase;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
@@ -54,7 +40,22 @@ import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import zeldaswordskills.api.item.WeaponRegistry;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import dynamicswordskills.api.ItemRandomSkill;
+import dynamicswordskills.api.ItemSkillProvider;
+import dynamicswordskills.api.WeaponRegistry;
+import dynamicswordskills.command.DSSCommands;
+import dynamicswordskills.entity.EntityLeapingBlow;
+import dynamicswordskills.entity.EntitySwordBeam;
+import dynamicswordskills.item.ItemSkillOrb;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.SkillActive;
+import dynamicswordskills.skills.SkillBase;
 
 @Mod(modid = ModInfo.ID, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST)
 public class DynamicSwordSkills

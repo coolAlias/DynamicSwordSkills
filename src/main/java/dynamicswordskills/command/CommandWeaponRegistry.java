@@ -28,7 +28,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import zeldaswordskills.api.item.WeaponRegistry;
+import dynamicswordskills.api.WeaponRegistry;
 
 public class CommandWeaponRegistry extends CommandBase
 {
