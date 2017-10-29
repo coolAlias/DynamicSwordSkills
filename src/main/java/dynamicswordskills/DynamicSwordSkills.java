@@ -68,9 +68,6 @@ public class DynamicSwordSkills
 
 	public static final Logger logger = LogManager.getLogger(ModInfo.ID);
 
-	/** Whether Battlegear2 mod is loaded */
-	public static boolean isBG2Enabled;
-
 	public static CreativeTabs tabSkills;
 
 	public static Item skillOrb;
@@ -90,7 +87,6 @@ public class DynamicSwordSkills
 		if (Loader.isModLoaded("zeldaswordskills")) {
 			throw new RuntimeException("Dynamic Sword Skills may not be loaded at the same time as Zelda Sword Skills! Please remove one or the other.");
 		}
-		isBG2Enabled = Loader.isModLoaded("battlegear2");
 		Config.init(event);
 		tabSkills = new CreativeTabs("dss.skills") {
 			@Override
