@@ -34,7 +34,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -89,11 +89,9 @@ public class Parry extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1),
-				(int)(getDisarmChance(player, null) * 100)));
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 2),
-				(int)(2.5F * (getActiveTime() - getParryDelay()))));
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 3), getMaxParries()));
+		desc.add(new TextComponentTranslation(getInfoString("info", 1), (int)(getDisarmChance(player, null) * 100)).getUnformattedText());
+		desc.add(new TextComponentTranslation(getInfoString("info", 2), (int)(2.5F * (getActiveTime() - getParryDelay()))).getUnformattedText());
+		desc.add(new TextComponentTranslation(getInfoString("info", 3), getMaxParries()).getUnformattedText());
 		desc.add(getTimeLimitDisplay(getActiveTime() - getParryDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}

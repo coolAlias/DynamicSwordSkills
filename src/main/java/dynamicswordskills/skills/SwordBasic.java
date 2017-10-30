@@ -36,7 +36,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -120,9 +120,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1), getMaxComboSize()));
+		desc.add(new TextComponentTranslation(getInfoString("info", 1), getMaxComboSize()).getUnformattedText());
 		desc.add(getTimeLimitDisplay(getComboTimeLimit()));
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 2), String.format("%.1f", (0.5F * level))));
+		desc.add(new TextComponentTranslation(getInfoString("info", 2), String.format("%.1f", (0.5F * level))).getUnformattedText());
 	}
 
 	@Override

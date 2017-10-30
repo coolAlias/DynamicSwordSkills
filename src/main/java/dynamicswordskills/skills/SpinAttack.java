@@ -36,7 +36,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -112,7 +112,7 @@ public class SpinAttack extends SkillActive
 		}
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1).replace("super", ""), superLevel + 1));
+		desc.add(new TextComponentTranslation(getInfoString("info", 1).replace("super", ""), superLevel + 1).getUnformattedText());
 		desc.add(getExhaustionDisplay(getExhaustion()));
 		level = temp;
 	}

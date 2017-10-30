@@ -36,7 +36,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
@@ -76,7 +75,7 @@ public class ItemSkillOrb extends Item implements IModItem
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
-		return I18n.translateToLocalFormatted(super.getUnlocalizedName() + ".name", (skill == null ? "" : skill.getDisplayName()));
+		return new TextComponentTranslation(super.getUnlocalizedName() + ".name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
 	}
 
 	@Override
@@ -94,12 +93,12 @@ public class ItemSkillOrb extends Item implements IModItem
 			SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
 			if (skill != null) {
 				if (!Config.isSkillEnabled(skill.getId())) {
-					list.add(TextFormatting.DARK_RED + I18n.translateToLocal("skill.dss.disabled"));
+					list.add(TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled").getUnformattedText());
 				} else if (skill.getLevel() > 0) {
 					list.add(TextFormatting.GOLD + skill.getLevelDisplay(true));
 					list.addAll(skill.getTranslatedTooltip(player));
 				} else {
-					list.add(TextFormatting.ITALIC + I18n.translateToLocal("tooltip.dss.skillorb.desc.0"));
+					list.add(TextFormatting.ITALIC + new TextComponentTranslation("tooltip.dss.skillorb.desc.0").getUnformattedText());
 				}
 			}
 		}

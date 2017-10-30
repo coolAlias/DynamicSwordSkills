@@ -34,8 +34,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
 
 public class GuiSkills extends GuiContainer
 {
@@ -112,7 +112,7 @@ public class GuiSkills extends GuiContainer
 			RenderHelperQ.drawTexturedRect(259, 61 + (int)(scrollY * 81), 282, 10, 3, 7, 285, 180);
 			GlStateManager.popAttrib();
 		}
-		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : I18n.translateToLocal("skill.dss.gui.description"));
+		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : new TextComponentTranslation("skill.dss.gui.description").getUnformattedText());
 		isUnicode = fontRendererObj.getUnicodeFlag();
 		fontRendererObj.setUnicodeFlag(true);
 		fontRendererObj.drawString(s, 158, 38, 4210752);
@@ -120,7 +120,7 @@ public class GuiSkills extends GuiContainer
 			if (Config.isSkillEnabled(currentSkill.getId())) {
 				s = currentSkill.getLevelDisplay(false);
 			} else {
-				s = (TextFormatting.DARK_RED + I18n.translateToLocal("skill.dss.disabled"));
+				s = (TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled").getUnformattedText()) + TextFormatting.RESET;
 			}
 			fontRendererObj.drawString(s, 262 - fontRendererObj.getStringWidth(s), 38, 4210752);
 		}
@@ -148,15 +148,15 @@ public class GuiSkills extends GuiContainer
 			return;
 		}
 		if (currentSkill != null) {
-			desc.add(I18n.translateToLocal("skill.dss.gui.summary"));
+			desc.add(new TextComponentTranslation("skill.dss.gui.summary").getUnformattedText());
 			currentSkill.addInformation(desc, mc.thePlayer);
 			desc.add("");
-			desc.add(I18n.translateToLocal("skill.dss.gui.activation"));
+			desc.add(new TextComponentTranslation("skill.dss.gui.activation").getUnformattedText());
 			desc.addAll(fontRendererObj.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
 			desc.add("");
 		}
-		desc.add(I18n.translateToLocal("skill.dss.gui.description"));
-		String[] temp = (currentSkill != null ? currentSkill.getFullDescription().split("\\\\n") : I18n.translateToLocal("skill.dss.gui.explanation").split("\\\\n"));
+		desc.add(new TextComponentTranslation("skill.dss.gui.description").getUnformattedText());
+		String[] temp = (currentSkill != null ? currentSkill.getFullDescription().split("\\\\n") : new TextComponentTranslation("skill.dss.gui.explanation").getUnformattedText().split("\\\\n"));
 		for (String s : temp) {
 			desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
 			desc.add("");

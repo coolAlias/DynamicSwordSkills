@@ -32,8 +32,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.WeightedRandomChestContent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.fml.relauncher.Side;
@@ -109,7 +109,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
-		return I18n.translateToLocalFormatted("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName()));
+		return new TextComponentTranslation("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
 	}
 
 	@Override
@@ -117,10 +117,11 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null) {
-			list.add(I18n.translateToLocalFormatted("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()));
-			list.add(I18n.translateToLocalFormatted("tooltip.dss.skillprovider.desc.level", skill.getLevel(), skill.getMaxLevel()));
+			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()).getUnformattedText());
+			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.level", skill.getLevel(), skill.getMaxLevel()).getUnformattedText());
 			if (grantsBasicSwordSkill(stack)) {
-				list.add(I18n.translateToLocalFormatted("tooltip.dss.skillprovider.desc.provider", TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName()));
+				String name = TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + TextFormatting.RESET;
+				list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.provider", name).getUnformattedText());
 			}
 			list.addAll(skill.getDescription(player));
 		}

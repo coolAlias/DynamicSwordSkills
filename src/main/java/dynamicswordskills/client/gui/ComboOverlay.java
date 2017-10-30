@@ -28,7 +28,7 @@ import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -107,9 +107,9 @@ public class ComboOverlay extends AbstractGuiOverlay
 		// Minimum display of 3 lines: combo name, size and damage
 		int n = Math.min(this.combo.getDamageList().size(), Config.getHitsToDisplay());
 		this.height = (n + 3) * this.mc.fontRendererObj.FONT_HEIGHT;
-		this.label = (this.combo.isFinished() ? I18n.translateToLocalFormatted("combo.finished", this.combo.getLabel()) : I18n.translateToLocalFormatted("combo.combo", this.combo.getLabel()));
-		this.comboSize = I18n.translateToLocalFormatted("combo.size", this.combo.getNumHits(), this.combo.getMaxNumHits());
-		this.comboDamage = I18n.translateToLocalFormatted("combo.damage", String.format("%.1f", this.combo.getDamage()));
+		this.label = new TextComponentTranslation(this.combo.isFinished() ? "combo.finished" : "combo.combo", this.combo.getLabel()).getUnformattedText();
+		this.comboSize = new TextComponentTranslation("combo.size", this.combo.getNumHits(), this.combo.getMaxNumHits()).getUnformattedText();
+		this.comboDamage = new TextComponentTranslation("combo.damage", String.format("%.1f", this.combo.getDamage())).getUnformattedText();
 		this.width = Math.max(this.mc.fontRendererObj.getStringWidth(this.label), this.mc.fontRendererObj.getStringWidth(this.comboDamage));
 		this.setPosX(resolution, this.getOffsetX(DEFAULT_PADDING) + Config.comboHudOffsetX);
 		this.setPosY(resolution, this.getOffsetY(DEFAULT_PADDING) + Config.comboHudOffsetY);

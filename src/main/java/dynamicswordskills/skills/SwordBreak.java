@@ -35,7 +35,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -82,7 +82,7 @@ public class SwordBreak extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1), getMaxDamage()));
+		desc.add(new TextComponentTranslation(getInfoString("info", 1), getMaxDamage()).getUnformattedText());
 		desc.add(getTimeLimitDisplay(getActiveTime() - getUseDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}

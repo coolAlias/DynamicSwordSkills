@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -201,7 +201,7 @@ public abstract class SkillBase
 
 	/** Returns the translated skill name */
 	public final String getDisplayName() {
-		return I18n.translateToLocal(getFullUnlocalizedName() + ".name");
+		return new TextComponentTranslation(getFullUnlocalizedName() + ".name").getUnformattedText();
 	}
 
 	/** Returns the string used to translate this skill's name */
@@ -280,7 +280,7 @@ public abstract class SkillBase
 	public final List<String> getTranslatedTooltip(EntityPlayer player) {
 		List<String> desc = new ArrayList<String>(tooltip.size());
 		for (String s : tooltip) {
-			desc.add(I18n.translateToLocal(s));
+			desc.add(new TextComponentTranslation(s).getUnformattedText());
 		}
 		if (Minecraft.getMinecraft().gameSettings.advancedItemTooltips) {
 			addInformation(desc, player);
@@ -293,7 +293,7 @@ public abstract class SkillBase
 	public final List<String> getDescription() {
 		List<String> desc = new ArrayList<String>(tooltip.size());
 		for (String s : tooltip) {
-			desc.add(I18n.translateToLocal(s));
+			desc.add(new TextComponentTranslation(s).getUnformattedText());
 		}
 		return desc;
 	}
@@ -312,43 +312,43 @@ public abstract class SkillBase
 
 	/** Returns the translated description of the skill's activation requirements (long version) */
 	public String getActivationDisplay() {
-		return I18n.translateToLocal(getFullUnlocalizedName() + ".desc.activate");
+		return new TextComponentTranslation(getFullUnlocalizedName() + ".desc.activate").getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's AoE, using the value provided */
 	public String getAreaDisplay(double area) {
-		return I18n.translateToLocalFormatted("skill.dss.desc.area", String.format("%.1f", area));
+		return new TextComponentTranslation("skill.dss.desc.area", String.format("%.1f", area)).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's charge time in ticks, using the value provided */
 	public String getChargeDisplay(int chargeTime) {
-		return I18n.translateToLocalFormatted("skill.dss.desc.charge", chargeTime);
+		return new TextComponentTranslation("skill.dss.desc.charge", chargeTime).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's damage, using the value provided and with "+" if desired */
 	public String getDamageDisplay(float damage, boolean displayPlus) {
-		return I18n.translateToLocalFormatted("skill.dss.desc.damage", (displayPlus ? "+" : ""), String.format("%.1f", damage));
+		return new TextComponentTranslation("skill.dss.desc.damage", (displayPlus ? "+" : ""), String.format("%.1f", damage)).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's damage, using the value provided and with "+" if desired */
 	public String getDamageDisplay(int damage, boolean displayPlus) {
-		return I18n.translateToLocalFormatted("skill.dss.desc.damage", (displayPlus ? "+" : ""), damage);
+		return new TextComponentTranslation("skill.dss.desc.damage", (displayPlus ? "+" : ""), damage).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's duration, in ticks or seconds, using the value provided */
 	public String getDurationDisplay(int duration, boolean inTicks) {
-		return I18n.translateToLocalFormatted("skill.dss.desc.duration", (inTicks ? duration : duration / 20),
-				(inTicks ? I18n.translateToLocal("skill.dss.ticks") : I18n.translateToLocal("skill.dss.seconds")));
+		String time = (inTicks ? new TextComponentTranslation("skill.dss.ticks").getUnformattedText() : new TextComponentTranslation("skill.dss.seconds").getUnformattedText());
+		return new TextComponentTranslation("skill.dss.desc.duration", (inTicks ? duration : duration / 20), time).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's exhaustion, using the value provided */
 	public String getExhaustionDisplay(float exhaustion) {
-		return I18n.translateToLocalFormatted("skill.dss.desc.exhaustion", String.format("%.2f", exhaustion));
+		return new TextComponentTranslation("skill.dss.desc.exhaustion", String.format("%.2f", exhaustion)).getUnformattedText();
 	}
 
 	/** Returns the translated description of the skill's effect (long version) */
 	public String getFullDescription() {
-		return I18n.translateToLocal(getFullUnlocalizedName() + ".desc.full");
+		return new TextComponentTranslation(getFullUnlocalizedName() + ".desc.full").getUnformattedText();
 	}
 
 	/**
@@ -356,18 +356,20 @@ public abstract class SkillBase
 	 * @param simpleMax whether to replace the numerical display with MAX LEVEL when appropriate
 	 */
 	public String getLevelDisplay(boolean simpleMax) {
-		return ((simpleMax && level == getMaxLevel()) ? I18n.translateToLocal("skill.dss.level.max") :
-			I18n.translateToLocalFormatted("skill.dss.desc.level", level, getMaxLevel()));
+		if (simpleMax && level == getMaxLevel()) {
+			return new TextComponentTranslation("skill.dss.level.max").getUnformattedText();
+		}
+		return new TextComponentTranslation("skill.dss.desc.level", level, getMaxLevel()).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's range, using the value provided */
 	public String getRangeDisplay(double range) {
-		return I18n.translateToLocalFormatted("skill.dss.desc.range", String.format("%.1f", range));
+		return new TextComponentTranslation("skill.dss.desc.range", String.format("%.1f", range)).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's time limit, using the value provided */
 	public String getTimeLimitDisplay(int time) {
-		return I18n.translateToLocalFormatted("skill.dss.desc.time", time);
+		return new TextComponentTranslation("skill.dss.desc.time", time).getUnformattedText();
 	}
 
 	/** Returns true if player meets requirements to learn this skill at target level */

@@ -34,7 +34,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -88,10 +88,10 @@ public class Dodge extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1),
-				(int)(getBaseDodgeChance(player) * 100)));
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 2),
-				(getDodgeTime() + level - 5) * 2)); // don't use real time bonus, since timer is zero
+		desc.add(new TextComponentTranslation(getInfoString("info", 1),
+				(int)(getBaseDodgeChance(player) * 100)).getUnformattedText());
+		desc.add(new TextComponentTranslation(getInfoString("info", 2),
+				(getDodgeTime() + level - 5) * 2).getUnformattedText()); // don't use real time bonus, since timer is zero
 		desc.add(getTimeLimitDisplay(getDodgeTime()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}

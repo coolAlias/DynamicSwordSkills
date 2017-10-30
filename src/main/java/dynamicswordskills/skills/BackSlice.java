@@ -44,7 +44,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -96,9 +96,9 @@ public class BackSlice extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1), 360 - (2 * getAttackAngle())));
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 2),
-				String.format("%.2f", getDisarmorChance(null, player.getHeldItemMainhand(), level))));
+		desc.add(new TextComponentTranslation(getInfoString("info", 1), 360 - (2 * getAttackAngle())).getUnformattedText());
+		String chance = String.format("%.2f", getDisarmorChance(null, player.getHeldItemMainhand(), level));
+		desc.add(new TextComponentTranslation(getInfoString("info", 2), chance).getUnformattedText());
 		desc.add(getDamageDisplay(level * 10, true) + "%");
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}

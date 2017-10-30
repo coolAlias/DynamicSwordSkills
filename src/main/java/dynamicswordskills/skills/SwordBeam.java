@@ -33,7 +33,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -77,8 +77,7 @@ public class SwordBeam extends SkillActive
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(getDamageFactor(player), false) + "%");
 		desc.add(getRangeDisplay(12 + level));
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1),
-				String.format("%.1f", Config.getHealthAllowance(level) / 2.0F)));
+		desc.add(new TextComponentTranslation(getInfoString("info", 1), String.format("%.1f", Config.getHealthAllowance(level) / 2.0F)).getUnformattedText());
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 

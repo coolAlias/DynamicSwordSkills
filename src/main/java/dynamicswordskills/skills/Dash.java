@@ -42,7 +42,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -104,11 +104,10 @@ public class Dash extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(getDamage(), false));
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 1), 2 + level));
-		desc.add(getRangeDisplay(getRange()));
-		desc.add(I18n.translateToLocalFormatted(getInfoString("info", 2),
-				String.format("%.1f", getMinDistance())));
-		desc.add(getExhaustionDisplay(getExhaustion()));
+		desc.add(new TextComponentTranslation(getInfoString("info", 1), 2 + level).getUnformattedText());
+		desc.add(new TextComponentTranslation(getRangeDisplay(getRange())).getUnformattedText());
+		desc.add(new TextComponentTranslation(getInfoString("info", 2), String.format("%.1f", getMinDistance())).getUnformattedText());
+		desc.add(new TextComponentTranslation(getExhaustionDisplay(getExhaustion())).getUnformattedText());
 	}
 
 	@Override
