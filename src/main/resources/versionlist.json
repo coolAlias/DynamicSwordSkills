@@ -1,27 +1,41 @@
 {
-	"homepage": "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1294232",
+	"homepage": "https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 	"promos": {
-		"1.7.10-latest": "1.7",
-		"1.7.10-recommended": "1.7",
-		"1.8.0-latest": "2.1",
-		"1.8.9-latest": "2.5",
+		"1.9.4-latest": "3.0.0",
+		"1.8.9-latest": "2.5.1",
 		"1.8.9-recommended": "2.5",
+		"1.7.10-latest": "1.7.1",
+		"1.7.10-recommended": "1.7"
 	},
-	"1.8.0": {
-	    "2.1": "Added Weapon Registry\nSee mod home page for full change log"
+	"1.9.4": {
+		"3.0.0": "Initial 1.9.4 version"
 	},
 	"1.8.9": {
-	    "2.5": "Updated to 1.8.9\nSee mod home page for full change log"
+	    "2.5.1": "Fixed various bugs\nSee mod home page for full change log"
+	},
+	"1.7.10": {
+	    "1.7.1": "Fixed various bugs\nSee mod home page for full change log"
 	},
 	"versionList": [
 		{
-			"mcVersion":"Minecraft 1.8.9",
-			"modVersion":"2.5",
+			"mcVersion":"Minecraft 1.9.4",
+			"modVersion":"3.0.0",
 			"changeLog": [
-	               "Updated to 1.8.9",
+	               "Initial 1.9.4 version",
 	               "See main mod page for full change log"
 			],
-			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1294232",
+			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
+			"isDirectLink":"false",
+			"newFileName":""
+		},
+		{
+			"mcVersion":"Minecraft 1.8.9",
+			"modVersion":"2.5.1",
+			"changeLog": [
+	               "Fixed various bugs",
+	               "See main mod page for full change log"
+			],
+			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
 			"newFileName":""
 		},
@@ -32,18 +46,18 @@
 	               "Added Weapon Registry",
 	               "See main mod page for full change log"
 			],
-			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1294232",
+			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
 			"newFileName":""
 		},
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"1.7",
+			"modVersion":"1.7.1",
 			"changeLog": [
-	               "Added Weapon Registry",
+	               "Fixed various bugs",
 	               "See main mod page for full change log"
 			],
-			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1294232",
+			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
 			"newFileName":""
 		}
