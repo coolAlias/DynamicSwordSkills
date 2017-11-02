@@ -19,7 +19,6 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import dynamicswordskills.api.IDashItem;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -36,7 +35,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
@@ -137,14 +135,13 @@ public class Dash extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		Item item = (player.getHeldItemMainhand() != null ? player.getHeldItemMainhand().getItem() : null);
-		return super.canUse(player) && !isActive() && (PlayerUtils.isWeapon(player.getHeldItemMainhand()) || item instanceof IDashItem);
+		return (super.canUse(player) && !isActive() && PlayerUtils.isBlocking(player));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.onGround && PlayerUtils.isBlocking(player) && canUse(player);
+		return player.onGround && canUse(player);
 	}
 
 	@Override
