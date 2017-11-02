@@ -11,6 +11,8 @@
   "credits": "",
   "logoFile": "",
   "screenshots": [],
-  "dependencies": ["zeldaswordskills"]
+  "useDependencyInformation": true,
+  "requiredMods": ["swordskillsapi"],
+  "dependencies": ["swordskillsapi"]
 }
 ]

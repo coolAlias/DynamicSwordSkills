@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Dynamic Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,6 @@ package dynamicswordskills.util;
 import java.util.Random;
 
 import dynamicswordskills.api.ISkillProvider;
-import dynamicswordskills.api.IWeapon;
-import dynamicswordskills.api.WeaponRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.PlaySoundPacket;
 import dynamicswordskills.skills.SkillBase;
@@ -41,6 +39,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import swordskillsapi.api.item.IWeapon;
+import swordskillsapi.api.item.WeaponRegistry;
 
 /**
  * 

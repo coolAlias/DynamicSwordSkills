@@ -17,13 +17,13 @@
 
 package dynamicswordskills.util;
 
-import dynamicswordskills.api.IComboDamage.IComboDamageFull;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.SoundEvent;
+import swordskillsapi.api.damage.IComboDamage.IComboDamageFull;
 
 /**
  * 

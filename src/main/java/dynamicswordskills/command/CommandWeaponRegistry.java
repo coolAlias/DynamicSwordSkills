@@ -21,7 +21,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import dynamicswordskills.api.WeaponRegistry;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
@@ -32,6 +31,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import swordskillsapi.api.item.WeaponRegistry;
 
 public class CommandWeaponRegistry extends CommandBase
 {
