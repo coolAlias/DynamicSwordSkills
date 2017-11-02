@@ -28,6 +28,7 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
+import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
@@ -188,7 +189,7 @@ public class ArmorBreak extends SkillActive
 		} else {
 			// Attack first so skill still active upon impact, then set timer to zero
 			ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
-			if (skill != null && skill.isLockedOn()) {
+			if (skill != null && skill.isLockedOn() && TargetUtils.canReachTarget(player, skill.getCurrentTarget())) {
 				player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
 			}
 		}
