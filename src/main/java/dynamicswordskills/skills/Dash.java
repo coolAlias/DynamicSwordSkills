@@ -35,8 +35,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -44,6 +46,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import swordskillsapi.api.item.IDashItem;
 
 /**
  * 
@@ -135,7 +138,26 @@ public class Dash extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return (super.canUse(player) && !isActive() && PlayerUtils.isBlocking(player));
+		boolean flag = PlayerUtils.isBlocking(player);
+		for (EnumHand hand : EnumHand.values()) {
+			if (canItemDash(player, hand)) {
+				flag = true;
+				break;
+			}
+		}
+		return (flag && super.canUse(player) && !isActive());
+	}
+
+	/**
+	 * Returns true if the item held in the given hand is an {@link IDashItem}
+	 * and {@link IDashItem#canDash(ItemStack, EntityPlayer, EnumHand) IDashItem#canDash} returns true.
+	 */
+	private boolean canItemDash(EntityPlayer player, EnumHand hand) {
+		ItemStack stack = player.getHeldItem(hand);
+		if (stack != null && stack.getItem() instanceof IDashItem) {
+			return ((IDashItem) stack.getItem()).canDash(stack, player, hand);
+		}
+		return false;
 	}
 
 	@Override
