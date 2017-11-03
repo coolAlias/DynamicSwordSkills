@@ -68,14 +68,14 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 
 	@Override
 	protected void setup(ScaledResolution resolution) {
-		this.height = this.mc.fontRendererObj.FONT_HEIGHT;
-		this.width = this.mc.fontRendererObj.getStringWidth(new TextComponentTranslation("combo.ending").getUnformattedText());
+		this.height = this.mc.fontRenderer.FONT_HEIGHT;
+		this.width = this.mc.fontRenderer.getStringWidth(new TextComponentTranslation("combo.ending").getUnformattedText());
 		this.setPosX(resolution, Config.endingBlowHudOffsetX);
 		this.setPosY(resolution, Config.endingBlowHudOffsetY);
 	}
 
 	@Override
 	protected void render(ScaledResolution resolution) {
-		this.mc.fontRendererObj.drawString(new TextComponentTranslation("combo.ending").getUnformattedText(), this.x, this.y, 0xFF0000, true);
+		this.mc.fontRenderer.drawString(new TextComponentTranslation("combo.ending").getUnformattedText(), this.x, this.y, 0xFF0000, true);
 	}
 }

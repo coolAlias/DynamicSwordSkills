@@ -252,7 +252,7 @@ public class Dash extends SkillActive
 	public void onImpact(World world, EntityPlayer player, RayTraceResult result) {
 		if (result != null && result.typeOfHit == RayTraceResult.Type.ENTITY) {
 			target = result.entityHit;
-			double dist = target.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord);
+			double dist = target.getDistance(initialPosition.x, initialPosition.y, initialPosition.z);
 			// Subtract half the width for each entity to account for their bounding box size
 			dist -= (target.width / 2.0F) + (player.width / 2.0F);
 
@@ -290,17 +290,17 @@ public class Dash extends SkillActive
 		if (target instanceof EntityLivingBase && trajectory != null) {
 			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - BASE_MOVE;
 			double dfactor = (1.0D + (speed) + (speed * (1.0D - ((getRange() - distance) / getRange()))));
-			player.motionX = trajectory.xCoord * dfactor * dfactor;
-			player.motionZ = trajectory.zCoord * dfactor * dfactor;
+			player.motionX = trajectory.x * dfactor * dfactor;
+			player.motionZ = trajectory.z * dfactor * dfactor;
 		}
 		return false; // this skill doesn't need to control the camera
 	}
 
 	@Override
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
-		if (impactTime > 0 && source.getEntity() == target) {
+		if (impactTime > 0 && source.getTrueSource() == target) {
 			return true;
-		} else if (source.damageType.equals("mob") && source.getEntity() != null && player.getDistanceSqToEntity(source.getEntity()) < 6.0D) {
+		} else if (source.damageType.equals("mob") && source.getTrueSource() != null && player.getDistanceSqToEntity(source.getTrueSource()) < 6.0D) {
 			return true; // stop stupid zombies from hitting player right before impact
 		}
 		return false;

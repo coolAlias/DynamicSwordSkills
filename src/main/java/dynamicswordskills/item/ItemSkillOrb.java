@@ -33,6 +33,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -51,7 +52,8 @@ public class ItemSkillOrb extends Item implements IModItem
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(ItemStack stack, World world, EntityPlayer player, EnumHand hand) {
+	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+		ItemStack stack = player.getHeldItem(hand);
 		if (!player.getEntityWorld().isRemote) {
 			SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
 			if (skill != null) {
@@ -62,7 +64,7 @@ public class ItemSkillOrb extends Item implements IModItem
 					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.levelup",
 							new TextComponentTranslation(skill.getTranslationString()), DSSPlayerInfo.get(player).getTrueSkillLevel(skill));
 					if (!player.capabilities.isCreativeMode) {
-						--stack.stackSize;
+						stack.shrink(1);
 					}
 				} else {
 					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.maxlevel", new TextComponentTranslation(skill.getTranslationString()));
@@ -80,7 +82,7 @@ public class ItemSkillOrb extends Item implements IModItem
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(Item item, CreativeTabs tab, List<ItemStack> list) {
+	public void getSubItems(Item item, CreativeTabs tab, NonNullList<ItemStack> list) {
 		for (SkillBase skill : SkillBase.getSkills()) {
 			list.add(new ItemStack(item, 1, skill.getId()));
 		}

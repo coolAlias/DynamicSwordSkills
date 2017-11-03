@@ -266,11 +266,11 @@ public class BackSlice extends SkillActive
 			}
 			Vec3d vec3 = player.getLookVec();
 			if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
-				player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
+				player.addVelocity(-vec3.z * d, 0.0D, vec3.x * d);
 			} else {
-				player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
+				player.addVelocity(vec3.z * d, 0.0D, -vec3.x * d);
 			}
-			player.addVelocity(vec3.xCoord * d * 1.15D, 0.0D, vec3.zCoord * d * 1.15D);
+			player.addVelocity(vec3.x * d * 1.15D, 0.0D, vec3.z * d * 1.15D);
 		}
 		return false; // allow camera to update again
 	}
@@ -278,7 +278,7 @@ public class BackSlice extends SkillActive
 	@Override
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
 		ILockOnTarget targeting = DSSPlayerInfo.get(player).getTargetingSkill();
-		return (dodgeTimer > getDodgeTime() && targeting != null && targeting.getCurrentTarget() == source.getEntity());
+		return (dodgeTimer > getDodgeTime() && targeting != null && targeting.getCurrentTarget() == source.getTrueSource());
 	}
 
 	@Override

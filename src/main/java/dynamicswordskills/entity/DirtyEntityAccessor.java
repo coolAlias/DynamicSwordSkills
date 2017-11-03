@@ -41,7 +41,7 @@ public class DirtyEntityAccessor {
 	/** Damages the target for the amount of damage using the vanilla method; posts LivingHurtEvent */
 	public static void damageEntity(EntityLivingBase target, DamageSource source, float amount) {
 		if (damageEntity == null) {
-			damageEntity = ReflectionHelper.findMethod(EntityLivingBase.class, target, new String[]{"func_70665_d","damageEntity"}, DamageSource.class, float.class);
+			damageEntity = ReflectionHelper.findMethod(EntityLivingBase.class, "damageEntity", "func_70665_d", DamageSource.class, float.class);
 		}
 		try {
 			damageEntity.invoke(target, source, amount);
@@ -55,7 +55,7 @@ public class DirtyEntityAccessor {
 	 */
 	public static float getModifiedDamage(EntityLivingBase entity, DamageSource source, float amount) {
 		if (applyPotionDamageCalculations == null) {
-			applyPotionDamageCalculations = ReflectionHelper.findMethod(EntityLivingBase.class, entity, new String[]{"func_70672_c","applyPotionDamageCalculations"}, DamageSource.class, float.class);
+			applyPotionDamageCalculations = ReflectionHelper.findMethod(EntityLivingBase.class, "applyPotionDamageCalculations", "func_70672_c", DamageSource.class, float.class);
 		}
 		// Don't want to actually damage the entity's armor at this point, so
 		// reproduce parts of EntityLivingBase#applyArmorCalculations here:

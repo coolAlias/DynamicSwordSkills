@@ -113,25 +113,25 @@ public class GuiSkills extends GuiContainer
 			GlStateManager.popAttrib();
 		}
 		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : new TextComponentTranslation("skill.dss.gui.description").getUnformattedText());
-		isUnicode = fontRendererObj.getUnicodeFlag();
-		fontRendererObj.setUnicodeFlag(true);
-		fontRendererObj.drawString(s, 158, 38, 4210752);
+		isUnicode = fontRenderer.getUnicodeFlag();
+		fontRenderer.setUnicodeFlag(true);
+		fontRenderer.drawString(s, 158, 38, 4210752);
 		if (currentSkill != null) {
 			if (Config.isSkillEnabled(currentSkill.getId())) {
 				s = currentSkill.getLevelDisplay(false);
 			} else {
 				s = (TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled").getUnformattedText()) + TextFormatting.RESET;
 			}
-			fontRendererObj.drawString(s, 262 - fontRendererObj.getStringWidth(s), 38, 4210752);
+			fontRenderer.drawString(s, 262 - fontRenderer.getStringWidth(s), 38, 4210752);
 		}
 		refreshDescription();
-		textY = 38 + (fontRendererObj.FONT_HEIGHT * 2);
+		textY = 38 + (fontRenderer.FONT_HEIGHT * 2);
 		int start = (needsScrollBar() ? (int)(scrollY * (numLines - MAX_LINES)) : 0);
 		for (int i = start; i < desc.size() && i < (MAX_LINES + start); ++i) {
-			fontRendererObj.drawString(desc.get(i), 158, textY, 4210752);
-			textY += fontRendererObj.FONT_HEIGHT;
+			fontRenderer.drawString(desc.get(i), 158, textY, 4210752);
+			textY += fontRenderer.FONT_HEIGHT;
 		}
-		fontRendererObj.setUnicodeFlag(isUnicode);
+		fontRenderer.setUnicodeFlag(isUnicode);
 	}
 
 	@Override
@@ -152,13 +152,13 @@ public class GuiSkills extends GuiContainer
 			currentSkill.addInformation(desc, mc.player);
 			desc.add("");
 			desc.add(new TextComponentTranslation("skill.dss.gui.activation").getUnformattedText());
-			desc.addAll(fontRendererObj.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
+			desc.addAll(fontRenderer.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
 			desc.add("");
 		}
 		desc.add(new TextComponentTranslation("skill.dss.gui.description").getUnformattedText());
 		String[] temp = (currentSkill != null ? currentSkill.getFullDescription().split("\\\\n") : new TextComponentTranslation("skill.dss.gui.explanation").getUnformattedText().split("\\\\n"));
 		for (String s : temp) {
-			desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+			desc.addAll(fontRenderer.listFormattedStringToWidth(s, 101));
 			desc.add("");
 		}
 		numLines = desc.size();

@@ -341,11 +341,11 @@ public class SpinAttack extends SkillActive
 		// TODO these will not be seen by other players
 		EnumParticleTypes particle = (isFlaming ? EnumParticleTypes.FLAME : (superLevel > 0 ? EnumParticleTypes.CRIT_MAGIC : EnumParticleTypes.CRIT));
 		Vec3d vec3 = player.getLookVec();
-		double posX = player.posX + (vec3.xCoord * getRange());
+		double posX = player.posX + (vec3.x * getRange());
 		double posY = player.posY + player.getEyeHeight() - 0.1D;
-		double posZ = player.posZ + (vec3.zCoord * getRange());
+		double posZ = player.posZ + (vec3.z * getRange());
 		for (int i = 0; i < 2; ++i) {
-			player.getEntityWorld().spawnParticle(particle, posX, posY, posZ, vec3.xCoord * 0.15D, 0.01D, vec3.zCoord * 0.15D);
+			player.getEntityWorld().spawnParticle(particle, posX, posY, posZ, vec3.x * 0.15D, 0.01D, vec3.z * 0.15D);
 		}
 	}
 

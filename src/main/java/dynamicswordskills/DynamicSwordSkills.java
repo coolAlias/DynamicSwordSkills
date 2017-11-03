@@ -37,8 +37,10 @@ import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -91,8 +93,8 @@ public class DynamicSwordSkills
 		tabSkills = new CreativeTabs("dss.skills") {
 			@Override
 			@SideOnly(Side.CLIENT)
-			public Item getTabIconItem() {
-				return DynamicSwordSkills.skillOrb;
+			public ItemStack getTabIconItem() {
+				return new ItemStack(DynamicSwordSkills.skillOrb);
 			}
 		};
 		skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
@@ -124,8 +126,8 @@ public class DynamicSwordSkills
 		}
 		proxy.preInit();
 		registerSounds();
-		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, this, 64, 10, true);
-		EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", 1, this, 64, 10, true);
+		registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, 64, 10, true);
+		registerModEntity(EntitySwordBeam.class, "swordbeam", 1, 64, 10, true);
 		PacketDispatcher.initialize();
 		registerCapabilities();
 	}
@@ -173,5 +175,9 @@ public class DynamicSwordSkills
 
 	private void registerSound(ResourceLocation location) {
 		GameRegistry.register(new SoundEvent(location).setRegistryName(location));
+	}
+
+	private void registerModEntity(Class<? extends Entity> clazz, String name, int id, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates) {
+		EntityRegistry.registerModEntity(new ResourceLocation(ModInfo.ID, name), clazz, name, id, this, trackingRange, updateFrequency, sendsVelocityUpdates);
 	}
 }

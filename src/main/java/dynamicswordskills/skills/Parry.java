@@ -203,8 +203,8 @@ public class Parry extends SkillActive
 
 	@Override
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
-		if (source.getEntity() instanceof EntityLivingBase) {
-			EntityLivingBase attacker = (EntityLivingBase) source.getEntity();
+		if (source.getTrueSource() instanceof EntityLivingBase) {
+			EntityLivingBase attacker = (EntityLivingBase) source.getTrueSource();
 			if (attacksParried < getMaxParries() && parryTimer > getParryDelay() && attacker.getHeldItemMainhand() != null && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 				if (player.getEntityWorld().rand.nextFloat() < getDisarmChance(player, attacker)) {
 					PlayerUtils.dropHeldItem(attacker);

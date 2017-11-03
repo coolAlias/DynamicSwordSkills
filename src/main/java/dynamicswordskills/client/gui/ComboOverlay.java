@@ -106,11 +106,11 @@ public class ComboOverlay extends AbstractGuiOverlay
 	protected void setup(ScaledResolution resolution) {
 		// Minimum display of 3 lines: combo name, size and damage
 		int n = Math.min(this.combo.getDamageList().size(), Config.getHitsToDisplay());
-		this.height = (n + 3) * this.mc.fontRendererObj.FONT_HEIGHT;
+		this.height = (n + 3) * this.mc.fontRenderer.FONT_HEIGHT;
 		this.label = new TextComponentTranslation(this.combo.isFinished() ? "combo.finished" : "combo.combo", this.combo.getLabel()).getUnformattedText();
 		this.comboSize = new TextComponentTranslation("combo.size", this.combo.getNumHits(), this.combo.getMaxNumHits()).getUnformattedText();
 		this.comboDamage = new TextComponentTranslation("combo.damage", String.format("%.1f", this.combo.getDamage())).getUnformattedText();
-		this.width = Math.max(this.mc.fontRendererObj.getStringWidth(this.label), this.mc.fontRendererObj.getStringWidth(this.comboDamage));
+		this.width = Math.max(this.mc.fontRenderer.getStringWidth(this.label), this.mc.fontRenderer.getStringWidth(this.comboDamage));
 		this.setPosX(resolution, this.getOffsetX(DEFAULT_PADDING) + Config.comboHudOffsetX);
 		this.setPosY(resolution, this.getOffsetY(DEFAULT_PADDING) + Config.comboHudOffsetY);
 	}
@@ -119,25 +119,25 @@ public class ComboOverlay extends AbstractGuiOverlay
 	protected void render(ScaledResolution resolution) {
 		int xPos = this.getLeft();
 		int yPos = this.getTop();
-		this.mc.fontRendererObj.drawString(this.label, xPos, yPos, this.combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
-		yPos += this.mc.fontRendererObj.FONT_HEIGHT;
-		this.mc.fontRendererObj.drawString(this.comboSize, xPos + this.getOffset(this.comboSize), yPos, 0xFFFFFF, true);
-		yPos += this.mc.fontRendererObj.FONT_HEIGHT;
-		this.mc.fontRendererObj.drawString(this.comboDamage, xPos + this.getOffset(this.comboDamage), yPos, 0xFFFFFF, true);
+		this.mc.fontRenderer.drawString(this.label, xPos, yPos, this.combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
+		yPos += this.mc.fontRenderer.FONT_HEIGHT;
+		this.mc.fontRenderer.drawString(this.comboSize, xPos + this.getOffset(this.comboSize), yPos, 0xFFFFFF, true);
+		yPos += this.mc.fontRenderer.FONT_HEIGHT;
+		this.mc.fontRenderer.drawString(this.comboDamage, xPos + this.getOffset(this.comboDamage), yPos, 0xFFFFFF, true);
 		List<Float> damageList = this.combo.getDamageList();
 		int n = Math.min(damageList.size(), Config.getHitsToDisplay());
 		for (int i = 0; i < n; ++i) {
-			yPos += this.mc.fontRendererObj.FONT_HEIGHT;
+			yPos += this.mc.fontRenderer.FONT_HEIGHT;
 			String s = String.format("+%.1f", damageList.get(damageList.size() - i - 1));
-			this.mc.fontRendererObj.drawString(s, xPos + this.getOffset(s), yPos, 0xFFFFFF, true);
+			this.mc.fontRenderer.drawString(s, xPos + this.getOffset(s), yPos, 0xFFFFFF, true);
 		}
 	}
 
 	private int getOffset(String s) {
 		switch (this.getHorizontalAlignment()) {
 		case LEFT: return DEFAULT_PADDING;
-		case CENTER: return (this.getWidth() / 2) - (this.mc.fontRendererObj.getStringWidth(s) / 2);
-		case RIGHT: return this.getWidth() - this.mc.fontRendererObj.getStringWidth(s) - DEFAULT_PADDING;
+		case CENTER: return (this.getWidth() / 2) - (this.mc.fontRenderer.getStringWidth(s) / 2);
+		case RIGHT: return this.getWidth() - this.mc.fontRenderer.getStringWidth(s) - DEFAULT_PADDING;
 		default: return 0;
 		}
 	}

@@ -123,7 +123,7 @@ public class DSSCombatEvents
 
 	@SubscribeEvent
 	public void onLivingDrops(LivingDropsEvent event) {
-		if (event.getSource().getEntity() instanceof EntityPlayer) {
+		if (event.getSource().getTrueSource() instanceof EntityPlayer) {
 			EntityLivingBase mob = event.getEntityLiving();
 			ItemStack orb = getOrbDrop(mob);
 			if (orb != null && (Config.areOrbDropsEnabled() || (Config.arePlayerDropsEnabled() && event.getEntity() instanceof EntityPlayer))) {
@@ -159,8 +159,8 @@ public class DSSCombatEvents
 	 */
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onHurt(LivingHurtEvent event) {
-		if (event.getSource().getEntity() instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.getSource().getEntity();
+		if (event.getSource().getTrueSource() instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) event.getSource().getTrueSource();
 			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 			ICombo combo = skills.getComboSkill();
 			if (combo != null && combo.getCombo() != null && !combo.getCombo().isFinished()) {
@@ -180,8 +180,8 @@ public class DSSCombatEvents
 				combo.onPlayerHurt(player, event);
 			}
 		}
-		if (event.getAmount() > 0.0F && event.getSource().getEntity() instanceof EntityPlayer) {
-			DSSPlayerInfo.get((EntityPlayer) event.getSource().getEntity()).onPostImpact(event);
+		if (event.getAmount() > 0.0F && event.getSource().getTrueSource() instanceof EntityPlayer) {
+			DSSPlayerInfo.get((EntityPlayer) event.getSource().getTrueSource()).onPostImpact(event);
 		}
 	}
 

@@ -80,10 +80,10 @@ public class TargetUtils
 		vec3 = new Vec3d(entity.posX, posY, entity.posZ);
 		vec31 = new Vec3d(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
 		if (result != null) {
-			vec31 = new Vec3d(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord);
+			vec31 = new Vec3d(result.hitVec.x, result.hitVec.y, result.hitVec.z);
 		}
 		Entity target = null;
-		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox().addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
+		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox().expand(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
 		double d0 = 0.0D;
 		for (int i = 0; i < list.size(); ++i) {
 			Entity entity1 = list.get(i);
@@ -156,9 +156,9 @@ public class TargetUtils
 		double distanceTraveled = 0;
 
 		while ((int) distanceTraveled < distance) {
-			targetX += vec3.xCoord;
-			targetY += vec3.yCoord;
-			targetZ += vec3.zCoord;
+			targetX += vec3.x;
+			targetY += vec3.y;
+			targetZ += vec3.z;
 			distanceTraveled += vec3.lengthVector();
 			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
 			List<EntityLivingBase> list = seeker.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, bb);
@@ -192,9 +192,9 @@ public class TargetUtils
 		double distanceTraveled = 0;
 
 		while ((int) distanceTraveled < distance) {
-			targetX += vec3.xCoord;
-			targetY += vec3.yCoord;
-			targetZ += vec3.zCoord;
+			targetX += vec3.x;
+			targetY += vec3.y;
+			targetZ += vec3.z;
 			distanceTraveled += vec3.lengthVector();
 			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
 			List<EntityLivingBase> list = seeker.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, bb);

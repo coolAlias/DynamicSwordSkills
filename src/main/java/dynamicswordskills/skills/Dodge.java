@@ -210,9 +210,9 @@ public class Dodge extends SkillActive
 		double d = 0.15D * speed * speed;
 		Vec3d vec3 = player.getLookVec();
 		if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
-			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
+			player.addVelocity(-vec3.z * d, 0.0D, vec3.x * d);
 		} else {
-			player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
+			player.addVelocity(vec3.z * d, 0.0D, -vec3.x * d);
 		}
 		return true;
 	}
@@ -220,7 +220,7 @@ public class Dodge extends SkillActive
 	@Override
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
 		if (dodgeTimer > level) { // still able to dodge (used to use isActive(), but changed for animating)
-			Entity attacker = source.getEntity();
+			Entity attacker = source.getTrueSource();
 			if (attacker != null) {
 				return (attacker == entityDodged || dodgeAttack(player, attacker));
 			}

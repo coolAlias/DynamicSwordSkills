@@ -197,14 +197,14 @@ public class MortalDraw extends SkillActive
 
 	@Override
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
-		if (!player.getEntityWorld().isRemote && source.getEntity() != null) {
+		if (!player.getEntityWorld().isRemote && source.getTrueSource() != null) {
 			// Changed isActive to return true for an extra 2 ticks to allow canceling damage
-			if (target == source.getEntity()) {
+			if (target == source.getTrueSource()) {
 				return true;
 			} else if (attackTimer > DELAY) {
-				if (drawSword(player, source.getEntity())) {
+				if (drawSword(player, source.getTrueSource())) {
 					PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
-					target = source.getEntity();
+					target = source.getTrueSource();
 					return true;
 				} else { // failed - do not continue trying
 					attackTimer = DELAY;
