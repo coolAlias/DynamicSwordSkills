@@ -45,7 +45,7 @@ public class RandomSkillSword extends SkillFunction
 
 	@Override
 	public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
-		int i = SkillFunction.SKILL_IDS.get(MathHelper.getRandomIntegerInRange(rand, 0, SkillFunction.SKILL_IDS.size()));
+		int i = SkillFunction.SKILL_IDS.get(MathHelper.getInt(rand, 0, SkillFunction.SKILL_IDS.size()));
 		if (!(stack.getItem() instanceof ItemRandomSkill)) {
 			DynamicSwordSkills.logger.warn("Invalid item for RandomSkillSword function: " + stack.toString());
 		} else if (SkillBase.doesSkillExist(i)) {

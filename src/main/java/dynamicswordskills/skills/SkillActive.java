@@ -201,10 +201,10 @@ public abstract class SkillActive extends SkillBase
 	 */
 	public final void deactivate(EntityPlayer player) throws IllegalStateException {
 		if (isActive()) {
-			onDeactivated(player.worldObj, player);
+			onDeactivated(player.getEntityWorld(), player);
 			if (isActive()) {
 				DynamicSwordSkills.logger.error(getDisplayName() + " is still active after onDeactivated called - this may result in SEVERE errors or even crashes!!!");
-			} else if (player.worldObj.isRemote) {
+			} else if (player.getEntityWorld().isRemote) {
 				PacketDispatcher.sendToServer(new DeactivateSkillPacket(this));
 			} else {
 				PacketDispatcher.sendTo(new DeactivateSkillPacket(this), (EntityPlayerMP) player);

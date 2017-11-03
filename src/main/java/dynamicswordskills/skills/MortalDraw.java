@@ -186,7 +186,7 @@ public class MortalDraw extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		if (attackTimer > 0) {
 			--attackTimer;
-			if (attackTimer == DELAY && !player.worldObj.isRemote) {
+			if (attackTimer == DELAY && !player.getEntityWorld().isRemote) {
 				drawSword(player, null);
 				if (player.getHeldItemMainhand() != null) {
 					PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
@@ -197,7 +197,7 @@ public class MortalDraw extends SkillActive
 
 	@Override
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
-		if (!player.worldObj.isRemote && source.getEntity() != null) {
+		if (!player.getEntityWorld().isRemote && source.getEntity() != null) {
 			// Changed isActive to return true for an extra 2 ticks to allow canceling damage
 			if (target == source.getEntity()) {
 				return true;
@@ -223,7 +223,7 @@ public class MortalDraw extends SkillActive
 		if (attackTimer > DELAY) {
 			attackTimer = DELAY;
 			event.setAmount(event.getAmount() * (1.0F + ((float) getDamageMultiplier() / 100F)));
-			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
+			PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
 		} else { // too late - didn't defend against this target!
 			target = null;
 		}
@@ -238,7 +238,7 @@ public class MortalDraw extends SkillActive
 		// letting this run on both sides is fine - client will sync from server later anyway
 		if (swordSlot > -1 && swordSlot != player.inventory.currentItem && player.getHeldItemMainhand() == null) {
 			ItemStack sword = player.inventory.getStackInSlot(swordSlot);
-			if (!player.worldObj.isRemote) {
+			if (!player.getEntityWorld().isRemote) {
 				player.inventory.setInventorySlotContents(swordSlot, null);
 			}
 			player.setHeldItem(EnumHand.MAIN_HAND, sword);

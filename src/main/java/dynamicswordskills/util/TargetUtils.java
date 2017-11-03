@@ -161,7 +161,7 @@ public class TargetUtils
 			targetZ += vec3.zCoord;
 			distanceTraveled += vec3.lengthVector();
 			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
-			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bb);
+			List<EntityLivingBase> list = seeker.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
 				if (target != seeker && target.canBeCollidedWith() && isTargetInSight(vec3, seeker, target)) {
 					double newDistance = (closestToSeeker ? target.getDistanceSqToEntity(seeker) : target.getDistanceSq(targetX, targetY, targetZ));
@@ -197,7 +197,7 @@ public class TargetUtils
 			targetZ += vec3.zCoord;
 			distanceTraveled += vec3.lengthVector();
 			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
-			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bb);
+			List<EntityLivingBase> list = seeker.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
 				if (target != seeker && target.canBeCollidedWith() && isTargetInSight(vec3, seeker, target)) {
 					if (!targets.contains(target)) {
@@ -245,7 +245,7 @@ public class TargetUtils
 	 * Whether the entity is currently standing in any liquid
 	 */
 	public static boolean isInLiquid(Entity entity) {
-		return entity.worldObj.getBlockState(new BlockPos(entity)).getMaterial().isLiquid();
+		return entity.getEntityWorld().getBlockState(new BlockPos(entity)).getMaterial().isLiquid();
 	}
 
 	/**

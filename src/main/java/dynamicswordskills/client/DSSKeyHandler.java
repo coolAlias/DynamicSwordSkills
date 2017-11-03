@@ -83,23 +83,23 @@ public class DSSKeyHandler
 	 * @param kb	The key code of the key pressed; for the mouse, this is the mouse button number minus 100
 	 */
 	public static void onKeyPressed(Minecraft mc, int kb) {
-		if (mc.inGameHasFocus && mc.thePlayer != null) {
-			DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
+		if (mc.inGameHasFocus && mc.player != null) {
+			DSSPlayerInfo skills = DSSPlayerInfo.get(mc.player);
 			if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
 				if (skills.hasSkill(SkillBase.swordBasic)) {
 					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.swordBasic));
 				}
 			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
-				if (mc.thePlayer.isSneaking()) {
-					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggletp", new TextComponentTranslation(Config.toggleTargetPlayers() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
+				if (mc.player.isSneaking()) {
+					PlayerUtils.sendTranslatedChat(mc.player, "key.dss.toggletp", new TextComponentTranslation(Config.toggleTargetPlayers() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
 				} else {
-					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggleat", new TextComponentTranslation(Config.toggleAutoTarget() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
+					PlayerUtils.sendTranslatedChat(mc.player, "key.dss.toggleat", new TextComponentTranslation(Config.toggleAutoTarget() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
 				}
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
 			}  else if (kb == keys[KEY_TOGGLE_HUD].getKeyCode()) {
 				Config.isComboHudEnabled = !Config.isComboHudEnabled;
-				PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.togglehud", new TextComponentTranslation(Config.isComboHudEnabled ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
+				PlayerUtils.sendTranslatedChat(mc.player, "key.dss.togglehud", new TextComponentTranslation(Config.isComboHudEnabled ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
 			} else {
 				handleTargetingKeys(mc, kb, skills);
 			}
@@ -117,7 +117,7 @@ public class DSSKeyHandler
 			return;
 		}
 		if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
-			skill.getNextTarget(mc.thePlayer);
+			skill.getNextTarget(mc.player);
 		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
 			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK] : mc.gameSettings.keyBindAttack);
 			boolean canAttack = skills.canAttack();
@@ -126,10 +126,10 @@ public class DSSKeyHandler
 			} else if (canAttack) {
 				// hack for Super Spin Attack, as it requires key press to be passed while animation is in progress
 				if (skills.isSkillActive(SkillBase.spinAttack)) {
-					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.thePlayer);
+					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.player);
 					return;
 				} else if (skills.isSkillActive(SkillBase.backSlice)) {
-					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, key, mc.thePlayer);
+					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, key, mc.player);
 					return;
 				}
 			}
@@ -140,7 +140,7 @@ public class DSSKeyHandler
 				}
 				// hack for Armor Break to begin charging without having to press attack again
 				if (skills.hasSkill(SkillBase.armorBreak)) {
-					skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.thePlayer);
+					skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.player);
 				}
 			}
 		} else if (canInteract) {

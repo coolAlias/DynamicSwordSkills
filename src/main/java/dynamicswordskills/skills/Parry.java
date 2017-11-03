@@ -194,9 +194,9 @@ public class Parry extends SkillActive
 		if (isActive()) {
 			if (--parryTimer <= getParryDelay() && playMissSound) {
 				playMissSound = false;
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
+				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			}
-		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
+		} else if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
 		}
 	}
@@ -206,11 +206,11 @@ public class Parry extends SkillActive
 		if (source.getEntity() instanceof EntityLivingBase) {
 			EntityLivingBase attacker = (EntityLivingBase) source.getEntity();
 			if (attacksParried < getMaxParries() && parryTimer > getParryDelay() && attacker.getHeldItemMainhand() != null && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
-				if (player.worldObj.rand.nextFloat() < getDisarmChance(player, attacker)) {
+				if (player.getEntityWorld().rand.nextFloat() < getDisarmChance(player, attacker)) {
 					PlayerUtils.dropHeldItem(attacker);
 				}
 				++attacksParried; // increment after disarm
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SWORD_STRIKE, SoundCategory.PLAYERS, 0.4F, 0.5F);
+				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.SWORD_STRIKE, SoundCategory.PLAYERS, 0.4F, 0.5F);
 				playMissSound = false;
 				TargetUtils.knockTargetBack(attacker, player);
 				return true;

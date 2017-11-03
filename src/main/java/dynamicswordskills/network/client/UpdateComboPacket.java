@@ -47,12 +47,12 @@ public class UpdateComboPacket extends AbstractClientMessage<UpdateComboPacket>
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		compound = buffer.readNBTTagCompoundFromBuffer();
+		compound = buffer.readCompoundTag();
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeNBTTagCompoundToBuffer(compound);
+		buffer.writeCompoundTag(compound);
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class UpdateComboPacket extends AbstractClientMessage<UpdateComboPacket>
 		try {
 			ICombo skill = (ICombo) DSSPlayerInfo.get(player).getPlayerSkill(combo.getSkill());
 			if (skill != null) {
-				combo.getEntityFromWorld(player.worldObj);
+				combo.getEntityFromWorld(player.getEntityWorld());
 				skill.setCombo(combo);
 			}
 		} catch (ClassCastException e) {

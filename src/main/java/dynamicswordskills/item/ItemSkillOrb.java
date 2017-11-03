@@ -52,7 +52,7 @@ public class ItemSkillOrb extends Item implements IModItem
 
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(ItemStack stack, World world, EntityPlayer player, EnumHand hand) {
-		if (!player.worldObj.isRemote) {
+		if (!player.getEntityWorld().isRemote) {
 			SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
 			if (skill != null) {
 				if (!Config.isSkillEnabled(skill.getId())) {

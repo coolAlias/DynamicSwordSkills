@@ -73,7 +73,7 @@ public class PlaySoundPacket extends AbstractMessage<PlaySoundPacket>
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		this.sound = (SoundEvent) SoundEvent.REGISTRY.getObjectById(buffer.readVarIntFromBuffer());
+		this.sound = (SoundEvent) SoundEvent.REGISTRY.getObjectById(buffer.readVarInt());
 		this.category = (SoundCategory) buffer.readEnumValue(SoundCategory.class);
 		volume = buffer.readFloat();
 		pitch = buffer.readFloat();
@@ -84,7 +84,7 @@ public class PlaySoundPacket extends AbstractMessage<PlaySoundPacket>
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeVarIntToBuffer(SoundEvent.REGISTRY.getIDForObject(this.sound));
+		buffer.writeVarInt(SoundEvent.REGISTRY.getIDForObject(this.sound));
 		buffer.writeEnumValue(this.category);
 		buffer.writeFloat(volume);
 		buffer.writeFloat(pitch);
@@ -99,7 +99,7 @@ public class PlaySoundPacket extends AbstractMessage<PlaySoundPacket>
 			player.playSound(sound, volume, pitch);
 		} else {
 			// pass 'null' player so they will hear the sound, too
-			player.worldObj.playSound(null, x, y, z, sound, category, volume, pitch);
+			player.getEntityWorld().playSound(null, x, y, z, sound, category, volume, pitch);
 		}
 	}
 }

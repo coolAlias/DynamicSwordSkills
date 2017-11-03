@@ -13,29 +13,22 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-/*
-// for people who want stable - not yet functional for MC 1.8.8 - we require the forgegradle 2.1 snapshot
-plugins {
-    id "net.minecraftforge.gradle.forge" version "2.0.2"
-}
-*/
-
-version = "3.1.0"
+version = "4.0"
 group = "com.google.coolalias008.dynamicswordskills"
-archivesBaseName = "1.9.4-DynamicSwordSkills"
+archivesBaseName = "1.10.2-DynamicSwordSkills"
 
 sourceCompatibility = targetCompatibility = "1.7"
 
 dependencies {
     compile files (
-		"eclipse/libs/1.9.4-SwordSkillsApi-1.1.0-deobf.jar",
+		"eclipse/libs/1.10.2-SwordSkillsApi-1.1.0-deobf.jar",
     )
 }
 
 minecraft {
-    version = "1.9.4-12.17.0.1976"
+    version = "1.10.2-12.18.3.2511"
     runDir = "eclipse"
-    mappings = "snapshot_20160627"
+    mappings = "stable_29"
 }
 
 processResources

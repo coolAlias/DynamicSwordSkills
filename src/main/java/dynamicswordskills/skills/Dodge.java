@@ -188,7 +188,7 @@ public class Dodge extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		if (isActive()) {
 			--dodgeTimer;
-		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
+		} else if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
 		}
 	}
@@ -232,7 +232,7 @@ public class Dodge extends SkillActive
 	 * Returns true if the attack was dodged and the attack event should be canceled
 	 */
 	private boolean dodgeAttack(EntityPlayer player, Entity attacker) {
-		if (player.worldObj.rand.nextFloat() < getDodgeChance(player)) {
+		if (player.getEntityWorld().rand.nextFloat() < getDodgeChance(player)) {
 			entityDodged = attacker;
 			PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			return true;

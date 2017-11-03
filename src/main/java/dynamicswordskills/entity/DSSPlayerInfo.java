@@ -117,7 +117,7 @@ public class DSSPlayerInfo
 	 * no less than the current value and no more than MAX_ATTACK_DELAY.
 	 */
 	public void setAttackTime(int ticks) {
-		this.attackTime = MathHelper.clamp_int(ticks, attackTime, MAX_ATTACK_DELAY);
+		this.attackTime = MathHelper.clamp(ticks, attackTime, MAX_ATTACK_DELAY);
 	}
 
 	/**
@@ -660,7 +660,7 @@ public class DSSPlayerInfo
 	 * Call when the player logs in for the first time
 	 */
 	public void onPlayerLoggedIn() {
-		if (!player.worldObj.isRemote) {
+		if (!player.getEntityWorld().isRemote) {
 			verifyStartingGear();
 		}
 	}

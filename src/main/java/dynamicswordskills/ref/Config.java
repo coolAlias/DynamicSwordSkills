@@ -120,7 +120,7 @@ public class Config
 		String category = "client";
 		config.addCustomCategoryComment(category, "This category contains client side settings; i.e. they are not synchronized with the server.");
 		isComboHudEnabled = config.get(category, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')", true).getBoolean(true);
-		hitsToDisplay = MathHelper.clamp_int(config.get(category, "[Combo HUD] Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
+		hitsToDisplay = MathHelper.clamp(config.get(category, "[Combo HUD] Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
 		comboHudHAlign = HALIGN.fromString(config.get(category, "[Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "left").getString());
 		comboHudVAlign = VALIGN.fromString(config.get(category, "[Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
 		comboHudOffsetX = config.get(category, "[Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
@@ -145,15 +145,15 @@ public class Config
 		forbidden_weapons = config.get("Weapon Registry", "[Forbidden Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Forbid one or more items from acting as WEAPONs, e.g. if an item is added by IMC and you don't want it to be usable with skills.\nNote that this will also prevent the item from behaving as a SWORD.").getStringList();
 		Arrays.sort(forbidden_weapons);
 		/*================== GENERAL =====================*/
-		baseSwingSpeed = MathHelper.clamp_int(config.get("general", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
+		baseSwingSpeed = MathHelper.clamp(config.get("general", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
 		enableBonusOrb = config.get("general", "Whether all players should start with a Basic Skill orb", true).getBoolean(true);
-		chestLootWeight = MathHelper.clamp_int(config.get("general", "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-100]", 5).getInt(), 0, 100);
+		chestLootWeight = MathHelper.clamp(config.get("general", "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-100]", 5).getInt(), 0, 100);
 		allowDisarmorPlayer = config.get("general", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
-		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("general", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 50);
-		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("general", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
+		disarmTimingBonus = 0.001F * (float) MathHelper.clamp(config.get("general", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 50);
+		disarmPenalty = 0.01F * (float) MathHelper.clamp(config.get("general", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
 		enableRandomSkillSwords = config.get("general", "[Skill Swords] Enable randomized Skill Swords to appear as loot in various chests", true).getBoolean(true);
 		enableCreativeSkillSwords = config.get("general", "[Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples)", true).getBoolean(true);
-		skillSwordLevel = MathHelper.clamp_int(config.get("general", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt(), 1, 5);
+		skillSwordLevel = MathHelper.clamp(config.get("general", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt(), 1, 5);
 		requireSpinAttack = config.get("general", "[Skill Swords][Super Spin Attack] Require player to have at least one level in Spin Attack to perform extra spins using a skill item", false).getBoolean(false);
 		requireFullHealth = config.get("general", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 
@@ -169,13 +169,13 @@ public class Config
 		}
 		/*================== DROPS =====================*/
 		enablePlayerDrops = config.get("drops", "[Player] Enable skill orbs to drop from players when killed in PvP", true).getBoolean(true);
-		playerDropFactor = MathHelper.clamp_int(config.get("drops", "[Player] Factor by which to multiply chance for skill orb to drop by slain players [1-20]", 5).getInt(), 1, 20);
+		playerDropFactor = MathHelper.clamp(config.get("drops", "[Player] Factor by which to multiply chance for skill orb to drop by slain players [1-20]", 5).getInt(), 1, 20);
 		enableOrbDrops = config.get("drops", "Enable skill orbs to drop as loot from mobs (may still be disabled individually)", true).getBoolean(true);
-		randomDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("drops", "Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
-		genericMobDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("drops", "Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
+		randomDropChance = 0.01F * (float) MathHelper.clamp(config.get("drops", "Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
+		genericMobDropChance = 0.01F * (float) MathHelper.clamp(config.get("drops", "Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
 		orbDropChance = new HashMap<Byte, Float>(SkillBase.getNumSkills());
 		for (SkillBase skill : SkillBase.getSkills()) {
-			int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
+			int i = MathHelper.clamp(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
 			orbDropChance.put(skill.getId(), (0.001F * (float) i));
 		}
 		config.save();

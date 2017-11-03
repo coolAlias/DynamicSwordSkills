@@ -266,7 +266,7 @@ public class SpinAttack extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		// isCharging can only be true on the client, which is where charging is handled
 		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
-			if (PlayerUtils.isWeapon(player.getHeldItemMainhand()) && player.worldObj.isRemote && isKeyPressed()) {
+			if (PlayerUtils.isWeapon(player.getHeldItemMainhand()) && player.getEntityWorld().isRemote && isKeyPressed()) {
 				--charge;
 				int maxCharge = getChargeTime();
 				if (charge < maxCharge) {
@@ -297,7 +297,7 @@ public class SpinAttack extends SkillActive
 			}
 			spawnParticles(player);
 			DSSPlayerInfo.get(player).armSwing = 0.5F;
-			player.setAngles((clockwise ? getSpinSpeed() : -getSpinSpeed()), 0);
+			player.turn((clockwise ? getSpinSpeed() : -getSpinSpeed()), 0);
 		}
 		return true;
 	}
@@ -332,7 +332,7 @@ public class SpinAttack extends SkillActive
 		if (currentSpin >= arc) {
 			deactivate(player);
 		} else if (currentSpin > (360F * refreshed)) {
-			startSpin(player.worldObj, player);
+			startSpin(player.getEntityWorld(), player);
 		}
 	}
 
@@ -345,7 +345,7 @@ public class SpinAttack extends SkillActive
 		double posY = player.posY + player.getEyeHeight() - 0.1D;
 		double posZ = player.posZ + (vec3.zCoord * getRange());
 		for (int i = 0; i < 2; ++i) {
-			player.worldObj.spawnParticle(particle, posX, posY, posZ, vec3.xCoord * 0.15D, 0.01D, vec3.zCoord * 0.15D);
+			player.getEntityWorld().spawnParticle(particle, posX, posY, posZ, vec3.xCoord * 0.15D, 0.01D, vec3.zCoord * 0.15D);
 		}
 	}
 

@@ -137,7 +137,7 @@ public class GuiSkills extends GuiContainer
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
 		RenderHelperQ.drawTexturedRect(texture, guiLeft, guiTop, 0, 0, xSize, ySize, 284, 180);
-		GuiInventory.drawEntityOnScreen(guiLeft + 73, guiTop + 105, 30, guiLeft + 73 - xSize_lo, guiTop + 55 - ySize_lo, mc.thePlayer);
+		GuiInventory.drawEntityOnScreen(guiLeft + 73, guiTop + 105, 30, guiLeft + 73 - xSize_lo, guiTop + 55 - ySize_lo, mc.player);
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class GuiSkills extends GuiContainer
 		}
 		if (currentSkill != null) {
 			desc.add(new TextComponentTranslation("skill.dss.gui.summary").getUnformattedText());
-			currentSkill.addInformation(desc, mc.thePlayer);
+			currentSkill.addInformation(desc, mc.player);
 			desc.add("");
 			desc.add(new TextComponentTranslation("skill.dss.gui.activation").getUnformattedText());
 			desc.addAll(fontRendererObj.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
@@ -212,7 +212,7 @@ public class GuiSkills extends GuiContainer
 				// clear the current description so it refreshes next time the screen draws
 				desc.clear();
 			}
-			currentSkill = DSSPlayerInfo.get(mc.thePlayer).getPlayerSkill((byte) id);
+			currentSkill = DSSPlayerInfo.get(mc.player).getPlayerSkill((byte) id);
 		}
 	}
 
@@ -222,7 +222,7 @@ public class GuiSkills extends GuiContainer
 	private Slot getSlotAtPosition(int x, int y) {
 		for (int k = 0; k < inventorySlots.inventorySlots.size(); ++k) {
 			Slot slot = (Slot) inventorySlots.inventorySlots.get(k);
-			if (isPointInRegion(slot.xDisplayPosition, slot.yDisplayPosition, 16, 16, x, y)) {
+			if (isPointInRegion(slot.xPos, slot.yPos, 16, 16, x, y)) {
 				return slot;
 			}
 		}
@@ -232,7 +232,7 @@ public class GuiSkills extends GuiContainer
 	@Override
 	protected void keyTyped(char c, int key) {
 		if (key == 1 || key == mc.gameSettings.keyBindInventory.getKeyCode() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_SKILLS_GUI].getKeyCode()) {
-			mc.thePlayer.closeScreen();
+			mc.player.closeScreen();
 		}
 	}
 }

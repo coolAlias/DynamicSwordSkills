@@ -119,14 +119,14 @@ public class EntitySwordBeam extends EntityThrowable
 		}
 		for (int i = 0; i < 2; ++i) {
 			EnumParticleTypes particle = (i % 2 == 1) ? EnumParticleTypes.CRIT_MAGIC : EnumParticleTypes.CRIT;
-			worldObj.spawnParticle(particle, posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian());
-			worldObj.spawnParticle(particle, posX, posY, posZ, -motionX + rand.nextGaussian(), 0.01D, -motionZ + rand.nextGaussian());
+			getEntityWorld().spawnParticle(particle, posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian());
+			getEntityWorld().spawnParticle(particle, posX, posY, posZ, -motionX + rand.nextGaussian(), 0.01D, -motionZ + rand.nextGaussian());
 		}
 	}
 
 	@Override
 	protected void onImpact(RayTraceResult result) {
-		if (!worldObj.isRemote) {
+		if (!getEntityWorld().isRemote) {
 			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
 			SwordBeam skill = (player != null ? (SwordBeam) DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
 			if (result.typeOfHit == RayTraceResult.Type.ENTITY) {
@@ -136,7 +136,7 @@ public class EntitySwordBeam extends EntityThrowable
 						skill.onImpact(player, false);
 					}
 					if (result.entityHit.attackEntityFrom(DamageUtils.causeIndirectComboDamage(this, player).setProjectile(), damage)) {
-						PlayerUtils.playSoundAtEntity(worldObj, result.entityHit, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.4F, 0.5F);
+						PlayerUtils.playSoundAtEntity(getEntityWorld(), result.entityHit, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.4F, 0.5F);
 					}
 					damage *= 0.8F;
 				}
@@ -144,7 +144,7 @@ public class EntitySwordBeam extends EntityThrowable
 					setDead();
 				}
 			} else {
-				if (worldObj.getBlockState(result.getBlockPos()).getMaterial().blocksMovement()) {
+				if (getEntityWorld().getBlockState(result.getBlockPos()).getMaterial().blocksMovement()) {
 					if (player != null && skill != null) {
 						skill.onImpact(player, true);
 					}

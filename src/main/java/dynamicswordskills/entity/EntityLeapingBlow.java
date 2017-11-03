@@ -126,8 +126,8 @@ public class EntityLeapingBlow extends EntityThrowable
 		if (inGround || ticksExisted > lifespan) {
 			setDead();
 		}
-		if (!worldObj.isRemote) {
-			List<EntityLivingBase> targets = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, getAoE());
+		if (!getEntityWorld().isRemote) {
+			List<EntityLivingBase> targets = getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, getAoE());
 			for (EntityLivingBase target : targets) {
 				if (!affectedEntities.contains(target.getEntityId()) && target != getThrower() && !TargetUtils.isTargetInFrontOf(this, target, 30F)) {
 					affectedEntities.add(target.getEntityId());
@@ -147,33 +147,33 @@ public class EntityLeapingBlow extends EntityThrowable
 			double vX = motionZ;
 			double vZ = motionX;
 			AxisAlignedBB bb = getEntityBoundingBox();
-			int i = MathHelper.floor_double(posX + (bb.maxX - bb.minX) / 2);
-			int j = MathHelper.floor_double(posY) - 1;
-			int k = MathHelper.floor_double(posZ + (bb.maxZ - bb.minZ) / 2);
-			IBlockState state = worldObj.getBlockState(new BlockPos(i, j, k));
+			int i = MathHelper.floor(posX + (bb.maxX - bb.minX) / 2);
+			int j = MathHelper.floor(posY) - 1;
+			int k = MathHelper.floor(posZ + (bb.maxZ - bb.minZ) / 2);
+			IBlockState state = getEntityWorld().getBlockState(new BlockPos(i, j, k));
 			EnumParticleTypes particle = (state.getRenderType() == EnumBlockRenderType.INVISIBLE ? EnumParticleTypes.CRIT : EnumParticleTypes.BLOCK_CRACK);
 			int[] stateId = (state.getRenderType() == EnumBlockRenderType.INVISIBLE ? new int[]{} : new int[] {Block.getStateId(state)});
 			for (int n = 0; n < 4; ++n) {
-				worldObj.spawnParticle(particle, posX, posY, posZ, vX + rand.nextGaussian(), 0.01D, vZ + rand.nextGaussian(), stateId);
-				worldObj.spawnParticle(particle, posX, posY, posZ, -vX + rand.nextGaussian(), 0.01D, -vZ + rand.nextGaussian(), stateId);
+				getEntityWorld().spawnParticle(particle, posX, posY, posZ, vX + rand.nextGaussian(), 0.01D, vZ + rand.nextGaussian(), stateId);
+				getEntityWorld().spawnParticle(particle, posX, posY, posZ, -vX + rand.nextGaussian(), 0.01D, -vZ + rand.nextGaussian(), stateId);
 			}
 		}
 	}
 
 	@Override
 	protected void onImpact(RayTraceResult result) {
-		if (!worldObj.isRemote) {
+		if (!getEntityWorld().isRemote) {
 			if (result.typeOfHit == RayTraceResult.Type.ENTITY) {
 				Entity entity = result.entityHit;
 				if (entity instanceof EntityLivingBase && !affectedEntities.contains(entity.getEntityId()) && entity != getThrower()) {
 					affectedEntities.add(entity.getEntityId());
 					if (entity.attackEntityFrom(DamageUtils.causeIndirectSwordDamage(this, getThrower()), damage)) {
-						PlayerUtils.playSoundAtEntity(worldObj, entity, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.4F, 0.5F);
+						PlayerUtils.playSoundAtEntity(getEntityWorld(), entity, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.4F, 0.5F);
 						((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.POISON, 60));
 					}
 				}
 			} else {
-				if (worldObj.getBlockState(result.getBlockPos()).getMaterial().blocksMovement()) {
+				if (getEntityWorld().getBlockState(result.getBlockPos()).getMaterial().blocksMovement()) {
 					setDead();
 				}
 			}

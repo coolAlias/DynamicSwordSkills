@@ -56,13 +56,13 @@ public class SyncPlayerInfoPacket extends AbstractClientMessage<SyncPlayerInfoPa
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		compound = buffer.readNBTTagCompoundFromBuffer();
+		compound = buffer.readCompoundTag();
 		validate = buffer.readBoolean();
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeNBTTagCompoundToBuffer(compound);
+		buffer.writeCompoundTag(compound);
 		buffer.writeBoolean(validate);
 	}
 

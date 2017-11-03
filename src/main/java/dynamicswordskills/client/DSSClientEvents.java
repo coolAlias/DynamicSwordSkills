@@ -90,13 +90,13 @@ public class DSSClientEvents
 	 */
 	@SideOnly(Side.CLIENT)
 	public static void performComboAttack(Minecraft mc, ILockOnTarget skill) {
-		if (!mc.thePlayer.isHandActive()) {
-			if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
+		if (!mc.player.isHandActive()) {
+			if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.player)) {
 				Entity entity = TargetUtils.getMouseOverEntity();
-				mc.playerController.attackEntity(mc.thePlayer, (entity != null ? entity : skill.getCurrentTarget()));
+				mc.playerController.attackEntity(mc.player, (entity != null ? entity : skill.getCurrentTarget()));
 			}
-			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
-			mc.thePlayer.swingArm(EnumHand.MAIN_HAND);
+			DSSCombatEvents.setPlayerAttackTime(mc.player);
+			mc.player.swingArm(EnumHand.MAIN_HAND);
 		}
 	}
 
@@ -121,15 +121,15 @@ public class DSSClientEvents
 			}
 			return;
 		}
-		DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
+		DSSPlayerInfo skills = DSSPlayerInfo.get(mc.player);
 		if (event.isButtonstate() || event.getDwheel() != 0) {
 			if (isAttackKey) {
 				// hack for spin attack: allows key press information to be received while animating
 				if (skills.isSkillActive(SkillBase.spinAttack) && skills.getActiveSkill(SkillBase.spinAttack).isAnimating()) {
-					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
+					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.player);
 					event.setCanceled(true);
 				} else if (skills.isSkillActive(SkillBase.backSlice) && skills.getActiveSkill(SkillBase.backSlice).isAnimating()) {
-					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
+					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.player);
 					event.setCanceled(true);
 				} else {
 					event.setCanceled(!skills.canInteract() || !skills.canAttack());
@@ -153,7 +153,7 @@ public class DSSClientEvents
 					}
 					// hack for Armor Break: allows charging to begin without having to press attack key a second time
 					if (skills.hasSkill(SkillBase.armorBreak)) {
-						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
+						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.player);
 					}
 				}
 
@@ -165,7 +165,7 @@ public class DSSClientEvents
 				event.setCanceled(!skills.canInteract());
 			}
 		} else  if (isAttackKey) { // not locked on to a target, normal item swing: set attack time only
-			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
+			DSSCombatEvents.setPlayerAttackTime(mc.player);
 		}
 	}
 }

@@ -79,7 +79,7 @@ public class ComboOverlay extends AbstractGuiOverlay
 		if (!Config.isComboHudEnabled) {
 			return false;
 		}
-		ICombo iCombo = DSSPlayerInfo.get(mc.thePlayer).getComboSkill();
+		ICombo iCombo = DSSPlayerInfo.get(mc.player).getComboSkill();
 		if (iCombo != null && iCombo.getCombo() != null) {
 			if (this.combo != iCombo.getCombo()) {
 				this.combo = iCombo.getCombo();

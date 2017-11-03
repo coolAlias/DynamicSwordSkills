@@ -250,7 +250,7 @@ public class ArmorBreak extends SkillActive
 	 */
 	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
 		activeTimer = 0;
-		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.ARMOR_BREAK, SoundCategory.PLAYERS, 0.4F, 0.5F);
+		PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.ARMOR_BREAK, SoundCategory.PLAYERS, 0.4F, 0.5F);
 		DirtyEntityAccessor.damageEntity(event.getEntityLiving(), DamageUtils.causeArmorBreakDamage(player), event.getAmount());
 		event.setAmount(0.0F);
 	}

@@ -96,7 +96,7 @@ public class PlayerUtils
 
 	/** Sends a translated chat message with optional arguments to the player */
 	public static void sendTranslatedChat(EntityPlayer player, String message, Object... args) {
-		player.addChatMessage(new TextComponentTranslation(message, args));
+		player.sendMessage(new TextComponentTranslation(message, args));
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class PlayerUtils
 	 * To avoid playing a sound twice, only call the method from one side or the other, not both.
 	 */
 	public static void playSound(EntityPlayer player, SoundEvent sound, SoundCategory category, float volume, float pitch) {
-		if (player.worldObj.isRemote) {
+		if (player.getEntityWorld().isRemote) {
 			PacketDispatcher.sendToServer(new PlaySoundPacket(sound, category, volume, pitch, player));
 		} else {
 			PacketDispatcher.sendTo(new PlaySoundPacket(sound, category, volume, pitch), (EntityPlayerMP) player);
@@ -121,8 +121,8 @@ public class PlayerUtils
 	 * @param add	Pitch: 1.0F / (nextFloat() * f + add)
 	 */
 	public static void playRandomizedSound(EntityPlayer player, SoundEvent sound, SoundCategory category, float f, float add) {
-		float volume = player.worldObj.rand.nextFloat() * f + add;
-		float pitch = 1.0F / (player.worldObj.rand.nextFloat() * f + add);
+		float volume = player.getEntityWorld().rand.nextFloat() * f + add;
+		float pitch = 1.0F / (player.getEntityWorld().rand.nextFloat() * f + add);
 		playSound(player, sound, category, volume, pitch);
 	}
 
@@ -152,7 +152,7 @@ public class PlayerUtils
 			entityitem.motionY = (4 + world.rand.nextGaussian()) * f3;
 			entityitem.motionZ = (-0.5F + world.rand.nextGaussian()) * f3;
 			entityitem.setDefaultPickupDelay();
-			world.spawnEntityInWorld(entityitem);
+			world.spawnEntity(entityitem);
 		}
 	}
 
@@ -169,7 +169,7 @@ public class PlayerUtils
 				float spawnZ = pos.getZ() + rand.nextFloat();
 				EntityXPOrb xpOrb = new EntityXPOrb(world, spawnX, spawnY, spawnZ, xp);
 				xpOrb.motionY += (4 + rand.nextGaussian()) * 0.05F;
-				world.spawnEntityInWorld(xpOrb);
+				world.spawnEntity(xpOrb);
 			}
 		}
 	}
@@ -178,21 +178,21 @@ public class PlayerUtils
 	 * Drops any item in the entity's main hand and spawns it into the world
 	 */
 	public static void dropHeldItem(EntityLivingBase entity) {
-		if (!entity.worldObj.isRemote && entity.getHeldItemMainhand() != null) {
-			EntityItem drop = new EntityItem(entity.worldObj, entity.posX,
+		if (!entity.getEntityWorld().isRemote && entity.getHeldItemMainhand() != null) {
+			EntityItem drop = new EntityItem(entity.getEntityWorld(), entity.posX,
 					entity.posY - 0.30000001192092896D + (double) entity.getEyeHeight(),
 					entity.posZ, entity.getHeldItemMainhand().copy());
 			float f = 0.3F;
-			float f1 = entity.worldObj.rand.nextFloat() * (float) Math.PI * 2.0F;
+			float f1 = entity.getEntityWorld().rand.nextFloat() * (float) Math.PI * 2.0F;
 			drop.motionX = (double)(-MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f);
 			drop.motionZ = (double)(MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f);
 			drop.motionY = (double)(-MathHelper.sin(entity.rotationPitch / 180.0F * (float) Math.PI) * f + 0.1F);
-			f = 0.02F * entity.worldObj.rand.nextFloat();
+			f = 0.02F * entity.getEntityWorld().rand.nextFloat();
 			drop.motionX += Math.cos((double) f1) * (double) f;
-			drop.motionY += (double)((entity.worldObj.rand.nextFloat() - entity.worldObj.rand.nextFloat()) * 0.1F);
+			drop.motionY += (double)((entity.getEntityWorld().rand.nextFloat() - entity.getEntityWorld().rand.nextFloat()) * 0.1F);
 			drop.motionZ += Math.sin((double) f1) * (double) f;
 			drop.setPickupDelay(40);
-			entity.worldObj.spawnEntityInWorld(drop);
+			entity.getEntityWorld().spawnEntity(drop);
 			entity.setHeldItem(EnumHand.MAIN_HAND, null);
 		}
 	}

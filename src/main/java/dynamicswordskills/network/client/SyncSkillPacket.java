@@ -55,13 +55,13 @@ public class SyncSkillPacket extends AbstractClientMessage<SyncSkillPacket>
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
 		id = buffer.readByte();
-		compound = buffer.readNBTTagCompoundFromBuffer();
+		compound = buffer.readCompoundTag();
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeByte(id);
-		buffer.writeNBTTagCompoundToBuffer(compound);
+		buffer.writeCompoundTag(compound);
 	}
 
 	@Override

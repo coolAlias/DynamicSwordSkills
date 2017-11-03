@@ -174,9 +174,9 @@ public class SwordBreak extends SkillActive
 		if (isActive()) {
 			if (--breakTimer <= getUseDelay() && playMissSound) {
 				playMissSound = false;
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
+				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			}
-		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
+		} else if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
 		}
 	}
@@ -188,13 +188,13 @@ public class SwordBreak extends SkillActive
 			ItemStack stackToDamage = attacker.getHeldItemMainhand();
 			if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 				breakTimer = getUseDelay(); // only block one attack
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SWORD_STRIKE, SoundCategory.PLAYERS, 0.4F, 0.5F);
+				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.SWORD_STRIKE, SoundCategory.PLAYERS, 0.4F, 0.5F);
 				playMissSound = false;
-				if (!player.worldObj.isRemote) {
-					int dmg = Math.max(getMaxDamage() / 3, player.worldObj.rand.nextInt(getMaxDamage()));
+				if (!player.getEntityWorld().isRemote) {
+					int dmg = Math.max(getMaxDamage() / 3, player.getEntityWorld().rand.nextInt(getMaxDamage()));
 					stackToDamage.damageItem(dmg, attacker);
 					if (stackToDamage.stackSize <= 0) {
-						PlayerUtils.playSoundAtEntity(attacker.worldObj, attacker, SoundEvents.ITEM_SHIELD_BREAK, SoundCategory.PLAYERS, 0.8F, 0.8F + player.worldObj.rand.nextFloat() * 0.4F);
+						PlayerUtils.playSoundAtEntity(attacker.getEntityWorld(), attacker, SoundEvents.ITEM_SHIELD_BREAK, SoundCategory.PLAYERS, 0.8F, 0.8F + player.getEntityWorld().rand.nextFloat() * 0.4F);
 						attacker.setHeldItem(EnumHand.MAIN_HAND, null);
 					}
 				}

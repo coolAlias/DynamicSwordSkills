@@ -41,7 +41,7 @@ public class CommandRemoveSkill extends CommandBase
 	public CommandRemoveSkill() {}
 
 	@Override
-	public String getCommandName() {
+	public String getName() {
 		return "removeskill";
 	}
 
@@ -54,7 +54,7 @@ public class CommandRemoveSkill extends CommandBase
 	 * removeskill <skill | all>
 	 */
 	@Override
-	public String getCommandUsage(ICommandSender player) {
+	public String getUsage(ICommandSender player) {
 		return "commands.removeskill.usage";
 	}
 
@@ -84,12 +84,12 @@ public class CommandRemoveSkill extends CommandBase
 				}
 			}
 		} else {
-			throw new WrongUsageException(getCommandUsage(sender));
+			throw new WrongUsageException(getUsage(sender));
 		}
 	}
 
 	@Override
-	public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
+	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
 		return args.length == 1 ? CommandBase.getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames()) : null;
 	}
 }

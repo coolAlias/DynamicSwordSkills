@@ -151,7 +151,7 @@ public class LeapingBlow extends SkillActive
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		// Handle on client because onGround is always true on the server
-		if (player.worldObj.isRemote && isActive() && (player.onGround || TargetUtils.isInLiquid(player))) {
+		if (player.getEntityWorld().isRemote && isActive() && (player.onGround || TargetUtils.isInLiquid(player))) {
 			deactivate(player);
 		}
 	}
@@ -163,7 +163,7 @@ public class LeapingBlow extends SkillActive
 	public void onImpact(EntityPlayer player, float distance) {
 		SwordBasic swordSkill = (SwordBasic) DSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
 		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItemMainhand(), this)) {
-			if (player.worldObj.isRemote) {
+			if (player.getEntityWorld().isRemote) {
 				if (distance < 1.0F) {
 					DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);
 				} else {
@@ -172,12 +172,12 @@ public class LeapingBlow extends SkillActive
 			} else if (distance >= 1.0F) {
 				// add exhaustion here, now that skill has truly activated:
 				player.addExhaustion(getExhaustion());
-				EntityLeapingBlow entity = new EntityLeapingBlow(player.worldObj, player).setDamage(getDamage(player)).setLevel(level);
+				EntityLeapingBlow entity = new EntityLeapingBlow(player.getEntityWorld(), player).setDamage(getDamage(player)).setLevel(level);
 				entity.setHeadingFromThrower(player, player.rotationPitch, player.rotationYaw, 0.0F, entity.getVelocity(), 1.0F);
-				player.worldObj.spawnEntityInWorld(entity);
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.LEAPING_BLOW, SoundCategory.PLAYERS, 0.4F, 0.5F);
+				player.getEntityWorld().spawnEntity(entity);
+				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.LEAPING_BLOW, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			}
 		}
-		onDeactivated(player.worldObj, player);
+		onDeactivated(player.getEntityWorld(), player);
 	}
 }

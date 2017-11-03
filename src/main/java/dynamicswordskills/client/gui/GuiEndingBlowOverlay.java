@@ -55,10 +55,10 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 		if (!Config.isEndingBlowHudEnabled) {
 			return false;
 		}
-		SkillActive skill = DSSPlayerInfo.get(mc.thePlayer).getActiveSkill(SkillActive.endingBlow);
+		SkillActive skill = DSSPlayerInfo.get(mc.player).getActiveSkill(SkillActive.endingBlow);
 		if (skill == null) {
 			this.displayStartTime = 0;
-		} else if (skill.canUse(this.mc.thePlayer)) {
+		} else if (skill.canUse(this.mc.player)) {
 			this.displayStartTime = Minecraft.getSystemTime();
 		} else if (((EndingBlow) skill).getLastActivationTime() < this.displayStartTime) {
 			this.displayStartTime = 0; // unable to use and was not activated during this opportunity window

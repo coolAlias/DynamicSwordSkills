@@ -402,7 +402,7 @@ public abstract class SkillBase
 			++level;
 			levelUp(player);
 		}
-		if (!player.worldObj.isRemote && oldLevel < level) {
+		if (!player.getEntityWorld().isRemote && oldLevel < level) {
 			PacketDispatcher.sendTo(new SyncSkillPacket(this), (EntityPlayerMP) player);
 		}
 		return oldLevel < level;

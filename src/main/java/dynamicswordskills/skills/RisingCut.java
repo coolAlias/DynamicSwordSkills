@@ -145,7 +145,7 @@ public class RisingCut extends SkillActive
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (player.worldObj.isRemote && ticksTilFail > 0) {
+		if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
 		}
 		if (isActive()) {

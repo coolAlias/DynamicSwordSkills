@@ -200,7 +200,7 @@ public class BackSlice extends SkillActive
 			// Attack targeted entity directly rather than using mouse cursor object due to camera funkiness
 			Entity target = DSSPlayerInfo.get(player).getTargetingSkill().getCurrentTarget();
 			if (target != null && TargetUtils.canReachTarget(player, target)) {
-				mc.playerController.attackEntity(mc.thePlayer, target);
+				mc.playerController.attackEntity(mc.player, target);
 			} else {
 				player.resetCooldown();
 				PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
@@ -210,7 +210,7 @@ public class BackSlice extends SkillActive
 				}
 			}
 			player.swingArm(EnumHand.MAIN_HAND);
-			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
+			DSSCombatEvents.setPlayerAttackTime(mc.player);
 		}
 		return false; // allow other skills to receive this key press (e.g. Spin Attack)
 	}
@@ -235,7 +235,7 @@ public class BackSlice extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		if (isActive()) {
 			--dodgeTimer;
-		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
+		} else if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
 			if (--ticksTilFail == 0) {
 				keyPressed = null;
 			}
@@ -288,11 +288,11 @@ public class BackSlice extends SkillActive
 			if (targeting != null && targeting.getCurrentTarget() == entity) {
 				if (!TargetUtils.isTargetInFrontOf(entity, player, getAttackAngle())) {
 					amount *= 1.0F + (level * 0.1F);
-					PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
+					PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
 					if (Config.canDisarmorPlayers() || !(entity instanceof EntityPlayer)) {
 						ItemStack armor = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
-						if (armor != null && player.worldObj.rand.nextFloat() < getDisarmorChance(armor, player.getHeldItemMainhand(), level)) {
-							PlayerUtils.spawnItemWithRandom(entity.worldObj, armor, entity.posX, entity.posY, entity.posZ);
+						if (armor != null && player.getEntityWorld().rand.nextFloat() < getDisarmorChance(armor, player.getHeldItemMainhand(), level)) {
+							PlayerUtils.spawnItemWithRandom(entity.getEntityWorld(), armor, entity.posX, entity.posY, entity.posZ);
 							entity.setItemStackToSlot(EntityEquipmentSlot.CHEST, null);
 						}
 					}

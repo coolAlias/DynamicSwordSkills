@@ -40,7 +40,7 @@ public class CommandWeaponRegistry extends CommandBase
 	private CommandWeaponRegistry() {}
 
 	@Override
-	public String getCommandName() {
+	public String getName() {
 		return "dssweaponregistry";
 	}
 
@@ -53,14 +53,14 @@ public class CommandWeaponRegistry extends CommandBase
 	 * dssweaponregistry <allow|forbid> <sword|weapon> modid:item_name
 	 */
 	@Override
-	public String getCommandUsage(ICommandSender sender) {
+	public String getUsage(ICommandSender sender) {
 		return "commands.dssweaponregistry.usage";
 	}
 
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
 		if (args == null || args.length != 3) {
-			throw new WrongUsageException(getCommandUsage(sender));
+			throw new WrongUsageException(getUsage(sender));
 		}
 		String[] parts = WeaponRegistry.parseString(args[2]);
 		if (parts != null) {
@@ -89,9 +89,9 @@ public class CommandWeaponRegistry extends CommandBase
 					msg += "fail";
 				}
 			}
-			sender.addChatMessage(new TextComponentTranslation(msg, args[2]));
+			sender.sendMessage(new TextComponentTranslation(msg, args[2]));
 		} else {
-			throw new WrongUsageException(getCommandUsage(sender));
+			throw new WrongUsageException(getUsage(sender));
 		}
 	}
 
@@ -114,7 +114,7 @@ public class CommandWeaponRegistry extends CommandBase
 	}
 
 	@Override
-	public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
+	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
 		switch (args.length) {
 		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, "allow", "forbid");
 		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, "sword", "weapon");

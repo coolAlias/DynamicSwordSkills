@@ -88,14 +88,14 @@ public class DashImpactPacket extends AbstractServerMessage<DashImpactPacket>
 		if (dash != null && dash.isActive()) {
 			RayTraceResult result = null;
 			if (hitType == RayTraceResult.Type.ENTITY.ordinal()) {
-				Entity entityHit = player.worldObj.getEntityByID(entityId);
+				Entity entityHit = player.getEntityWorld().getEntityByID(entityId);
 				if (entityHit != null) {
 					result = new RayTraceResult(entityHit);
 				} else {
 					DynamicSwordSkills.logger.warn("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
 				}
 			}
-			dash.onImpact(player.worldObj, player, result);
+			dash.onImpact(player.getEntityWorld(), player, result);
 		}
 	}
 }

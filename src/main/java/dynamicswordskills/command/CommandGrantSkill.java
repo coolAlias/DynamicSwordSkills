@@ -48,7 +48,7 @@ public class CommandGrantSkill extends CommandBase
 	public CommandGrantSkill() {}
 
 	@Override
-	public String getCommandName() {
+	public String getName() {
 		return "grantskill";
 	}
 
@@ -61,7 +61,7 @@ public class CommandGrantSkill extends CommandBase
 	 * 	grantskill <player> <skill> <level> OR grantskill <player> all
 	 */
 	@Override
-	public String getCommandUsage(ICommandSender player) {
+	public String getUsage(ICommandSender player) {
 		return "commands.grantskill.usage";
 	}
 
@@ -107,14 +107,14 @@ public class CommandGrantSkill extends CommandBase
 				throw new CommandException("commands.grantskill.failure.low", player.getDisplayName(), new TextComponentTranslation(skill.getTranslationString()), oldLevel);
 			}
 		} else {
-			throw new WrongUsageException(getCommandUsage(sender));
+			throw new WrongUsageException(getUsage(sender));
 		}
 	}
 
 	@Override
-	public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
+	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
 		switch(args.length) {
-		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
 		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
 		default: return null;
 		}

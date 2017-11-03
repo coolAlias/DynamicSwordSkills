@@ -220,8 +220,8 @@ public class Dash extends SkillActive
 		if (isActive) {
 			// Only check for impact on the client, as the server is not reliable for this step
 			// If a collision is detected, DashImpactPacket is sent to conclude the server-side
-			if (player.worldObj.isRemote) {
-				RayTraceResult result = TargetUtils.checkForImpact(player.worldObj, player, player, 0.5D, false);
+			if (player.getEntityWorld().isRemote) {
+				RayTraceResult result = TargetUtils.checkForImpact(player.getEntityWorld(), player, player, 0.5D, false);
 				if (result != null) {
 					PacketDispatcher.sendToServer(new DashImpactPacket(player, result));
 					player.resetCooldown(); // player effectively made an attack
@@ -269,12 +269,12 @@ public class Dash extends SkillActive
 				}
 				double k = sf * resist * (distance / 3.0F) * 0.6000000238418579D;
 				target.addVelocity(player.motionX * k * (0.2D + (0.1D * level)), 0.1D + k * (level * 0.025D), player.motionZ * k * (0.2D + (0.1D * level)));
-				if (target instanceof EntityPlayerMP && !player.worldObj.isRemote) {
+				if (target instanceof EntityPlayerMP && !player.getEntityWorld().isRemote) {
 					((EntityPlayerMP) target).connection.sendPacket(new SPacketEntityVelocity(target));
 				}
 			}
 		}
-		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SLAM, SoundCategory.PLAYERS, 0.4F, 0.5F);
+		PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.SLAM, SoundCategory.PLAYERS, 0.4F, 0.5F);
 		setNotDashing();
 	}
 

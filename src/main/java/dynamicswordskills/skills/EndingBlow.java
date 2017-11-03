@@ -205,7 +205,7 @@ public class EndingBlow extends SkillActive
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (player.worldObj.isRemote && ticksTilFail > 0) {
+		if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
 			if (ticksTilFail == 0) {
 				keyPressed = 0;
@@ -222,7 +222,7 @@ public class EndingBlow extends SkillActive
 		}
 		if (isActive()) {
 			--activeTimer;
-			if (activeTimer == 0 && !player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
+			if (activeTimer == 0 && !player.getEntityWorld().isRemote && !player.capabilities.isCreativeMode) {
 				DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 				skills.setAttackTime(getDuration() * 2);
 				PacketDispatcher.sendTo(new AttackTimePacket(skills.getAttackTime()), (EntityPlayerMP) player);
@@ -234,16 +234,16 @@ public class EndingBlow extends SkillActive
 	 * Checks if entity hit is dead, granting Xp or causing defensive penalty
 	 */
 	private void updateEntityState(EntityPlayer player) {
-		if (!player.worldObj.isRemote) {
+		if (!player.getEntityWorld().isRemote) {
 			if (entityHit.getHealth() <= 0.0F) {
 				if (entityHit instanceof EntityLiving) {
 					DirtyEntityAccessor.setLivingXp((EntityLiving) entityHit, xp, true);
 				} else {
-					PlayerUtils.spawnXPOrbsWithRandom(player.worldObj, player.worldObj.rand, entityHit.getPosition(), xp);
+					PlayerUtils.spawnXPOrbsWithRandom(player.getEntityWorld(), player.getEntityWorld().rand, entityHit.getPosition(), xp);
 				}
 			} else {
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.3F, 0.8F);
-				if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
+				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.3F, 0.8F);
+				if (!player.getEntityWorld().isRemote && !player.capabilities.isCreativeMode) {
 					DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 					skills.setAttackTime(getDuration());
 					PacketDispatcher.sendTo(new AttackTimePacket(skills.getAttackTime()), (EntityPlayerMP) player);
@@ -261,9 +261,9 @@ public class EndingBlow extends SkillActive
 		ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
 		if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
 			amount *= 1.0F + (level * 0.2F);
-			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
+			PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			entityHit = entity;
-			xp = level + 1 + player.worldObj.rand.nextInt(Math.max(2, MathHelper.ceiling_float_int(entity.getHealth())));
+			xp = level + 1 + player.getEntityWorld().rand.nextInt(Math.max(2, MathHelper.ceil(entity.getHealth())));
 		}
 		return amount;
 	}

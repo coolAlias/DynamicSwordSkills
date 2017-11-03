@@ -106,15 +106,15 @@ public class DSSCombatEvents
 	 * this is not always the same as the stack stored in dropsList
 	 */
 	private static ItemStack getOrbDrop(EntityLivingBase mob) {
-		if (dropsList.get(mob.getClass()) != null && mob.worldObj.rand.nextFloat() > Config.getChanceForRandomDrop()) {
+		if (dropsList.get(mob.getClass()) != null && mob.getEntityWorld().rand.nextFloat() > Config.getChanceForRandomDrop()) {
 			return dropsList.get(mob.getClass());
 		}
 		ItemStack orb = null;
 		boolean flag = mob instanceof EntityPlayer;
-		int id = mob.worldObj.rand.nextInt(SkillBase.getNumSkills());
+		int id = mob.getEntityWorld().rand.nextInt(SkillBase.getNumSkills());
 		if (SkillBase.doesSkillExist(id) && (!flag || Config.arePlayerDropsEnabled())) {
 			float chance = (flag ? Config.getPlayerDropFactor() : 1) * Config.getRandomMobDropChance();
-			if (dropsList.get(mob.getClass()) != null || mob.worldObj.rand.nextFloat() < chance) {
+			if (dropsList.get(mob.getClass()) != null || mob.getEntityWorld().rand.nextFloat() < chance) {
 				orb = new ItemStack(DynamicSwordSkills.skillOrb, 1, id);
 			}
 		}
@@ -128,9 +128,9 @@ public class DSSCombatEvents
 			ItemStack orb = getOrbDrop(mob);
 			if (orb != null && (Config.areOrbDropsEnabled() || (Config.arePlayerDropsEnabled() && event.getEntity() instanceof EntityPlayer))) {
 				float baseChance = Config.getDropChance(orb.getItemDamage());
-				if (baseChance > 0.0F && mob.worldObj.rand.nextFloat() < (baseChance + (0.005F * event.getLootingLevel()))) {
-					event.getDrops().add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
-					mob.worldObj.playSound(null, mob.posX, mob.posY, mob.posZ, ModSounds.SPECIAL_DROP, SoundCategory.PLAYERS, 1.0F, 1.0F);
+				if (baseChance > 0.0F && mob.getEntityWorld().rand.nextFloat() < (baseChance + (0.005F * event.getLootingLevel()))) {
+					event.getDrops().add(new EntityItem(mob.getEntityWorld(), mob.posX, mob.posY, mob.posZ, orb.copy()));
+					mob.getEntityWorld().playSound(null, mob.posX, mob.posY, mob.posZ, ModSounds.SPECIAL_DROP, SoundCategory.PLAYERS, 1.0F, 1.0F);
 				}
 			}
 		}

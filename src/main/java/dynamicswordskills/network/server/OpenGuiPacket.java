@@ -47,6 +47,6 @@ public class OpenGuiPacket extends AbstractServerMessage<OpenGuiPacket>
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		player.openGui(DynamicSwordSkills.instance, id, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
+		player.openGui(DynamicSwordSkills.instance, id, player.getEntityWorld(), (int) player.posX, (int) player.posY, (int) player.posZ);
 	}
 }

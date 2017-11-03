@@ -190,7 +190,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (isActive() && player.worldObj.isRemote) {
+		if (isActive() && player.getEntityWorld().isRemote) {
 			if (Minecraft.getMinecraft().currentScreen != null  || !updateTargets(player)) {
 				deactivate(player);
 			}
@@ -213,7 +213,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		while (rYaw < -180) { rYaw += 360; }
 		rYaw += 90F;
 		float rPitch = (float) pitch - (float)(10.0F / Math.sqrt(distance)) + (float)(distance * Math.PI / 90);
-		player.setAngles(rYaw, -(rPitch - player.rotationPitch));
+		player.turn(rYaw, -(rPitch - player.rotationPitch));
 		return false;
 	}
 
@@ -344,7 +344,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		}
 		SoundEvent sound = getComboDamageSound(player, event.getSource());
 		if (sound != null) {
-			PlayerUtils.playSoundAtEntity(player.worldObj, player, sound, SoundCategory.PLAYERS, 0.4F, 0.5F);
+			PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, sound, SoundCategory.PLAYERS, 0.4F, 0.5F);
 		}
 	}
 

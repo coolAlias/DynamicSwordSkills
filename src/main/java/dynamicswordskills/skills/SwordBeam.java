@@ -148,7 +148,7 @@ public class SwordBeam extends SkillActive
 			PlayerUtils.playSoundAtEntity(world, player, ModSounds.WHOOSH, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level).setDamage(getDamage(player));
 			beam.setHeadingFromThrower(player, player.rotationPitch, player.rotationYaw, 0.0F, beam.getVelocity(), 1.0F);
-			world.spawnEntityInWorld(beam);
+			world.spawnEntity(beam);
 		} else {
 			player.swingArm(EnumHand.MAIN_HAND);
 			DSSPlayerInfo.get(player).setAttackTime(20 - level);
@@ -165,7 +165,7 @@ public class SwordBeam extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		if (missTimer > 0) {
 			--missTimer;
-			if (missTimer == 0 && !player.worldObj.isRemote) {
+			if (missTimer == 0 && !player.getEntityWorld().isRemote) {
 				ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
 				if (combo != null && combo.isComboInProgress()) {
 					combo.getCombo().endCombo(player);

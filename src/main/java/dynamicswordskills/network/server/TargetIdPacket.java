@@ -91,7 +91,7 @@ public class TargetIdPacket extends AbstractServerMessage<TargetIdPacket>
 			if (isNull) {
 				skill.setCurrentTarget(player, null);
 			} else {
-				targetEntity = player.worldObj.getEntityByID(entityId);
+				targetEntity = player.getEntityWorld().getEntityByID(entityId);
 				skill.setCurrentTarget(player, targetEntity);
 				if (targetEntity == null) { // For some reason the target id is sometimes incorrect or out of date
 					DynamicSwordSkills.logger.warn("Invalid target; entity with id " + entityId + " is null");

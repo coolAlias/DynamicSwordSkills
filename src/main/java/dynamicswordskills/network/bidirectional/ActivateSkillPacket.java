@@ -67,9 +67,9 @@ public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 	protected void process(EntityPlayer player, Side side) {
 		// handled identically on both sides
 		if (wasTriggered) {
-			DSSPlayerInfo.get(player).triggerSkill(player.worldObj, skillId);
+			DSSPlayerInfo.get(player).triggerSkill(player.getEntityWorld(), skillId);
 		} else {
-			DSSPlayerInfo.get(player).activateSkill(player.worldObj, skillId);
+			DSSPlayerInfo.get(player).activateSkill(player.getEntityWorld(), skillId);
 		}
 	}
 }
