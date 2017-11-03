@@ -61,7 +61,7 @@ public class DSSKeyHandler
 	public DSSKeyHandler() {
 		this.mc = Minecraft.getMinecraft();
 		for (int i = 0; i < desc.length; ++i) {
-			keys[i] = new KeyBinding("key.dss." + desc[i] + ".desc", keyValues[i], new TextComponentTranslation("key.dss.label").getUnformattedText());
+			keys[i] = new KeyBinding("key.dss." + desc[i] + ".desc", keyValues[i], "key.dss.label");
 			ClientRegistry.registerKeyBinding(keys[i]);
 		}
 	}
