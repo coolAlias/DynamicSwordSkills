@@ -22,6 +22,7 @@ import dynamicswordskills.inventory.ContainerSkills;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.IThreadListener;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
@@ -37,6 +38,9 @@ public class CommonProxy implements IGuiHandler
 
 	/** Called during {@link FMLInitializationEvent} */
 	public void init() {}
+
+	/** Called from ModelRegistryEvent to register models */
+	public void registerModels(ModelRegistryEvent event) {}
 
 	/**
 	 * Returns the current thread based on side during message handling,

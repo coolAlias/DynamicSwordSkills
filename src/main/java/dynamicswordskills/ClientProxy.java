@@ -30,6 +30,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.IThreadListener;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -45,6 +46,10 @@ public class ClientProxy extends CommonProxy
 		MinecraftForge.EVENT_BUS.register(new TargetingTickHandler());
 		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing.Factory());
 		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam.Factory());
+	}
+
+	@Override
+	public void registerModels(ModelRegistryEvent event) {
 		registerItemRenderer((IModItem) DynamicSwordSkills.skillOrb);
 		if (Config.areCreativeSwordsEnabled()) {
 			for (Item item : DynamicSwordSkills.skillItems) {

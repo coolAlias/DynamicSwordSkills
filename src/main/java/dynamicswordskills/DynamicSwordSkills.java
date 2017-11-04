@@ -43,7 +43,9 @@ import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -52,9 +54,10 @@ import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.common.registry.EntityEntry;
+import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import swordskillsapi.api.item.WeaponRegistry;
@@ -97,7 +100,7 @@ public class DynamicSwordSkills
 				return new ItemStack(DynamicSwordSkills.skillOrb);
 			}
 		};
-		ForgeRegistries.ITEMS.register(skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb"));
+		skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
 		if (Config.areCreativeSwordsEnabled()) {
 			skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
 			Item item = null;
@@ -108,20 +111,16 @@ public class DynamicSwordSkills
 				int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
 				item = new ItemSkillProvider(ToolMaterial.IRON, "iron_sword", skill, (byte) level).setCreativeTab(DynamicSwordSkills.tabSkills);
 				skillItems.add(item);
-				ForgeRegistries.ITEMS.register(item);
 			}
 		}
 		if (Config.areRandomSwordsEnabled()) {
-			ForgeRegistries.ITEMS.register(skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword"));
-			ForgeRegistries.ITEMS.register(skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword"));
-			ForgeRegistries.ITEMS.register(skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword"));
-			ForgeRegistries.ITEMS.register(skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword"));
-			ForgeRegistries.ITEMS.register(skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword"));
+			skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword");
+			skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword");
+			skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword");
+			skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword");
+			skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword");
 		}
 		proxy.preInit();
-		registerSounds();
-		registerModEntity(EntityLeapingBlow.class, "leapingblow", 0, 64, 10, true);
-		registerModEntity(EntitySwordBeam.class, "swordbeam", 1, 64, 10, true);
 		PacketDispatcher.initialize();
 		registerCapabilities();
 		MinecraftForge.EVENT_BUS.register(this);
@@ -154,11 +153,55 @@ public class DynamicSwordSkills
 		}
 	}
 
-	private void registerSounds() {
-		String[] sounds = {"armor_break","hurt_flesh","leaping_blow","level_up","mortal_draw","slam","special_drop","spin_attack","sword_cut","sword_miss","sword_strike","whoosh"};
-		for (String sound : sounds) {
-			ForgeRegistries.SOUND_EVENTS.register(createSound(new ResourceLocation(ModInfo.ID, sound)));
+	@SubscribeEvent
+	public void registerEntities(RegistryEvent.Register<EntityEntry> event) {
+		final EntityEntry[] entities = {
+				createEntityEntryBuilder("leapingblow", EntityLeapingBlow.class, 64, 10, true).build(),
+				createEntityEntryBuilder("swordbeam", EntitySwordBeam.class, 64, 10, true).build()
+		};
+		event.getRegistry().registerAll(entities);
+	}
+
+	private int entityId = 0;
+	private <E extends Entity> EntityEntryBuilder<E> createEntityEntryBuilder(String name, Class<? extends E> clazz, int trackingRange, int updateFrequency, boolean sendVelocityUpdates) {
+		final EntityEntryBuilder<E> builder = EntityEntryBuilder.create();
+		final ResourceLocation location = new ResourceLocation(ModInfo.ID, name);
+		return builder.id(location, entityId++).name(location.toString()).entity(clazz).tracker(trackingRange, updateFrequency, sendVelocityUpdates);
+	}
+
+	@SubscribeEvent
+	public void registerItems(RegistryEvent.Register<Item> event) {
+		event.getRegistry().register(skillOrb);
+		if (Config.areCreativeSwordsEnabled()) {
+			event.getRegistry().registerAll(skillItems.toArray(new Item[skillItems.size()]));
 		}
+		if (Config.areRandomSwordsEnabled()) {
+			event.getRegistry().registerAll(skillWood, skillStone, skillIron, skillGold, skillDiamond);
+		}
+	}
+
+	@SubscribeEvent
+	public void registerModels(ModelRegistryEvent event) {
+		proxy.registerModels(event);
+	}
+
+	@SubscribeEvent
+	public void registerSounds(RegistryEvent.Register<SoundEvent> event) {
+		final SoundEvent[] sounds = {
+				createSound(new ResourceLocation(ModInfo.ID, "armor_break")),
+				createSound(new ResourceLocation(ModInfo.ID, "hurt_flesh")),
+				createSound(new ResourceLocation(ModInfo.ID, "leaping_blow")),
+				createSound(new ResourceLocation(ModInfo.ID, "level_up")),
+				createSound(new ResourceLocation(ModInfo.ID, "mortal_draw")),
+				createSound(new ResourceLocation(ModInfo.ID, "slam")),
+				createSound(new ResourceLocation(ModInfo.ID, "special_drop")),
+				createSound(new ResourceLocation(ModInfo.ID, "spin_attack")),
+				createSound(new ResourceLocation(ModInfo.ID, "sword_cut")),
+				createSound(new ResourceLocation(ModInfo.ID, "sword_miss")),
+				createSound(new ResourceLocation(ModInfo.ID, "sword_strike")),
+				createSound(new ResourceLocation(ModInfo.ID, "whoosh")),
+		};
+		event.getRegistry().registerAll(sounds);
 	}
 
 	private SoundEvent createSound(ResourceLocation location) {
@@ -167,9 +210,5 @@ public class DynamicSwordSkills
 
 	private void registerCapabilities() {
 		CapabilityPlayerInfo.register();
-	}
-
-	private void registerModEntity(Class<? extends Entity> clazz, String name, int id, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates) {
-		EntityRegistry.registerModEntity(new ResourceLocation(ModInfo.ID, name), clazz, name, id, this, trackingRange, updateFrequency, sendsVelocityUpdates);
 	}
 }
