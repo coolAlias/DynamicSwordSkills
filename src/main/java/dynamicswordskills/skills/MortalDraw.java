@@ -133,10 +133,10 @@ public class MortalDraw extends SkillActive
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		swordSlot = -1;
-		if (super.canUse(player) && player.getHeldItemMainhand() == null && attackTimer == 0) {
+		if (super.canUse(player) && player.getHeldItemMainhand().isEmpty() && attackTimer == 0) {
 			for (int i = 0; i < 9; ++i) {
 				ItemStack stack = player.inventory.getStackInSlot(i);
-				if (stack != null && PlayerUtils.isSwordOrProvider(stack, this)) {
+				if (PlayerUtils.isSwordOrProvider(stack, this)) {
 					swordSlot = i;
 					break;
 				}
@@ -148,7 +148,7 @@ public class MortalDraw extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.getHeldItemMainhand() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown()
+		return player.getHeldItemMainhand().isEmpty() && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown()
 				|| DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown());
 	}
 
@@ -188,7 +188,7 @@ public class MortalDraw extends SkillActive
 			--attackTimer;
 			if (attackTimer == DELAY && !player.getEntityWorld().isRemote) {
 				drawSword(player, null);
-				if (player.getHeldItemMainhand() != null) {
+				if (!player.getHeldItemMainhand().isEmpty()) {
 					PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
 				}
 			}
@@ -236,10 +236,10 @@ public class MortalDraw extends SkillActive
 	public boolean drawSword(EntityPlayer player, Entity attacker) {
 		boolean flag = false;
 		// letting this run on both sides is fine - client will sync from server later anyway
-		if (swordSlot > -1 && swordSlot != player.inventory.currentItem && player.getHeldItemMainhand() == null) {
+		if (swordSlot > -1 && swordSlot != player.inventory.currentItem && player.getHeldItemMainhand().isEmpty()) {
 			ItemStack sword = player.inventory.getStackInSlot(swordSlot);
 			if (!player.getEntityWorld().isRemote) {
-				player.inventory.setInventorySlotContents(swordSlot, null);
+				player.inventory.setInventorySlotContents(swordSlot, ItemStack.EMPTY);
 			}
 			player.setHeldItem(EnumHand.MAIN_HAND, sword);
 			// Prevent cooldown from resetting after switching weapons

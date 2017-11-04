@@ -62,7 +62,7 @@ public class PlayerUtils
 	 * or registered to the {@link WeaponRegistry} as a sword
 	 */
 	public static boolean isSword(ItemStack stack) {
-		if (stack == null) {
+		if (stack.isEmpty()) {
 			return false;
 		} else if (stack.getItem() instanceof IWeapon) {
 			return ((IWeapon) stack.getItem()).isSword(stack);
@@ -75,7 +75,7 @@ public class PlayerUtils
 	 * an {@link IWeapon}, or registered to the {@link WeaponRegistry} as a weapon
 	 */
 	public static boolean isWeapon(ItemStack stack) {
-		if (stack == null) {
+		if (stack.isEmpty()) {
 			return false;
 		} else if (stack.getItem() instanceof IWeapon) {
 			return ((IWeapon) stack.getItem()).isWeapon(stack);
@@ -85,7 +85,7 @@ public class PlayerUtils
 
 	/** Returns true if the stack is either a {@link #isSwordItem(Item) sword} or {@link ISkillProvider provider} of this skill */
 	public static boolean isSwordOrProvider(ItemStack stack, SkillBase skill) {
-		Item item = (stack != null ? stack.getItem() : null);
+		Item item = stack.getItem();
 		return (isSword(stack) || (item instanceof ISkillProvider && ((ISkillProvider) item).getSkillId(stack) == skill.getId()));
 	}
 
@@ -142,7 +142,7 @@ public class PlayerUtils
 	 * Used by blocks to scatter items when broken
 	 */
 	public static void spawnItemWithRandom(World world, ItemStack stack, double x, double y, double z) {
-		if (!world.isRemote && stack != null) {
+		if (!world.isRemote && !stack.isEmpty()) {
 			double spawnX = x + world.rand.nextFloat();
 			double spawnY = y + world.rand.nextFloat();
 			double spawnZ = z + world.rand.nextFloat();
@@ -178,7 +178,7 @@ public class PlayerUtils
 	 * Drops any item in the entity's main hand and spawns it into the world
 	 */
 	public static void dropHeldItem(EntityLivingBase entity) {
-		if (!entity.getEntityWorld().isRemote && entity.getHeldItemMainhand() != null) {
+		if (!entity.getEntityWorld().isRemote && !entity.getHeldItemMainhand().isEmpty()) {
 			EntityItem drop = new EntityItem(entity.getEntityWorld(), entity.posX,
 					entity.posY - 0.30000001192092896D + (double) entity.getEyeHeight(),
 					entity.posZ, entity.getHeldItemMainhand().copy());
@@ -193,7 +193,7 @@ public class PlayerUtils
 			drop.motionZ += Math.sin((double) f1) * (double) f;
 			drop.setPickupDelay(40);
 			entity.getEntityWorld().spawnEntity(drop);
-			entity.setHeldItem(EnumHand.MAIN_HAND, null);
+			entity.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
 		}
 	}
 }

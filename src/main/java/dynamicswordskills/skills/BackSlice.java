@@ -97,7 +97,7 @@ public class BackSlice extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(new TextComponentTranslation(getInfoString("info", 1), 360 - (2 * getAttackAngle())).getUnformattedText());
-		String chance = String.format("%.2f", getDisarmorChance(null, player.getHeldItemMainhand(), level));
+		String chance = String.format("%.2f", getDisarmorChance(ItemStack.EMPTY, player.getHeldItemMainhand(), level));
 		desc.add(new TextComponentTranslation(getInfoString("info", 2), chance).getUnformattedText());
 		desc.add(getDamageDisplay(level * 10, true) + "%");
 		desc.add(getExhaustionDisplay(getExhaustion()));
@@ -123,14 +123,14 @@ public class BackSlice extends SkillActive
 	 * each point of armor above 5 reduces the chance by 5%, and each point below 5 increases
 	 * the chance by 5%, e.g. diamond plate gives damage reduction 8, so incurs a -15% penalty
 	 * to the attacker's chance to disarmor. Each level of Unbreaking adds another -5%.
-	 * @param armor	null is allowed to return base chance for addInformation
-	 * @param weapon attacking entity's held item adds bonus for Sharpness; null is allowed, adding a -100% penalty
+	 * @param armor	ItemStack.EMPTY is allowed to return base chance for addInformation
+	 * @param weapon attacking entity's held item adds bonus for Sharpness; -100% penalty for no weapon
 	 * @param level	base chance is 5% per skill level
 	 * @return chance that the armor stack will be knocked off of the damaged entity, a value between 0.0F and 1.0F inclusive
 	 */
 	public static float getDisarmorChance(ItemStack armorStack, ItemStack weapon, int level) {
 		float chance = ((float) level * 0.05F);
-		if (armorStack != null && armorStack.getItem() instanceof ItemArmor) {
+		if (armorStack.getItem() instanceof ItemArmor) {
 			ItemArmor armor = (ItemArmor) armorStack.getItem();
 			int i = armor.getArmorMaterial().getDamageReductionAmount(armor.armorType);
 			chance += (float)(5 - i) * 0.05F;
@@ -139,7 +139,7 @@ public class BackSlice extends SkillActive
 				chance -= (float) i * 0.05F;
 			}
 		}
-		if (weapon != null) {
+		if (!weapon.isEmpty()) {
 			int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.SHARPNESS, weapon);
 			if (i > 0) { // +5% per level of Sharpness
 				chance += (float) i * 0.05F;
@@ -291,9 +291,9 @@ public class BackSlice extends SkillActive
 					PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
 					if (Config.canDisarmorPlayers() || !(entity instanceof EntityPlayer)) {
 						ItemStack armor = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
-						if (armor != null && player.getEntityWorld().rand.nextFloat() < getDisarmorChance(armor, player.getHeldItemMainhand(), level)) {
+						if (!armor.isEmpty() && player.getEntityWorld().rand.nextFloat() < getDisarmorChance(armor, player.getHeldItemMainhand(), level)) {
 							PlayerUtils.spawnItemWithRandom(entity.getEntityWorld(), armor, entity.posX, entity.posY, entity.posZ);
-							entity.setItemStackToSlot(EntityEquipmentSlot.CHEST, null);
+							entity.setItemStackToSlot(EntityEquipmentSlot.CHEST, ItemStack.EMPTY);
 						}
 					}
 				}

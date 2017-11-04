@@ -92,7 +92,7 @@ public class DirtyEntityAccessor {
 			itemStackMainHand = ReflectionHelper.findField(EntityPlayer.class, "field_184831_bT", "itemStackMainHand");
 		}
 		try {
-			itemStackMainHand.set(player, stack == null ? null : stack.copy());
+			itemStackMainHand.set(player, stack.copy());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

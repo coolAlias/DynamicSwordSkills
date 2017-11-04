@@ -66,7 +66,7 @@ public class DSSPlayerInfo
 	private SkillBase itemSkill = null;
 
 	/** Stores the last held ItemStack that was checked for ISkillItem */
-	private ItemStack lastCheckedStack = null;
+	private ItemStack lastCheckedStack = ItemStack.EMPTY;
 
 	/** A dummy version of Basic Sword skill for use with ISkillItem skills when player's skill level is 0 */
 	private SkillBase dummySwordSkill = null;
@@ -194,7 +194,7 @@ public class DSSPlayerInfo
 		if (itemSkill != null && itemSkill.getId() == id) {
 			level = itemSkill.getLevel();
 		} else if (id == SkillBase.swordBasic.getId()) {
-			if (player.getHeldItemMainhand() == null) {
+			if (player.getHeldItemMainhand().isEmpty()) {
 				retrieveDummySwordSkill();
 			}
 			if (dummySwordSkill != null) {
@@ -203,9 +203,7 @@ public class DSSPlayerInfo
 		} else if (id == SkillBase.mortalDraw.getId() && (itemSkill == null || dummySwordSkill == null)) {
 			for (int i = 0; i < 9; ++i) {
 				ItemStack stack = player.inventory.getStackInSlot(i);
-				if (stack != null && stack.getItem() instanceof ISkillProvider &&
-						((ISkillProvider) stack.getItem()).getSkillId(stack) == id)
-				{
+				if (stack.getItem() instanceof ISkillProvider && ((ISkillProvider) stack.getItem()).getSkillId(stack) == id) {
 					if (itemSkill == null) {
 						itemSkill = SkillBase.getSkillFromItem(stack, (ISkillProvider) stack.getItem());
 						if (itemSkill != null && itemSkill.getLevel() > getTrueSkillLevel(id)) {
@@ -355,9 +353,7 @@ public class DSSPlayerInfo
 		if ((needsDummy || itemSkill == null) && persistentDummySkillSlot == -1) {
 			for (int i = 0; i < 9; ++i) {
 				ItemStack stack = player.inventory.getStackInSlot(i);
-				if (stack != null && stack.getItem() instanceof ISkillProvider &&
-						((ISkillProvider) stack.getItem()).getSkillId(stack) == SkillBase.mortalDraw.getId())
-				{
+				if (stack.getItem() instanceof ISkillProvider && ((ISkillProvider) stack.getItem()).getSkillId(stack) == SkillBase.mortalDraw.getId()) {
 					if (needsDummy && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack)) {
 						dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic.getId(), (byte) 1);
 						persistentDummySkillSlot = i;
@@ -401,7 +397,7 @@ public class DSSPlayerInfo
 			SkillBase skill = getTruePlayerSkill(id);
 			return (skill == null && !Config.isSpinAttackRequired() ? itemSkill : skill);
 		} else if (id == SkillBase.swordBasic.getId()) {
-			if (player.getHeldItemMainhand() == null) {
+			if (player.getHeldItemMainhand().isEmpty()) {
 				retrieveDummySwordSkill();
 			}
 			return (dummySwordSkill == null ? getTruePlayerSkill(id) : dummySwordSkill);
@@ -578,20 +574,16 @@ public class DSSPlayerInfo
 	private void updateISkillItem() {
 		ItemStack stack = player.getHeldItemMainhand();
 		if (itemSkill != null && itemSkill.getId() == SkillBase.mortalDraw.getId() &&
-				(stack == null || ((SkillActive) itemSkill).isActive()))
+				(stack.isEmpty() || ((SkillActive) itemSkill).isActive()))
 		{
 			// do not replace Mortal Draw until it is no longer active
-			if (persistentDummySkillSlot > -1 && stack == null) {
+			if (persistentDummySkillSlot > -1 && stack.isEmpty()) {
 				ItemStack dummyStack = player.inventory.getStackInSlot(persistentDummySkillSlot);
-				if (dummyStack == null || (!(dummyStack.getItem() instanceof ISkillProvider)) ||
-						!SkillBase.getSkillFromItem(dummyStack, (ISkillProvider) dummyStack.getItem()).equals(itemSkill))
-				{
+				if (!(dummyStack.getItem() instanceof ISkillProvider) || !SkillBase.getSkillFromItem(dummyStack, (ISkillProvider) dummyStack.getItem()).equals(itemSkill)) {
 					boolean wasFound = false;
 					for (int i = 0; i < 9; ++i) {
 						ItemStack newStack = player.inventory.getStackInSlot(i);
-						if (newStack != null && newStack.getItem() instanceof ISkillProvider &&
-								SkillBase.getSkillFromItem(newStack, (ISkillProvider) newStack.getItem()).equals(itemSkill))
-						{
+						if (newStack.getItem() instanceof ISkillProvider && SkillBase.getSkillFromItem(newStack, (ISkillProvider) newStack.getItem()).equals(itemSkill)) {
 							persistentDummySkillSlot = i;
 							wasFound = true;
 							break;
@@ -604,7 +596,7 @@ public class DSSPlayerInfo
 					}
 				}
 			}
-		} else if (stack != null && stack.getItem() instanceof ISkillProvider) {
+		} else if (stack.getItem() instanceof ISkillProvider) {
 			if (stack == lastCheckedStack) {
 				return;
 			}
@@ -633,7 +625,7 @@ public class DSSPlayerInfo
 		} else {
 			itemSkill = null;
 			dummySwordSkill = null;
-			lastCheckedStack = null;
+			lastCheckedStack = ItemStack.EMPTY;
 			if (persistentDummySkillSlot > -1) {
 				persistentDummySkillSlot = -1;
 			}

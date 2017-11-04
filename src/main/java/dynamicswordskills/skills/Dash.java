@@ -154,7 +154,7 @@ public class Dash extends SkillActive
 	 */
 	private boolean canItemDash(EntityPlayer player, EnumHand hand) {
 		ItemStack stack = player.getHeldItem(hand);
-		if (stack != null && stack.getItem() instanceof IDashItem) {
+		if (stack.getItem() instanceof IDashItem) {
 			return ((IDashItem) stack.getItem()).canDash(stack, player, hand);
 		}
 		return false;

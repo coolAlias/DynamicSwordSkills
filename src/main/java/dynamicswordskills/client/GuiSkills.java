@@ -205,7 +205,7 @@ public class GuiSkills extends GuiContainer
 	protected void mouseReleased(int mouseX, int mouseY, int state) {
 		// don't need to call super
 		Slot slot = this.getSlotAtPosition(mouseX, mouseY);
-		if (slot != null && slot.getStack() != null) {
+		if (slot != null && !slot.getStack().isEmpty()) {
 			int id = (slot.getStack().getItemDamage() % SkillBase.getNumSkills());
 			if (currentSkill == null || currentSkill.getId() != id) {
 				scrollY = 0.0F;

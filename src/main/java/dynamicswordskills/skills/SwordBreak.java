@@ -186,7 +186,7 @@ public class SwordBreak extends SkillActive
 		if (source.getImmediateSource() instanceof EntityLivingBase) {
 			EntityLivingBase attacker = (EntityLivingBase) source.getImmediateSource();
 			ItemStack stackToDamage = attacker.getHeldItemMainhand();
-			if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
+			if (breakTimer > getUseDelay() && !stackToDamage.isEmpty() && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 				breakTimer = getUseDelay(); // only block one attack
 				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.SWORD_STRIKE, SoundCategory.PLAYERS, 0.4F, 0.5F);
 				playMissSound = false;
@@ -195,7 +195,7 @@ public class SwordBreak extends SkillActive
 					stackToDamage.damageItem(dmg, attacker);
 					if (stackToDamage.getCount() <= 0) {
 						PlayerUtils.playSoundAtEntity(attacker.getEntityWorld(), attacker, SoundEvents.ITEM_SHIELD_BREAK, SoundCategory.PLAYERS, 0.8F, 0.8F + player.getEntityWorld().rand.nextFloat() * 0.4F);
-						attacker.setHeldItem(EnumHand.MAIN_HAND, null);
+						attacker.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
 					}
 				}
 				TargetUtils.knockTargetBack(attacker, player);

@@ -73,11 +73,11 @@ public class ContainerSkills extends Container
 
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer player, int index) {
-		return null;
+		return ItemStack.EMPTY;
 	}
 
 	@Override
 	public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
-		return null;
+		return this.inventory.getStackInSlot(slotId);
 	}
 }
