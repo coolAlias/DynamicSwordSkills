@@ -87,6 +87,7 @@ public class ItemSkillOrb extends Item implements IModItem
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> list) {
+		if (!this.isInCreativeTab(tab)) { return; }
 		for (SkillBase skill : SkillBase.getSkills()) {
 			list.add(new ItemStack(this, 1, skill.getId()));
 		}
