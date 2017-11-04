@@ -19,13 +19,17 @@ package dynamicswordskills.item;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.PlayerUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -82,23 +86,23 @@ public class ItemSkillOrb extends Item implements IModItem
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(Item item, CreativeTabs tab, NonNullList<ItemStack> list) {
+	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> list) {
 		for (SkillBase skill : SkillBase.getSkills()) {
-			list.add(new ItemStack(item, 1, skill.getId()));
+			list.add(new ItemStack(this, 1, skill.getId()));
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
-		if (SkillBase.doesSkillExist(stack.getItemDamage())) {
-			SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
+	public void addInformation(ItemStack stack, @Nullable World world, List<String> list, ITooltipFlag flag) {
+		if (world != null && SkillBase.doesSkillExist(stack.getItemDamage())) {
+			SkillBase skill = DSSPlayerInfo.get(Minecraft.getMinecraft().player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
 			if (skill != null) {
 				if (!Config.isSkillEnabled(skill.getId())) {
 					list.add(TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled").getUnformattedText());
 				} else if (skill.getLevel() > 0) {
 					list.add(TextFormatting.GOLD + skill.getLevelDisplay(true));
-					list.addAll(skill.getTranslatedTooltip(player));
+					list.addAll(skill.getTranslatedTooltip(Minecraft.getMinecraft().player));
 				} else {
 					list.add(TextFormatting.ITALIC + new TextComponentTranslation("tooltip.dss.skillorb.desc.0").getUnformattedText());
 				}

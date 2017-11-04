@@ -62,7 +62,7 @@ public class TargetUtils
 	 * for predicting misses from the client side; does not use the mouse over object.
 	 */
 	public static boolean canReachTarget(EntityPlayer player, Entity target) {
-		return (player.canEntityBeSeen(target) && player.getDistanceSqToEntity(target) < getReachDistanceSq(player));
+		return (player.canEntityBeSeen(target) && player.getDistanceSq(target) < getReachDistanceSq(player));
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class TargetUtils
 			List<EntityLivingBase> list = seeker.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
 				if (target != seeker && target.canBeCollidedWith() && isTargetInSight(vec3, seeker, target)) {
-					double newDistance = (closestToSeeker ? target.getDistanceSqToEntity(seeker) : target.getDistanceSq(targetX, targetY, targetZ));
+					double newDistance = (closestToSeeker ? target.getDistanceSq(seeker) : target.getDistanceSq(targetX, targetY, targetZ));
 					if (newDistance < currentDistance) {
 						currentTarget = target;
 						currentDistance = newDistance;

@@ -83,8 +83,8 @@ public class EntityLeapingBlow extends EntityThrowable
 	 * prevent leaping blow entity from crashing into the ground and dying prematurely.
 	 */
 	@Override
-	public void setHeadingFromThrower(Entity thrower, float rotationPitch, float rotationYaw, float pitchOffset, float velocity, float inaccuracy) {
-		super.setHeadingFromThrower(thrower, rotationPitch, rotationYaw, pitchOffset, velocity, inaccuracy);
+	public void shoot(Entity thrower, float rotationPitch, float rotationYaw, float pitchOffset, float velocity, float inaccuracy) {
+		super.shoot(thrower, rotationPitch, rotationYaw, pitchOffset, velocity, inaccuracy);
 		this.motionY = 0.0D;
 	}
 
@@ -133,7 +133,7 @@ public class EntityLeapingBlow extends EntityThrowable
 					affectedEntities.add(target.getEntityId());
 					float d = damage;
 					if (getThrower() != null) {
-						double d0 = (1.0D - getThrower().getDistanceSqToEntity(target) / getRangeSquared());
+						double d0 = (1.0D - getThrower().getDistanceSq(target) / getRangeSquared());
 						d *= (d0 > 1.0D ? 1.0D : d0);
 						if (d < 0.5D) { return; }
 					}

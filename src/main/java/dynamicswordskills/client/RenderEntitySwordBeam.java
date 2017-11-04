@@ -20,9 +20,9 @@ package dynamicswordskills.client;
 import org.lwjgl.opengl.GL11;
 
 import dynamicswordskills.ref.ModInfo;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -55,7 +55,7 @@ public class RenderEntitySwordBeam extends Render<EntityThrowable>
 		GlStateManager.scale(1.5F, 0.5F, 1.5F);
 		this.bindTexture(this.getEntityTexture(entity));
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer buffer = tessellator.getBuffer();
+		BufferBuilder buffer = tessellator.getBuffer();
 		GlStateManager.rotate(180.0F - renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
 		GlStateManager.rotate(-renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
 		GlStateManager.color(1.0F, 1.0F, 1.0F);

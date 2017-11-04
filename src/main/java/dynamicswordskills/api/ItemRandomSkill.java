@@ -20,17 +20,21 @@ package dynamicswordskills.api;
 import java.util.List;
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 import dynamicswordskills.item.IModItem;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -128,16 +132,16 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
+	public void addInformation(ItemStack stack, @Nullable World world, List<String> list, ITooltipFlag flag) {
 		SkillBase skill = getSkill(stack);
-		if (skill != null) {
+		if (skill != null && world != null) {
 			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()).getUnformattedText());
 			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.level", skill.getLevel(), skill.getMaxLevel()).getUnformattedText());
 			if (grantsBasicSwordSkill(stack)) {
 				String name = TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + TextFormatting.RESET;
 				list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.provider", name).getUnformattedText());
 			}
-			list.addAll(skill.getDescription(player));
+			list.addAll(skill.getDescription(Minecraft.getMinecraft().player));
 		}
 	}
 

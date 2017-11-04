@@ -19,18 +19,21 @@ package dynamicswordskills.api;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Multimap;
 
 import dynamicswordskills.item.IModItem;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
@@ -42,6 +45,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import swordskillsapi.api.item.IWeapon;
 
 /**
  * 
@@ -113,7 +117,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 		super();
 		this.material = material;
 		this.texture = texture;
-		this.weaponDamage = 4.0F + this.material.getDamageVsEntity();
+		this.weaponDamage = 4.0F + this.material.getAttackDamage();
 		this.skillName = skill.getUnlocalizedName();
 		this.level = level;
 		this.grantsBasicSkill = grantsBasicSkill;
@@ -211,16 +215,16 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
+	public void addInformation(ItemStack stack, @Nullable World world, List<String> list, ITooltipFlag flag) {
 		SkillBase skill = getSkill(stack);
-		if (skill != null) {
+		if (skill != null && world != null) {
 			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()).getUnformattedText());
 			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.level", skill.getLevel(), skill.getMaxLevel()).getUnformattedText());
 			if (grantsBasicSwordSkill(stack)) {
 				String name = TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + TextFormatting.RESET;
 				list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.provider", name).getUnformattedText());
 			}
-			list.addAll(skill.getDescription(player));
+			list.addAll(skill.getDescription(Minecraft.getMinecraft().player));
 		}
 	}
 

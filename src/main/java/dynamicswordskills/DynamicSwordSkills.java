@@ -54,7 +54,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import swordskillsapi.api.item.WeaponRegistry;
@@ -97,8 +97,7 @@ public class DynamicSwordSkills
 				return new ItemStack(DynamicSwordSkills.skillOrb);
 			}
 		};
-		skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
-		GameRegistry.register(skillOrb);
+		ForgeRegistries.ITEMS.register(skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb"));
 		if (Config.areCreativeSwordsEnabled()) {
 			skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
 			Item item = null;
@@ -109,20 +108,15 @@ public class DynamicSwordSkills
 				int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
 				item = new ItemSkillProvider(ToolMaterial.IRON, "iron_sword", skill, (byte) level).setCreativeTab(DynamicSwordSkills.tabSkills);
 				skillItems.add(item);
-				GameRegistry.register(item);
+				ForgeRegistries.ITEMS.register(item);
 			}
 		}
 		if (Config.areRandomSwordsEnabled()) {
-			skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword");
-			GameRegistry.register(skillWood);
-			skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword");
-			GameRegistry.register(skillStone);
-			skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword");
-			GameRegistry.register(skillIron);
-			skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword");
-			GameRegistry.register(skillGold);
-			skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword");
-			GameRegistry.register(skillDiamond);
+			ForgeRegistries.ITEMS.register(skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword"));
+			ForgeRegistries.ITEMS.register(skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword"));
+			ForgeRegistries.ITEMS.register(skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword"));
+			ForgeRegistries.ITEMS.register(skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword"));
+			ForgeRegistries.ITEMS.register(skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword"));
 		}
 		proxy.preInit();
 		registerSounds();
@@ -130,10 +124,7 @@ public class DynamicSwordSkills
 		registerModEntity(EntitySwordBeam.class, "swordbeam", 1, 64, 10, true);
 		PacketDispatcher.initialize();
 		registerCapabilities();
-	}
-
-	private void registerCapabilities() {
-		CapabilityPlayerInfo.register();
+		MinecraftForge.EVENT_BUS.register(this);
 	}
 
 	@Mod.EventHandler
@@ -163,18 +154,19 @@ public class DynamicSwordSkills
 		}
 	}
 
-	/**
-	 * Call during mod initialization to register all mod sounds
-	 */
 	private void registerSounds() {
 		String[] sounds = {"armor_break","hurt_flesh","leaping_blow","level_up","mortal_draw","slam","special_drop","spin_attack","sword_cut","sword_miss","sword_strike","whoosh"};
 		for (String sound : sounds) {
-			registerSound(new ResourceLocation(ModInfo.ID, sound));
+			ForgeRegistries.SOUND_EVENTS.register(createSound(new ResourceLocation(ModInfo.ID, sound)));
 		}
 	}
 
-	private void registerSound(ResourceLocation location) {
-		GameRegistry.register(new SoundEvent(location).setRegistryName(location));
+	private SoundEvent createSound(ResourceLocation location) {
+		return new SoundEvent(location).setRegistryName(location);
+	}
+
+	private void registerCapabilities() {
+		CapabilityPlayerInfo.register();
 	}
 
 	private void registerModEntity(Class<? extends Entity> clazz, String name, int id, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates) {

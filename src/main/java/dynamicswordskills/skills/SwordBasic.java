@@ -207,7 +207,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		double dz = player.posZ - currentTarget.posZ;
 		double angle = Math.atan2(dz, dx) * 180 / Math.PI;
 		double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (currentTarget.posY + (currentTarget.height / 2.0F)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
-		double distance = player.getDistanceToEntity(currentTarget);
+		double distance = player.getDistance(currentTarget);
 		float rYaw = (float)(angle - player.rotationYaw);
 		while (rYaw > 180) { rYaw -= 360; }
 		while (rYaw < -180) { rYaw += 360; }
@@ -249,10 +249,10 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 			if (entity == player) { continue; }
 			if (entity != currentTarget && entity != prevTarget && isTargetValid(player, entity)) {
 				if (nextTarget == null) {
-					dTarget = player.getDistanceSqToEntity(entity);
+					dTarget = player.getDistanceSq(entity);
 					nextTarget = entity;
 				} else {
-					double distance = player.getDistanceSqToEntity(entity);
+					double distance = player.getDistanceSq(entity);
 					if (distance < dTarget) {
 						nextTarget = entity;
 						dTarget = distance;
@@ -295,7 +295,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	@SideOnly(Side.CLIENT)
 	private boolean isTargetValid(EntityPlayer player, EntityLivingBase target) {
 		return (target != null && !target.isDead && target.getHealth() > 0F &&
-				player.getDistanceToEntity(target) < (float) getRange() && !target.isInvisible() &&
+				player.getDistance(target) < (float) getRange() && !target.isInvisible() &&
 				(Config.canTargetPlayers() || !(target instanceof EntityPlayer)));
 	}
 

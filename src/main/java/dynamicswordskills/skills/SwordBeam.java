@@ -147,7 +147,7 @@ public class SwordBeam extends SkillActive
 			missTimer = 12 + level;
 			PlayerUtils.playSoundAtEntity(world, player, ModSounds.WHOOSH, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level).setDamage(getDamage(player));
-			beam.setHeadingFromThrower(player, player.rotationPitch, player.rotationYaw, 0.0F, beam.getVelocity(), 1.0F);
+			beam.shoot(player, player.rotationPitch, player.rotationYaw, 0.0F, beam.getVelocity(), 1.0F);
 			world.spawnEntity(beam);
 		} else {
 			player.swingArm(EnumHand.MAIN_HAND);

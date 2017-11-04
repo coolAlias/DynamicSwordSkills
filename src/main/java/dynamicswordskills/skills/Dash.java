@@ -259,7 +259,7 @@ public class Dash extends SkillActive
 			// Base player speed is 0.1D; heavy boots = 0.04D, pegasus = 0.13D
 			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
 			double sf = (1.0D + (speed - BASE_MOVE)); // speed factor
-			if (speed > 0.075D && dist > getMinDistance() && player.getDistanceSqToEntity(target) < 6.0D) {
+			if (speed > 0.075D && dist > getMinDistance() && player.getDistanceSq(target) < 6.0D) {
 				float dmg = (float) getDamage() + (float)((dist / 2.0D) - 2.0D);
 				impactTime = 5; // time player will be immune to damage from the target entity
 				target.attackEntityFrom(DamageSource.causePlayerDamage(player), (float)(dmg * sf * sf));
@@ -300,7 +300,7 @@ public class Dash extends SkillActive
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
 		if (impactTime > 0 && source.getTrueSource() == target) {
 			return true;
-		} else if (source.damageType.equals("mob") && source.getTrueSource() != null && player.getDistanceSqToEntity(source.getTrueSource()) < 6.0D) {
+		} else if (source.damageType.equals("mob") && source.getTrueSource() != null && player.getDistanceSq(source.getTrueSource()) < 6.0D) {
 			return true; // stop stupid zombies from hitting player right before impact
 		}
 		return false;

@@ -4,27 +4,30 @@ buildscript {
         maven { url = "http://files.minecraftforge.net/maven" }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "5.0"
+version = "6.0"
 group = "com.google.coolalias008.dynamicswordskills"
-archivesBaseName = "1.11.2-DynamicSwordSkills"
+archivesBaseName = "1.12.2-DynamicSwordSkills"
 
-sourceCompatibility = targetCompatibility = "1.7"
+sourceCompatibility = targetCompatibility = "1.8"
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
 
 dependencies {
     compile files (
-		"eclipse/libs/1.11.2-SwordSkillsApi-1.1.0-deobf.jar",
+		"eclipse/libs/1.12.2-SwordSkillsApi-1.1.0-deobf.jar",
     )
 }
 
 minecraft {
-    version = "1.11.2-13.20.1.2516"
+    version = "1.12.2-14.23.0.2529"
     runDir = "eclipse"
-    mappings = "stable_32"
+    mappings = "snapshot_20171102"
 }
 
 processResources

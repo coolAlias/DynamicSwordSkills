@@ -101,13 +101,13 @@ public class EntitySwordBeam extends EntityThrowable
 	}
 
 	@Override
-	public float getBrightness(float partialTick) {
+	public float getBrightness() {
 		return 1.0F;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public int getBrightnessForRender(float partialTick) {
+	public int getBrightnessForRender() {
 		return 0xf000f0;
 	}
 

@@ -20,8 +20,8 @@ package dynamicswordskills.client;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 
@@ -39,7 +39,7 @@ public class RenderHelperQ {
 		double minV = (double)v / (double)imageHeight;
 		double maxV = (double)(v + height) / (double)imageHeight;
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer buffer = tessellator.getBuffer();
+		BufferBuilder buffer = tessellator.getBuffer();
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		buffer.pos(x + scale*(double)width, y + scale*(double)height, 0).tex(maxU, maxV).endVertex();
 		buffer.pos(x + scale*(double)width, y, 0).tex(maxU, minV).endVertex();
@@ -69,7 +69,7 @@ public class RenderHelperQ {
 		double minV = (double)v / (double)imageHeight;
 		double maxV = (double)(v + height) / (double)imageHeight;
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer buffer = tessellator.getBuffer();
+		BufferBuilder buffer = tessellator.getBuffer();
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		buffer.pos(x + scale*(double)width, y + scale*(double)height, 0).tex(maxU, maxV).endVertex();
 		buffer.pos(x + scale*(double)width, y, 0).tex(maxU, minV).endVertex();

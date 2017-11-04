@@ -181,7 +181,7 @@ public class LeapingBlow extends SkillActive
 				// add exhaustion here, now that skill has truly activated:
 				player.addExhaustion(getExhaustion());
 				EntityLeapingBlow entity = new EntityLeapingBlow(player.getEntityWorld(), player).setDamage(getDamage(player)).setLevel(level);
-				entity.setHeadingFromThrower(player, player.rotationPitch, player.rotationYaw, 0.0F, entity.getVelocity(), 1.0F);
+				entity.shoot(player, player.rotationPitch, player.rotationYaw, 0.0F, entity.getVelocity(), 1.0F);
 				player.getEntityWorld().spawnEntity(entity);
 				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.LEAPING_BLOW, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			}
