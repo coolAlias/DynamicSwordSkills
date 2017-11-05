@@ -52,8 +52,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProviderInfusable
 {
-	/** The maximum level of the SkillBase.{skill} granted by this Item */
-	private final byte maxLevel;
+	/** Item quality based on tool material; higher quality tends toward higher levels */
+	private final int quality;
 
 	/** String used as the ModelResourceLocation for this item's model */
 	private final String texture;
@@ -61,7 +61,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	public ItemRandomSkill(ToolMaterial material, String textureName) {
 		super(material);
 		this.texture = textureName;
-		this.maxLevel = (byte)(2 + material.getHarvestLevel());
+		this.quality = material.getHarvestLevel() + (material == ToolMaterial.GOLD ? 3 : 0);
 		setCreativeTab(null);
 	}
 
@@ -88,8 +88,26 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 
 	@Override
 	public int getSkillId(ItemStack stack) {
-		return (stack.hasTagCompound() && stack.getTagCompound().hasKey("ItemSkillId") ?
-				stack.getTagCompound().getInteger("ItemSkillId") : -1);
+		if (!stack.hasTagCompound()) {
+			return -1;
+		}
+		NBTTagCompound tag = stack.getTagCompound();
+		SkillBase skill = null;
+		if (tag.hasKey("ItemSkillName")) {
+			skill = SkillBase.getSkillByName(tag.getString("ItemSkillName"));
+		}
+		// For backwards compatibility:
+		if (tag.hasKey("ItemSkillId")) {
+			if (skill == null) {
+				skill = SkillBase.getSkill(tag.getInteger("ItemSkillId"));
+				if (skill != null) {
+					tag.setString("ItemSkillName", skill.getUnlocalizedName());
+				}
+			} else if (tag.getInteger("ItemSkillId") != skill.getId()) {
+				tag.setInteger("ItemSkillId", skill.getId());
+			}
+		}
+		return (skill == null ? -1 : skill.getId());
 	}
 
 	@Override
@@ -178,21 +196,24 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 			}
 		}
 		ItemStack loot = new ItemStack(this);
-		loot.setTagCompound(getRandomSkillTag(skill, rand));
+		generateSkillTag(loot, skill, rand);
 		return new WeightedRandomChestContent(loot, original.minStackSize, original.maxStackSize, original.itemWeight);
 	}
 
 	/**
-	 * Creates a new NBTTagCompound containing all necessary skill data:
-	 * id, random level not exceeding the maximum, and random ability
-	 * to grant basic sword skill
+	 * Adds all necessary skill data to the stack's NBT Tag:
+	 * skill id, random level not exceeding the maximum, and
+	 * random ability to grant basic sword skill
 	 */
-	private NBTTagCompound getRandomSkillTag(SkillBase skill, Random rand) {
-		NBTTagCompound tag = new NBTTagCompound();
-		tag.setInteger("ItemSkillId", skill.getId());
-		int level = 1 + rand.nextInt(Math.min(maxLevel, skill.getMaxLevel()));
+	public void generateSkillTag(ItemStack stack, SkillBase skill, Random rand) {
+		if (!stack.hasTagCompound()) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		NBTTagCompound tag = stack.getTagCompound();
+		tag.setString("ItemSkillName", skill.getUnlocalizedName());
+		int level = 1 + rand.nextInt(Math.min(this.quality + 2, skill.getMaxLevel()));
 		tag.setByte("ItemSkillLevel", (byte) level);
-		tag.setBoolean("grantsBasicSword", (!skill.is(SkillBase.swordBasic) && rand.nextInt(16) > 4));
-		return tag;
+		boolean flag = (!skill.is(SkillBase.swordBasic) && rand.nextInt(16) > 9 - this.quality); 
+		tag.setBoolean("grantsBasicSword", flag);
 	}
 }

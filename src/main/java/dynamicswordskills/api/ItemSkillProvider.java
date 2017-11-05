@@ -71,8 +71,11 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	/** Weapon damage is based on tool material, just like swords */
 	private float weaponDamage;
 
-	/** The skill id and level of the SkillBase.{skill} granted by this Item */
-	private final byte skillId, level;
+	/** The registry name of the skill provided by this item */
+	private final String skillName;
+
+	/** The skill level of the SkillBase.{skill} granted by this Item */
+	private final byte level;
 
 	/** This is used mainly for the tooltip display */
 	private SkillBase skill;
@@ -109,7 +112,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 		this.material = material;
 		this.texture = texture;
 		this.weaponDamage = 4.0F + this.material.getDamageVsEntity();
-		this.skillId = skill.getId();
+		this.skillName = skill.getUnlocalizedName();
 		this.level = level;
 		this.grantsBasicSkill = grantsBasicSkill;
 		setMaxDamage(this.material.getMaxUses());
@@ -143,7 +146,8 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 
 	@Override
 	public int getSkillId(ItemStack stack) {
-		return skillId;
+		SkillBase skill = SkillBase.getSkillByName(this.skillName);
+		return (skill == null ? -1 : skill.getId());
 	}
 
 	@Override
