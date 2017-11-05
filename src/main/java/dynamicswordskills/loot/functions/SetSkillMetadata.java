@@ -22,20 +22,22 @@ import java.util.Random;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSyntaxException;
 
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.LootFunction;
 
 /**
  * 
- * Sets item metadata to the id of a random enabled skill.
+ * Sets item metadata to the id of a random enabled skill
+ * or to that of one specified by name in the JSON file.
  *
  */
 public class SetSkillMetadata extends SkillFunction
@@ -48,9 +50,13 @@ public class SetSkillMetadata extends SkillFunction
 		super(conditions);
 	}
 
+	public SetSkillMetadata(LootCondition[] conditions, String skill_name) {
+		super(conditions, skill_name);
+	}
+
 	@Override
 	public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
-		int i = SkillFunction.SKILL_IDS.get(MathHelper.getInt(rand, 0, SkillFunction.SKILL_IDS.size()));
+		int i = getSkillId(rand);
 		if (SkillBase.doesSkillExist(i)) {
 			stack.setItemDamage(i);
 		} else {
@@ -66,10 +72,24 @@ public class SetSkillMetadata extends SkillFunction
 		}
 		@Override
 		public void serialize(JsonObject json, SetSkillMetadata instance, JsonSerializationContext context) {
-			// nothing to serialize
+			if (instance.skill_name != null) {
+				SkillBase skill = SkillBase.getSkillByName(instance.skill_name);
+				if (skill == null) {
+					throw new JsonSyntaxException("Unknown skill '" + instance.skill_name + "'");
+				}
+				json.addProperty("skill_name", instance.skill_name);
+			}
 		}
 		@Override
 		public SetSkillMetadata deserialize(JsonObject json, JsonDeserializationContext context, LootCondition[] conditions) {
+			if (json.has("skill_name")) {
+				String name = JsonUtils.getString(json, "skill_name");
+				SkillBase skill = SkillBase.getSkillByName(name);
+				if (skill == null) {
+					throw new JsonSyntaxException("Unknown skill '" + name + "'");
+				}
+				return new SetSkillMetadata(conditions, name);
+			}
 			return new SetSkillMetadata(conditions);
 		}
 	}
