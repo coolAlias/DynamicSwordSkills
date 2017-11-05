@@ -87,8 +87,26 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 
 	@Override
 	public int getSkillId(ItemStack stack) {
-		return (stack.hasTagCompound() && stack.getTagCompound().hasKey("ItemSkillId") ?
-				stack.getTagCompound().getInteger("ItemSkillId") : -1);
+		if (!stack.hasTagCompound()) {
+			return -1;
+		}
+		NBTTagCompound tag = stack.getTagCompound();
+		SkillBase skill = null;
+		if (tag.hasKey("ItemSkillName")) {
+			skill = SkillBase.getSkillByName(tag.getString("ItemSkillName"));
+		}
+		// For backwards compatibility:
+		if (tag.hasKey("ItemSkillId")) {
+			if (skill == null) {
+				skill = SkillBase.getSkill(tag.getInteger("ItemSkillId"));
+				if (skill != null) {
+					tag.setString("ItemSkillName", skill.getUnlocalizedName());
+				}
+			} else if (tag.getInteger("ItemSkillId") != skill.getId()) {
+				tag.setInteger("ItemSkillId", skill.getId());
+			}
+		}
+		return (skill == null ? -1 : skill.getId());
 	}
 
 	@Override
@@ -150,7 +168,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 			stack.setTagCompound(new NBTTagCompound());
 		}
 		NBTTagCompound tag = stack.getTagCompound();
-		tag.setInteger("ItemSkillId", skill.getId());
+		tag.setString("ItemSkillName", skill.getUnlocalizedName());
 		int level = 1 + rand.nextInt(Math.min(this.quality + 2, skill.getMaxLevel()));
 		tag.setByte("ItemSkillLevel", (byte) level);
 		boolean flag = (skill.getId() != SkillBase.swordBasic.getId() && rand.nextInt(16) > 9 - this.quality); 
