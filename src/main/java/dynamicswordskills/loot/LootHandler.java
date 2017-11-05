@@ -29,8 +29,10 @@ import net.minecraft.world.storage.loot.LootPool;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraft.world.storage.loot.RandomValueRange;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
+import net.minecraft.world.storage.loot.conditions.LootConditionManager;
 import net.minecraft.world.storage.loot.conditions.RandomChance;
 import net.minecraft.world.storage.loot.functions.LootFunction;
+import net.minecraft.world.storage.loot.functions.LootFunctionManager;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -40,6 +42,12 @@ public class LootHandler
 	private LootPool skillOrbsPool;
 	private LootEntry[] skillSwords;
 	private LootPool skillSwordsPool;
+
+	static {
+		LootConditionManager.registerCondition(new SkillCondition.Serializer());
+		LootFunctionManager.registerFunction(new RandomSkillSword.Serializer());
+		LootFunctionManager.registerFunction(new SetSkillMetadata.Serializer());
+	}
 
 	public LootHandler() {
 		if (Config.getLootWeight() > 0) {

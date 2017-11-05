@@ -19,7 +19,13 @@ package dynamicswordskills.loot.conditions;
 
 import java.util.Random;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+
 import dynamicswordskills.loot.functions.SkillFunction;
+import dynamicswordskills.ref.ModInfo;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 
@@ -36,5 +42,20 @@ public class SkillCondition implements LootCondition
 	@Override
 	public boolean testCondition(Random rand, LootContext context) {
 		return !SkillFunction.SKILL_IDS.isEmpty();
+	}
+
+	public static class Serializer extends LootCondition.Serializer<SkillCondition>
+	{
+		public Serializer() {
+			super(new ResourceLocation(ModInfo.ID, "skill_condition"), SkillCondition.class);
+		}
+		@Override
+		public void serialize(JsonObject json, SkillCondition value, JsonSerializationContext context) {
+			// nothing to serialize
+		}
+		@Override
+		public SkillCondition deserialize(JsonObject json, JsonDeserializationContext context) {
+			return new SkillCondition();
+		}
 	}
 }

@@ -19,13 +19,20 @@ package dynamicswordskills.loot.functions;
 
 import java.util.Random;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ItemRandomSkill;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
+import net.minecraft.world.storage.loot.functions.LootFunction;
 
 /**
  * 
@@ -54,5 +61,20 @@ public class RandomSkillSword extends SkillFunction
 			DynamicSwordSkills.logger.warn("Skill with ID " + i + " does not exist");
 		}
 		return stack;
+	}
+
+	public static class Serializer extends LootFunction.Serializer<RandomSkillSword>
+	{
+		public Serializer() {
+			super(new ResourceLocation(ModInfo.ID, "get_random_skill_sword"), RandomSkillSword.class);
+		}
+		@Override
+		public void serialize(JsonObject json, RandomSkillSword clazz, JsonSerializationContext context) {
+			// nothing to serialize
+		}
+		@Override
+		public RandomSkillSword deserialize(JsonObject json, JsonDeserializationContext context, LootCondition[] conditions) {
+			return new RandomSkillSword();
+		}
 	}
 }
