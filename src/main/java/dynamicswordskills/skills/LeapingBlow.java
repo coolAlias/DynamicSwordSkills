@@ -41,7 +41,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * 
  * LEAPING BLOW
- * Activation: Jump while holding block
+ * Activation: Jump while holding block (shield is not required)
  * Damage: Regular sword damage (without enchantment bonuses), +1 extra damage per skill level
  * Effect: Adds Weakness I for (50 + (10 * level)) ticks
  * Range: Technique travels roughly 3 blocks + 1/2 block per level
@@ -116,7 +116,7 @@ public class LeapingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return !isActive() && player.onGround && PlayerUtils.isBlocking(player) && !TargetUtils.isInLiquid(player);
+		return !isActive() && player.onGround && isKeyPressed() && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
@@ -135,6 +135,14 @@ public class LeapingBlow extends SkillActive
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Returns true if either the custom block key or vanilla use item key is currently down
+	 */
+	@SideOnly(Side.CLIENT)
+	protected boolean isKeyPressed() {
+		return Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown() || DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown();
 	}
 
 	@Override
