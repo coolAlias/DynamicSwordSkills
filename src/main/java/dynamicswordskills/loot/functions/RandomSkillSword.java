@@ -22,14 +22,15 @@ import java.util.Random;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSyntaxException;
 
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.LootFunction;
@@ -38,6 +39,8 @@ import net.minecraft.world.storage.loot.functions.LootFunction;
  * 
  * Calls {@link ItemRandomSkill#getRandomSkillTag} and sets the ItemStack's
  * NBT Tag accordingly.
+ * 
+ * If "skill_name" is specified and valid, the generated tag will be for that skill.
  *
  */
 public class RandomSkillSword extends SkillFunction
@@ -50,9 +53,13 @@ public class RandomSkillSword extends SkillFunction
 		super(conditions);
 	}
 
+	public RandomSkillSword(LootCondition[] conditions, String skill_name) {
+		super(conditions, skill_name);
+	}
+
 	@Override
 	public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
-		int i = SkillFunction.SKILL_IDS.get(MathHelper.getRandomIntegerInRange(rand, 0, SkillFunction.SKILL_IDS.size()));
+		int i = getSkillId(rand);
 		if (!(stack.getItem() instanceof ItemRandomSkill)) {
 			DynamicSwordSkills.logger.warn("Invalid item for RandomSkillSword function: " + stack.toString());
 		} else if (SkillBase.doesSkillExist(i)) {
@@ -70,10 +77,24 @@ public class RandomSkillSword extends SkillFunction
 		}
 		@Override
 		public void serialize(JsonObject json, RandomSkillSword instance, JsonSerializationContext context) {
-			// nothing to serialize
+			if (instance.skill_name != null) {
+				SkillBase skill = SkillBase.getSkillByName(instance.skill_name);
+				if (skill == null) {
+					throw new JsonSyntaxException("Unknown skill '" + instance.skill_name + "'");
+				}
+				json.addProperty("skill_name", instance.skill_name);
+			}
 		}
 		@Override
 		public RandomSkillSword deserialize(JsonObject json, JsonDeserializationContext context, LootCondition[] conditions) {
+			if (json.has("skill_name")) {
+				String name = JsonUtils.getString(json, "skill_name");
+				SkillBase skill = SkillBase.getSkillByName(name);
+				if (skill == null) {
+					throw new JsonSyntaxException("Unknown skill '" + name + "'");
+				}
+				return new RandomSkillSword(conditions, name);
+			}
 			return new RandomSkillSword(conditions);
 		}
 	}
