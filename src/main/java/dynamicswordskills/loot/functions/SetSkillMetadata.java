@@ -65,7 +65,7 @@ public class SetSkillMetadata extends SkillFunction
 			super(new ResourceLocation(ModInfo.ID, "gen_random_skill_meta"), SetSkillMetadata.class);
 		}
 		@Override
-		public void serialize(JsonObject json, SetSkillMetadata clazz, JsonSerializationContext context) {
+		public void serialize(JsonObject json, SetSkillMetadata instance, JsonSerializationContext context) {
 			// nothing to serialize
 		}
 		@Override

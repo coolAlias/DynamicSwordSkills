@@ -50,7 +50,7 @@ public class SkillCondition implements LootCondition
 			super(new ResourceLocation(ModInfo.ID, "skill_condition"), SkillCondition.class);
 		}
 		@Override
-		public void serialize(JsonObject json, SkillCondition value, JsonSerializationContext context) {
+		public void serialize(JsonObject json, SkillCondition instance, JsonSerializationContext context) {
 			// nothing to serialize
 		}
 		@Override
