@@ -69,7 +69,7 @@ public class RandomSkillSword extends SkillFunction
 			super(new ResourceLocation(ModInfo.ID, "get_random_skill_sword"), RandomSkillSword.class);
 		}
 		@Override
-		public void serialize(JsonObject json, RandomSkillSword clazz, JsonSerializationContext context) {
+		public void serialize(JsonObject json, RandomSkillSword instance, JsonSerializationContext context) {
 			// nothing to serialize
 		}
 		@Override
