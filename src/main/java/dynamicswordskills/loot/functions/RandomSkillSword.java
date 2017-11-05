@@ -74,7 +74,7 @@ public class RandomSkillSword extends SkillFunction
 		}
 		@Override
 		public RandomSkillSword deserialize(JsonObject json, JsonDeserializationContext context, LootCondition[] conditions) {
-			return new RandomSkillSword();
+			return new RandomSkillSword(conditions);
 		}
 	}
 }

@@ -70,7 +70,7 @@ public class SetSkillMetadata extends SkillFunction
 		}
 		@Override
 		public SetSkillMetadata deserialize(JsonObject json, JsonDeserializationContext context, LootCondition[] conditions) {
-			return new SetSkillMetadata();
+			return new SetSkillMetadata(conditions);
 		}
 	}
 }
