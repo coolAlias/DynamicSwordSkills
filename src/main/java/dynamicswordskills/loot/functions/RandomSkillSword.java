@@ -29,6 +29,9 @@ import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTException;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootContext;
@@ -41,10 +44,18 @@ import net.minecraft.world.storage.loot.functions.LootFunction;
  * NBT Tag accordingly.
  * 
  * If "skill_name" is specified and valid, the generated tag will be for that skill.
+ * 
+ * If "skill_tag" is specified, that will be used instead of generating a random tag.
+ * 
+ * JSON Tag Format: "skill_tag": "{ItemSkillName:\"skill_name\",ItemSkillLevel:xb,grantsBasicSword:yb}"
+ * where ItemSkillLevel 'x' is a number from 1 to max skill level (usually 5) and
+ * "grantsBasicSword" is either 0 or 1; both entries are followed by the letter 'b'.
  *
  */
 public class RandomSkillSword extends SkillFunction
 {
+	protected NBTTagCompound skill_tag;
+
 	public RandomSkillSword() {
 		super();
 	}
@@ -57,11 +68,18 @@ public class RandomSkillSword extends SkillFunction
 		super(conditions, skill_name);
 	}
 
+	public RandomSkillSword(LootCondition[] conditions, NBTTagCompound tag) {
+		super(conditions);
+		this.skill_tag = tag;
+	}
+
 	@Override
 	public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
 		int i = getSkillId(rand);
 		if (!(stack.getItem() instanceof ItemRandomSkill)) {
 			DynamicSwordSkills.logger.warn("Invalid item for RandomSkillSword function: " + stack.toString());
+		} else if (this.skill_tag != null) {
+			stack.setTagCompound(this.skill_tag);
 		} else if (SkillBase.doesSkillExist(i)) {
 			((ItemRandomSkill) stack.getItem()).generateSkillTag(stack, SkillBase.getSkill(i), rand);
 		} else {
@@ -77,7 +95,9 @@ public class RandomSkillSword extends SkillFunction
 		}
 		@Override
 		public void serialize(JsonObject json, RandomSkillSword instance, JsonSerializationContext context) {
-			if (instance.skill_name != null) {
+			if (instance.skill_tag != null) {
+				json.addProperty("skill_tag", instance.skill_tag.toString());
+			} else if (instance.skill_name != null) {
 				SkillBase skill = SkillBase.getSkillByName(instance.skill_name);
 				if (skill == null) {
 					throw new JsonSyntaxException("Unknown skill '" + instance.skill_name + "'");
@@ -87,7 +107,19 @@ public class RandomSkillSword extends SkillFunction
 		}
 		@Override
 		public RandomSkillSword deserialize(JsonObject json, JsonDeserializationContext context, LootCondition[] conditions) {
-			if (json.has("skill_name")) {
+			if (json.has("skill_tag")) {
+				try {
+					NBTTagCompound tag = JsonToNBT.getTagFromJson(JsonUtils.getString(json, "skill_tag"));
+					if (!tag.hasKey("ItemSkillName") || !tag.hasKey("ItemSkillLevel")) {
+						throw new JsonSyntaxException("Invalid skill tag; correct format is: {ItemSkillName:\"skill_name\",ItemSkillLevel:xb,grantsBasicSword:yb}");
+					} else if (SkillBase.getSkillByName(tag.getString("ItemSkillName")) == null) {
+						throw new JsonSyntaxException("Unknown skill '" + tag.getString("ItemSkillName") + "'");
+					}
+					return new RandomSkillSword(conditions, tag);
+				} catch (NBTException e) {
+					throw new JsonSyntaxException(e);
+				}
+			} else if (json.has("skill_name")) {
 				String name = JsonUtils.getString(json, "skill_name");
 				SkillBase skill = SkillBase.getSkillByName(name);
 				if (skill == null) {
