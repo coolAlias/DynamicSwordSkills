@@ -19,16 +19,23 @@ package dynamicswordskills.loot.functions;
 
 import java.util.Random;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
+import net.minecraft.world.storage.loot.functions.LootFunction;
 
 /**
  * 
- * Sets item metadata to the id of an enabled skill.
+ * Sets item metadata to the id of a random enabled skill.
  *
  */
 public class SetSkillMetadata extends SkillFunction
@@ -50,5 +57,20 @@ public class SetSkillMetadata extends SkillFunction
 			DynamicSwordSkills.logger.warn("Skill with ID " + i + " does not exist");
 		}
 		return stack;
+	}
+
+	public static class Serializer extends LootFunction.Serializer<SetSkillMetadata>
+	{
+		public Serializer() {
+			super(new ResourceLocation(ModInfo.ID, "gen_random_skill_meta"), SetSkillMetadata.class);
+		}
+		@Override
+		public void serialize(JsonObject json, SetSkillMetadata clazz, JsonSerializationContext context) {
+			// nothing to serialize
+		}
+		@Override
+		public SetSkillMetadata deserialize(JsonObject json, JsonDeserializationContext context, LootCondition[] conditions) {
+			return new SetSkillMetadata();
+		}
 	}
 }
