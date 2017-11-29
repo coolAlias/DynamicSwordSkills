@@ -1,14 +1,14 @@
 {
 	"homepage": "https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 	"promos": {
-		"1.9.4-latest": "3.1.0",
+		"1.9.4-latest": "3.1.1",
 		"1.8.9-latest": "2.5.1",
 		"1.8.9-recommended": "2.5",
 		"1.7.10-latest": "1.7.1",
 		"1.7.10-recommended": "1.7"
 	},
 	"1.9.4": {
-		"3.1.0": "Implemented IDashItem from SwordSkillsAPI"
+		"3.1.1": "Fixed various bugs\nSee mod home page for full change log"
 	},
 	"1.8.9": {
 	    "2.5.1": "Fixed various bugs\nSee mod home page for full change log"
@@ -19,9 +19,9 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.9.4",
-			"modVersion":"3.1.0",
+			"modVersion":"3.1.1",
 			"changeLog": [
-	               "Implemented IDashItem from SwordSkillsAPI",
+	               "Bug fixes",
 	               "See main mod page for full change log"
 			],
 			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
