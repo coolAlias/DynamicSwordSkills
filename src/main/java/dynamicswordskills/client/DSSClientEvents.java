@@ -97,6 +97,7 @@ public class DSSClientEvents
 			}
 			DSSCombatEvents.setPlayerAttackTime(mc.player);
 			mc.player.swingArm(EnumHand.MAIN_HAND);
+			mc.player.resetCooldown();
 		}
 	}
 
