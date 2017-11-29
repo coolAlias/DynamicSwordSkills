@@ -9,7 +9,7 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "5.0"
+version = "5.0.1"
 group = "com.google.coolalias008.dynamicswordskills"
 archivesBaseName = "1.11.2-DynamicSwordSkills"
 
