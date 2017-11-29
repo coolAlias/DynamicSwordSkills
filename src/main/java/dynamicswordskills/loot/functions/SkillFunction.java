@@ -74,7 +74,7 @@ public abstract class SkillFunction extends LootFunction
 				return skill.getId();
 			}
 		}
-		return SkillFunction.SKILL_IDS.get(MathHelper.getInt(rand, 0, SkillFunction.SKILL_IDS.size()));
+		return SkillFunction.SKILL_IDS.get(MathHelper.getInt(rand, 0, SkillFunction.SKILL_IDS.size() - 1));
 	}
 
 	static {
