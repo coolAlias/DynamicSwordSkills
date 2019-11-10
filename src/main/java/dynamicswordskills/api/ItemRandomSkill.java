@@ -125,6 +125,16 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	}
 
 	@Override
+	public boolean isRepairable() {
+		return false;
+	}
+
+	@Override
+	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
+		return true;
+	}
+
+	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
 		return new TextComponentTranslation("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
