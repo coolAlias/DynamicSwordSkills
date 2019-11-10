@@ -68,6 +68,9 @@ public class DynamicSwordSkills
 
 	public static final Logger logger = LogManager.getLogger(ModInfo.ID);
 
+	/** Expected FPS used as a reference to normalize e.g. client-side motion adjustments */
+	public static final float BASE_FPS = 30F;
+
 	/** Whether Battlegear2 mod is loaded */
 	public static boolean isBG2Enabled;
 

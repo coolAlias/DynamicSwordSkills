@@ -30,6 +30,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -279,7 +280,9 @@ public class SpinAttack extends SkillActive
 			}
 			spawnParticles(player);
 			player.swingProgress = 0.5F;
-			player.setAngles((clockwise ? getSpinSpeed() : -getSpinSpeed()), 0);
+			float fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS());
+			float speed = fps * this.getSpinSpeed();
+			player.setAngles((clockwise ? speed: -speed), 0);
 		}
 		return true;
 	}
