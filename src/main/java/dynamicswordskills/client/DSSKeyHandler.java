@@ -90,13 +90,11 @@ public class DSSKeyHandler
 				}
 			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
-					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggletp",
-							(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("key.dss.enable")
-									: StatCollector.translateToLocal("key.dss.disable")));
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggletp", StatCollector.translateToLocal(Config.toggleTargetPlayers() ? "key.dss.enable" : "key.dss.disable"));
+				} else if (mc.thePlayer.isSprinting()) {
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggletpm", StatCollector.translateToLocal(Config.toggleTargetPassiveMobs() ? "key.dss.enable" : "key.dss.disable"));
 				} else {
-					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggleat",
-							(Config.toggleAutoTarget() ? StatCollector.translateToLocal("key.dss.enable")
-									: StatCollector.translateToLocal("key.dss.disable")));
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggleat", StatCollector.translateToLocal(Config.toggleAutoTarget() ? "key.dss.enable" : "key.dss.disable"));
 				}
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));

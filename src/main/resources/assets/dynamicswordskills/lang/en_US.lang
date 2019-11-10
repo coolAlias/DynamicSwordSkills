@@ -78,6 +78,7 @@ key.dss.skills_gui.desc=View Skills
 key.dss.togglehud.desc=Toggle Combo HUD
 key.dss.toggleat.desc=Toggle Auto-Targeting
 key.dss.toggleat=Auto targeting is now %s
+key.dss.toggletpm=Targeting of passive mobs is now %s
 key.dss.toggletp=Player targeting is now %s
 key.dss.togglehud=Combo HUD is now %s
 key.dss.enable=enabled
