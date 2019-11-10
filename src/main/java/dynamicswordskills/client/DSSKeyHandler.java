@@ -92,6 +92,8 @@ public class DSSKeyHandler
 			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
 					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggletp", new TextComponentTranslation(Config.toggleTargetPlayers() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
+				} else if (mc.thePlayer.isSprinting()) {
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggletpm", new TextComponentTranslation(Config.toggleTargetPassiveMobs() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
 				} else {
 					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggleat", new TextComponentTranslation(Config.toggleAutoTarget() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
 				}
