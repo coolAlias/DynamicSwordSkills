@@ -140,6 +140,7 @@ public class TargetUtils
 	 *   - target is not the current seeker
 	 *   - target is not riding or being ridden by the current seeker
 	 *   - {@link Entity#canBeCollidedWith} returns true
+	 *   - {@link Entity#isInvisible} returns false
 	 */
 	public static final boolean isTargetValid(Entity target, EntityLivingBase seeker) {
 		if (target == seeker) {
@@ -149,7 +150,7 @@ public class TargetUtils
 		} else if (!Config.canTargetPassiveMobs() && !(target instanceof IMob)) {
 			return false;
 		}
-		return target.canBeCollidedWith();
+		return target.canBeCollidedWith() && !target.isInvisible();
 	}
 
 	/** Returns the EntityLivingBase closest to the point at which the seeker is looking and within the distance and radius specified */
