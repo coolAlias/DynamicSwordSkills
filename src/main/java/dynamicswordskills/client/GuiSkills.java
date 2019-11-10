@@ -93,6 +93,7 @@ public class GuiSkills extends GuiContainer
 			scrollY = ((float)(mouseY - y1) - 3.0F) / 81.0F;
 			clampScrollBar();
 		}
+		this.renderHoveredToolTip(mouseX, mouseY);
 	}
 
 	/** Returns true if the mouse is within the real-screen coordinates specified */
