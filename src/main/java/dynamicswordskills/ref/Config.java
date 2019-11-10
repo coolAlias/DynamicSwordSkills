@@ -63,6 +63,8 @@ public class Config
 	public static int endingBlowHudOffsetY;
 	/** [Targeting] Whether auto-targeting is enabled or not (toggle in game by pressing '.') */
 	private static boolean autoTarget;
+	/** [Targeting] Whether passive mobs can be targeted (toggle in game: '.' while sprinting) */
+	private static boolean enablePassiveTarget;
 	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
 	private static boolean enablePlayerTarget;
 	/*================== WEAPON REGISTRY =====================*/
@@ -133,6 +135,7 @@ public class Config
 		endingBlowHudOffsetX = config.get(category, "[Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
 		endingBlowHudOffsetY = config.get(category, "[Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 30).getInt();
 		autoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
+		enablePassiveTarget = config.get(category, "[Targeting] Whether passive mobs can be targeted (toggle in game: '.' while sprinting)", true).getBoolean(true);
 		enablePlayerTarget = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
 		/*================== WEAPON REGISTRY =====================*/
 		swords = config.get("Weapon Registry", "[Allowed Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item so that it is considered a SWORD by ZSS, i.e. it be used with skills that\nrequire swords, as well as other interactions that require swords, such as cutting grass.\nAll swords are also considered WEAPONS.").getStringList();
@@ -192,6 +195,8 @@ public class Config
 	public static boolean requiresDoubleTap() { return doubleTap; }
 	public static boolean autoTargetEnabled() { return autoTarget; }
 	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
+	public static boolean canTargetPassiveMobs() { return enablePassiveTarget; }
+	public static boolean toggleTargetPassiveMobs() { enablePassiveTarget = !enablePassiveTarget; return enablePassiveTarget; }
 	public static boolean canTargetPlayers() { return enablePlayerTarget; }
 	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
 	/*================== SKILLS =====================*/
