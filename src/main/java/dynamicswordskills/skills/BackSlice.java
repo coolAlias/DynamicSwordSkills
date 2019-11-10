@@ -36,6 +36,7 @@ import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DSSCombatEvents;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -257,7 +258,8 @@ public class BackSlice extends SkillActive
 			if (speed > 1.0D) {
 				speed = 1.0D;
 			}
-			double d = 0.15D * speed * speed;
+			double fps = (DynamicSwordSkills.BASE_FPS / (float) DynamicSwordSkills.proxy.getDebugFPS());
+			double d = 0.15D * fps * speed * speed;
 			if (player.isInWater() || player.handleLavaMovement()) {
 				d *= 0.15D;
 			}

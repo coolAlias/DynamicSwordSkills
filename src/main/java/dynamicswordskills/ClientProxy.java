@@ -17,12 +17,12 @@
 
 package dynamicswordskills;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.common.MinecraftForge;
+import java.lang.reflect.Field;
+
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.ReflectionHelper;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.client.RenderEntitySwordBeam;
@@ -30,8 +30,14 @@ import dynamicswordskills.client.RenderNothing;
 import dynamicswordskills.client.TargetingTickHandler;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.common.MinecraftForge;
 
-public class ClientProxy extends CommonProxy {
+public class ClientProxy extends CommonProxy
+{
+	/** Accessible reference to {@code Minecraft#debugFPS */
+	private static Field debugFPS;
 
 	@Override
 	public void registerRenderers() {
@@ -45,5 +51,17 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public EntityPlayer getPlayerEntity(MessageContext ctx) {
 		return (ctx.side.isClient() ? Minecraft.getMinecraft().thePlayer : super.getPlayerEntity(ctx));
+	}
+
+	public int getDebugFPS() {
+		if (debugFPS == null) {
+			debugFPS = ReflectionHelper.findField(Minecraft.class, "field_71470_ab", "debugFPS");
+		}
+		try {
+			return debugFPS.getInt(Minecraft.class);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Minecraft.getMinecraft().getLimitFramerate();
 	}
 }

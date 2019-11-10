@@ -55,4 +55,8 @@ public class CommonProxy implements IGuiHandler
 		}
 		return null;
 	}
+
+	public int getDebugFPS() {
+		return 30;
+	}
 }

@@ -30,6 +30,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -205,7 +206,9 @@ public class Dodge extends SkillActive
 		if (speed > 1.0D) {
 			speed = 1.0D;
 		}
-		double d = 0.15D * speed * speed;
+		// TODO reduce speed in liquids?
+		double fps = (DynamicSwordSkills.BASE_FPS / (float) DynamicSwordSkills.proxy.getDebugFPS()); 
+		double d = 0.15D * fps * speed * speed;
 		Vec3 vec3 = player.getLookVec();
 		if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
 			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
