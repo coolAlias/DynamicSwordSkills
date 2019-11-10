@@ -19,6 +19,7 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -297,7 +298,9 @@ public class SpinAttack extends SkillActive
 			}
 			spawnParticles(player);
 			DSSPlayerInfo.get(player).armSwing = 0.5F;
-			player.setAngles((clockwise ? getSpinSpeed() : -getSpinSpeed()), 0);
+			float fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS());
+			float speed = fps * this.getSpinSpeed();
+			player.setAngles((clockwise ? speed: -speed), 0);
 		}
 		return true;
 	}
