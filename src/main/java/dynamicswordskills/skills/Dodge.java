@@ -206,10 +206,12 @@ public class Dodge extends SkillActive
 		if (speed > 1.0D) {
 			speed = 1.0D;
 		}
-		// TODO reduce speed in liquids?
 		double fps = (DynamicSwordSkills.BASE_FPS / (float) DynamicSwordSkills.proxy.getDebugFPS()); 
 		double d = 0.15D * fps * speed * speed;
 		Vec3 vec3 = player.getLookVec();
+		if (player.isInWater() || player.handleLavaMovement()) {
+			d *= 0.15D;
+		}
 		if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
 			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
 		} else {
