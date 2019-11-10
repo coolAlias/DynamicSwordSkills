@@ -81,7 +81,7 @@ public class ItemSkillOrb extends Item implements IModItem
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
-		return new TextComponentTranslation(super.getUnlocalizedName() + ".name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
+		return new TextComponentTranslation(super.getTranslationKey() + ".name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
 	}
 
 	@Override

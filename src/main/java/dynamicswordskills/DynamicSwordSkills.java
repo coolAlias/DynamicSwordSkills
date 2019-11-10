@@ -99,11 +99,11 @@ public class DynamicSwordSkills
 		tabSkills = new CreativeTabs("dss.skills") {
 			@Override
 			@SideOnly(Side.CLIENT)
-			public ItemStack getTabIconItem() {
+			public ItemStack createIcon() {
 				return new ItemStack(DynamicSwordSkills.skillOrb);
 			}
 		};
-		skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
+		skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setTranslationKey("dss.skillorb");
 		if (Config.areCreativeSwordsEnabled()) {
 			skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
 			Item item = null;

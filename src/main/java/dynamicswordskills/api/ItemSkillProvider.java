@@ -124,7 +124,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 		setMaxDamage(this.material.getMaxUses());
 		setMaxStackSize(1);
 		setRegistryName(ModInfo.ID, "skillitem_" + skill.getUnlocalizedName());
-		setUnlocalizedName("dss.skillitem" + skill.getId());
+		setTranslationKey("dss.skillitem" + skill.getId());
 	}
 
 	@Override

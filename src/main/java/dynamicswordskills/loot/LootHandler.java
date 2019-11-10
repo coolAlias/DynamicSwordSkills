@@ -76,7 +76,7 @@ public class LootHandler
 
 	@SubscribeEvent
 	public void addLoot(LootTableLoadEvent event) {
-		if(!event.getName().getResourceDomain().equalsIgnoreCase("minecraft") || !event.getName().getResourcePath().toLowerCase().contains("chest")) {
+		if(!event.getName().getNamespace().equalsIgnoreCase("minecraft") || !event.getName().getPath().toLowerCase().contains("chest")) {
 			return; // only modify vanilla chest loot tables
 		}
 		// Add skill orbs as an additional pool to bonus chest; other chests add to existing pool

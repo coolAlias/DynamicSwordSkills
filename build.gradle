@@ -25,9 +25,9 @@ dependencies {
 }
 
 minecraft {
-    version = "1.12.2-14.23.0.2529"
+    version = "1.12.2-14.23.5.2768"
     runDir = "eclipse"
-    mappings = "snapshot_20171102"
+    mappings = "stable_39"
 }
 
 processResources

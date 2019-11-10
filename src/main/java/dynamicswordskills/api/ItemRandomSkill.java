@@ -65,7 +65,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		this.quality = material.getHarvestLevel() + (material == ToolMaterial.GOLD ? 3 : 0);
 		setCreativeTab(null);
 		setRegistryName(ModInfo.ID, "skillsword_" + material.name());
-		setUnlocalizedName("dss.skill" + material.name());
+		setTranslationKey("dss.skill" + material.name());
 	}
 
 	@Override

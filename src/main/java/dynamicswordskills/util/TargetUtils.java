@@ -179,7 +179,7 @@ public class TargetUtils
 			targetX += vec3.x;
 			targetY += vec3.y;
 			targetZ += vec3.z;
-			distanceTraveled += vec3.lengthVector();
+			distanceTraveled += vec3.length();
 			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
 			List<EntityLivingBase> list = seeker.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
@@ -215,7 +215,7 @@ public class TargetUtils
 			targetX += vec3.x;
 			targetY += vec3.y;
 			targetZ += vec3.z;
-			distanceTraveled += vec3.lengthVector();
+			distanceTraveled += vec3.length();
 			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
 			List<EntityLivingBase> list = seeker.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
