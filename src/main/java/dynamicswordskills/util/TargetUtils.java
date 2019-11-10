@@ -20,10 +20,12 @@ package dynamicswordskills.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import dynamicswordskills.ref.Config;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -142,6 +144,8 @@ public class TargetUtils
 		if (target == seeker) {
 			return false;
 		} else if (target.ridingEntity == seeker || seeker.ridingEntity == target) {
+			return false;
+		} else if (!Config.canTargetPassiveMobs() && !(target instanceof IMob)) {
 			return false;
 		}
 		return target.canBeCollidedWith();
