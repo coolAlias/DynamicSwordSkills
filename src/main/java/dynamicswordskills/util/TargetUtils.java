@@ -133,6 +133,21 @@ public class TargetUtils
 		return (mop == null ? null : mop.entityHit);
 	}
 
+	/**
+	 * Returns true if target is considered valid, specifically:
+	 *   - target is not the current seeker
+	 *   - target is not riding or being ridden by the current seeker
+	 *   - {@link Entity#canBeCollidedWith} returns true
+	 */
+	public static final boolean isTargetValid(Entity target, EntityLivingBase seeker) {
+		if (target == seeker) {
+			return false;
+		} else if (target.riddenByEntity == seeker || seeker.ridingEntity == target) {
+			return false;
+		}
+		return target.canBeCollidedWith();
+	}
+
 	/** Returns the EntityLivingBase closest to the point at which the seeker is looking and within the distance and radius specified */
 	public static final EntityLivingBase acquireLookTarget(EntityLivingBase seeker, int distance, double radius) {
 		return acquireLookTarget(seeker, distance, radius, false);
@@ -165,7 +180,7 @@ public class TargetUtils
 			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
 					AxisAlignedBB.getBoundingBox(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius));
 			for (EntityLivingBase target : list) {
-				if (target != seeker && target.canBeCollidedWith() && isTargetInSight(vec3, seeker, target)) {
+				if (isTargetValid(target, seeker) && isTargetInSight(vec3, seeker, target)) {
 					double newDistance = (closestToSeeker ? target.getDistanceSqToEntity(seeker) : target.getDistanceSq(targetX, targetY, targetZ));
 					if (newDistance < currentDistance) {
 						currentTarget = target;
@@ -201,7 +216,7 @@ public class TargetUtils
 			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
 					AxisAlignedBB.getBoundingBox(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius));
 			for (EntityLivingBase target : list) {
-				if (target != seeker && target.canBeCollidedWith() && isTargetInSight(vec3, seeker, target)) {
+				if (isTargetValid(target, seeker) && isTargetInSight(vec3, seeker, target)) {
 					if (!targets.contains(target)) {
 						targets.add(target);
 					}
