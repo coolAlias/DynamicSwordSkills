@@ -1,44 +1,44 @@
 {
 	"homepage": "https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 	"promos": {
-		"1.12.2-latest": "6.0.1",
-		"1.12.2-recommended": "6.0.1",
-		"1.11.2-latest": "5.0.1",
-		"1.11.2-recommended": "5.0.1",
-		"1.10.2-latest": "4.0.1",
-		"1.10.2-recommended": "4.0.1",
-		"1.9.4-latest": "3.1.1",
-		"1.9.4-recommended": "3.1.1",
-		"1.8.9-latest": "2.5.1",
-		"1.8.9-recommended": "2.5.1",
-		"1.7.10-latest": "1.7.1",
-		"1.7.10-recommended": "1.7.1"
+		"1.12.2-latest": "1.12.2-6.0.1",
+		"1.12.2-recommended": "1.12.2-6.0.1",
+		"1.11.2-latest": "1.11.2-5.0.1",
+		"1.11.2-recommended": "1.11.2-5.0.1",
+		"1.10.2-latest": "1.10.2-4.0.1",
+		"1.10.2-recommended": "1.10.2-4.0.1",
+		"1.9.4-latest": "1.9.4-3.1.1",
+		"1.9.4-recommended": "1.9.4-3.1.1",
+		"1.8.9-latest": "1.8.9-2.5.1",
+		"1.8.9-recommended": "1.8.9-2.5.1",
+		"1.7.10-latest": "1.7.10-1.7.1",
+		"1.7.10-recommended": "1.7.10-1.7.1"
 	},
 	"1.12.2": {
-		"6.0.1": "Fixed various bugs\nSee mod home page for full change log"
+		"1.12.2-6.0.1": "Fixed various bugs\nSee mod home page for full change log"
 	},
 	"1.11.2": {
-		"5.0.1": "Fixed various bugs\nSee mod home page for full change log"
+		"1.11.2-5.0.1": "Fixed various bugs\nSee mod home page for full change log"
 	},
 	"1.10.2": {
-		"4.0.1": "Fixed various bugs\nSee mod home page for full change log"
+		"1.10.2-4.0.1": "Fixed various bugs\nSee mod home page for full change log"
 	},
 	"1.9.4": {
-		"3.1.1": "Fixed various bugs\nSee mod home page for full change log"
+		"1.9.4-3.1.1": "Fixed various bugs\nSee mod home page for full change log"
 	},
 	"1.8.9": {
-	    "2.5.1": "Fixed various bugs\nSee mod home page for full change log"
+		"1.8.9-2.5.1": "Fixed various bugs\nSee mod home page for full change log"
 	},
 	"1.7.10": {
-	    "1.7.1": "Fixed various bugs\nSee mod home page for full change log"
+		"1.7.10-1.7.1": "Fixed various bugs\nSee mod home page for full change log"
 	},
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.12.2",
-			"modVersion":"6.0.1",
+			"modVersion":"1.12.2-6.0.1",
 			"changeLog": [
-	               "Bug fixes",
-	               "See main mod page for full change log"
+				   "Bug fixes",
+				   "See main mod page for full change log"
 			],
 			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
@@ -46,10 +46,10 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.11.2",
-			"modVersion":"5.0.1",
+			"modVersion":"1.11.2-5.0.1",
 			"changeLog": [
-	               "Bug fixes",
-	               "See main mod page for full change log"
+				   "Bug fixes",
+				   "See main mod page for full change log"
 			],
 			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
@@ -57,10 +57,10 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.10.2",
-			"modVersion":"4.0.1",
+			"modVersion":"1.10.2-4.0.1",
 			"changeLog": [
-	               "Bug fixes",
-	               "See main mod page for full change log"
+				   "Bug fixes",
+				   "See main mod page for full change log"
 			],
 			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
@@ -68,10 +68,10 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.9.4",
-			"modVersion":"3.1.1",
+			"modVersion":"1.9.4-3.1.1",
 			"changeLog": [
-	               "Bug fixes",
-	               "See main mod page for full change log"
+				   "Bug fixes",
+				   "See main mod page for full change log"
 			],
 			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
@@ -79,10 +79,10 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.8.9",
-			"modVersion":"2.5.1",
+			"modVersion":"1.8.9-2.5.1",
 			"changeLog": [
-	               "Fixed various bugs",
-	               "See main mod page for full change log"
+				   "Fixed various bugs",
+				   "See main mod page for full change log"
 			],
 			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
@@ -90,10 +90,10 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.8.0",
-			"modVersion":"2.1",
+			"modVersion":"1.8-2.1",
 			"changeLog": [
-	               "Added Weapon Registry",
-	               "See main mod page for full change log"
+				   "Added Weapon Registry",
+				   "See main mod page for full change log"
 			],
 			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
@@ -101,10 +101,10 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"1.7.1",
+			"modVersion":"1.7.10-1.7.1",
 			"changeLog": [
-	               "Fixed various bugs",
-	               "See main mod page for full change log"
+				   "Fixed various bugs",
+				   "See main mod page for full change log"
 			],
 			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
