@@ -20,6 +20,7 @@ package dynamicswordskills.skills;
 import java.util.List;
 
 import dynamicswordskills.DSSCombatEvents;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -260,7 +261,8 @@ public class BackSlice extends SkillActive
 			if (speed > 1.0D) {
 				speed = 1.0D;
 			}
-			double d = 0.15D * speed * speed;
+			double fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS());
+			double d = 0.15D * fps * speed * speed;
 			if (player.isInWater() || player.isInLava()) {
 				d *= 0.15D;
 			}
