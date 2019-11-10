@@ -96,6 +96,11 @@ public class ItemRandomSkill extends ItemSword implements ISkillProvider
 	}
 
 	@Override
+	public boolean isRepairable() {
+		return false;
+	}
+
+	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
 		return StatCollector.translateToLocalFormatted("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName()));
