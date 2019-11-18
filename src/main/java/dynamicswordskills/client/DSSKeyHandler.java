@@ -100,8 +100,8 @@ public class DSSKeyHandler
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
 			}  else if (kb == keys[KEY_TOGGLE_HUD].getKeyCode()) {
-				Config.isComboHudEnabled = !Config.isComboHudEnabled;
-				PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.togglehud", new TextComponentTranslation(Config.isComboHudEnabled ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
+				Config.comboHudEnabled = !Config.comboHudEnabled;
+				PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.togglehud", new TextComponentTranslation(Config.comboHudEnabled ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
 			} else {
 				handleTargetingKeys(mc, kb, skills);
 			}

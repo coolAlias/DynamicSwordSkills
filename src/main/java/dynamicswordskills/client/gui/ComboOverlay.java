@@ -61,12 +61,12 @@ public class ComboOverlay extends AbstractGuiOverlay
 
 	@Override
 	public HALIGN getHorizontalAlignment() {
-		return Config.comboHudHAlign;
+		return Config.comboHudXAlign;
 	}
 
 	@Override
 	public VALIGN getVerticalAlignment() {
-		return Config.comboHudVAlign;
+		return Config.comboHudYAlign;
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class ComboOverlay extends AbstractGuiOverlay
 
 	@Override
 	public boolean shouldRender() {
-		if (!Config.isComboHudEnabled) {
+		if (!Config.comboHudEnabled) {
 			return false;
 		}
 		ICombo iCombo = DSSPlayerInfo.get(mc.thePlayer).getComboSkill();
@@ -111,8 +111,8 @@ public class ComboOverlay extends AbstractGuiOverlay
 		this.comboSize = new TextComponentTranslation("combo.size", this.combo.getNumHits(), this.combo.getMaxNumHits()).getUnformattedText();
 		this.comboDamage = new TextComponentTranslation("combo.damage", String.format("%.1f", this.combo.getDamage())).getUnformattedText();
 		this.width = Math.max(this.mc.fontRendererObj.getStringWidth(this.label), this.mc.fontRendererObj.getStringWidth(this.comboDamage));
-		this.setPosX(resolution, this.getOffsetX(DEFAULT_PADDING) + Config.comboHudOffsetX);
-		this.setPosY(resolution, this.getOffsetY(DEFAULT_PADDING) + Config.comboHudOffsetY);
+		this.setPosX(resolution, this.getOffsetX(DEFAULT_PADDING) + Config.comboHudXOffset);
+		this.setPosY(resolution, this.getOffsetY(DEFAULT_PADDING) + Config.comboHudYOffset);
 	}
 
 	@Override
