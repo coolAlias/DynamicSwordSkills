@@ -198,11 +198,8 @@ public class Config
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
 	public static boolean requiresDoubleTap() { return requireDoubleTap; }
 	public static boolean autoTargetEnabled() { return enableAutoTarget; }
-	public static boolean toggleAutoTarget() { enableAutoTarget = !enableAutoTarget; return enableAutoTarget; }
 	public static boolean canTargetPassiveMobs() { return enableTargetPassive; }
-	public static boolean toggleTargetPassiveMobs() { enableTargetPassive = !enableTargetPassive; return enableTargetPassive; }
 	public static boolean canTargetPlayers() { return enableTargetPlayer; }
-	public static boolean toggleTargetPlayers() { enableTargetPlayer = !enableTargetPlayer; return enableTargetPlayer; }
 	/*================== SKILLS =====================*/
 	public static boolean giveBonusOrb() { return enableBonusOrb; }
 	public static int getLootWeight() { return chestLootWeight; }
