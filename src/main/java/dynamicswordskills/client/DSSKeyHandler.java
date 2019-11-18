@@ -44,18 +44,45 @@ public class DSSKeyHandler
 	private final Minecraft mc;
 
 	/** Key index for easy handling and retrieval of keys and key descriptions */
-	public static final byte KEY_SKILL_ACTIVATE = 0, KEY_NEXT_TARGET = 1, KEY_ATTACK = 2,
-			KEY_LEFT = 3, KEY_RIGHT = 4, KEY_DOWN = 5, KEY_BLOCK = 6, KEY_TOGGLE_AUTOTARGET = 7,
-			KEY_SKILLS_GUI = 8, KEY_TOGGLE_HUD = 9;
+	public static final byte 
+	KEY_SKILL_ACTIVATE = 0,
+	KEY_NEXT_TARGET = 1,
+	KEY_ATTACK = 2,
+	KEY_LEFT = 3,
+	KEY_RIGHT = 4,
+	KEY_DOWN = 5,
+	KEY_BLOCK = 6,
+	KEY_TOGGLE_AUTOTARGET = 7,
+	KEY_SKILLS_GUI = 8,
+	KEY_TOGGLE_HUD = 9;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
-	public static final String[] desc = { "activate","next","attack","left","right","down",
-		"block","toggleat","skills_gui","togglehud"};
+	public static final String[] desc = {
+			"activate",
+			"next",
+			"attack",
+			"left",
+			"right",
+			"down",
+			"block",
+			"toggleat",
+			"skills_gui",
+			"togglehud"
+	};
 
 	/** Default key values */
-	private static final int[] keyValues = {Keyboard.KEY_X, Keyboard.KEY_TAB, Keyboard.KEY_UP,
-		Keyboard.KEY_LEFT, Keyboard.KEY_RIGHT, Keyboard.KEY_DOWN, Keyboard.KEY_RCONTROL,
-		Keyboard.KEY_PERIOD, Keyboard.KEY_P, Keyboard.KEY_V};
+	private static final int[] keyValues = {
+			Keyboard.KEY_X,
+			Keyboard.KEY_TAB,
+			Keyboard.KEY_UP,
+			Keyboard.KEY_LEFT,
+			Keyboard.KEY_RIGHT,
+			Keyboard.KEY_DOWN,
+			Keyboard.KEY_RCONTROL,
+			Keyboard.KEY_PERIOD,
+			Keyboard.KEY_P,
+			Keyboard.KEY_V
+	};
 
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
 
