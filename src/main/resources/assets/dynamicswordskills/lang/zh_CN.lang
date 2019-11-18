@@ -64,11 +64,6 @@ key.dss.right.desc=右闪避
 key.dss.down.desc=格挡
 key.dss.block.desc=锁定
 key.dss.skills_gui.desc=查看技能
-key.dss.toggleat.desc=激活/关闭自动瞄准
-key.dss.toggleat=自动瞄准现在 %s
-key.dss.toggletp=玩家现在瞄准着 %s
-key.dss.enable=开启
-key.dss.disable=关闭
 
 skill.dss.desc.area=面积: %s块
 skill.dss.desc.charge=蓄力时间: %d刻

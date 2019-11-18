@@ -27,7 +27,6 @@ import dynamicswordskills.network.server.OpenGuiPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -51,9 +50,7 @@ public class DSSKeyHandler
 	KEY_RIGHT = 4,
 	KEY_DOWN = 5,
 	KEY_BLOCK = 6,
-	KEY_TOGGLE_AUTOTARGET = 7,
-	KEY_SKILLS_GUI = 8,
-	KEY_TOGGLE_HUD = 9;
+	KEY_SKILLS_GUI = 7;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
 	public static final String[] desc = {
@@ -64,9 +61,7 @@ public class DSSKeyHandler
 			"right",
 			"down",
 			"block",
-			"toggleat",
-			"skills_gui",
-			"togglehud"
+			"skills_gui"
 	};
 
 	/** Default key values */
@@ -78,9 +73,7 @@ public class DSSKeyHandler
 			Keyboard.KEY_RIGHT,
 			Keyboard.KEY_DOWN,
 			Keyboard.KEY_RCONTROL,
-			Keyboard.KEY_PERIOD,
-			Keyboard.KEY_P,
-			Keyboard.KEY_V
+			Keyboard.KEY_P
 	};
 
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
@@ -116,19 +109,8 @@ public class DSSKeyHandler
 				if (skills.hasSkill(SkillBase.swordBasic)) {
 					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.swordBasic));
 				}
-			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
-				if (mc.thePlayer.isSneaking()) {
-					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggletp", new TextComponentTranslation(Config.toggleTargetPlayers() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
-				} else if (mc.thePlayer.isSprinting()) {
-					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggletpm", new TextComponentTranslation(Config.toggleTargetPassiveMobs() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
-				} else {
-					PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.toggleat", new TextComponentTranslation(Config.toggleAutoTarget() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
-				}
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
-			}  else if (kb == keys[KEY_TOGGLE_HUD].getKeyCode()) {
-				Config.comboHudEnabled = !Config.comboHudEnabled;
-				PlayerUtils.sendTranslatedChat(mc.thePlayer, "key.dss.togglehud", new TextComponentTranslation(Config.comboHudEnabled ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
 			} else {
 				handleTargetingKeys(mc, kb, skills);
 			}

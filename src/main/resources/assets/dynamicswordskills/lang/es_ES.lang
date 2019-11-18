@@ -59,11 +59,6 @@ key.dss.right.desc=Esquivar hacia la derecha
 key.dss.down.desc=Rechazar
 key.dss.block.desc=Bloquear
 key.dss.skills_gui.desc=View Skills
-key.dss.toggleat.desc=Des/Activar punteria automática
-key.dss.toggleat=Punteria automática %s
-key.dss.toggletp=Player targeting %s
-key.dss.enable=activada
-key.dss.disable=desactivada
 
 skill.dss.desc.area=Area: %s blocks
 skill.dss.desc.charge=Charge Time: %d ticks
