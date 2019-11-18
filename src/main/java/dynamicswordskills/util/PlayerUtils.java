@@ -31,7 +31,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -39,7 +38,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import swordskillsapi.api.item.IWeapon;
 import swordskillsapi.api.item.WeaponRegistry;
 
 /**
@@ -57,30 +55,17 @@ public class PlayerUtils
 	}
 
 	/**
-	 * Returns true if the item is a sword: i.e. if it is an {@link ItemSword},
-	 * an {@link IWeapon} (returns {@link IWeapon#isSword(ItemStack)}),
-	 * or registered to the {@link WeaponRegistry} as a sword
+	 * Returns {@link WeaponRegistry#isSword(ItemStack}
 	 */
 	public static boolean isSword(ItemStack stack) {
-		if (stack == null) {
-			return false;
-		} else if (stack.getItem() instanceof IWeapon) {
-			return ((IWeapon) stack.getItem()).isSword(stack);
-		}
-		return WeaponRegistry.INSTANCE.isSword(stack.getItem());
+		return WeaponRegistry.INSTANCE.isSword(stack);
 	}
 
 	/**
-	 * Returns true if the item is any kind of weapon: a {@link #isSword(ItemStack) sword},
-	 * an {@link IWeapon}, or registered to the {@link WeaponRegistry} as a weapon
+	 * Returns {@link WeaponRegistry#isWeapon(ItemStack}
 	 */
 	public static boolean isWeapon(ItemStack stack) {
-		if (stack == null) {
-			return false;
-		} else if (stack.getItem() instanceof IWeapon) {
-			return ((IWeapon) stack.getItem()).isWeapon(stack);
-		}
-		return (isSword(stack) || WeaponRegistry.INSTANCE.isWeapon(stack.getItem()));
+		return WeaponRegistry.INSTANCE.isWeapon(stack);
 	}
 
 	/** Returns true if the stack is either a {@link #isSwordItem(Item) sword} or {@link ISkillProvider provider} of this skill */

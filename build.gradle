@@ -28,7 +28,7 @@ sourceCompatibility = targetCompatibility = "1.8"
 
 dependencies {
     compile files (
-		"eclipse/libs/1.9.4-SwordSkillsApi-1.1.0-deobf.jar",
+		"eclipse/libs/1.9.4-SwordSkillsApi-2.0-deobf.jar",
     )
 }
 
