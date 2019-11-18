@@ -3,10 +3,10 @@ chat.dss.skill.maxlevel=%s уже полностью выучен!
 chat.dss.skill.use.disabled=%s отключен
 chat.dss.skill.use.fail=Сейчас нельзя использовать %s!
 
-combo.combo=Комбо
-combo.finished=Закончено
-combo.damage=Урон
-combo.size=Ударов
+combo.combo=Комбо: %s
+combo.finished=Закончено! %s
+combo.damage=Урон: %s
+combo.size=Ударов: %1$d/%2$d
 combo.label.1=Один удар
 combo.label.2=Новичок
 combo.label.3=Сойдёт
