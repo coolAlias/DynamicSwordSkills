@@ -63,11 +63,6 @@ key.dss.right.desc=Dodge Right
 key.dss.down.desc=Parry
 key.dss.block.desc=Block
 key.dss.skills_gui.desc=View Skills
-key.dss.toggleat.desc=Toggle Automatyczne namierzanie
-key.dss.toggleat=Automatyczne namierzanie: %s
-key.dss.toggletp=Namierzanie graczy: %s
-key.dss.enable=włączone
-key.dss.disable=wyłączone
 
 skill.dss.desc.area=Area: %s blocks
 skill.dss.desc.charge=Charge Time: %d ticks

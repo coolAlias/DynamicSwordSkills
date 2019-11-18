@@ -64,13 +64,6 @@ key.dss.right.desc=Уклонение вправо
 key.dss.down.desc=Парирование
 key.dss.block.desc=Блок
 key.dss.skills_gui.desc=Просмотр умений
-key.dss.togglehud.desc=Переключить отображение комбо
-key.dss.toggleat.desc=Переключить автозахват следующей цели
-key.dss.toggleat=Захват следующего противника %s
-key.dss.toggletp=Прицеливание на игроков %s
-key.dss.togglehud=Отображение комбо %s
-key.dss.enable=включено
-key.dss.disable=выключено
 
 skill.dss.desc.area=Зона поражения: %s блоков
 skill.dss.desc.charge=Время зарядки: %d тиков
