@@ -42,17 +42,17 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 
 	@Override
 	public HALIGN getHorizontalAlignment() {
-		return Config.endingBlowHudHAlign;
+		return Config.endingBlowHudXAlign;
 	}
 
 	@Override
 	public VALIGN getVerticalAlignment() {
-		return Config.endingBlowHudVAlign;
+		return Config.endingBlowHudYAlign;
 	}
 
 	@Override
 	public boolean shouldRender() {
-		if (!Config.isEndingBlowHudEnabled) {
+		if (!Config.endingBlowHudEnabled) {
 			return false;
 		}
 		SkillActive skill = DSSPlayerInfo.get(mc.thePlayer).getActiveSkill(SkillActive.endingBlow);
@@ -70,8 +70,8 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 	protected void setup(ScaledResolution resolution) {
 		this.height = this.mc.fontRendererObj.FONT_HEIGHT;
 		this.width = this.mc.fontRendererObj.getStringWidth(StatCollector.translateToLocal("combo.ending"));
-		this.setPosX(resolution, Config.endingBlowHudOffsetX);
-		this.setPosY(resolution, Config.endingBlowHudOffsetY);
+		this.setPosX(resolution, Config.endingBlowHudXOffset);
+		this.setPosY(resolution, Config.endingBlowHudYOffset);
 	}
 
 	@Override

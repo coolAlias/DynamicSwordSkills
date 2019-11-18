@@ -17,7 +17,6 @@
 
 package dynamicswordskills.ref;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,39 +33,27 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 public class Config
 {
+	public static Configuration config;
 	/*================== CLIENT SIDE SETTINGS =====================*/
-	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
-	public static boolean isComboHudEnabled;
-	/** [Combo HUD] Number of combo hits to display */
-	private static int hitsToDisplay;
-	/** [Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
-	public static HALIGN comboHudHAlign;
-	/** [Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
-	public static VALIGN comboHudVAlign;
-	/** [Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
-	public static int comboHudOffsetX;
-	/** [Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
-	public static int comboHudOffsetY;
-	/** [Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry */
+	/* General client settings */
+	private static boolean enableAutoTarget;
+	private static boolean enableTargetPassive;
+	private static boolean enableTargetPlayer;
 	private static boolean allowVanillaControls;
-	/** [Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme) */
-	private static boolean doubleTap;
-	/** [Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use) */
-	public static boolean isEndingBlowHudEnabled;
-	/** [Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
-	public static HALIGN endingBlowHudHAlign;
-	/** [Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
-	public static VALIGN endingBlowHudVAlign;
-	/** [Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
-	public static int endingBlowHudOffsetX;
-	/** [Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
-	public static int endingBlowHudOffsetY;
-	/** [Targeting] Whether auto-targeting is enabled or not (toggle in game by pressing '.') */
-	private static boolean autoTarget;
-	/** [Targeting] Whether passive mobs can be targeted (toggle in game: '.' while sprinting) */
-	private static boolean enablePassiveTarget;
-	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
-	private static boolean enablePlayerTarget;
+	private static boolean requireDoubleTap;
+	/* Combo HUD */
+	public static boolean comboHudEnabled;
+	private static int comboHudMaxHits;
+	public static HALIGN comboHudXAlign;
+	public static VALIGN comboHudYAlign;
+	public static int comboHudXOffset;
+	public static int comboHudYOffset;
+	/* Ending Blow HUD */
+	public static boolean endingBlowHudEnabled;
+	public static HALIGN endingBlowHudXAlign;
+	public static VALIGN endingBlowHudYAlign;
+	public static int endingBlowHudXOffset;
+	public static int endingBlowHudYOffset;
 	/*================== WEAPON REGISTRY =====================*/
 	/** Items that are considered Swords for all intents and purposes */
 	private static String[] swords = new String[0];
@@ -116,27 +103,40 @@ public class Config
 	private static Map<Byte, Float> orbDropChance;
 
 	public static void init(FMLPreInitializationEvent event) {
-		Configuration config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
+		config = new Configuration(event.getSuggestedConfigurationFile());
 		config.load();
-		/*================== CLIENT SIDE SETTINGS =====================*/
-		String category = "client";
-		config.addCustomCategoryComment(category, "This category contains client side settings; i.e. they are not synchronized with the server.");
-		isComboHudEnabled = config.get(category, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')", true).getBoolean(true);
-		hitsToDisplay = MathHelper.clamp_int(config.get(category, "[Combo HUD] Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
-		comboHudHAlign = HALIGN.fromString(config.get(category, "[Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "left").getString());
-		comboHudVAlign = VALIGN.fromString(config.get(category, "[Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
-		comboHudOffsetX = config.get(category, "[Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
-		comboHudOffsetY = config.get(category, "[Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 0).getInt();
-		allowVanillaControls = config.get(category, "[Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry", true).getBoolean(true);
-		doubleTap = config.get(category, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", true).getBoolean(true);
-		isEndingBlowHudEnabled = config.get(category, "[Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use))", true).getBoolean(true);
-		endingBlowHudHAlign = HALIGN.fromString(config.get(category, "[Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "center").getString());
-		endingBlowHudVAlign = VALIGN.fromString(config.get(category, "[Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
-		endingBlowHudOffsetX = config.get(category, "[Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
-		endingBlowHudOffsetY = config.get(category, "[Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 30).getInt();
-		autoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
-		enablePassiveTarget = config.get(category, "[Targeting] Whether passive mobs can be targeted (toggle in game: '.' while sprinting)", true).getBoolean(true);
-		enablePlayerTarget = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
+		refreshClient();
+		refreshServer();
+	}
+	
+	public static void refreshClient() {
+		/* General client settings */
+		config.addCustomCategoryComment(Configuration.CATEGORY_CLIENT, "This category contains client side settings; i.e. they are not synchronized with the server.");
+		enableAutoTarget = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.enableAutoTarget", true, "Enable auto-targeting when locked on and the current target becomes invalid").getBoolean(true);
+		enableTargetPassive = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.enableTargetPassive", true, "Allow targeting passive mobs with the lock-on mechanic").getBoolean(true);
+		enableTargetPlayer = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.enableTargetPlayer", true, "Allow targeting players with the lock-on mechanic").getBoolean(true);
+		allowVanillaControls = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.enableVanillaControls", true, "Allow vanilla movement keys to be used to activate skills; must be enabled if Additional Controls are disabled").getBoolean(true);
+		/* Combo HUD */
+		String[] xalign = {"left", "center", "right"};
+		String[] yalign = {"top", "center", "bottom"};
+		comboHudEnabled = config.get("comboHud", "dss.config.client.comboHud.enable", true, "The Combo HUD displays combo damage and recent hits").getBoolean(true);
+		comboHudMaxHits = config.get("comboHud", "dss.config.client.comboHud.maxHits", 3, "Maximum number of recent hits to display [0-12]", 0, 12).getInt();
+		comboHudXAlign = HALIGN.fromString(config.get("comboHud", "dss.config.client.comboHud.xalign", "left", "Base HUD alignment on the X-Axis").setValidValues(xalign).getString());
+		comboHudXOffset = config.get("comboHud", "dss.config.client.comboHud.xoffset", 0, "Number of pixels to offset HUD alignment on the X-Axis").getInt();
+		comboHudYAlign = VALIGN.fromString(config.get("comboHud", "dss.config.client.comboHud.yalign", "top", "Base HUD alignment on the Y-Axis").setValidValues(yalign).getString());
+		comboHudYOffset = config.get("comboHud", "dss.config.client.comboHud.yoffset", 0, "Number of pixels to offset HUD alignment on the Y-Axis").getInt();
+		/* Ending Blow HUD */
+		endingBlowHudEnabled = config.get("endingBlowHud", "dss.config.client.endingBlowHud.enable", true, "The Ending Blow HUD indicates when the skill can be activated").getBoolean(true);
+		endingBlowHudXAlign = HALIGN.fromString(config.get("endingBlowHud", "dss.config.client.endingBlowHud.xalign", "center", "Base HUD alignment on the X-Axis").setValidValues(xalign).getString());
+		endingBlowHudXOffset = config.get("endingBlowHud", "dss.config.client.endingBlowHud.xoffset", 0, "Number of pixels to offset HUD alignment on the X-Axis").getInt();
+		endingBlowHudYAlign = VALIGN.fromString(config.get("endingBlowHud", "dss.config.client.endingBlowHud.yalign", "top", "Base HUD alignment on the Y-Axis").setValidValues(yalign).getString());
+		endingBlowHudYOffset = config.get("endingBlowHud", "dss.config.client.endingBlowHud.yoffset", 30, "Number of pixels to offset HUD alignment on the Y-Axis").getInt();
+		if (config.hasChanged()) {
+			config.save();
+		}
+	}
+
+	public static void refreshServer() {
 		/*================== WEAPON REGISTRY =====================*/
 		swords = config.get("Weapon Registry", "[Allowed Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item so that it is considered a SWORD by ZSS, i.e. it be used with skills that\nrequire swords, as well as other interactions that require swords, such as cutting grass.\nAll swords are also considered WEAPONS.").getStringList();
 		Arrays.sort(swords);
@@ -166,7 +166,7 @@ public class Config
 		requireSpinAttack = config.get("general", "[Skill Swords][Super Spin Attack] Require player to have at least one level in Spin Attack to perform extra spins using a skill item", false).getBoolean(false);
 		requireFullHealth = config.get("general", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 
-		category = "enabledskills";
+		String category = "enabledskills";
 		config.addCustomCategoryComment(category,
 				"Disabling a skill prevents players from learning or using that skill, but does not change the player\'s known skills."
 				+ "\nSkill items previously generated as loot may be found but not used, and subsequent loot will not generate with that skill."
@@ -187,8 +187,11 @@ public class Config
 			int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
 			orbDropChance.put(skill.getId(), (0.001F * (float) i));
 		}
-		config.save();
+		if (config.hasChanged()) {
+			config.save();
+		}
 	}
+
 	public static void postInit() {
 		WeaponRegistry.INSTANCE.registerItems(swords, "Config", true);
 		WeaponRegistry.INSTANCE.registerItems(weapons, "Config", false);
@@ -196,15 +199,15 @@ public class Config
 		WeaponRegistry.INSTANCE.forbidItems(forbidden_weapons, "Config", false);
 	}
 	/*================== CLIENT SIDE SETTINGS =====================*/
-	public static int getHitsToDisplay() { return hitsToDisplay; }
+	public static int getHitsToDisplay() { return comboHudMaxHits; }
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
-	public static boolean requiresDoubleTap() { return doubleTap; }
-	public static boolean autoTargetEnabled() { return autoTarget; }
-	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
-	public static boolean canTargetPassiveMobs() { return enablePassiveTarget; }
-	public static boolean toggleTargetPassiveMobs() { enablePassiveTarget = !enablePassiveTarget; return enablePassiveTarget; }
-	public static boolean canTargetPlayers() { return enablePlayerTarget; }
-	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
+	public static boolean requiresDoubleTap() { return requireDoubleTap; }
+	public static boolean autoTargetEnabled() { return enableAutoTarget; }
+	public static boolean toggleAutoTarget() { enableAutoTarget = !enableAutoTarget; return enableAutoTarget; }
+	public static boolean canTargetPassiveMobs() { return enableTargetPassive; }
+	public static boolean toggleTargetPassiveMobs() { enableTargetPassive = !enableTargetPassive; return enableTargetPassive; }
+	public static boolean canTargetPlayers() { return enableTargetPlayer; }
+	public static boolean toggleTargetPlayers() { enableTargetPlayer = !enableTargetPlayer; return enableTargetPlayer; }
 	/*================== SKILLS =====================*/
 	public static boolean giveBonusOrb() { return enableBonusOrb; }
 	public static int getLootWeight() { return chestLootWeight; }
