@@ -68,7 +68,7 @@ public class PlayerUtils
 		return WeaponRegistry.INSTANCE.isWeapon(stack);
 	}
 
-	/** Returns true if the stack is either a {@link #isSwordItem(Item) sword} or {@link ISkillProvider provider} of this skill */
+	/** Returns true if the stack is either a {@link #isSword(ItemStack) sword} or {@link ISkillProvider provider} of this skill */
 	public static boolean isSwordOrProvider(ItemStack stack, SkillBase skill) {
 		Item item = (stack != null ? stack.getItem() : null);
 		return (isSword(stack) || (item instanceof ISkillProvider && ((ISkillProvider) item).getSkillId(stack) == skill.getId()));
