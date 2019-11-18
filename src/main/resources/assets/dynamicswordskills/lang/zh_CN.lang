@@ -3,9 +3,10 @@ chat.dss.skill.maxlevel=%s 已经达到最高等级了!
 chat.dss.skill.use.disabled=%s has been disabled
 chat.dss.skill.use.fail=现在不能使用 %s!
 
-combo.finished=完成
-combo.damage=伤害
-combo.size=击
+combo.finished=Combo: %s
+combo.finished=完成! %s
+combo.damage=伤害: %s
+combo.size=击: %1$d/%2$d
 combo.label.1=一连击
 combo.label.2=二连击
 combo.label.3=三连击

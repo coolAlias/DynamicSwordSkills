@@ -3,10 +3,10 @@ chat.dss.skill.maxlevel=¡%s ya alcanzo el nivel máximo!
 chat.dss.skill.use.disabled=%s has been disabled
 chat.dss.skill.use.fail=No puedes usar ahora %s!
 
-combo.combo=Combo
-combo.finished=Terminado
-combo.damage=Daño
-combo.size=Impactos
+combo.combo=Combo: %s
+combo.finished=¡Terminado! %s
+combo.damage=Daño: %s
+combo.size=Impactos: %1$d/%2$d
 combo.label.1=Artista de un solo éxito
 combo.label.2=Novato
 combo.label.3=Decente
