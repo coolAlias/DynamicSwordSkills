@@ -144,7 +144,6 @@ public class DynamicSwordSkills
 		MinecraftForge.EVENT_BUS.register(new LootHandler());
 		DSSCombatEvents.initializeDrops();
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
-		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", ModInfo.VERSION_LIST);
 	}
 
 	@Mod.EventHandler
