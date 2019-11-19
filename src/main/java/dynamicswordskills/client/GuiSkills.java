@@ -213,6 +213,9 @@ public class GuiSkills extends GuiContainer
 				desc.clear();
 			}
 			currentSkill = DSSPlayerInfo.get(mc.thePlayer).getPlayerSkill((byte) id);
+		} else if (!isMouseInRegion(mouseX, mouseY, guiLeft + 155, guiLeft + 267, guiTop + 35, guiTop + 160)) {
+			currentSkill = null;
+			desc.clear();
 		}
 	}
 
