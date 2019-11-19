@@ -113,7 +113,7 @@ public class GuiSkills extends GuiContainer
 			RenderHelperQ.drawTexturedRect(259, 61 + (int)(scrollY * 81), 282, 10, 3, 7, 285, 180);
 			GlStateManager.popAttrib();
 		}
-		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : StatCollector.translateToLocal("skill.dss.gui.description"));
+		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : StatCollector.translateToLocal("skill.dss.gui.name"));
 		isUnicode = fontRendererObj.getUnicodeFlag();
 		fontRendererObj.setUnicodeFlag(true);
 		fontRendererObj.drawString(s, 158, 38, 4210752);
@@ -148,19 +148,45 @@ public class GuiSkills extends GuiContainer
 		if (!desc.isEmpty()) {
 			return;
 		}
+		String[] temp;
 		if (currentSkill != null) {
 			desc.add(StatCollector.translateToLocal("skill.dss.gui.summary"));
 			currentSkill.addInformation(desc, mc.thePlayer);
 			desc.add("");
 			desc.add(StatCollector.translateToLocal("skill.dss.gui.activation"));
-			desc.addAll(fontRendererObj.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
+			temp = currentSkill.getActivationDisplay().split("\\\\n");
+			for (String s : temp) {
+				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+			}
 			desc.add("");
-		}
-		desc.add(StatCollector.translateToLocal("skill.dss.gui.description"));
-		String[] temp = (currentSkill != null ? currentSkill.getFullDescription().split("\\\\n") : StatCollector.translateToLocal("skill.dss.gui.explanation").split("\\\\n"));
-		for (String s : temp) {
-			desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+			desc.add(StatCollector.translateToLocal("skill.dss.gui.description"));
+			temp = currentSkill.getFullDescription().split("\\\\n");
+			for (String s : temp) {
+				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+				desc.add("");
+			}
+		} else {
+			desc.add(StatCollector.translateToLocal("skill.dss.gui.summary"));
+			desc.addAll(fontRendererObj.listFormattedStringToWidth(StatCollector.translateToLocal("skill.dss.gui.summary.text"), 101));
 			desc.add("");
+			desc.add(StatCollector.translateToLocal("skill.dss.gui.activation"));
+			temp = StatCollector.translateToLocal("skill.dss.gui.activation.text").split("\\\\n");
+			for (String s : temp) {
+				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+				desc.add("");
+			}
+			desc.add(StatCollector.translateToLocal("skill.dss.gui.description"));
+			temp = StatCollector.translateToLocal("skill.dss.gui.description.text").split("\\\\n");
+			for (String s : temp) {
+				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+				desc.add("");
+			}
+			desc.add(StatCollector.translateToLocal("skill.dss.gui.additional"));
+			temp = StatCollector.translateToLocal("skill.dss.gui.additional.text").split("\\\\n");
+			for (String s : temp) {
+				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+				desc.add("");
+			}
 		}
 		numLines = desc.size();
 	}
