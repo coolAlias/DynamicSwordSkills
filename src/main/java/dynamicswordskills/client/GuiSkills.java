@@ -20,6 +20,7 @@ package dynamicswordskills.client;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.lwjgl.input.Mouse;
 
@@ -112,7 +113,7 @@ public class GuiSkills extends GuiContainer
 			RenderHelperQ.drawTexturedRect(259, 61 + (int)(scrollY * 81), 282, 10, 3, 7, 285, 180);
 			GlStateManager.popAttrib();
 		}
-		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : new TextComponentTranslation("skill.dss.gui.description").getUnformattedText());
+		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : new TextComponentTranslation("skill.dss.gui.name").getUnformattedText());
 		isUnicode = fontRendererObj.getUnicodeFlag();
 		fontRendererObj.setUnicodeFlag(true);
 		fontRendererObj.drawString(s, 158, 38, 4210752);
@@ -152,14 +153,34 @@ public class GuiSkills extends GuiContainer
 			currentSkill.addInformation(desc, mc.thePlayer);
 			desc.add("");
 			desc.add(new TextComponentTranslation("skill.dss.gui.activation").getUnformattedText());
-			desc.addAll(fontRendererObj.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
+			Stream.of(currentSkill.getActivationDisplay().split("\\\\n")).forEach(s -> {
+				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+			});
 			desc.add("");
-		}
-		desc.add(new TextComponentTranslation("skill.dss.gui.description").getUnformattedText());
-		String[] temp = (currentSkill != null ? currentSkill.getFullDescription().split("\\\\n") : new TextComponentTranslation("skill.dss.gui.explanation").getUnformattedText().split("\\\\n"));
-		for (String s : temp) {
-			desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+			desc.add(new TextComponentTranslation("skill.dss.gui.description").getUnformattedText());
+			Stream.of(currentSkill.getFullDescription().split("\\\\n")).forEach(s -> {
+				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+				desc.add("");
+			});
+		} else {
+			desc.add(new TextComponentTranslation("skill.dss.gui.summary").getUnformattedText());
+			desc.addAll(fontRendererObj.listFormattedStringToWidth(new TextComponentTranslation("skill.dss.gui.summary.text").getUnformattedText(), 101));
 			desc.add("");
+			desc.add(new TextComponentTranslation("skill.dss.gui.activation").getUnformattedText());
+			Stream.of(new TextComponentTranslation("skill.dss.gui.activation.text").getUnformattedText().split("\\\\n")).forEach(s -> {
+				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+				desc.add("");
+			});
+			desc.add(new TextComponentTranslation("skill.dss.gui.description").getUnformattedText());
+			Stream.of(new TextComponentTranslation("skill.dss.gui.description.text").getUnformattedText().split("\\\\n")).forEach(s -> {
+				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+				desc.add("");
+			});
+			desc.add(new TextComponentTranslation("skill.dss.gui.additional").getUnformattedText());
+			Stream.of(new TextComponentTranslation("skill.dss.gui.additional.text").getUnformattedText().split("\\\\n")).forEach(s -> {
+				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+				desc.add("");
+			});
 		}
 		numLines = desc.size();
 	}
