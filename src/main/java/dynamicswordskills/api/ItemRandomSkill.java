@@ -144,7 +144,7 @@ public class ItemRandomSkill extends ItemSword implements ISkillProvider
 		tag.setInteger("ItemSkillId", skill.getId());
 		int level = 1 + rand.nextInt(Math.min(maxLevel, skill.getMaxLevel()));
 		tag.setByte("ItemSkillLevel", (byte) level);
-		tag.setBoolean("grantsBasicSword", (skill.getId() != SkillBase.swordBasic.getId() && rand.nextInt(16) > 4));
+		tag.setBoolean("grantsBasicSword", (!skill.is(SkillBase.swordBasic) && rand.nextInt(16) > 4));
 		return tag;
 	}
 }

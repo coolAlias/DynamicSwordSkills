@@ -372,7 +372,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	public SkillBase getPlayerSkill(byte id) {
 		if (itemSkill != null && itemSkill.getId() == id) {
 			return itemSkill;
-		} else if (id == SkillBase.spinAttack.getId() && itemSkill != null && itemSkill.getId() == SkillBase.superSpinAttack.getId()) {
+		} else if (id == SkillBase.spinAttack.getId() && itemSkill != null && itemSkill.is(SkillBase.superSpinAttack)) {
 			SkillBase skill = getTruePlayerSkill(id);
 			return (skill == null && !Config.isSpinAttackRequired() ? itemSkill : skill);
 		} else if (id == SkillBase.swordBasic.getId()) {
@@ -556,7 +556,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	private void updateISkillItem() {
 		ItemStack stack = player.getHeldItem();
-		if (itemSkill != null && itemSkill.getId() == SkillBase.mortalDraw.getId() &&
+		if (itemSkill != null && itemSkill.is(SkillBase.mortalDraw) &&
 				(stack == null || ((SkillActive) itemSkill).isActive()))
 		{
 			// do not replace Mortal Draw until it is no longer active
@@ -596,7 +596,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 					if (itemSkill.getLevel() <= getTrueSkillLevel(itemSkill.getId())) {
 						itemSkill = null;
 					}
-					if (item.grantsBasicSwordSkill(stack) && skill.getId() != SkillBase.swordBasic.getId()
+					if (item.grantsBasicSwordSkill(stack) && !skill.is(SkillBase.swordBasic)
 							&& getTrueSkillLevel(SkillBase.swordBasic.getId()) < 1)
 					{
 						if (dummySwordSkill == null) {
