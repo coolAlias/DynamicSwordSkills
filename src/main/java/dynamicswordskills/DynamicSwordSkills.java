@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
 import dynamicswordskills.command.DSSCommands;
+import dynamicswordskills.crafting.RecipeInfuseSkillOrb;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
 import dynamicswordskills.entity.IPlayerInfo.CapabilityPlayerInfo;
@@ -144,6 +145,7 @@ public class DynamicSwordSkills
 		MinecraftForge.EVENT_BUS.register(new LootHandler());
 		DSSCombatEvents.initializeDrops();
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
+		GameRegistry.addRecipe(new RecipeInfuseSkillOrb());
 	}
 
 	@Mod.EventHandler
