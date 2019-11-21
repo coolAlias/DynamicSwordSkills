@@ -48,6 +48,7 @@ import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
 import dynamicswordskills.api.WeaponRegistry;
 import dynamicswordskills.command.DSSCommands;
+import dynamicswordskills.crafting.RecipeInfuseSkillOrb;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
 import dynamicswordskills.item.ItemSkillOrb;
@@ -148,6 +149,7 @@ public class DynamicSwordSkills
 		}
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
 		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", ModInfo.VERSION_LIST);
+		GameRegistry.addRecipe(new RecipeInfuseSkillOrb());
 	}
 
 	@Mod.EventHandler
