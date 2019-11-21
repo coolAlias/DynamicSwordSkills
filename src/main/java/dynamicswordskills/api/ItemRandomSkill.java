@@ -176,7 +176,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		tag.setString("ItemSkillName", skill.getUnlocalizedName());
 		int level = 1 + rand.nextInt(Math.min(this.quality + 2, skill.getMaxLevel()));
 		tag.setByte("ItemSkillLevel", (byte) level);
-		boolean flag = (skill.getId() != SkillBase.swordBasic.getId() && rand.nextInt(16) > 9 - this.quality); 
+		boolean flag = (!skill.is(SkillBase.swordBasic) && rand.nextInt(16) > 9 - this.quality); 
 		tag.setBoolean("grantsBasicSword", flag);
 	}
 }
