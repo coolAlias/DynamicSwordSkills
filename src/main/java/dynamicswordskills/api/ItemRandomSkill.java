@@ -46,7 +46,7 @@ import net.minecraftforge.common.ChestGenHooks;
  * they extend ItemSword instead of Item, but could just as well be anything.
  *
  */
-public class ItemRandomSkill extends ItemSword implements ISkillProvider
+public class ItemRandomSkill extends ItemSword implements ISkillProviderInfusable
 {
 	/** The maximum level of the SkillBase.{skill} granted by this Item */
 	private final byte maxLevel;
@@ -93,6 +93,29 @@ public class ItemRandomSkill extends ItemSword implements ISkillProvider
 	@Override
 	public boolean grantsBasicSwordSkill(ItemStack stack) {
 		return (stack.hasTagCompound() && stack.getTagCompound().getBoolean("grantsBasicSword"));
+	}
+
+	@Override
+	public int getInfusionCost(ItemStack stack, SkillBase skill) {
+		if (skill.is(SkillBase.swordBasic) && !grantsBasicSwordSkill(stack)) {
+			return 1;
+		} else if (!skill.is(getSkill(stack))) {
+			return 0;
+		}
+		int i = getSkillLevel(stack);
+		return (i < SkillBase.MAX_LEVEL ? i + 1 : 0);
+	}
+
+	@Override
+	public ItemStack getInfusionResult(ItemStack stack, SkillBase skill) {
+		ItemStack result = stack.copy();
+		if (skill.is(SkillBase.swordBasic) && !grantsBasicSwordSkill(stack)) {
+			result.getTagCompound().setBoolean("grantsBasicSword", true);
+		} else {
+			int level = Math.min(SkillBase.MAX_LEVEL, getSkillLevel(stack) + 1);
+			result.getTagCompound().setByte("ItemSkillLevel", (byte) level);
+		}
+		return result;
 	}
 
 	@Override
