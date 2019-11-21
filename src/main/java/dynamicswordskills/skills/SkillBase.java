@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -194,6 +196,14 @@ public abstract class SkillBase
 		}
 		SkillBase skill = (SkillBase) obj;
 		return (skill.id == this.id && skill.level == this.level);
+	}
+
+	/**
+	 * Use this method instead of equals when level is not relevant to the equality comparison
+	 * @return true if this skill is the same as another based solely on {@link #getId()}
+	 */
+	public boolean is(@Nullable SkillBase skill) {
+		return (skill != null && this.getId() == skill.getId());
 	}
 
 	/** Returns a new instance of the skill with appropriate class type without registering it to the Skill database */
