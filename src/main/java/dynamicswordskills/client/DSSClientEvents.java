@@ -117,6 +117,8 @@ public class DSSClientEvents
 			// pass mouse clicks to custom key handler when pressed, as KeyInputEvent no longer receives these
 			if (event.buttonstate) {
 				DSSKeyHandler.onKeyPressed(mc, mouseKey);
+			} else {
+				DSSKeyHandler.onKeyReleased(mc, mouseKey);
 			}
 			return;
 		}
