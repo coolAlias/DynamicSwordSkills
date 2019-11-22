@@ -67,6 +67,10 @@ public class Dodge extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 
+	/** Only for double-tap activation; true after the first key press and release */
+	@SideOnly(Side.CLIENT)
+	private boolean keyReleased;
+
 	/** Timer during which player may evade incoming attacks */
 	private int dodgeTimer = 0;
 
@@ -155,7 +159,7 @@ public class Dodge extends SkillActive
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
 			if (Config.requiresDoubleTap()) {
-				if (ticksTilFail > 0 && key == keyPressed) {
+				if (keyReleased && ticksTilFail > 0 && key == keyPressed) {
 					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
 					return true;
@@ -170,6 +174,12 @@ public class Dodge extends SkillActive
 			}
 		}
 		return false; // allow other skills to receive this key press (e.g. Spin Attack)
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		keyReleased = (key == keyPressed && ticksTilFail > 0);
 	}
 
 	@Override
@@ -191,6 +201,9 @@ public class Dodge extends SkillActive
 			--dodgeTimer;
 		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
+			if (ticksTilFail == 0) {
+				keyReleased = false;
+			}
 		}
 	}
 

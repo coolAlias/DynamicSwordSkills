@@ -71,6 +71,10 @@ public class EndingBlow extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private int keyPressed;
 
+	/** Only for double-tap activation; true after the first key press and release */
+	@SideOnly(Side.CLIENT)
+	private boolean keyReleased;
+
 	/** The last time this skill was activated (so HUD element can display or hide as appropriate) */
 	@SideOnly(Side.CLIENT)
 	private long lastActivationTime;
@@ -145,7 +149,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return ticksTilFail > 0 && keyPressed > 1 && canUse(player);
+		return ticksTilFail > 0 && keyPressed > 1 && keyReleased && canUse(player);
 	}
 
 	@Override
@@ -170,10 +174,19 @@ public class EndingBlow extends SkillActive
 		} else if (canExecute(player)) {
 			ticksTilFail = 0;
 			keyPressed = 0;
+			keyReleased = false;
 			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (key == mc.gameSettings.keyBindForward) {
+			keyReleased = (keyPressed > 0 && ticksTilFail > 0);
+		}
 	}
 
 	@Override
@@ -186,8 +199,6 @@ public class EndingBlow extends SkillActive
 		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
 			DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), DSSPlayerInfo.get(player).getTargetingSkill());
 			this.lastActivationTime = Minecraft.getSystemTime();
-			ticksTilFail = 0;
-			keyPressed = 0;
 		}
 		return isActive();
 	}
@@ -209,6 +220,7 @@ public class EndingBlow extends SkillActive
 			--ticksTilFail;
 			if (ticksTilFail == 0) {
 				keyPressed = 0;
+				keyReleased = false;
 			}
 		}
 		if (lastNumHits > 0) {

@@ -70,6 +70,10 @@ public class Parry extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 
+	/** Only for double-tap activation; true after the first key press and release */
+	@SideOnly(Side.CLIENT)
+	private boolean keyReleased;
+
 	/** Notification to play miss sound; set to true when activated and false when attack parried */
 	private boolean playMissSound;
 
@@ -160,7 +164,7 @@ public class Parry extends SkillActive
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
 			if (Config.requiresDoubleTap()) {
-				if (ticksTilFail > 0) {
+				if (keyReleased && ticksTilFail > 0) {
 					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
 					return true;
@@ -173,6 +177,12 @@ public class Parry extends SkillActive
 			}
 		}
 		return false;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		keyReleased = (ticksTilFail > 0);
 	}
 
 	@Override
@@ -198,6 +208,9 @@ public class Parry extends SkillActive
 			}
 		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
+			if (ticksTilFail == 0) {
+				keyReleased = false;
+			}
 		}
 	}
 

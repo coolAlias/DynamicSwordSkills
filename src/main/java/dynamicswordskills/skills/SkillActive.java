@@ -143,6 +143,13 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
+	 * This method is called if {@link #isKeyListener} returns true for the given key,
+	 * allowing each skill to handle key releases accordingly.
+	 */
+	@SideOnly(Side.CLIENT)
+	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {}
+
+	/**
 	 * Whether this skill automatically sends an {@link ActivateSkillPacket} to the client from {@link #trigger}
 	 */
 	protected boolean sendClientUpdate() {

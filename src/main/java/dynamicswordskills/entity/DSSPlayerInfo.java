@@ -309,6 +309,21 @@ public class DSSPlayerInfo
 	}
 
 	/**
+	 * Call when a key is released to pass that information to each skills' {@link SkillActive#keyReleased keyReleased} method
+	 */
+	@SideOnly(Side.CLIENT)
+	public void onKeyReleased(Minecraft mc, KeyBinding key) {
+		for (SkillBase skill : skills.values()) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key)) {
+				((SkillActive) skill).keyReleased(mc, key, player);
+			}
+		}
+		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isKeyListener(mc, key)) {
+			((SkillActive) itemSkill).keyReleased(mc, key, player);
+		}
+	}
+
+	/**
 	 * Called from LivingAttackEvent to trigger {@link SkillActive#onBeingAttacked} for each
 	 * currently active skill, potentially canceling the event. If the event is canceled, it
 	 * returns immediately without processing any remaining active skills.

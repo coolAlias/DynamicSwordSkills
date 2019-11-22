@@ -90,8 +90,8 @@ public class DSSKeyHandler
 	public void onKeyInput(KeyInputEvent event) {
 		if (Keyboard.getEventKeyState()) {
 			onKeyPressed(mc, Keyboard.getEventKey());
-		} else if (Keyboard.getEventKey() == keys[KEY_BLOCK].getKeyCode()) {
-			KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
+		} else {
+			onKeyReleased(mc, Keyboard.getEventKey());
 		}
 	}
 
@@ -113,6 +113,24 @@ public class DSSKeyHandler
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
 			} else {
 				handleTargetingKeys(mc, kb, skills);
+			}
+		}
+	}
+
+	/**
+	 * Call for any key code, mouse or keyboard, to handle custom key bindings that may
+	 * have been remapped to mouse. From MouseEvent, ONLY call this method when the mouse
+	 * key is released, not when it is pressed (i.e. when event.buttonstate is false).
+	 * @param mc	Pass in Minecraft instance, since this is a static method
+	 * @param kb	The key code of the key released; for the mouse, this is the mouse button number minus 100
+	 */
+	public static void onKeyReleased(Minecraft mc, int kb) {
+		KeyBinding key = getKeyBindFromCode(mc, kb);
+		if (key != null && mc.inGameHasFocus && mc.thePlayer != null) {
+			DSSPlayerInfo.get(mc.thePlayer).onKeyReleased(mc, key);
+			// Hack for custom block keybinding
+			if (key.getKeyCode() == keys[KEY_BLOCK].getKeyCode()) {
+				KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
 			}
 		}
 	}
