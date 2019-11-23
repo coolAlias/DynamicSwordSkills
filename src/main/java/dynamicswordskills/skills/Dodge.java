@@ -137,7 +137,9 @@ public class Dodge extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && DSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() 
+				&& !PlayerUtils.isBlocking(player) 
+				&& DSSPlayerInfo.get(player).isSkillActive(swordBasic);
 	}
 
 	@Override
