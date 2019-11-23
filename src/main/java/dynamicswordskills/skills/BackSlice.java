@@ -174,9 +174,9 @@ public class BackSlice extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
 		if (isActive()) {
-			return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+			return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
 		}
-		return key == mc.gameSettings.keyBindForward || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT] || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] ||
+		return key == mc.gameSettings.keyBindForward || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() ||
 				((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)));
 	}
 
@@ -195,7 +195,7 @@ public class BackSlice extends SkillActive
 			} else if (key != mc.gameSettings.keyBindForward) {
 				keyPressed = key;
 			}
-		} else if (isActive() && (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK])) {
+		} else if (isActive() && (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey())) {
 			// Attack targeted entity directly rather than using mouse cursor object due to camera funkiness
 			Entity target = DSSPlayerInfo.get(player).getTargetingSkill().getCurrentTarget();
 			if (target != null && TargetUtils.canReachTarget(player, target)) {
@@ -264,7 +264,7 @@ public class BackSlice extends SkillActive
 				d *= 0.15D;
 			}
 			Vec3 vec3 = player.getLookVec();
-			if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
+			if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
 				player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
 			} else {
 				player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);

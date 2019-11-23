@@ -128,7 +128,7 @@ public class SwordBeam extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
 	}
 
 	@Override

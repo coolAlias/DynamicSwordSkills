@@ -150,7 +150,7 @@ public class Dodge extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
 		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
-				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT] || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT]);
+				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey());
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class Dodge extends SkillActive
 					ticksTilFail = 6;
 				}
 				// Single-tap activation only allowed using custom key bindings:
-			} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT] || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT]) {
+			} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey()) {
 				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 				return true;
 			}
@@ -221,11 +221,11 @@ public class Dodge extends SkillActive
 		}
 		double fps = (DynamicSwordSkills.BASE_FPS / (float) DynamicSwordSkills.proxy.getDebugFPS()); 
 		double d = 0.15D * fps * speed * speed;
-		Vec3 vec3 = player.getLookVec();
 		if (player.isInWater() || player.handleLavaMovement()) {
 			d *= 0.15D;
 		}
-		if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
+		Vec3 vec3 = player.getLookVec();
+		if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
 			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
 		} else {
 			player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);

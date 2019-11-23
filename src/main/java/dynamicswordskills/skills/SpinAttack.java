@@ -192,7 +192,7 @@ public class SpinAttack extends SkillActive
 		// to other skills; this is necessary to prevent another skill activating while spin attack is active
 		return (//key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK] ||
 				(Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
-				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT] || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT]);
+				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey());
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class SpinAttack extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK]) {
+		if (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey()) {
 			if (isActive() && canRefresh() && canExecute(player)) {
 				PacketDispatcher.sendToServer(new RefreshSpinPacket());
 				arc += 360F;
@@ -216,7 +216,7 @@ public class SpinAttack extends SkillActive
 			if (wasKeyPressed) {
 				wasKeyPressed = false;
 			} else {
-				clockwise = (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || key == mc.gameSettings.keyBindRight);
+				clockwise = (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || key == mc.gameSettings.keyBindRight);
 				wasKeyPressed = true;
 			}
 			if (isKeyPressed()) {
