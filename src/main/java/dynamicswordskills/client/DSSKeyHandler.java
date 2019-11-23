@@ -44,45 +44,49 @@ public class DSSKeyHandler
 	/** Key index for easy handling and retrieval of keys and key descriptions */
 	public static final byte 
 	KEY_SKILL_ACTIVATE = 0,
-	KEY_NEXT_TARGET = 1,
-	KEY_ATTACK = 2,
-	KEY_LEFT = 3,
-	KEY_RIGHT = 4,
-	KEY_DOWN = 5,
-	KEY_BLOCK = 6,
-	KEY_SKILLS_GUI = 7;
+	KEY_SKILLS_GUI = 1,
+	KEY_NEXT_TARGET = 2,
+	KEY_ATTACK = 3,
+	KEY_LEFT = 4,
+	KEY_RIGHT = 5,
+	KEY_DOWN = 6,
+	KEY_BLOCK = 7;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
-	public static final String[] desc = {
+	private static final String[] desc = {
 			"activate",
 			"next",
+			"skills_gui",
 			"attack",
 			"left",
 			"right",
 			"down",
-			"block",
-			"skills_gui"
+			"block"
 	};
 
 	/** Default key values */
 	private static final int[] keyValues = {
 			Keyboard.KEY_X,
 			Keyboard.KEY_TAB,
+			Keyboard.KEY_P,
 			Keyboard.KEY_UP,
 			Keyboard.KEY_LEFT,
 			Keyboard.KEY_RIGHT,
 			Keyboard.KEY_DOWN,
-			Keyboard.KEY_RCONTROL,
-			Keyboard.KEY_P
+			Keyboard.KEY_RCONTROL
 	};
 
-	public static final KeyBinding[] keys = new KeyBinding[desc.length];
+	public static final KeyBindingHolder[] keys = new KeyBindingHolder[desc.length];
 
 	public DSSKeyHandler() {
 		this.mc = Minecraft.getMinecraft();
 		for (int i = 0; i < desc.length; ++i) {
-			keys[i] = new KeyBinding("key.dss." + desc[i] + ".desc", keyValues[i], new TextComponentTranslation("key.dss.label").getUnformattedText());
-			ClientRegistry.registerKeyBinding(keys[i]);
+			KeyBinding key = null;
+			if (Config.enableAdditionalControls() || i < KEY_ATTACK) {
+				key = new KeyBinding("key.dss." + desc[i] + ".desc", keyValues[i], new TextComponentTranslation("key.dss.label").getUnformattedText());
+				ClientRegistry.registerKeyBinding(key);
+			}
+			keys[i] = new KeyBindingHolder(key);
 		}
 	}
 
@@ -148,7 +152,7 @@ public class DSSKeyHandler
 		if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
 			skill.getNextTarget(mc.thePlayer);
 		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
-			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK] : mc.gameSettings.keyBindAttack);
+			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK].getKey() : mc.gameSettings.keyBindAttack);
 			boolean canAttack = skills.canAttack();
 			if (canInteract && canAttack) {
 				KeyBinding.setKeyBindState(key.getKeyCode(), true);
@@ -196,9 +200,9 @@ public class DSSKeyHandler
 	 */
 	@SideOnly(Side.CLIENT)
 	public static KeyBinding getKeyBindFromCode(Minecraft mc, int keyCode) {
-		for (KeyBinding k : keys) {
+		for (KeyBindingHolder k : keys) {
 			if (k.getKeyCode() == keyCode) {
-				return k;
+				return k.getKey();
 			}
 		}
 		if (keyCode == mc.gameSettings.keyBindForward.getKeyCode()) {

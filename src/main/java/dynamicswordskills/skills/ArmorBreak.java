@@ -152,7 +152,7 @@ public class ArmorBreak extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		requiresReset = (key == mc.gameSettings.keyBindAttack);
-		if (requiresReset || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK]) {
+		if (requiresReset || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey()) {
 			charge = getChargeTime(player);
 			if (requiresReset) {
 				// manually set the keybind state, since it will not be set by the canceled mouse event

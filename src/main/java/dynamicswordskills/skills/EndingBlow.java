@@ -155,7 +155,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return (key == mc.gameSettings.keyBindForward || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK]
+		return (key == mc.gameSettings.keyBindForward || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey()
 				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
 	}
 
