@@ -161,7 +161,10 @@ public class BackSlice extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this) && DSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() 
+				&& !player.isUsingItem() 
+				&& PlayerUtils.isSwordOrProvider(player.getHeldItem(), this) 
+				&& DSSPlayerInfo.get(player).isSkillActive(swordBasic);
 	}
 
 	@Override
