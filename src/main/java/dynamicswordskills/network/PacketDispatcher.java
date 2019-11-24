@@ -52,6 +52,7 @@ public class PacketDispatcher
 		registerMessage(DeactivateSkillPacket.class);
 
 		// Packets handled on CLIENT
+		registerMessage(EndingBlowPacket.class);
 		registerMessage(MortalDrawPacket.class);
 		registerMessage(SyncConfigPacket.class);
 		registerMessage(SyncPlayerInfoPacket.class);

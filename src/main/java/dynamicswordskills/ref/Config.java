@@ -51,6 +51,7 @@ public class Config
 	public static int comboHudYOffset;
 	/* Ending Blow HUD */
 	public static boolean endingBlowHudEnabled;
+	public static boolean endingBlowHudText;
 	public static HALIGN endingBlowHudXAlign;
 	public static VALIGN endingBlowHudYAlign;
 	public static int endingBlowHudXOffset;
@@ -134,6 +135,7 @@ public class Config
 		comboHudYOffset = config.get("comboHud", "dss.config.client.comboHud.yoffset", 0, "Number of pixels to offset HUD alignment on the Y-Axis").getInt();
 		/* Ending Blow HUD */
 		endingBlowHudEnabled = config.get("endingBlowHud", "dss.config.client.endingBlowHud.enable", true, "The Ending Blow HUD indicates when the skill can be activated").getBoolean(true);
+		endingBlowHudText = config.get("endingBlowHud", "dss.config.client.endingBlowHud.enableText", false, "Display text instead of icons for Ending Blow notifications").getBoolean(false);
 		endingBlowHudXAlign = HALIGN.fromString(config.get("endingBlowHud", "dss.config.client.endingBlowHud.xalign", "center", "Base HUD alignment on the X-Axis").setValidValues(xalign).getString());
 		endingBlowHudXOffset = config.get("endingBlowHud", "dss.config.client.endingBlowHud.xoffset", 0, "Number of pixels to offset HUD alignment on the X-Axis").getInt();
 		endingBlowHudYAlign = VALIGN.fromString(config.get("endingBlowHud", "dss.config.client.endingBlowHud.yalign", "top", "Base HUD alignment on the Y-Axis").setValidValues(yalign).getString());

@@ -26,6 +26,7 @@ import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.AttackTimePacket;
+import dynamicswordskills.network.client.EndingBlowPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
@@ -78,6 +79,9 @@ public class EndingBlow extends SkillActive
 	/** The last time this skill was activated (so HUD element can display or hide as appropriate) */
 	@SideOnly(Side.CLIENT)
 	private long lastActivationTime;
+
+	/** Flag indicating the skill's result: 0 - result pending; +1 - success; -1 - failure; only used for HUD  */
+	public byte skillResult;
 
 	/** Number of consecutive hits the combo had when the skill was last used */
 	private int lastNumHits;
@@ -230,6 +234,7 @@ public class EndingBlow extends SkillActive
 			ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
 			if (skill == null || !skill.isComboInProgress()) {
 				lastNumHits = 0;
+				skillResult = 0;
 			}
 		}
 		if (isActive()) {
@@ -240,6 +245,9 @@ public class EndingBlow extends SkillActive
 				PacketDispatcher.sendTo(new AttackTimePacket(skills.getAttackTime()), (EntityPlayerMP) player);
 			}
 		}
+		if (player.worldObj.isRemote && canUse(player)) {
+			skillResult = 0; // clear previous result when able to activate again
+		}
 	}
 
 	/**
@@ -247,7 +255,9 @@ public class EndingBlow extends SkillActive
 	 */
 	private void updateEntityState(EntityPlayer player) {
 		if (!player.worldObj.isRemote) {
+			byte result = -1;
 			if (entityHit.getHealth() <= 0.0F) {
+				result = 1;
 				if (entityHit instanceof EntityLiving) {
 					DirtyEntityAccessor.setLivingXp((EntityLiving) entityHit, xp, true);
 				} else {
@@ -261,6 +271,7 @@ public class EndingBlow extends SkillActive
 					PacketDispatcher.sendTo(new AttackTimePacket(skills.getAttackTime()), (EntityPlayerMP) player);
 				}
 			}
+			PacketDispatcher.sendTo(new EndingBlowPacket(result), (EntityPlayerMP) player);
 		}
 		entityHit = null;
 		xp = 0;
