@@ -19,7 +19,6 @@ combo.label.9=Unstoppable
 combo.label.10=Devastating
 combo.label.11=Masterful
 combo.label.12=Legendary
-combo.ending=FINISH HIM!!!
 
 commands.skill.generic.unknown=%1$s is not a recognized skill
 commands.grantskill.failure.disabled=%1$s is disabled
@@ -97,6 +96,10 @@ death.attack.armorBreak=%1$s's armor was pierced by %2$s
 death.attack.armorBreak.item=%1$s's armor was pierced by %2$s using %3$s
 death.attack.indirectSword=%1$s was slain by %2$s
 death.attack.indirectSword.item=%1$s was slain by %2$s using %3$s
+
+dss.hud.endingblow.activate=Finish him!
+dss.hud.endingblow.failure=Failed
+dss.hud.endingblow.success=FATALITY
 
 entity.dynamicswordskills.leapingblow.name=Leaping Blow
 entity.dynamicswordskills.swordbeam.name=Sword Beam

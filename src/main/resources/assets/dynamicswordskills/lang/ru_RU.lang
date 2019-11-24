@@ -19,7 +19,6 @@ combo.label.9=Дерзкий!
 combo.label.10=Не остановим!
 combo.label.11=Мастер!
 combo.label.12=Профессионал!
-combo.ending=ДОБЕЙ ЕГО!!!
 
 commands.skill.generic.unknown=Умение %1$s неизвестно
 commands.grantskill.failure.disabled=%1$s отключен
@@ -43,6 +42,10 @@ death.attack.armorBreak=Броня %1$s была проломлена %2$s
 death.attack.armorBreak.item=Броня %1$s была проломлена %2$s используя %3$s
 death.attack.indirectSword=%1$s был сражён %2$s
 death.attack.indirectSword.item=%1$s был сражён %2$s используя %3$s
+
+dss.hud.endingblow.activate=ДОБЕЙ ЕГО!!!
+dss.hud.endingblow.failure=Failed
+dss.hud.endingblow.success=FATALITY
 
 entity.dynamicswordskills.leapingblow.name=Ударная волна
 entity.dynamicswordskills.swordbeam.name=Небесный удар
