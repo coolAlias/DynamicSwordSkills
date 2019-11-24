@@ -52,9 +52,6 @@ public class ComboOverlay extends AbstractGuiOverlay
 	/** Time at which the current combo first started displaying */
 	private long displayStartTime;
 
-	/** Length of time combo pop-up will display */
-	private static final long DISPLAY_TIME = 5000;
-
 	public ComboOverlay(Minecraft mc) {
 		super(mc);
 	}
@@ -76,7 +73,7 @@ public class ComboOverlay extends AbstractGuiOverlay
 
 	@Override
 	public boolean shouldRender() {
-		if (!Config.comboHudEnabled) {
+		if (Config.comboHudDisplayTime < 1) {
 			return false;
 		}
 		ICombo iCombo = DSSPlayerInfo.get(mc.thePlayer).getComboSkill();
@@ -97,7 +94,7 @@ public class ComboOverlay extends AbstractGuiOverlay
 				this.lastComboSize = this.combo.getNumHits();
 				this.displayStartTime = Minecraft.getSystemTime();
 			}
-			return ((Minecraft.getSystemTime() - this.displayStartTime) < DISPLAY_TIME);
+			return ((Minecraft.getSystemTime() - this.displayStartTime) < Config.comboHudDisplayTime);
 		}
 		return false;
 	}

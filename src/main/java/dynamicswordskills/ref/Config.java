@@ -43,14 +43,14 @@ public class Config
 	private static boolean allowVanillaControls;
 	private static boolean requireDoubleTap;
 	/* Combo HUD */
-	public static boolean comboHudEnabled;
+	public static int comboHudDisplayTime;
 	private static int comboHudMaxHits;
 	public static HALIGN comboHudXAlign;
 	public static VALIGN comboHudYAlign;
 	public static int comboHudXOffset;
 	public static int comboHudYOffset;
 	/* Ending Blow HUD */
-	public static boolean endingBlowHudEnabled;
+	public static int endingBlowHudDisplayTime;
 	public static boolean endingBlowHudResult;
 	public static boolean endingBlowHudText;
 	public static HALIGN endingBlowHudXAlign;
@@ -128,14 +128,14 @@ public class Config
 		/* Combo HUD */
 		String[] xalign = {"left", "center", "right"};
 		String[] yalign = {"top", "center", "bottom"};
-		comboHudEnabled = config.get("comboHud", "dss.config.client.comboHud.enable", true, "The Combo HUD displays combo damage and recent hits").getBoolean(true);
+		comboHudDisplayTime = config.get("comboHud", "dss.config.client.comboHud.displayTime", 5000, "Number of milliseconds Combo HUD will remain on screen (0 to disable)", 0, 20000).getInt();
 		comboHudMaxHits = config.get("comboHud", "dss.config.client.comboHud.maxHits", 3, "Maximum number of recent hits to display [0-12]", 0, 12).getInt();
 		comboHudXAlign = HALIGN.fromString(config.get("comboHud", "dss.config.client.comboHud.xalign", "left", "Base HUD alignment on the X-Axis").setValidValues(xalign).getString());
 		comboHudXOffset = config.get("comboHud", "dss.config.client.comboHud.xoffset", 0, "Number of pixels to offset HUD alignment on the X-Axis").getInt();
 		comboHudYAlign = VALIGN.fromString(config.get("comboHud", "dss.config.client.comboHud.yalign", "top", "Base HUD alignment on the Y-Axis").setValidValues(yalign).getString());
 		comboHudYOffset = config.get("comboHud", "dss.config.client.comboHud.yoffset", 0, "Number of pixels to offset HUD alignment on the Y-Axis").getInt();
 		/* Ending Blow HUD */
-		endingBlowHudEnabled = config.get("endingBlowHud", "dss.config.client.endingBlowHud.enable", true, "The Ending Blow HUD indicates when the skill can be activated").getBoolean(true);
+		endingBlowHudDisplayTime = config.get("endingBlowHud", "dss.config.client.endingBlowHud.displayTime", 1000, "Number of milliseconds Ending Blow HUD will remain on screen (0 to disable)", 0, 20000).getInt();
 		endingBlowHudResult = config.get("endingBlowHud", "dss.config.client.endingBlowHud.enableResultNotification", true, "Display success / failure notification when Ending Blow is used").getBoolean(true);
 		endingBlowHudText = config.get("endingBlowHud", "dss.config.client.endingBlowHud.enableText", false, "Display text instead of icons for Ending Blow notifications").getBoolean(false);
 		endingBlowHudXAlign = HALIGN.fromString(config.get("endingBlowHud", "dss.config.client.endingBlowHud.xalign", "center", "Base HUD alignment on the X-Axis").setValidValues(xalign).getString());
