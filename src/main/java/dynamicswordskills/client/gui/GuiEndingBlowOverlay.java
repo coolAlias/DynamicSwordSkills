@@ -44,8 +44,6 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 
 	private static final int ICON_SIZE = 16;
 
-	private SkillActive skill;
-
 	private int iconIndex;
 
 	private String text;
@@ -69,7 +67,7 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 		if (!Config.endingBlowHudEnabled) {
 			return false;
 		}
-		this.skill = DSSPlayerInfo.get(mc.thePlayer).getActiveSkill(SkillActive.endingBlow);
+		SkillActive skill = DSSPlayerInfo.get(mc.thePlayer).getActiveSkill(SkillActive.endingBlow);
 		if (skill == null) {
 			this.displayStartTime = 0;
 		} else if (skill.canUse(this.mc.thePlayer)) {
@@ -77,17 +75,20 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 		} else if (((EndingBlow) skill).getLastActivationTime() < this.displayStartTime) {
 			this.displayStartTime = 0; // unable to use and was not activated during this opportunity window
 		}
+		if (skill instanceof EndingBlow) {
+			byte i = ((EndingBlow) skill).skillResult;
+			this.iconIndex = (i < 0 ? 2 : i);
+		}
+		if (!Config.endingBlowHudResult && this.iconIndex != 0) {
+			return false;
+		}
 		return ((Minecraft.getSystemTime() - this.displayStartTime) < DISPLAY_TIME);
 	}
 
 	@Override
 	protected void setup(ScaledResolution resolution) {
-		if (this.skill instanceof EndingBlow) {
-			byte i = ((EndingBlow) skill).skillResult;
-			this.iconIndex = (i < 0 ? 2 : i);
-			String textKey = (i < 0 ? "dss.hud.endingblow.failure" : (i > 0 ? "dss.hud.endingblow.success" : "dss.hud.endingblow.activate"));
-			this.text = new TextComponentTranslation(textKey).getUnformattedText();
-		}
+		String textKey = (this.iconIndex == 2 ? "dss.hud.endingblow.failure" : (this.iconIndex == 1 ? "dss.hud.endingblow.success" : "dss.hud.endingblow.activate"));
+		this.text = new TextComponentTranslation(textKey).getUnformattedText();
 		this.height = (Config.endingBlowHudText ? this.mc.fontRendererObj.FONT_HEIGHT : ICON_SIZE);
 		this.width = (Config.endingBlowHudText ? this.mc.fontRendererObj.getStringWidth(this.text) : ICON_SIZE);
 		this.setPosX(resolution, Config.endingBlowHudXOffset);
