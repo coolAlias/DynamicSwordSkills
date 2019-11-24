@@ -19,7 +19,6 @@ combo.label.9=九连击(无人能挡!)
 combo.label.10=十连击(毁灭!)
 combo.label.11=十一连段(宗师!)
 combo.label.12=十二连段(传奇!)
-combo.ending=了结了他吧!
 
 commands.skill.generic.unknown=%1$s is not a recognized skill
 commands.grantskill.failure.disabled=%1$s is disabled
@@ -41,6 +40,10 @@ death.attack.armorBreak=%1$s的护甲被%2$s刺穿了
 death.attack.armorBreak.item=%1$s的护甲被%2$s使用%3$s刺穿了
 death.attack.indirectSword=%1$s被%2$s杀死
 death.attack.indirectSword.item=%1$s被%2$s使用%3$s杀死
+
+dss.hud.endingblow.activate=了结了他吧!
+dss.hud.endingblow.failure=Failed
+dss.hud.endingblow.success=FATALITY
 
 entity.dynamicswordskills.leapingblow.name=跳劈
 entity.dynamicswordskills.swordbeam.name=剑气

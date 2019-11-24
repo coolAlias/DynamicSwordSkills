@@ -86,7 +86,7 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 		if (this.skill instanceof EndingBlow) {
 			byte i = ((EndingBlow) skill).skillResult;
 			this.iconIndex = (i < 0 ? 2 : i);
-			String textKey = "combo.ending";
+			String textKey = (i < 0 ? "dss.hud.endingblow.failure" : (i > 0 ? "dss.hud.endingblow.success" : "dss.hud.endingblow.activate"));
 			this.text = StatCollector.translateToLocal(textKey);
 		}
 		this.height = (Config.endingBlowHudText ? this.mc.fontRenderer.FONT_HEIGHT : ICON_SIZE);

@@ -19,7 +19,6 @@ combo.label.9=Nie do powstrzymania
 combo.label.10=Niszczycielski
 combo.label.11=Mistrzowski
 combo.label.12=Legendarny
-combo.ending=WYKOŃCZ GO!!!
 
 commands.skill.generic.unknown=%1$s is not a recognized skill
 commands.grantskill.failure.disabled=%1$s is disabled
@@ -41,6 +40,10 @@ death.attack.armorBreak=Zbroja gracza %1$s została przebita przez %2$s
 death.attack.armorBreak.item=Zbroja gracza %1$s została przebita przez %2$s używając %3$s
 death.attack.indirectSword=%1$s został zabity przez %2$s
 death.attack.indirectSword.item=%1$s został zabity przez %2$s używając %3$s
+
+dss.hud.endingblow.activate=WYKOŃCZ GO!!!
+dss.hud.endingblow.failure=Failed
+dss.hud.endingblow.success=FATALITY
 
 entity.dynamicswordskills.leapingblow.name=Obszerny podmuch
 entity.dynamicswordskills.swordbeam.name=Sword Beam
