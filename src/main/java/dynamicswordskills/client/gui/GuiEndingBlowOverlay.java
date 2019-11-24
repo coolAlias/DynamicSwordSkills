@@ -37,9 +37,6 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 	/** Time at which the current combo first started displaying */
 	private long displayStartTime;
 
-	/** Length of time combo pop-up will display */
-	private static final long DISPLAY_TIME = 1000;
-
 	private static final ResourceLocation HUD_ICONS = new ResourceLocation(ModInfo.ID, "textures/gui/hud_icons.png");
 
 	private static final int ICON_SIZE = 16;
@@ -64,7 +61,7 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 
 	@Override
 	public boolean shouldRender() {
-		if (!Config.endingBlowHudEnabled) {
+		if (Config.endingBlowHudDisplayTime < 1) {
 			return false;
 		}
 		SkillActive skill = DSSPlayerInfo.get(mc.thePlayer).getActiveSkill(SkillActive.endingBlow);
@@ -82,7 +79,7 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 		if (!Config.endingBlowHudResult && this.iconIndex != 0) {
 			return false;
 		}
-		return ((Minecraft.getSystemTime() - this.displayStartTime) < DISPLAY_TIME);
+		return ((Minecraft.getSystemTime() - this.displayStartTime) < Config.endingBlowHudDisplayTime);
 	}
 
 	@Override
