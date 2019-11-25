@@ -36,6 +36,7 @@ public class Config
 	public static Configuration config;
 	/*================== CLIENT SIDE SETTINGS =====================*/
 	/* General client settings */
+	private static boolean enableAdditionalControls;
 	private static boolean enableAutoTarget;
 	private static boolean enableTargetPassive;
 	private static boolean enableTargetPlayer;
@@ -112,10 +113,16 @@ public class Config
 	public static void refreshClient() {
 		/* General client settings */
 		config.addCustomCategoryComment(Configuration.CATEGORY_CLIENT, "This category contains client side settings; i.e. they are not synchronized with the server.");
+		enableAdditionalControls = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.enableAdditionalControls", false, "Enables additional keybindings that can be used to attack, block, and activate skills").setRequiresMcRestart(true).getBoolean(false);
 		enableAutoTarget = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.enableAutoTarget", true, "Enable auto-targeting when locked on and the current target becomes invalid").getBoolean(true);
 		enableTargetPassive = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.enableTargetPassive", true, "Allow targeting passive mobs with the lock-on mechanic").getBoolean(true);
 		enableTargetPlayer = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.enableTargetPlayer", true, "Allow targeting players with the lock-on mechanic").getBoolean(true);
 		allowVanillaControls = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.enableVanillaControls", true, "Allow vanilla movement keys to be used to activate skills; must be enabled if Additional Controls are disabled").getBoolean(true);
+		if (!enableAdditionalControls && !allowVanillaControls) {
+			DynamicSwordSkills.logger.warn("Both Vanilla and Additional Controls are disabled - Vanilla Controls were automatically enabled");
+			allowVanillaControls = true;
+		}
+		requireDoubleTap = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.requireDoubleTap", true, "Require double-tap for Dodge and Parry (always required when Vanilla Controls are enabled)").getBoolean(true);
 		/* Combo HUD */
 		String[] xalign = {"left", "center", "right"};
 		String[] yalign = {"top", "center", "bottom"};
@@ -201,6 +208,7 @@ public class Config
 	/*================== CLIENT SIDE SETTINGS =====================*/
 	public static int getHitsToDisplay() { return comboHudMaxHits; }
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
+	public static boolean enableAdditionalControls() { return enableAdditionalControls; }
 	public static boolean requiresDoubleTap() { return requireDoubleTap; }
 	public static boolean autoTargetEnabled() { return enableAutoTarget; }
 	public static boolean canTargetPassiveMobs() { return enableTargetPassive; }
