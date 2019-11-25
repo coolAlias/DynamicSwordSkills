@@ -44,8 +44,8 @@ public class DSSKeyHandler
 	/** Key index for easy handling and retrieval of keys and key descriptions */
 	public static final byte 
 	KEY_SKILL_ACTIVATE = 0,
-	KEY_SKILLS_GUI = 1,
-	KEY_NEXT_TARGET = 2,
+	KEY_NEXT_TARGET = 1,
+	KEY_SKILLS_GUI = 2,
 	KEY_ATTACK = 3,
 	KEY_LEFT = 4,
 	KEY_RIGHT = 5,
