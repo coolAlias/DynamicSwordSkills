@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemSword;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -75,7 +76,7 @@ public class WeaponRegistry
 	 * Returns true if the item is registered as a non-sword weapon or extends ItemSword
 	 */
 	public boolean isWeapon(Item item) {
-        return !isWeaponForbidden(item) && (isSword(item) || weapons.contains(item));
+        return !isWeaponForbidden(item) && (isSword(item) || item instanceof ItemAxe || weapons.contains(item));
 	}
 
 	/**
