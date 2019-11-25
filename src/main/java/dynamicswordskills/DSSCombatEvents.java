@@ -217,7 +217,6 @@ public class DSSCombatEvents
 	public void onEntityJoinWorld(EntityJoinWorldEvent event) {
 		if (event.entity instanceof EntityPlayer) {
 			DSSPlayerInfo.get((EntityPlayer) event.entity).onJoinWorld();
-			
 		}
 	}
 
