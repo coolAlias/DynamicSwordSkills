@@ -75,7 +75,7 @@ public class WeaponRegistry
 	 * Returns true if the item is registered as a non-sword weapon or extends ItemSword
 	 */
 	public boolean isWeapon(Item item) {
-		return !isWeaponForbidden(item) && (item instanceof ItemSword || weapons.contains(item));
+        return !isWeaponForbidden(item) && (isSword(item) || weapons.contains(item));
 	}
 
 	/**
