@@ -144,7 +144,7 @@ skill.dss.gui.additional.text=Sword skills are acquired by finding and using ski
 skill.dss.gui.click=< Click any skill >
 skill.dss.gui.description=DESCRIPTION
 skill.dss.gui.description.text=This section contains the full skill description.
-skill.dss.gui.name=SKILL NAME
+skill.dss.gui.name=SKILL MANUAL
 skill.dss.gui.summary=SUMMARY
 skill.dss.gui.summary.text=This section displays the mechanical aspects of the skill based on your current skill level.
 
