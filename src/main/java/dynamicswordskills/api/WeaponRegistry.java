@@ -24,6 +24,7 @@ import cpw.mods.fml.common.event.FMLInterModComms;
 import cpw.mods.fml.common.registry.GameRegistry;
 import dynamicswordskills.DynamicSwordSkills;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemSword;
 
 /**
@@ -75,7 +76,7 @@ public class WeaponRegistry
 	 * Returns true if the item is registered as a non-sword weapon or extends ItemSword
 	 */
 	public boolean isWeapon(Item item) {
-        return !isWeaponForbidden(item) && (isSword(item) || weapons.contains(item));
+        return !isWeaponForbidden(item) && (isSword(item) || item instanceof ItemAxe || weapons.contains(item));
 	}
 
 	/**
