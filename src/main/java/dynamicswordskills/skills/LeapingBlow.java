@@ -19,6 +19,7 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
@@ -90,6 +91,11 @@ public class LeapingBlow extends SkillActive
 	}
 
 	@Override
+	public boolean isAnimating() {
+		return isActive() || ticksTilFail > 0;
+	}
+
+	@Override
 	protected float getExhaustion() {
 		return 2.0F - (0.1F * level);
 	}
@@ -142,6 +148,7 @@ public class LeapingBlow extends SkillActive
 				return true;
 			}
 		} else if (canExecute(player)) {
+			DSSCombatEvents.setPlayerAttackTime(player); // prevent left-click spam
 			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 			return true;
 		}
