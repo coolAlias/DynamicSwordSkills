@@ -47,6 +47,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Effect: A fierce block that is capable of destroying the opponent's blade
  * Exhaustion: 2.0F - (0.1 * level)
  * Damage: Up to 90 durability damage to the opponent's held item (15 * (level + 1))
+ * Knockback: 0.5F + (0.1F * level), slightly better than a standard block
  * Duration: Time allowed before skill fails is 2 ticks at level 1, up to 8 ticks at max level
  * Notes:
  * - Only works when being attacked by an enemy holding an item
@@ -83,6 +84,7 @@ public class SwordBreak extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(new TextComponentTranslation(getInfoString("info", 1), getMaxDamage()).getUnformattedText());
+		desc.add(new TextComponentTranslation(getInfoString("info", 2), getKnockbackStrength()).getUnformattedText());
 		desc.add(getTimeLimitDisplay(getActiveTime() - getUseDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
@@ -116,7 +118,7 @@ public class SwordBreak extends SkillActive
 	 * Returns the strength of the knockback effect when an attack is parried
 	 */
 	public float getKnockbackStrength() {
-		return 0.5F; // 0.5F is the base line per blocking with a shield
+		return 0.5F + (0.1F * level); // 0.5F is the base line per blocking with a shield
 	}
 
 	@Override
