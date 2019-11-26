@@ -139,6 +139,13 @@ public class Parry extends SkillActive
 		return ((level * 0.1F) - penalty + bonus);
 	}
 
+	/**
+	 * Returns the strength of the knockback effect when an attack is parried
+	 */
+	public float getKnockbackStrength() {
+		return 0.5F; // 0.5F is the base line per blocking with a shield
+	}
+
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand());
@@ -225,7 +232,7 @@ public class Parry extends SkillActive
 				++attacksParried; // increment after disarm
 				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SWORD_STRIKE, SoundCategory.PLAYERS, 0.4F, 0.5F);
 				playMissSound = false;
-				TargetUtils.knockTargetBack(attacker, player);
+				TargetUtils.knockTargetBack(attacker, player, getKnockbackStrength());
 				return true;
 			} // don't deactivate early, as there is a delay between uses
 		}
