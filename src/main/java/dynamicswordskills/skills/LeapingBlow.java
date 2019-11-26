@@ -19,14 +19,9 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
@@ -35,6 +30,12 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
 
 /**
  * 
@@ -84,6 +85,11 @@ public class LeapingBlow extends SkillActive
 	@Override
 	public boolean isActive() {
 		return isActive;
+	}
+
+	@Override
+	public boolean isAnimating() {
+		return isActive() || ticksTilFail > 0;
 	}
 
 	@Override
@@ -139,6 +145,7 @@ public class LeapingBlow extends SkillActive
 				return true;
 			}
 		} else if (canExecute(player) && activate(player)) {
+			DSSCombatEvents.setPlayerAttackTime(player); // prevent left-click spam
 			return true;
 		}
 		return false;
