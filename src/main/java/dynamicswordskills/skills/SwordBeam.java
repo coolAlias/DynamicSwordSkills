@@ -150,9 +150,10 @@ public class SwordBeam extends SkillActive
 			beam.setHeadingFromThrower(player, player.rotationPitch, player.rotationYaw, 0.0F, beam.getVelocity(), 1.0F);
 			world.spawnEntityInWorld(beam);
 		} else {
-			player.swingArm(EnumHand.MAIN_HAND);
 			DSSPlayerInfo.get(player).setAttackTime(20 - level);
 		}
+		player.swingArm(EnumHand.MAIN_HAND);
+		player.resetCooldown();
 		return true;
 	}
 

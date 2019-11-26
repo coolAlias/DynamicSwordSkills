@@ -186,6 +186,7 @@ public class ArmorBreak extends SkillActive
 		activeTimer = 1; // needs to be active for hurt event to process correctly
 		if (world.isRemote) {
 			player.swingArm(EnumHand.MAIN_HAND);
+			player.resetCooldown();
 		} else {
 			// Attack first so skill still active upon impact, then set timer to zero
 			ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
@@ -228,6 +229,7 @@ public class ArmorBreak extends SkillActive
 						PacketDispatcher.sendToServer(new ActivateSkillPacket(this, true));
 					} else { // player missed - swing arm manually since no activation packet will be sent
 						player.swingArm(EnumHand.MAIN_HAND);
+						player.resetCooldown();
 					}
 				}
 			} else {

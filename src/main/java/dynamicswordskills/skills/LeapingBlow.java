@@ -200,6 +200,7 @@ public class LeapingBlow extends SkillActive
 					DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);
 				} else {
 					player.swingArm(EnumHand.MAIN_HAND);
+					player.resetCooldown();
 				}
 			} else if (distance >= 1.0F) {
 				// add exhaustion here, now that skill has truly activated:
@@ -208,6 +209,7 @@ public class LeapingBlow extends SkillActive
 				entity.setHeadingFromThrower(player, player.rotationPitch, player.rotationYaw, 0.0F, entity.getVelocity(), 1.0F);
 				player.worldObj.spawnEntityInWorld(entity);
 				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.LEAPING_BLOW, SoundCategory.PLAYERS, 0.4F, 0.5F);
+				player.resetCooldown();
 			}
 		}
 		onDeactivated(player.worldObj, player);

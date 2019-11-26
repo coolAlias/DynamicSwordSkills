@@ -168,8 +168,9 @@ public class SwordBreak extends SkillActive
 		if (world.isRemote) {
 			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
 			KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
-			player.swingArm(EnumHand.MAIN_HAND);
 		}
+		player.swingArm(EnumHand.MAIN_HAND);
+		player.resetCooldown();
 		return isActive();
 	}
 

@@ -197,6 +197,7 @@ public class Parry extends SkillActive
 		attacksParried = 0;
 		playMissSound = true;
 		player.swingArm(EnumHand.MAIN_HAND);
+		player.resetCooldown();
 		return isActive();
 	}
 
