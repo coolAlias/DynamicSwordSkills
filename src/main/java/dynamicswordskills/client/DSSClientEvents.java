@@ -151,10 +151,10 @@ public class DSSClientEvents
 					if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
 						// no skill activated - perform a 'standard' attack
 						performComboAttack(mc, skill);
-					}
-					// hack for Armor Break: allows charging to begin without having to press attack key a second time
-					if (skills.hasSkill(SkillBase.armorBreak)) {
-						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
+						// hack for Armor Break: allows charging to begin without having to press attack key a second time
+						if (skills.hasSkill(SkillBase.armorBreak)) {
+							skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
+						}
 					}
 				}
 
