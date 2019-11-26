@@ -107,6 +107,13 @@ public class SwordBreak extends SkillActive
 		return (level + 1) * 15;
 	}
 
+	/**
+	 * Returns the strength of the knockback effect when an attack is parried
+	 */
+	public float getKnockbackStrength() {
+		return 0.5F; // 0.5F is the base line per blocking with a shield
+	}
+
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
@@ -191,7 +198,7 @@ public class SwordBreak extends SkillActive
 						attacker.setCurrentItemOrArmor(0, null);
 					}
 				}
-				TargetUtils.knockTargetBack(attacker, player);
+				TargetUtils.knockTargetBack(attacker, player, getKnockbackStrength());
 				return true;
 			} // don't deactivate early, as there is a delay between uses
 		}
