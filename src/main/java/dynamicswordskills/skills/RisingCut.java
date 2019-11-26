@@ -117,7 +117,7 @@ public class RisingCut extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (key == mc.gameSettings.keyBindJump) {
-			if (!isActive() && !player.isHandActive() && player.isSneaking()) {
+			if (player.onGround && ticksTilFail == 0 && !isActive() && !player.isHandActive() && player.isSneaking()) {
 				ticksTilFail = 3; // this allows canExecute to return true for 3 ticks
 				return true;
 			}
