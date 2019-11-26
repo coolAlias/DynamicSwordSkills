@@ -141,7 +141,7 @@ public class Parry extends SkillActive
 	 * Returns the strength of the knockback effect when an attack is parried
 	 */
 	public float getKnockbackStrength() {
-		return 0.5F; // 0.5F is the base line per blocking with a shield
+		return 0.4F; // 0.5F is the base line per blocking with a shield
 	}
 
 	@Override
