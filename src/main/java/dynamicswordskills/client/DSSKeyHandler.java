@@ -170,10 +170,10 @@ public class DSSKeyHandler
 			if (key.isKeyDown()) {
 				if (!skills.onKeyPressed(mc, key)) {
 					DSSClientEvents.performComboAttack(mc, skill);
-				}
-				// hack for Armor Break to begin charging without having to press attack again
-				if (skills.hasSkill(SkillBase.armorBreak)) {
-					skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.thePlayer);
+					// hack for Armor Break to begin charging without having to press attack again
+					if (skills.hasSkill(SkillBase.armorBreak)) {
+						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.thePlayer);
+					}
 				}
 			}
 		} else if (canInteract) {
