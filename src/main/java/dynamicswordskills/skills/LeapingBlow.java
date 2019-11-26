@@ -33,6 +33,7 @@ import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
@@ -40,7 +41,7 @@ import dynamicswordskills.util.TargetUtils;
 /**
  * 
  * LEAPING BLOW
- * Activation: Jump while holding block
+ * Activation: Jump while holding block, then attack
  * Damage: Regular sword damage (without enchantment bonuses), +1 extra damage per skill level
  * Effect: Adds Weakness I for (50 + (10 * level)) ticks
  * Range: Technique travels roughly 3 blocks + 1/2 block per level
@@ -53,7 +54,10 @@ import dynamicswordskills.util.TargetUtils;
  */
 public class LeapingBlow extends SkillActive
 {
-	/** Set to true when jumping and 'attack' key pressed; set to false upon landing */
+	/** Activation window for pressing the attack key, set when player initially leaps */
+	private int ticksTilFail;
+
+	/** Set to true when activated; set to false upon landing */
 	private boolean isActive = false;
 
 	public LeapingBlow(String name) {
@@ -115,22 +119,29 @@ public class LeapingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return !isActive() && player.onGround && PlayerUtils.isBlocking(player) && !TargetUtils.isInLiquid(player);
+		return ticksTilFail > 0 && !player.onGround && canUse(player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return key == mc.gameSettings.keyBindJump;
+		return (key == mc.gameSettings.keyBindJump 
+				|| key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey() 
+				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (canExecute(player)) {
+		if (key == mc.gameSettings.keyBindJump) {
+			if (player.onGround && PlayerUtils.isBlocking(player) && canUse(player)) {
+				ticksTilFail = 10;
+				KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
+				KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
+				return true;
+			}
+		} else if (canExecute(player)) {
 			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-			KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
-			KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 			return true;
 		}
 		return false;
@@ -139,19 +150,25 @@ public class LeapingBlow extends SkillActive
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		isActive = true;
+		ticksTilFail = 0;
 		return isActive();
 	}
 
 	@Override
 	protected void onDeactivated(World world, EntityPlayer player) {
 		isActive = false;
+		ticksTilFail = 0;
 	}
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		// Handle on client because onGround is always true on the server
-		if (player.worldObj.isRemote && isActive() && (player.onGround || TargetUtils.isInLiquid(player))) {
-			deactivate(player);
+		if (player.worldObj.isRemote) {
+			if (isActive() && (player.onGround || TargetUtils.isInLiquid(player))) {
+				deactivate(player);
+			} else if (ticksTilFail > 0) {
+				--ticksTilFail;
+			}
 		}
 	}
 
