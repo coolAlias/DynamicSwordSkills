@@ -141,16 +141,15 @@ public class Parry extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
+		return super.canUse(player) && !isActive() 
+				&& !player.isUsingItem() 
+				&& PlayerUtils.isWeapon(player.getHeldItem());
 	}
 
-	/**
-	 * Only allow activation if player not using item, to prevent clashing with SwordBreak
-	 */
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return canUse(player) && !PlayerUtils.isBlocking(player);
+		return canUse(player);
 	}
 
 	@Override
