@@ -27,6 +27,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
@@ -87,6 +88,11 @@ public class LeapingBlow extends SkillActive
 	}
 
 	@Override
+	public boolean isAnimating() {
+		return isActive() || ticksTilFail > 0;
+	}
+
+	@Override
 	protected float getExhaustion() {
 		return 2.0F - (0.1F * level);
 	}
@@ -139,6 +145,7 @@ public class LeapingBlow extends SkillActive
 				return true;
 			}
 		} else if (canExecute(player) && activate(player)) {
+			DSSCombatEvents.setPlayerAttackTime(player); // prevent left-click spam
 			return true;
 		}
 		return false;
