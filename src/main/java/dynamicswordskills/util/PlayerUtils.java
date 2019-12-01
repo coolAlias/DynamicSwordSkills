@@ -38,6 +38,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import swordskillsapi.api.item.IWeapon;
 import swordskillsapi.api.item.WeaponRegistry;
 
 /**
@@ -55,17 +56,27 @@ public class PlayerUtils
 	}
 
 	/**
-	 * Returns {@link WeaponRegistry#isSword(ItemStack}
+	 * Copy of SwordSkillsAPI v2.0 {@link WeaponRegistry#isSword(ItemStack} for backwards compatibility
 	 */
 	public static boolean isSword(ItemStack stack) {
-		return WeaponRegistry.INSTANCE.isSword(stack);
+		if (stack == null) {
+			return false;
+		} else if (stack.getItem() instanceof IWeapon) {
+			return ((IWeapon) stack.getItem()).isSword(stack);
+		}
+		return WeaponRegistry.INSTANCE.isSword(stack.getItem());
 	}
 
 	/**
-	 * Returns {@link WeaponRegistry#isWeapon(ItemStack}
+	 * Copy of SwordSkillsAPI v2.0 {@link WeaponRegistry#isWeapon(ItemStack} for backwards compatibility
 	 */
 	public static boolean isWeapon(ItemStack stack) {
-		return WeaponRegistry.INSTANCE.isWeapon(stack);
+		if (stack == null) {
+			return false;
+		} else if (stack.getItem() instanceof IWeapon) {
+			return ((IWeapon) stack.getItem()).isWeapon(stack);
+		}
+		return WeaponRegistry.INSTANCE.isWeapon(stack.getItem());
 	}
 
 	/** Returns true if the stack is either a {@link #isSword(ItemStack) sword} or {@link ISkillProvider provider} of this skill */
