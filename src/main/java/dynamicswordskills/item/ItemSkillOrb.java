@@ -66,7 +66,7 @@ public class ItemSkillOrb extends Item implements IModItem, ISkillInfusionFuelIt
 		if (!player.worldObj.isRemote) {
 			SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
 			if (skill != null) {
-				if (!Config.isSkillEnabled(skill.getId())) {
+				if (!Config.isSkillEnabled(skill)) {
 					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(skill.getTranslationString()));
 				} else if (DSSPlayerInfo.get(player).grantSkill(skill)) {
 					PlayerUtils.playSound(player, ModSounds.LEVEL_UP, SoundCategory.PLAYERS, 1.0F, 1.0F);
@@ -103,7 +103,7 @@ public class ItemSkillOrb extends Item implements IModItem, ISkillInfusionFuelIt
 		if (SkillBase.doesSkillExist(stack.getItemDamage())) {
 			SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
 			if (skill != null) {
-				if (!Config.isSkillEnabled(skill.getId())) {
+				if (!Config.isSkillEnabled(skill)) {
 					list.add(TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled").getUnformattedText());
 				} else if (skill.getLevel() > 0) {
 					list.add(TextFormatting.GOLD + skill.getLevelDisplay(true));

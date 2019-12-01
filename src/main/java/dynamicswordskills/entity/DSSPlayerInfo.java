@@ -20,6 +20,8 @@ package dynamicswordskills.entity;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.network.PacketDispatcher;
@@ -148,7 +150,6 @@ public class DSSPlayerInfo
 			resetSkills();
 			return true;
 		} else {
-			// TODO change skill storage to use unlocalized name instead of id
 			SkillBase dummy = null;
 			for (SkillBase skill : skills.values()) {
 				if (skill.getUnlocalizedName().equals(name)) {
@@ -191,66 +192,53 @@ public class DSSPlayerInfo
 
 	/** Returns true if the player has at least one level in the specified skill */
 	public boolean hasSkill(SkillBase skill) {
-		return hasSkill(skill.getId());
-	}
-
-	/** Returns true if the player has at least one level in the specified skill (of any class) */
-	private boolean hasSkill(byte id) {
-		return getSkillLevel(id) > 0;
-	}
-
-	/** Returns the player's skill level for given skill, or 0 if the player doesn't have that skill */
-	public byte getSkillLevel(SkillBase skill) {
-		return getSkillLevel(skill.getId());
+		return getSkillLevel(skill) > 0;
 	}
 
 	/**
 	 * Returns the player's skill level for given skill, or 0 if the player doesn't have that skill
 	 */
-	public byte getSkillLevel(byte id) {
+	public byte getSkillLevel(SkillBase skill) {
 		byte level = 0;
-		if (itemSkill != null && itemSkill.getId() == id) {
+		if (skill == null) {
+			return 0;
+		} else if (itemSkill != null && itemSkill.is(skill)) {
 			level = itemSkill.getLevel();
-		} else if (id == SkillBase.swordBasic.getId()) {
+		} else if (skill.is(SkillBase.swordBasic)) {
 			if (player.getHeldItemMainhand() == null) {
 				retrieveDummySwordSkill();
 			}
 			if (dummySwordSkill != null) {
 				level = dummySwordSkill.getLevel();
 			}
-		} else if (id == SkillBase.mortalDraw.getId() && (itemSkill == null || dummySwordSkill == null)) {
+		} else if (skill.is(SkillBase.mortalDraw) && (itemSkill == null || dummySwordSkill == null)) {
 			for (int i = 0; i < 9; ++i) {
 				ItemStack stack = player.inventory.getStackInSlot(i);
 				if (stack != null && stack.getItem() instanceof ISkillProvider &&
-						((ISkillProvider) stack.getItem()).getSkillId(stack) == id)
+						((ISkillProvider) stack.getItem()).getSkillId(stack) == skill.getId())
 				{
 					if (itemSkill == null) {
 						itemSkill = SkillBase.getSkillFromItem(stack, (ISkillProvider) stack.getItem());
-						if (itemSkill != null && itemSkill.getLevel() > getTrueSkillLevel(id)) {
+						if (itemSkill != null && itemSkill.getLevel() > getTrueSkillLevel(skill)) {
 							level = itemSkill.getLevel();
 						}
 					}
 					if (dummySwordSkill == null && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack)
-							&& getTrueSkillLevel(SkillBase.swordBasic.getId()) < 1)
+							&& getTrueSkillLevel(SkillBase.swordBasic) < 1)
 					{
-						dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic.getId(), (byte) 1);
+						dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic, (byte) 1);
 						persistentDummySkillSlot = i;
 					}
 					break;
 				}
 			}
 		}
-		return (byte) Math.max(level, getTrueSkillLevel(id));
+		return (byte) Math.max(level, getTrueSkillLevel(skill));
 	}
 
 	/** Returns the player's true skill level, ignoring any ISkillItem that may be equipped */
 	public byte getTrueSkillLevel(SkillBase skill) {
-		return getTrueSkillLevel(skill.getId());
-	}
-
-	/** Returns the player's true skill level, ignoring any ISkillItem that may be equipped */
-	private byte getTrueSkillLevel(byte id) {
-		return (skills.containsKey(id) ? skills.get(id).getLevel() : 0);
+		return (skills.containsKey(skill.getId()) ? skills.get(skill.getId()).getLevel() : 0);
 	}
 
 	/**
@@ -397,7 +385,7 @@ public class DSSPlayerInfo
 	 * search for a Mortal Draw skill, using the same item if a dummy is needed
 	 */
 	public void retrieveDummySwordSkill() {
-		boolean needsDummy = (getTrueSkillLevel(SkillBase.swordBasic.getId()) < 1 && dummySwordSkill == null);
+		boolean needsDummy = (getTrueSkillLevel(SkillBase.swordBasic) < 1 && dummySwordSkill == null);
 		if ((needsDummy || itemSkill == null) && persistentDummySkillSlot == -1) {
 			for (int i = 0; i < 9; ++i) {
 				ItemStack stack = player.inventory.getStackInSlot(i);
@@ -405,7 +393,7 @@ public class DSSPlayerInfo
 						((ISkillProvider) stack.getItem()).getSkillId(stack) == SkillBase.mortalDraw.getId())
 				{
 					if (needsDummy && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack)) {
-						dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic.getId(), (byte) 1);
+						dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic, (byte) 1);
 						persistentDummySkillSlot = i;
 					}
 					if (itemSkill == null) {
@@ -428,42 +416,36 @@ public class DSSPlayerInfo
 	 * or null if the player doesn't have the skill or it is not the correct type
 	 */
 	public SkillActive getActiveSkill(SkillBase skill) {
-		SkillBase active = getPlayerSkill(skill.getId());
+		SkillBase active = getPlayerSkill(skill);
 		return (active instanceof SkillActive ? (SkillActive) active : null);
 	}
 
-	/** Returns the skill instance for actual use, whether from the player or an ISkillItem or null */
-	public SkillBase getPlayerSkill(SkillBase skill) {
-		return getPlayerSkill(skill.getId());
-	}
-
 	/**
-	 * Returns the skill instance for actual use, whether from the player or an ISkillItem or null
+	 * Returns the skill instance for actual use, whether from the player or an ISkillItem or null 
 	 */
-	public SkillBase getPlayerSkill(byte id) {
-		if (itemSkill != null && itemSkill.getId() == id) {
+	public SkillBase getPlayerSkill(@Nullable SkillBase skill) {
+		if (skill == null) {
+			return null;
+		} else if (itemSkill != null && itemSkill.is(skill)) {
 			return itemSkill;
-		} else if (id == SkillBase.spinAttack.getId() && itemSkill != null && itemSkill.is(SkillBase.superSpinAttack)) {
-			SkillBase skill = getTruePlayerSkill(id);
-			return (skill == null && !Config.isSpinAttackRequired() ? itemSkill : skill);
-		} else if (id == SkillBase.swordBasic.getId()) {
+		} else if (skill.is(SkillBase.spinAttack) && itemSkill != null && itemSkill.is(SkillBase.superSpinAttack)) {
+			SkillBase instance = getTruePlayerSkill(skill);
+			return (instance == null && !Config.isSpinAttackRequired() ? itemSkill : instance);
+		} else if (skill.is(SkillBase.swordBasic)) {
 			if (player.getHeldItemMainhand() == null) {
 				retrieveDummySwordSkill();
 			}
-			return (dummySwordSkill == null ? getTruePlayerSkill(id) : dummySwordSkill);
+			return (dummySwordSkill == null ? getTruePlayerSkill(skill) : dummySwordSkill);
 		} else {
-			return getTruePlayerSkill(id);
+			return getTruePlayerSkill(skill);
 		}
 	}
 
-	/** Returns the player's actual skill instance or null if the player doesn't have the skill */
+	/**
+	 * Returns the player's actual skill instance or null if the player doesn't have the skill 
+	 */
 	public SkillBase getTruePlayerSkill(SkillBase skill) {
-		return getTruePlayerSkill(skill.getId());
-	}
-
-	/** Returns the player's actual skill instance or null if the player doesn't have the skill */
-	private SkillBase getTruePlayerSkill(byte id) {
-		return (skills.containsKey(id) ? skills.get(id) : null);
+		return (skills.containsKey(skill.getId()) ? skills.get(skill.getId()) : null);
 	}
 
 	/**
@@ -484,16 +466,17 @@ public class DSSPlayerInfo
 
 	/** Grants a skill with target level of current skill level plus one */
 	public boolean grantSkill(SkillBase skill) {
-		return grantSkill(skill.getId(), (byte)(getSkillLevel(skill) + 1));
+		return grantSkill(skill, (byte)(getSkillLevel(skill) + 1));
 	}
 
 	/**
 	 * Grants skill to player if player meets the requirements; returns true if skill learned
 	 */
-	public boolean grantSkill(byte id, byte targetLevel) {
-		SkillBase skill = skills.containsKey(id) ? (SkillBase) skills.get(id) : SkillBase.getNewSkillInstance(id);
-		if (skill.grantSkill(player, targetLevel)) {
-			skills.put(id, skill);
+	public boolean grantSkill(SkillBase skill, byte targetLevel) {
+		byte id = skill.getId();
+		SkillBase instance = skills.containsKey(id) ? (SkillBase) skills.get(id) : SkillBase.getNewSkillInstance(skill);
+		if (instance.grantSkill(player, targetLevel)) {
+			skills.put(id, instance);
 			return true;
 		} else {
 			return false;
@@ -526,10 +509,11 @@ public class DSSPlayerInfo
 	 */
 	@SideOnly(Side.CLIENT)
 	public void syncClientSideSkill(byte id, NBTTagCompound compound) {
-		if (SkillBase.doesSkillExist(id)) {
-			SkillBase skill = SkillBase.getNewSkillInstance(id).loadFromNBT(compound);
-			if (skill.getLevel() > 0) {
-				skills.put(id, skill);
+		SkillBase skill = SkillBase.getSkill(id);
+		if (skill != null) {
+			SkillBase instance = SkillBase.getNewSkillInstance(skill).loadFromNBT(compound);
+			if (instance.getLevel() > 0) {
+				skills.put(id, instance);
 			} else {
 				skills.remove(id);
 			}
@@ -627,14 +611,14 @@ public class DSSPlayerInfo
 			if (itemSkill == null || !itemSkill.equals(skill)) {
 				itemSkill = skill;
 				if (itemSkill != null) {
-					if (itemSkill.getLevel() <= getTrueSkillLevel(itemSkill.getId())) {
+					if (itemSkill.getLevel() <= getTrueSkillLevel(itemSkill)) {
 						itemSkill = null;
 					}
 					if (item.grantsBasicSwordSkill(stack) && !skill.is(SkillBase.swordBasic)
-							&& getTrueSkillLevel(SkillBase.swordBasic.getId()) < 1)
+							&& getTrueSkillLevel(SkillBase.swordBasic) < 1)
 					{
 						if (dummySwordSkill == null) {
-							dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic.getId(), (byte) 1);
+							dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic, (byte) 1);
 							persistentDummySkillSlot = -1;
 						}
 					} else {
@@ -714,6 +698,7 @@ public class DSSPlayerInfo
 		for (SkillBase skill : skills.values()) {
 			NBTTagCompound skillTag = new NBTTagCompound();
 			skill.writeToNBT(skillTag);
+			skillTag.setString("id", skill.getUnlocalizedName());
 			taglist.appendTag(skillTag);
 		}
 		compound.setTag("DynamicSwordSkills", taglist);
@@ -728,9 +713,16 @@ public class DSSPlayerInfo
 		skills.clear(); // allows skills to reset on client without re-adding all the skills
 		NBTTagList taglist = compound.getTagList("DynamicSwordSkills", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < taglist.tagCount(); ++i) {
-			NBTTagCompound skill = taglist.getCompoundTagAt(i);
-			byte id = skill.getByte("id");
-			skills.put(id, SkillBase.getSkill(id).loadFromNBT(skill));
+			NBTTagCompound skillTag = taglist.getCompoundTagAt(i);
+			SkillBase skill = null;
+			if (skillTag.hasKey("id", Constants.NBT.TAG_BYTE)) {
+				skill = SkillBase.getSkill(skillTag.getByte("id"));
+			} else {
+				skill = SkillBase.getSkillByName(skillTag.getString("id"));
+			}
+			if (skill != null) {
+				skills.put(skill.getId(), skill.loadFromNBT(skillTag));
+			}
 		}
 		receivedGear = compound.getBoolean("receivedGear");
 	}
