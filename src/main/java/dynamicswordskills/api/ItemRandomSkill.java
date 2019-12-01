@@ -167,7 +167,7 @@ public class ItemRandomSkill extends ItemSword implements ISkillProviderInfusabl
 		SkillBase skill = null;
 		while (skill == null) {
 			skill = SkillBase.getSkill(rand.nextInt(SkillBase.getNumSkills()));
-			if (!(skill instanceof SkillActive) || !Config.isSkillEnabled(skill.getId())) {
+			if (!(skill instanceof SkillActive) || !Config.isSkillEnabled(skill)) {
 				skill = null;
 			}
 		}

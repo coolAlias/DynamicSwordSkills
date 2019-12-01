@@ -19,14 +19,14 @@ package dynamicswordskills.network.bidirectional;
 
 import java.io.IOException;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.PacketBuffer;
 import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 
 /**
  * 
@@ -56,11 +56,12 @@ public class DeactivateSkillPacket extends AbstractMessage<DeactivateSkillPacket
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(skillId);
+		// handled identically on both sides
+		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(skillId));
 		if (skill instanceof SkillActive) {
 			((SkillActive) skill).deactivate(player);
 		} else {
-			DynamicSwordSkills.logger.warn(String.format("Skill with ID %d was not valid for %s while processing DeactivateSkillPacket", skillId, player));
+			DynamicSwordSkills.logger.warn(String.format("Skill ID %d was not valid for %s while processing DeactivateSkillPacket", skillId, player));
 		}
 	}
 }

@@ -121,8 +121,8 @@ public abstract class SkillBase
 	}
 
 	/** Returns a new instance of the skill with id, or null if it doesn't exist */
-	public static final SkillBase getNewSkillInstance(byte id) {
-		return (skillsMap.containsKey(id) ? skillsMap.get(id).newInstance() : null);
+	public static final SkillBase getNewSkillInstance(@Nullable SkillBase skill) {
+		return (skill != null && skillsMap.containsKey(skill.getId()) ? skillsMap.get(skill.getId()).newInstance() : null);
 	}
 
 	/** Returns the instance of the skill stored in the map if it exists, or null */
@@ -162,18 +162,19 @@ public abstract class SkillBase
 	 * and {@link ISkillProvider#getSkillLevel(ItemStack)}, or null if not possible
 	 */
 	public static final SkillBase getSkillFromItem(final ItemStack stack, final ISkillProvider item) {
-		return createLeveledSkill(item.getSkillId(stack), item.getSkillLevel(stack));
+		SkillBase skill = SkillBase.getSkill(item.getSkillId(stack));
+		return createLeveledSkill(skill, item.getSkillLevel(stack));
 	}
 
 	/**
 	 * Returns a leveled skill from an id and level, capped at the max level for the skill;
 	 * May return null if the id is invalid or level is less than 1
 	 */
-	public static final SkillBase createLeveledSkill(final int id, final byte level) {
-		if (doesSkillExist(id) && level > 0) {
-			SkillBase skill = getNewSkillInstance((byte) id);
-			skill.level = (level > skill.getMaxLevel() ? skill.getMaxLevel() : level);
-			return skill;
+	public static final SkillBase createLeveledSkill(@Nullable final SkillBase skill, final byte level) {
+		if (skill != null && level > 0) {
+			SkillBase instance = getNewSkillInstance(skill);
+			instance.level = (level > skill.getMaxLevel() ? skill.getMaxLevel() : level);
+			return instance;
 		}
 		return null;
 	}
@@ -419,7 +420,10 @@ public abstract class SkillBase
 	/** This method should be called every update tick */
 	public void onUpdate(EntityPlayer player) {}
 
-	/** Writes mutable data to NBT. */
+	/**
+	 * Write mutable data to NBT.
+	 * NOT responsible for storing this skill's identity (e.g. id) - if that is needed, write it separately.
+	 */
 	public abstract void writeToNBT(NBTTagCompound compound);
 
 	/** Reads mutable data from NBT. */

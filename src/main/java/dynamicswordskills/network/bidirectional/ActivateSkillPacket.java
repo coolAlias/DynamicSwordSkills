@@ -20,8 +20,10 @@ package dynamicswordskills.network.bidirectional;
 import java.io.IOException;
 
 import cpw.mods.fml.relauncher.Side;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
@@ -67,6 +69,11 @@ public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 		if (SkillBase.mortalDraw.getId() == skillId && info.getTrueSkillLevel(SkillBase.mortalDraw) < 1) {
 			info.retrieveDummySwordSkill();
 		}
-		info.activateSkill(info.getPlayerSkill(skillId), wasTriggered);
+		SkillBase skill = info.getPlayerSkill(SkillBase.getSkill(skillId));
+		if (skill instanceof SkillActive) {
+			info.activateSkill(skill, wasTriggered);
+		} else {
+			DynamicSwordSkills.logger.warn(String.format("Skill ID %d was not valid for %s while processing ActivateSkillPacket", skillId, player));
+		}
 	}
 }
