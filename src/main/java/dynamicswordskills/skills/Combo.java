@@ -108,7 +108,7 @@ public class Combo
 	}
 
 	/** Returns the skill id associated with this Combo */
-	public byte getSkill() { return skillId; }
+	public byte getSkillId() { return skillId; }
 
 	/** Returns current number of hits */
 	public int getNumHits() { return damageList.size(); }

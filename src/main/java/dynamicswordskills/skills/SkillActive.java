@@ -239,7 +239,7 @@ public abstract class SkillActive extends SkillBase
 	 * @return	Returns {@link #onActivated}, signaling whether or not to add the skill to the list of currently active skills.
 	 */
 	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
-		if (!Config.isSkillEnabled(getId())) {
+		if (!Config.isSkillEnabled(this)) {
 			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new ChatComponentTranslation(getTranslationString()));
 			return false;
 		} else if (!wasTriggered && !allowUserActivation()) {
@@ -334,7 +334,6 @@ public abstract class SkillActive extends SkillBase
 
 	@Override
 	public final void writeToNBT(NBTTagCompound compound) {
-		compound.setByte("id", getId());
 		compound.setByte("level", level);
 	}
 
@@ -345,7 +344,7 @@ public abstract class SkillActive extends SkillBase
 
 	@Override
 	public final SkillActive loadFromNBT(NBTTagCompound compound) {
-		SkillActive skill = (SkillActive) getNewSkillInstance(compound.getByte("id"));
+		SkillActive skill = (SkillActive) getNewSkillInstance(this);
 		skill.readFromNBT(compound);
 		return skill;
 	}

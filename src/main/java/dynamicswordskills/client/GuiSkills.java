@@ -118,7 +118,7 @@ public class GuiSkills extends GuiContainer
 		fontRendererObj.setUnicodeFlag(true);
 		fontRendererObj.drawString(s, 158, 38, 4210752);
 		if (currentSkill != null) {
-			if (Config.isSkillEnabled(currentSkill.getId())) {
+			if (Config.isSkillEnabled(currentSkill)) {
 				s = currentSkill.getLevelDisplay(false);
 			} else {
 				s = (EnumChatFormatting.DARK_RED + StatCollector.translateToLocal("skill.dss.disabled"));
@@ -239,7 +239,7 @@ public class GuiSkills extends GuiContainer
 				// clear the current description so it refreshes next time the screen draws
 				desc.clear();
 			}
-			currentSkill = DSSPlayerInfo.get(mc.thePlayer).getPlayerSkill((byte) id);
+			currentSkill = DSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(SkillBase.getSkill(id));
 		} else if (!isMouseInRegion(mouseX, mouseY, guiLeft + 155, guiLeft + 267, guiTop + 35, guiTop + 160)) {
 			currentSkill = null;
 			desc.clear();

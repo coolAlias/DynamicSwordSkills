@@ -19,13 +19,13 @@ package dynamicswordskills.network.server;
 
 import java.io.IOException;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * 
@@ -57,14 +57,12 @@ public class EndComboPacket extends AbstractServerMessage<EndComboPacket>
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		if (SkillBase.getSkill(id) instanceof ICombo) {
-			ICombo skill = (ICombo) DSSPlayerInfo.get(player).getPlayerSkill(id);
-			if (skill != null) {
-				if (skill.isComboInProgress()) {
-					skill.getCombo().endCombo(player);
-				} else {
-					skill.setCombo(null);
-				}
+		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(id));
+		if (skill instanceof ICombo) {
+			if (((ICombo) skill).isComboInProgress()) {
+				((ICombo) skill).getCombo().endCombo(player);
+			} else {
+				((ICombo) skill).setCombo(null);
 			}
 		}
 	}
