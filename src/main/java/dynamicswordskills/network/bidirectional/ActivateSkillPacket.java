@@ -39,10 +39,6 @@ public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 
 	public ActivateSkillPacket() {}
 
-	public ActivateSkillPacket(SkillBase skill) {
-		this(skill, false);
-	}
-
 	/**
 	 * See {@link DSSPlayerInfo#activateSkill(SkillBase, boolean)}
 	 */
