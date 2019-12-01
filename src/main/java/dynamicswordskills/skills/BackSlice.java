@@ -212,6 +212,7 @@ public class BackSlice extends SkillActive
 			}
 			player.swingItem();
 			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
+			return true;
 		}
 		return false; // allow other skills to receive this key press (e.g. Spin Attack)
 	}
