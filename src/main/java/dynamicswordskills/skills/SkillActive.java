@@ -30,6 +30,7 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
@@ -183,15 +184,21 @@ public abstract class SkillActive extends SkillBase
 	protected abstract void onDeactivated(World world, EntityPlayer player);
 
 	/**
-	 * This is the method that should be called when a player tries to activate a skill
-	 * directly, e.g. from a key binding, HUD, or other such means, to ensure that skills
-	 * with special activation requirements are not circumvented: i.e. {@link #trigger} is
-	 * called only if direct {@link #allowUserActivation() user activation} is allowed.
-	 * 
-	 * @return false if the skill could not be activated, or returns {@link #trigger}
+	 * Use this method when a player tries to manually activate a skill, e.g. from a key binding,
+	 * HUD, or other such means. An activation packet is sent to the server if called client-side.
+	 * {@link #allowUserActivation()} may prevent activation via this method.
+	 * @return The result of {@link DSSPlayerInfo#activateSkill(SkillBase, boolean)}
 	 */
-	public final boolean activate(World world, EntityPlayer player) {
-		return (allowUserActivation() ? trigger(world, player, false) : false);
+	public final boolean activate(EntityPlayer player) {
+		if (!allowUserActivation()) {
+			return false;
+		} else if (player.worldObj.isRemote) {
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this, false));
+			if (sendClientUpdate()) {
+				return true; // prevent activateSkill from getting called twice
+			}
+		}
+		return DSSPlayerInfo.get(player).activateSkill(this, false);
 	}
 
 	/**
@@ -220,25 +227,22 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
-	 * This method should not be called directly except from an {@link ActivateSkillPacket}
-	 * sent by a skill when it determines that any special activation requirements have been
-	 * met (e.g. Armor Break must first charge up by holding the 'attack' key for a while).
+	 * This method should not be called directly; use {@link DSSPlayerInfo#activateSkill} instead.
 	 * 
 	 * If {@link #canUse} returns true, the skill will be activated.
 	 * {@link #getExhaustion} is added if {@link #autoAddExhaustion} is true, and an
 	 * {@link ActivateSkillPacket} is sent to the client if required.
 	 * 
-	 * Finally, {@link #onActivated} is called, allowing the skill to initialize its
-	 * active state.
+	 * Finally, {@link #onActivated} is called, allowing the skill to initialize its active state.
 	 * 
-	 * @param wasTriggered	Flag for {@link ActivateSkillPacket} when received on the client: 
-	 * 						true to call {@link #trigger}, false to call {@link #activate}.
-	 * @return	Returns {@link #onActivated}, signaling whether or not to add the skill to the
-	 * 			list of currently active skills.
+	 * @param wasTriggered Whether the skill was triggered via some means other than direct user interaction (see {@link #allowUserActivation})
+	 * @return	Returns {@link #onActivated}, signaling whether or not to add the skill to the list of currently active skills.
 	 */
 	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
 		if (!Config.isSkillEnabled(getId())) {
 			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new ChatComponentTranslation(getTranslationString()));
+			return false;
+		} else if (!wasTriggered && !allowUserActivation()) {
 			return false;
 		} else if (canUse(player)) {
 			if (autoAddExhaustion() && !player.capabilities.isCreativeMode) {
