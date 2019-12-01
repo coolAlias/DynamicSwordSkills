@@ -448,48 +448,23 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * Called after {@link SkillActive#onActivated} returns true to add the skill to the
 	 * list of currently active skills, as well as set the currently animating skill
 	 */
-	private void onSkillActivated(World world, SkillActive skill) {
+	private void onSkillActivated(SkillActive skill) {
 		if (skill.isActive()) {
 			activeSkills.add(skill);
-			if (world.isRemote) {
+			if (player.worldObj.isRemote) {
 				setCurrentlyAnimatingSkill(skill);
 			}
 		}
 	}
 
 	/**
-	 * Returns true if the player has this skill and {@link SkillActive#activate} returns true
+	 * Attempts to activate the skill; if successful, {@link #onSkillActivated(SkillActive)} will be called
+	 * @param wasTriggered Whether the skill was triggered via some means other than direct user interaction (see {@link SkillActive#allowUserActivation})
+	 * @return true if the player has this skill and {@link SkillActive#trigger} returns true
 	 */
-	public boolean activateSkill(World world, SkillBase skill) {
-		return activateSkill(world, skill.getId());
-	}
-
-	/**
-	 * Returns true if the player has this skill and {@link SkillActive#activate} returns true
-	 */
-	public boolean activateSkill(World world, byte id) {
-		SkillBase skill = getPlayerSkill(id);
-		if (skill instanceof SkillActive && ((SkillActive) skill).activate(world, player)) {
-			onSkillActivated(world, (SkillActive) skill);
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Returns true if the player has this skill and {@link SkillActive#trigger} returns true
-	 */
-	public boolean triggerSkill(World world, SkillBase skill) {
-		return triggerSkill(world, skill.getId());
-	}
-
-	/**
-	 * Returns true if the player has this skill and {@link SkillActive#trigger} returns true
-	 */
-	public boolean triggerSkill(World world, byte id) {
-		SkillBase skill = getPlayerSkill(id);
-		if (skill instanceof SkillActive && ((SkillActive) skill).trigger(world, player, true)) {
-			onSkillActivated(world, (SkillActive) skill);
+	public boolean activateSkill(SkillBase skill, boolean wasTriggered) {
+		if (skill instanceof SkillActive && ((SkillActive) skill).trigger(player.worldObj, player, wasTriggered)) {
+			onSkillActivated((SkillActive) skill);
 			return true;
 		}
 		return false;

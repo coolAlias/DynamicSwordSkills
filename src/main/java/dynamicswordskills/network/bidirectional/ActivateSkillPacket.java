@@ -19,25 +19,22 @@ package dynamicswordskills.network.bidirectional;
 
 import java.io.IOException;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.PacketBuffer;
 import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 
 /**
  * 
- * Attempts to activate a skill for player. When activated on the server, a packet is automatically
- * sent to the client, so skills shouldn't be manually activated client side.
+ * Attempts to activate a skill for player on whichever side the packet is received.
  *
  */
 public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 {
-	/** If true, calls {@link DSSPlayerInfo#triggerSkill}, otherwise uses {@link DSSPlayerInfo#activateSkill} */
 	private boolean wasTriggered = false;
 
-	/** Skill to activate */
 	private byte skillId;
 
 	public ActivateSkillPacket() {}
@@ -46,6 +43,9 @@ public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 		this(skill, false);
 	}
 
+	/**
+	 * See {@link DSSPlayerInfo#activateSkill(SkillBase, boolean)}
+	 */
 	public ActivateSkillPacket(SkillBase skill, boolean wasTriggered) {
 		this.wasTriggered = wasTriggered;
 		this.skillId = skill.getId();
@@ -66,10 +66,7 @@ public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		// handled identically on both sides
-		if (wasTriggered) {
-			DSSPlayerInfo.get(player).triggerSkill(player.worldObj, skillId);
-		} else {
-			DSSPlayerInfo.get(player).activateSkill(player.worldObj, skillId);
-		}
+		DSSPlayerInfo info = DSSPlayerInfo.get(player);
+		info.activateSkill(info.getPlayerSkill(skillId), wasTriggered);
 	}
 }
