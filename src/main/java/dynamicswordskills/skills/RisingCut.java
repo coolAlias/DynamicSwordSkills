@@ -119,7 +119,6 @@ public class RisingCut extends SkillActive
 		if (key == mc.gameSettings.keyBindJump) {
 			if (player.onGround && ticksTilFail == 0 && !isActive() && !player.isUsingItem() && player.isSneaking()) {
 				ticksTilFail = 3; // this allows canExecute to return true for 3 ticks
-				return true;
 			}
 		} else if (canExecute(player)) {
 			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
