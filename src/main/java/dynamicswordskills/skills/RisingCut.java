@@ -22,8 +22,6 @@ import java.util.List;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
@@ -120,8 +118,7 @@ public class RisingCut extends SkillActive
 			if (player.onGround && ticksTilFail == 0 && !isActive() && !player.isHandActive() && player.isSneaking()) {
 				ticksTilFail = 3; // this allows canExecute to return true for 3 ticks
 			}
-		} else if (canExecute(player)) {
-			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+		} else if (canExecute(player) && activate(player)) {
 			DSSClientEvents.performComboAttack(mc, DSSPlayerInfo.get(player).getTargetingSkill());
 			return true;
 		}

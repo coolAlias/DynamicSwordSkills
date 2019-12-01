@@ -24,7 +24,6 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
@@ -191,9 +190,8 @@ public class BackSlice extends SkillActive
 		if (canExecute(player)) {
 			if (keyPressed != null && keyPressed.isKeyDown() && key == mc.gameSettings.keyBindForward) {
 				if (ticksTilFail > 0) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
-					return true;
+					return activate(player);
 				} else {
 					ticksTilFail = 6;
 				}

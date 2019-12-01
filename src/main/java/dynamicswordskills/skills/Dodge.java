@@ -22,8 +22,6 @@ import java.util.List;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
@@ -162,17 +160,15 @@ public class Dodge extends SkillActive
 		if (canExecute(player)) {
 			if (Config.requiresDoubleTap()) {
 				if (keyReleased && ticksTilFail > 0 && key == keyPressed) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
-					return true;
+					return activate(player);
 				} else {
 					keyPressed = key;
 					ticksTilFail = 6;
 				}
 				// Single-tap activation only allowed using custom key bindings:
 			} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey()) {
-				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-				return true;
+				return activate(player);
 			}
 		}
 		return false; // allow other skills to receive this key press (e.g. Spin Attack)

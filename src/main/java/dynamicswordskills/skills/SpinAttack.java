@@ -23,7 +23,6 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.server.RefreshSpinPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
@@ -274,7 +273,7 @@ public class SpinAttack extends SkillActive
 					DSSPlayerInfo.get(player).armSwing = 1F - 0.5F * ((float)(maxCharge - charge) / (float) maxCharge);
 				}
 				if (charge == 0 && canExecute(player)) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+					activate(player);
 				}
 			} else {
 				charge = 0;

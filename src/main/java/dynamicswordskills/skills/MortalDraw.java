@@ -23,7 +23,6 @@ import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.client.MortalDrawPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
@@ -161,11 +160,7 @@ public class MortalDraw extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (canExecute(player)) {
-			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-			return true;
-		}
-		return false;
+		return canExecute(player) && activate(player);
 	}
 
 	@Override
