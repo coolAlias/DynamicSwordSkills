@@ -111,7 +111,7 @@ public class DSSKeyHandler
 			DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
 			if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
 				if (skills.hasSkill(SkillBase.swordBasic)) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.swordBasic));
+					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.swordBasic, false));
 				}
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
