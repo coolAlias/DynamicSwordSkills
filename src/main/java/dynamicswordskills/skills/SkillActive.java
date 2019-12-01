@@ -134,8 +134,8 @@ public abstract class SkillActive extends SkillBase
 	 * This method is called if {@link #isKeyListener} returns true for the given key,
 	 * allowing the skill to handle the key input accordingly. Note that each key press
 	 * may only be handled once, on a first-come first-serve basis.
-	 * @return	True signals that the key press was handled: no other key listeners
-	 * 			will receive this key press
+	 * @return	True signals that the key press was "handled" and prevents propagation to any
+	 * 			remaining listeners; this should usually only occur when a skill is activated
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
