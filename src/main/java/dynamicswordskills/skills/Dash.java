@@ -215,7 +215,9 @@ public class Dash extends SkillActive
 		if (isActive) {
 			// Only check for impact on the client, as the server is not reliable for this step
 			// If a collision is detected, DashImpactPacket is sent to conclude the server-side
-			if (player.worldObj.isRemote) {
+			if (!PlayerUtils.isBlocking(player)) {
+				setNotDashing();
+			} else if (player.worldObj.isRemote) {
 				RayTraceResult result = TargetUtils.checkForImpact(player.worldObj, player, player, 0.5D, false);
 				if (result != null) {
 					PacketDispatcher.sendToServer(new DashImpactPacket(player, result));
