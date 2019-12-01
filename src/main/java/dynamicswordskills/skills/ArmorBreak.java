@@ -168,15 +168,6 @@ public class ArmorBreak extends SkillActive
 		return (DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getIsKeyPressed() || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.getIsKeyPressed()));
 	}
 
-	/**
-	 * ArmorBreak's activation was triggered from the client side and it will be over
-	 * on the server by the time the client receives the packet, so don't bother
-	 */
-	@Override
-	protected boolean sendClientUpdate() {
-		return false;
-	}
-
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		activeTimer = 1; // needs to be active for hurt event to process correctly
