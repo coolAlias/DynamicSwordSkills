@@ -53,8 +53,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * same damage as a normal attack with the given item would, including all bonuses from other
  * skills and enchantments.
  * 
- * Armor Break cannot be activated by normal means. It must be charged by holding the 'attack'
- * key, and once the charge reaches full, the player will perform the Armor Break attack.
+ * Armor Break must be charged by holding the 'attack' key; once the charge reaches full,
+ * the player will perform the Armor Break attack automatically.
  * 
  */
 public class ArmorBreak extends SkillActive
@@ -170,15 +170,6 @@ public class ArmorBreak extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyPressed() {
 		return (DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].isKeyDown() || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.isKeyDown()));
-	}
-
-	/**
-	 * ArmorBreak's activation was triggered from the client side and it will be over
-	 * on the server by the time the client receives the packet, so don't bother
-	 */
-	@Override
-	protected boolean sendClientUpdate() {
-		return true;
 	}
 
 	@Override
