@@ -111,7 +111,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 			return 0;
 		}
 		int i = getSkillLevel(stack);
-		return (i < SkillBase.MAX_LEVEL ? i + 1 : 0);
+		return (i < skill.getMaxLevel() ? i + 1 : 0);
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		if (skill.is(SkillBase.swordBasic) && !grantsBasicSwordSkill(stack)) {
 			result.getTagCompound().setBoolean("grantsBasicSword", true);
 		} else {
-			int level = Math.min(SkillBase.MAX_LEVEL, getSkillLevel(stack) + 1);
+			int level = Math.min(skill.getMaxLevel(), getSkillLevel(stack) + 1);
 			result.getTagCompound().setByte("ItemSkillLevel", (byte) level);
 		}
 		return result;
