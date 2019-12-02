@@ -20,6 +20,8 @@ package dynamicswordskills.api;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
+
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.item.IModItem;
 import dynamicswordskills.ref.Config;
@@ -53,8 +55,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * they extend ItemSword instead of Item, but could just as well be anything.
  *
  */
-public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProviderInfusable
+public class ItemRandomSkill extends ItemSword implements IModItem, IRandomSkill, ISkillProviderInfusable
 {
+	private static List<Byte> SKILLS = null;
+
 	/** Item quality based on tool material; higher quality tends toward higher levels */
 	private final int quality;
 
@@ -66,6 +70,23 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		this.texture = textureName;
 		this.quality = material.getHarvestLevel() + (material == ToolMaterial.GOLD ? 3 : 0);
 		setCreativeTab(null);
+	}
+
+	@Override
+	public SkillBase getRandomSkill(Random rand) {
+		if (SKILLS == null) {
+			SKILLS = Lists.<Byte>newArrayList();
+			for (SkillBase skill : SkillRegistry.getValues()) {
+				if (Config.isSkillEnabled(skill) && skill instanceof SkillActive) {
+					SKILLS.add(skill.getId());
+				}
+			}
+		}
+		if (SKILLS.size() > 0) {
+			byte id = SKILLS.get(rand.nextInt(SKILLS.size()));
+			return SkillRegistry.getSkillById(id);
+		}
+		return null;
 	}
 
 	@Override
@@ -184,12 +205,9 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 
 	@Override
 	public WeightedRandomChestContent getChestGenBase(ChestGenHooks chest, Random rand, WeightedRandomChestContent original) {
-		SkillBase skill = null;
-		while (skill == null) {
-			skill = SkillRegistry.getSkillById(rand.nextInt(SkillRegistry.getValues().size()));
-			if (!(skill instanceof SkillActive) || !Config.isSkillEnabled(skill)) {
-				skill = null;
-			}
+		SkillBase skill = getRandomSkill(rand);
+		if (skill == null) {
+			return null;
 		}
 		ItemStack loot = new ItemStack(this);
 		generateSkillTag(loot, skill, rand);

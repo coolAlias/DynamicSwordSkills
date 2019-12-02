@@ -108,8 +108,8 @@ public class DynamicSwordSkills
 				return DynamicSwordSkills.skillOrb;
 			}
 		};
-		skillOrb = new ItemSkillOrb().setUnlocalizedName("dss.skillorb");
-		GameRegistry.registerItem(skillOrb, skillOrb.getUnlocalizedName().substring(5));
+		skillOrb = new ItemSkillOrb(Skills.getSkillIdMap()).setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
+		GameRegistry.registerItem(skillOrb);
 		if (Config.areCreativeSwordsEnabled()) {
 			skillItems = new ArrayList<Item>(SkillRegistry.getValues().size());
 			Item item = null;
@@ -199,6 +199,8 @@ public class DynamicSwordSkills
 				}
 			} else if (s.resourceLocation.getResourcePath().matches("^dss.skill(wood|stone|iron|diamond|gold)$")) {
 				location = new ResourceLocation(s.resourceLocation.getResourceDomain(), s.resourceLocation.getResourcePath().replace("dss.skill", "skill_sword_").toLowerCase());
+			} else if (s.resourceLocation.getResourcePath().startsWith("dss.")) {
+				location = new ResourceLocation(s.resourceLocation.getResourceDomain(), s.resourceLocation.getResourcePath().replace("dss.", "").toLowerCase());
 			}
 			if (location != null) {
 				Item item = Item.itemRegistry.getObject(location);
@@ -212,7 +214,8 @@ public class DynamicSwordSkills
 	}
 
 	private void registerSkillOrbLoot() {
-		for (SkillBase skill : SkillRegistry.getValues()) {
+		for (ResourceLocation location : Skills.getSkillIdMap().values()) {
+			SkillBase skill = SkillRegistry.get(location);
 			if (Config.isSkillEnabled(skill)) {
 				addLootToAll(new WeightedRandomChestContent(new ItemStack(skillOrb, 1, skill.getId()), 1, 1, Config.getLootWeight()), false);
 			}

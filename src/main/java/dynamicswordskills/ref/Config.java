@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Nullable;
 
@@ -31,7 +32,9 @@ import dynamicswordskills.client.gui.IGuiOverlay.HALIGN;
 import dynamicswordskills.client.gui.IGuiOverlay.VALIGN;
 import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
@@ -108,7 +111,7 @@ public class Config
 	/** Chance for unmapped mob to drop an orb */
 	private static float genericMobDropChance;
 	/** Individual drop chances for skill orbs and heart pieces */
-	private static Map<Byte, Float> orbDropChance;
+	private static Map<Integer, Float> orbDropChance;
 
 	public static void init(FMLPreInitializationEvent event) {
 		config = new Configuration(event.getSuggestedConfigurationFile());
@@ -188,6 +191,12 @@ public class Config
 		enableOrbDrops = config.get("drops", "Enable skill orbs to drop as loot from mobs (may still be disabled individually)", true).getBoolean(true);
 		randomDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("drops", "Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
 		genericMobDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("drops", "Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
+		orbDropChance = new HashMap<Integer, Float>(Skills.getSkillIdMap().size());
+		for (Entry<Integer, ResourceLocation> entry : Skills.getSkillIdMap().entrySet()) {
+			SkillBase skill = SkillRegistry.get(entry.getValue());
+			int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
+			orbDropChance.put((int)skill.getId(), (0.001F * (float) i));
+		}
 		if (config.hasChanged()) {
 			config.save();
 		}
@@ -202,18 +211,13 @@ public class Config
 		// Sort per-skill config entries by registry name
 		List<SkillBase> skills = SkillRegistry.getSortedList(new SkillRegistry.SortByRegistryName());
 		config.addCustomCategoryComment("enabledskills",
-				"Disabling a skill prevents players from learning or using that skill, but does not change the player\'s known skills."
+				"Disabling a skill prevents players from using that skill, but does not change the player\'s known skills."
 				+ "\nSkill items previously generated as loot may be found but not used, and subsequent loot will not generate with that skill."
-				+ "\nSkill orbs may still drop from mobs / players unless disabled separately, but may not be used."
+				+ "\nSkill orb-like items may still drop from mobs / players unless disabled separately, but usually may not be used."
 				+ "\nThis setting is save-game safe: it may be disabled and re-enabled without affecting the saved game state.");
 		enableSkill = new boolean[skills.size()];
 		for (SkillBase skill : skills) {
 			enableSkill[skill.getId()] = config.get("enabledskills", "Enable use of the skill " + skill.getDisplayName(), true).getBoolean(true);
-		}
-		orbDropChance = new HashMap<Byte, Float>(skills.size());
-		for (SkillBase skill : skills) {
-			int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
-			orbDropChance.put(skill.getId(), (0.001F * (float) i));
 		}
 		if (config.hasChanged()) {
 			config.save();
@@ -252,7 +256,7 @@ public class Config
 	public static float getChanceForRandomDrop() { return randomDropChance; }
 	public static float getRandomMobDropChance() { return genericMobDropChance; }
 	public static float getDropChance(int orbID) {
-		return (orbDropChance.containsKey((byte) orbID) ? orbDropChance.get((byte) orbID) : 0.0F);
+		return (orbDropChance.containsKey(orbID) ? orbDropChance.get(orbID) : 0.0F);
 	}
 
 	/**
