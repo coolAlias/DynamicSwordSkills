@@ -20,6 +20,15 @@ package dynamicswordskills.item;
 import java.util.ArrayList;
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.ISkillInfusionFuelItem;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,16 +39,8 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.PlayerUtils;
 
-public class ItemSkillOrb extends Item
+public class ItemSkillOrb extends Item implements ISkillInfusionFuelItem
 {
 	@SideOnly(Side.CLIENT)
 	private List<IIcon> icons;
@@ -49,6 +50,16 @@ public class ItemSkillOrb extends Item
 		setMaxDamage(0);
 		setHasSubtypes(true);
 		setCreativeTab(DynamicSwordSkills.tabSkills);
+	}
+
+	@Override
+	public SkillBase getSkillToInfuse(ItemStack stack) {
+		return SkillBase.getSkill(stack.getItemDamage());
+	}
+
+	@Override
+	public int getAdjustedInfusionCost(ItemStack orb, ItemStack base, int required) {
+		return required;
 	}
 
 	@Override
