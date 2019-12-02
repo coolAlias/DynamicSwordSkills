@@ -20,6 +20,7 @@ package dynamicswordskills.item;
 import java.util.List;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.ISkillInfusionFuelItem;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
@@ -41,13 +42,23 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ItemSkillOrb extends Item implements IModItem
+public class ItemSkillOrb extends Item implements IModItem, ISkillInfusionFuelItem
 {
 	public ItemSkillOrb() {
 		super();
 		setMaxDamage(0);
 		setHasSubtypes(true);
 		setCreativeTab(DynamicSwordSkills.tabSkills);
+	}
+
+	@Override
+	public SkillBase getSkillToInfuse(ItemStack stack) {
+		return SkillBase.getSkill(stack.getItemDamage());
+	}
+
+	@Override
+	public int getAdjustedInfusionCost(ItemStack orb, ItemStack base, int required) {
+		return required;
 	}
 
 	@Override

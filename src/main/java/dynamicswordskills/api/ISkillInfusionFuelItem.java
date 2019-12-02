@@ -22,25 +22,24 @@ import net.minecraft.item.ItemStack;
 
 /**
  * 
- * Interface for {@link ISkillProvider} Items that can be upgraded by infusing them with {@link ISkillInfusionFuelItem} items.
- * 
+ * Interface for items that can be used to infuse {@link ISkillProviderInfusable} items.
+ *
  */
-public interface ISkillProviderInfusable extends ISkillProvider {
+public interface ISkillInfusionFuelItem
+{
+	/**
+	 * Return the skill this item may bestow when infusing an {@link ISkillProviderInfusable} item
+	 * @param stack The {@link ISkillInfusionFuelItem} ItemStack
+	 */
+	public SkillBase getSkillToInfuse(ItemStack stack);
 
 	/**
-	 * Number of matching {@link ISkillInfusionFuelItem}s required to infuse the stack with the new or upgraded skill
-	 * @param stack The {@link ISkillProviderInfusable} stack
-	 * @param skill The skill to be infused
-	 * @return 0 or less to prevent infusion, otherwise the number of items to be consumed [1 - 8]
+	 * Provides control over which items may be used to infuse as well as the cost to do so
+	 * @param fuel The skill item to be consumed, e.g. a skill orb
+	 * @param base The base {@link ISkillProviderInfusable} item to be infused
+	 * @param required The number of orbs to be consumed per {@link ISkillProviderInfusable#getInfusionCost(ItemStack, SkillBase)}
+	 * @return the new value for required (up to 8), 0 or less to prevent infusion
 	 */
-	public int getInfusionCost(ItemStack stack, SkillBase skill);
-
-	/**
-	 * Infuse the ItemStack with the skill, usually increasing the level provided by 1.
-	 * @param stack The {@link ISkillProviderInfusable} stack being infused
-	 * @param skill The skill being infused into the stack
-	 * @return The crafting result
-	 */
-	public ItemStack getInfusionResult(ItemStack stack, SkillBase skill);
+	public int getAdjustedInfusionCost(ItemStack fuel, ItemStack base, int required);
 
 }

@@ -17,8 +17,8 @@
 
 package dynamicswordskills.crafting;
 
+import dynamicswordskills.api.ISkillInfusionFuelItem;
 import dynamicswordskills.api.ISkillProviderInfusable;
-import dynamicswordskills.item.ItemSkillOrb;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.inventory.InventoryCrafting;
@@ -42,16 +42,17 @@ public class RecipeInfuseSkillOrb implements IRecipe
 
 	@Override
 	public boolean matches(InventoryCrafting grid, World world) {
-		ItemStack orb = null;
+		ItemStack fuel = null;
 		ItemStack base = null;
 		int found = 0;
 		for (int i = 0; i < grid.getSizeInventory(); ++i) {
 			ItemStack stack = grid.getStackInSlot(i);
 			if (stack != null) {
-				if (stack.getItem() instanceof ItemSkillOrb) {
-					if (orb == null) {
-						orb = stack;
-					} else if (orb.getItemDamage() != stack.getItemDamage()) {
+				if (stack.getItem() instanceof ISkillInfusionFuelItem) {
+					if (fuel == null) {
+						fuel = stack;
+						this.skill = ((ISkillInfusionFuelItem) fuel.getItem()).getSkillToInfuse(fuel);
+					} else if (this.skill == null || !this.skill.is(((ISkillInfusionFuelItem) stack.getItem()).getSkillToInfuse(stack))) {
 						return false;
 					}
 					found++;
@@ -65,15 +66,12 @@ public class RecipeInfuseSkillOrb implements IRecipe
 				}
 			}
 		}
-		if (orb == null || base == null) {
-			return false;
-		}
-		this.skill = SkillBase.getSkill(orb.getItemDamage());
-		if (this.skill == null) {
+		if (fuel == null || base == null || this.skill == null) {
 			return false;
 		}
 		this.input = base;
 		int required = ((ISkillProviderInfusable) base.getItem()).getInfusionCost(base, this.skill);
+		required = ((ISkillInfusionFuelItem) fuel.getItem()).getAdjustedInfusionCost(fuel, base, required);
 		return required > 0 && found == required;
 	}
 
