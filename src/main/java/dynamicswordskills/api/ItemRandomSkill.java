@@ -91,22 +91,8 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		if (!stack.hasTagCompound()) {
 			return -1;
 		}
-		NBTTagCompound tag = stack.getTagCompound();
-		SkillBase skill = null;
-		if (tag.hasKey("ItemSkillName")) {
-			skill = SkillBase.getSkillByName(tag.getString("ItemSkillName"));
-		}
-		// For backwards compatibility:
-		if (tag.hasKey("ItemSkillId")) {
-			if (skill == null) {
-				skill = SkillBase.getSkill(tag.getInteger("ItemSkillId"));
-				if (skill != null) {
-					tag.setString("ItemSkillName", skill.getUnlocalizedName());
-				}
-			} else if (tag.getInteger("ItemSkillId") != skill.getId()) {
-				tag.setInteger("ItemSkillId", skill.getId());
-			}
-		}
+		String name = stack.getTagCompound().getString("ItemSkillName");
+		SkillBase skill = SkillBase.getSkillByName(name);
 		return (skill == null ? -1 : skill.getId());
 	}
 
