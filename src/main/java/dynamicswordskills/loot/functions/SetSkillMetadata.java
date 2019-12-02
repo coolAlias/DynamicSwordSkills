@@ -25,7 +25,10 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.IMetadataSkillItem;
+import dynamicswordskills.api.IRandomSkill;
 import dynamicswordskills.api.SkillRegistry;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.item.ItemStack;
@@ -39,6 +42,8 @@ import net.minecraft.world.storage.loot.functions.LootFunction;
  * 
  * Sets item metadata to the id of a random enabled skill
  * or to that of one specified by name in the JSON file.
+ * 
+ * Requires Item to implement {@link IMetadataSkillItem}
  *
  */
 public class SetSkillMetadata extends SkillFunction
@@ -57,12 +62,19 @@ public class SetSkillMetadata extends SkillFunction
 
 	@Override
 	public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
-		SkillBase skill = getSkill(rand);
-		if (skill != null) {
-			stack.setItemDamage(skill.getId());
+		if (!(stack.getItem() instanceof IMetadataSkillItem)) {
+			DynamicSwordSkills.logger.error("Invalid item for SetSkillMetadata function: " + stack.toString());
 		} else {
-			DynamicSwordSkills.logger.warn("Failed to generate a random, enabled skill");
-			stack.stackSize = 0; // invalidate loot stack
+			SkillBase skill = this.getSkill();
+			if (skill == null && stack.getItem() instanceof IRandomSkill) {
+				skill = ((IRandomSkill) stack.getItem()).getRandomSkill(rand);
+			}
+			int damage = (skill == null ? -1 : ((IMetadataSkillItem) stack.getItem()).getItemDamage(skill));
+			if (damage < 0 || !Config.isSkillEnabled(skill)) {
+				stack.stackSize = 0; // invalidate loot stack
+			} else {
+				stack.setItemDamage(damage);
+			}
 		}
 		return stack;
 	}

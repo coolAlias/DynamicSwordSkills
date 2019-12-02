@@ -103,7 +103,7 @@ public class DynamicSwordSkills
 				return DynamicSwordSkills.skillOrb;
 			}
 		};
-		skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
+		skillOrb = new ItemSkillOrb(Skills.getSkillIdMap()).setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
 		GameRegistry.register(skillOrb);
 		if (Config.areCreativeSwordsEnabled()) {
 			skillItems = new ArrayList<Item>(SkillRegistry.getValues().size());

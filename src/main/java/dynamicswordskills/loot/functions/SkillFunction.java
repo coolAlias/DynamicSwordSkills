@@ -60,21 +60,20 @@ public abstract class SkillFunction extends LootFunction
 	}
 
 	/**
-	 * Returns the skill id of {@link #skill_name} if specified and valid;
-	 * otherwise generates a random skill id for an enabled skill.
+	 * Returns the skill id of {@link #skill_name} if specified and valid
 	 */
-	protected SkillBase getSkill(Random rand) {
+	protected SkillBase getSkill() {
 		if (this.skill_name != null) {
 			SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(this.skill_name));
 			if (skill == null) {
-				DynamicSwordSkills.logger.warn("Unknown skill '" + this.skill_name + "' - a random skill will be used instead.");
+				DynamicSwordSkills.logger.warn("Unknown skill '" + this.skill_name + "' - a random skill may be selected instead.");
 			} else if (!Config.isSkillEnabled(skill)) {
-				DynamicSwordSkills.logger.warn(skill.getDisplayName() + " has been disabled in the Config settings; a random skill will be used instead.");
+				DynamicSwordSkills.logger.warn(skill.getDisplayName() + " has been disabled in the Config settings; a random skill may be selected instead.");
 			} else {
 				return skill;
 			}
 		}
-		return SkillFunction.getRandomSkill(rand);
+		return null;
 	}
 
 	/**

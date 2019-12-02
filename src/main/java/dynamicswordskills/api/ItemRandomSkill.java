@@ -22,6 +22,7 @@ import java.util.Random;
 
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.item.IModItem;
+import dynamicswordskills.loot.functions.SkillFunction;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.skills.Skills;
@@ -49,7 +50,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * they extend ItemSword instead of Item, but could just as well be anything.
  *
  */
-public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProviderInfusable
+public class ItemRandomSkill extends ItemSword implements IModItem, IRandomSkill, ISkillProviderInfusable
 {
 	/** Item quality based on tool material; higher quality tends toward higher levels */
 	private final int quality;
@@ -62,6 +63,11 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		this.texture = textureName;
 		this.quality = material.getHarvestLevel() + (material == ToolMaterial.GOLD ? 3 : 0);
 		setCreativeTab(null);
+	}
+
+	@Override
+	public SkillBase getRandomSkill(Random rand) {
+		return SkillFunction.getRandomSkill(rand);
 	}
 
 	@Override

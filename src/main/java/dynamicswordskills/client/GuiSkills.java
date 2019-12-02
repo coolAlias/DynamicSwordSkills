@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 import org.lwjgl.input.Mouse;
 
-import dynamicswordskills.api.SkillRegistry;
+import dynamicswordskills.api.IMetadataSkillItem;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.inventory.ContainerSkills;
 import dynamicswordskills.ref.Config;
@@ -35,6 +35,7 @@ import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -227,14 +228,15 @@ public class GuiSkills extends GuiContainer
 	protected void mouseReleased(int mouseX, int mouseY, int state) {
 		// don't need to call super
 		Slot slot = this.getSlotAtPosition(mouseX, mouseY);
-		if (slot != null && slot.getStack() != null) {
-			int id = (slot.getStack().getItemDamage() % SkillRegistry.getValues().size());
-			if (currentSkill == null || currentSkill.getId() != id) {
+		if (slot != null && slot.getStack() != null && slot.getStack().getItem() instanceof IMetadataSkillItem) {
+			ItemStack stack = slot.getStack();
+			SkillBase skill = ((IMetadataSkillItem) stack.getItem()).getSkillFromDamage(stack.getItemDamage());
+			if (currentSkill == null || !currentSkill.is(skill)) {
 				scrollY = 0.0F;
 				// clear the current description so it refreshes next time the screen draws
 				desc.clear();
 			}
-			currentSkill = DSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(SkillRegistry.getSkillById(id));
+			currentSkill = DSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(skill);
 		} else if (!isMouseInRegion(mouseX, mouseY, guiLeft + 155, guiLeft + 267, guiTop + 35, guiTop + 160)) {
 			currentSkill = null;
 			desc.clear();
