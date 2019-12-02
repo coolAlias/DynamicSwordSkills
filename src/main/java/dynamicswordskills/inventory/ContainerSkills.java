@@ -18,14 +18,17 @@
 package dynamicswordskills.inventory;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.IMetadataSkillItem;
 import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * 
@@ -41,15 +44,16 @@ public class ContainerSkills extends Container
 		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 		inventory = new InventoryBasic("", true, SkillRegistry.getValues().size());
 		int x, y;
-
-		for (SkillBase skill : SkillRegistry.getValues()) {
-			if (skills.hasSkill(skill)) {
-				inventory.setInventorySlotContents(skill.getId(), new ItemStack(DynamicSwordSkills.skillOrb, 1, skill.getId()));
+		for (ResourceLocation location : Skills.getSkillIdMap().values()) {
+			SkillBase skill = SkillRegistry.get(location);
+			if (skill != null && skills.hasSkill(skill)) {
+				int dmg = ((IMetadataSkillItem) DynamicSwordSkills.skillOrb).getItemDamage(skill);
+				if (dmg > -1) {
+					inventory.setInventorySlotContents(dmg, new ItemStack(DynamicSwordSkills.skillOrb, 1, dmg));
+				}
 			}
 		}
-
 		addSlotToContainer(new Slot(inventory, 0, 65, 141));
-
 		for (int i = 1; i < inventory.getSizeInventory(); ++i) {
 			int bottom = 3;
 			int sideBar = 5;
@@ -61,7 +65,6 @@ public class ContainerSkills extends Container
 				x = 44 + (i - 1) * 21;
 				y = 120;
 			}
-
 			addSlotToContainer(new Slot(inventory, i, x, y));
 		}
 	}

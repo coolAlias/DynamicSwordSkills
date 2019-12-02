@@ -23,7 +23,8 @@ import java.util.Map;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-import dynamicswordskills.api.SkillRegistry;
+import dynamicswordskills.api.IMetadataSkillItem;
+import dynamicswordskills.api.IRandomSkill;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncConfigPacket;
@@ -77,8 +78,11 @@ public class DSSCombatEvents
 
 	/** Adds a mob-class to skill orb mapping */
 	private static void addDrop(Class<? extends EntityLivingBase> mobClass, SkillBase skill) {
-		ItemStack stack = new ItemStack(DynamicSwordSkills.skillOrb, 1, skill.getId());
-		dropsList.put(mobClass, stack);
+		int damage = ((IMetadataSkillItem) DynamicSwordSkills.skillOrb).getItemDamage(skill);
+		if (damage > -1) {
+			ItemStack stack = new ItemStack(DynamicSwordSkills.skillOrb, 1, damage);
+			dropsList.put(mobClass, stack);
+		}
 	}
 
 	public static void initializeDrops() {
@@ -111,11 +115,12 @@ public class DSSCombatEvents
 		}
 		ItemStack orb = null;
 		boolean flag = mob instanceof EntityPlayer;
-		int id = mob.worldObj.rand.nextInt(SkillRegistry.getValues().size());
-		if (SkillRegistry.getSkillById(id) != null && (!flag || Config.arePlayerDropsEnabled())) {
+		SkillBase skill = ((IRandomSkill) DynamicSwordSkills.skillOrb).getRandomSkill(mob.worldObj.rand);
+		if (Config.isSkillEnabled(skill) && (!flag || Config.arePlayerDropsEnabled())) {
+			int damage = ((IMetadataSkillItem) DynamicSwordSkills.skillOrb).getItemDamage(skill);
 			float chance = (flag ? Config.getPlayerDropFactor() : 1) * Config.getRandomMobDropChance();
-			if (dropsList.get(mob.getClass()) != null || mob.worldObj.rand.nextFloat() < chance) {
-				orb = new ItemStack(DynamicSwordSkills.skillOrb, 1, id);
+			if (damage > -1 && (dropsList.get(mob.getClass()) != null || mob.worldObj.rand.nextFloat() < chance)) {
+				orb = new ItemStack(DynamicSwordSkills.skillOrb, 1, damage);
 			}
 		}
 		return orb;

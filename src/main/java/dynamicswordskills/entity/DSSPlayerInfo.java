@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.IMetadataSkillItem;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.PacketDispatcher;
@@ -785,8 +786,8 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void verifyStartingGear() {
 		if (!receivedGear && Config.giveBonusOrb()) {
-			receivedGear = player.inventory.addItemStackToInventory(
-					new ItemStack(DynamicSwordSkills.skillOrb, 1, Skills.swordBasic.getId()));
+			int damage = ((IMetadataSkillItem) DynamicSwordSkills.skillOrb).getItemDamage(Skills.swordBasic);
+			receivedGear = player.inventory.addItemStackToInventory(new ItemStack(DynamicSwordSkills.skillOrb, 1, damage));
 		}
 	}
 

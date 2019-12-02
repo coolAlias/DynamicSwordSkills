@@ -20,23 +20,23 @@ package dynamicswordskills.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiInventory;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Slot;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
-
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import dynamicswordskills.api.SkillRegistry;
+import dynamicswordskills.api.IMetadataSkillItem;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.inventory.ContainerSkills;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 
 public class GuiSkills extends GuiContainer
 {
@@ -232,14 +232,15 @@ public class GuiSkills extends GuiContainer
 	@Override
 	protected void mouseMovedOrUp(int mouseX, int mouseY, int which) {
 		Slot slot = this.getSlotAtPosition(mouseX, mouseY);
-		if (slot != null && slot.getStack() != null) {
-			int id = (slot.getStack().getItemDamage() % SkillRegistry.getValues().size());
-			if (currentSkill == null || currentSkill.getId() != id) {
+		if (slot != null && slot.getStack() != null && slot.getStack().getItem() instanceof IMetadataSkillItem) {
+			ItemStack stack = slot.getStack();
+			SkillBase skill = ((IMetadataSkillItem) stack.getItem()).getSkillFromDamage(stack.getItemDamage());
+			if (currentSkill == null || !currentSkill.is(skill)) {
 				scrollY = 0.0F;
 				// clear the current description so it refreshes next time the screen draws
 				desc.clear();
 			}
-			currentSkill = DSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(SkillRegistry.getSkillById(id));
+			currentSkill = DSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(skill);
 		} else if (!isMouseInRegion(mouseX, mouseY, guiLeft + 155, guiLeft + 267, guiTop + 35, guiTop + 160)) {
 			currentSkill = null;
 			desc.clear();
