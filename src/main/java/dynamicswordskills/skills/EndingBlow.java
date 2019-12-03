@@ -24,7 +24,6 @@ import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.AttackTimePacket;
 import dynamicswordskills.network.client.EndingBlowPacket;
 import dynamicswordskills.ref.Config;
@@ -178,8 +177,7 @@ public class EndingBlow extends SkillActive
 			ticksTilFail = 0;
 			keyPressed = 0;
 			keyReleased = false;
-			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-			return true;
+			return activate(player);
 		}
 		return false;
 	}

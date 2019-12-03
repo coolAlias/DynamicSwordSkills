@@ -51,8 +51,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * same damage as a normal attack with the given item would, including all bonuses from other
  * skills and enchantments.
  * 
- * Armor Break cannot be activated by normal means. It must be charged by holding the 'attack'
- * key, and once the charge reaches full, the player will perform the Armor Break attack.
+ * Armor Break must be charged by holding the 'attack' key; once the charge reaches full,
+ * the player will perform the Armor Break attack automatically.
  * 
  */
 public class ArmorBreak extends SkillActive

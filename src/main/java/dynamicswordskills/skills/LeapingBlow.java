@@ -31,8 +31,6 @@ import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntityLeapingBlow;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
@@ -140,8 +138,7 @@ public class LeapingBlow extends SkillActive
 				KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 				return true;
 			}
-		} else if (canExecute(player)) {
-			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+		} else if (canExecute(player) && activate(player)) {
 			return true;
 		}
 		return false;
