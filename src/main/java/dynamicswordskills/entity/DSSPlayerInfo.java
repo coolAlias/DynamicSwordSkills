@@ -341,7 +341,7 @@ public class DSSPlayerInfo
 
 	/**
 	 * Called from LivingHurtEvent to trigger {@link SkillActive#postImpact} for each
-	 * currently active skill, potentially altering the value of event.ammount, as
+	 * currently active skill, potentially altering the value of event.amount, as
 	 * well as calling {@link ICombo#onHurtTarget onHurtTarget} for the current ICombo.
 	 */
 	public void onPostImpact(LivingHurtEvent event) {

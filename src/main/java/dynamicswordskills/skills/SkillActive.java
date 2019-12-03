@@ -320,7 +320,7 @@ public abstract class SkillActive extends SkillBase
 	 * 
 	 * @param player	The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
 	 * @param entity	The entity damaged, i.e. LivingHurtEvent's entityLiving
-	 * @param amount	The current damage amount from {@link LivingHurtEvent#ammount}
+	 * @param amount	The current damage amount from {@link LivingHurtEvent#amount}
 	 * @return			The final damage amount to inflict
 	 */
 	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
