@@ -24,6 +24,7 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.item.IModItem;
 import dynamicswordskills.loot.functions.SkillFunction;
 import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.skills.Skills;
 import net.minecraft.client.renderer.ItemMeshDefinition;
@@ -67,7 +68,8 @@ public class ItemRandomSkill extends ItemSword implements IModItem, IRandomSkill
 
 	@Override
 	public SkillBase getRandomSkill(Random rand) {
-		return SkillFunction.getRandomSkill(rand);
+		SkillBase skill = SkillFunction.getRandomSkill(rand);
+		return (skill instanceof SkillActive ? skill : null);
 	}
 
 	@Override

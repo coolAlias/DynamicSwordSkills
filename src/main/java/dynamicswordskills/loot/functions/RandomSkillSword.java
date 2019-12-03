@@ -28,6 +28,7 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
@@ -85,10 +86,9 @@ public class RandomSkillSword extends SkillFunction
 			if (skill == null) {
 				skill = ((ItemRandomSkill) stack.getItem()).getRandomSkill(rand);
 			}
-			if (skill != null) {
+			if (skill instanceof SkillActive) {
 				((ItemRandomSkill) stack.getItem()).generateSkillTag(stack, skill, rand);
 			} else {
-				DynamicSwordSkills.logger.warn("Failed to generate a random, enabled skill");
 				stack.stackSize = 0; // invalidate loot stack
 			}
 		}
