@@ -30,8 +30,6 @@ import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
@@ -135,15 +133,13 @@ public class SwordBreak extends SkillActive
 		if (canExecute(player)) {
 			if (Config.requiresDoubleTap()) {
 				if (ticksTilFail > 0) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
-					return true;
+					return activate(player);
 				} else {
 					ticksTilFail = 6;
 				}
 			} else if (key != mc.gameSettings.keyBindBack) { // activate on first press, but not for vanilla key!
-				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-				return true;
+				return activate(player);
 			}
 		}
 		return false;
