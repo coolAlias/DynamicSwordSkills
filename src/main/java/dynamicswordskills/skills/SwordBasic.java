@@ -279,7 +279,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		if (!isTargetValid(player, prevTarget) || !TargetUtils.isTargetInSight(player, prevTarget)) {
 			prevTarget = null;
 		}
-		if (!isTargetValid(player, currentTarget)) {
+		if (!isTargetValid(player, currentTarget) || !player.canEntityBeSeen(currentTarget)) {
 			currentTarget = null;
 			if (Config.autoTargetEnabled()) {
 				getNextTarget(player);
