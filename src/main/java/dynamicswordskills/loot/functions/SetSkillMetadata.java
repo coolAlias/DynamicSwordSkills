@@ -56,11 +56,12 @@ public class SetSkillMetadata extends SkillFunction
 
 	@Override
 	public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
-		int i = getSkillId(rand);
-		if (SkillBase.doesSkillExist(i)) {
-			stack.setItemDamage(i);
+		SkillBase skill = getSkill(rand);
+		if (skill != null) {
+			stack.setItemDamage(skill.getId());
 		} else {
-			DynamicSwordSkills.logger.warn("Skill with ID " + i + " does not exist");
+			DynamicSwordSkills.logger.warn("Failed to generate a random, enabled skill");
+			stack.stackSize = 0; // invalidate loot stack
 		}
 		return stack;
 	}

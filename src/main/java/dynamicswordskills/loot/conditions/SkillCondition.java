@@ -41,7 +41,7 @@ public class SkillCondition implements LootCondition
 
 	@Override
 	public boolean testCondition(Random rand, LootContext context) {
-		return !SkillFunction.SKILL_IDS.isEmpty();
+		return SkillFunction.areSkillsEnabled();
 	}
 
 	public static class Serializer extends LootCondition.Serializer<SkillCondition>

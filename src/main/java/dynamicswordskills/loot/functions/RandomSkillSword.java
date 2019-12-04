@@ -75,15 +75,16 @@ public class RandomSkillSword extends SkillFunction
 
 	@Override
 	public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
-		int i = getSkillId(rand);
+		SkillBase skill = getSkill(rand);
 		if (!(stack.getItem() instanceof ItemRandomSkill)) {
 			DynamicSwordSkills.logger.warn("Invalid item for RandomSkillSword function: " + stack.toString());
 		} else if (this.skill_tag != null) {
 			stack.setTagCompound(this.skill_tag);
-		} else if (SkillBase.doesSkillExist(i)) {
-			((ItemRandomSkill) stack.getItem()).generateSkillTag(stack, SkillBase.getSkill(i), rand);
+		} else if (skill != null) {
+			((ItemRandomSkill) stack.getItem()).generateSkillTag(stack, skill, rand);
 		} else {
-			DynamicSwordSkills.logger.warn("Skill with ID " + i + " does not exist");
+			DynamicSwordSkills.logger.warn("Failed to generate a random, enabled skill");
+			stack.stackSize = 0; // invalidate loot stack
 		}
 		return stack;
 	}

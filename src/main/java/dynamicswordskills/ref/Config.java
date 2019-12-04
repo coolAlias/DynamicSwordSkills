@@ -229,7 +229,7 @@ public class Config
 		return (requireFullHealth ? 0.0F : (0.6F * level));
 	}
 	public static final boolean isSkillEnabled(@Nullable SkillBase skill) { return skill != null && isSkillEnabled(skill.getId()); }
-	public static final boolean isSkillEnabled(int id) { return (id > -1 && id < enableSkill.length ? enableSkill[id] : false); }
+	private static final boolean isSkillEnabled(int id) { return (id > -1 && id < enableSkill.length ? enableSkill[id] : false); }
 	/*================== DROPS =====================*/
 	public static boolean arePlayerDropsEnabled() { return enablePlayerDrops; }
 	public static float getPlayerDropFactor() { return playerDropFactor; }
