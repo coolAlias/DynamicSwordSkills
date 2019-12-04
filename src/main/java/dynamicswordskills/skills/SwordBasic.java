@@ -19,6 +19,8 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import com.google.common.base.Predicate;
+
 import dynamicswordskills.api.IComboDamage;
 import dynamicswordskills.api.IComboDamage.IComboDamageFull;
 import dynamicswordskills.entity.DirtyEntityAccessor;
@@ -27,7 +29,6 @@ import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.network.server.TargetIdPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
@@ -173,7 +174,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 			if (!isComboInProgress()) {
 				combo = null;
 			}
-			currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true);
+			currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true, getTargetSelectors());
 		}
 		return true;
 	}
@@ -243,7 +244,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	public final void getNextTarget(EntityPlayer player) {
 		EntityLivingBase nextTarget = null;
 		double dTarget = 0;
-		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, getRange(), getRange());
+		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, getRange(), getRange(), getTargetSelectors());
 		for (EntityLivingBase entity : list) {
 			if (entity == player) { continue; }
 			if (entity != currentTarget && entity != prevTarget && isTargetValid(player, entity)) {
@@ -271,6 +272,20 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	/**
+	 * See {@link TargetUtils#getDefaultSelectors()}
+	 */
+	protected List<Predicate<Entity>> getTargetSelectors() {
+		List<Predicate<Entity>> list = TargetUtils.getDefaultSelectors();
+		if (!Config.canTargetPassiveMobs()) {
+			list.add(TargetUtils.HOSTILE_MOB_SELECTOR);
+		}
+		if (!Config.canTargetPlayers()) {
+			list.add(TargetUtils.NON_PLAYER_SELECTOR);
+		}
+		return list;
+	}
+
+	/**
 	 * Updates targets, setting to null if no longer valid and acquiring new target if necessary
 	 * @return returns true if the current target is valid
 	 */
@@ -293,9 +308,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	 */
 	@SideOnly(Side.CLIENT)
 	private boolean isTargetValid(EntityPlayer player, EntityLivingBase target) {
-		return (target != null && !target.isDead && target.getHealth() > 0F &&
-				player.getDistanceToEntity(target) < (float) getRange() && !target.isInvisible() &&
-				(Config.canTargetPlayers() || !(target instanceof EntityPlayer)));
+		return (target != null && !target.isDead && target.getHealth() > 0F 
+				&& player.getDistanceToEntity(target) < (float) getRange() 
+				&& !target.isInvisible());
 	}
 
 	@Override
