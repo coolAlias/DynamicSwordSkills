@@ -19,9 +19,13 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.StatCollector;
@@ -269,7 +273,7 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		if (PlayerUtils.isWeapon(player.getHeldItem())) {
-			List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D);
+			List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D, getTargetSelectors());
 			for (EntityLivingBase target : list) {
 				if (targets != null && targets.contains(target)) {
 					Minecraft.getMinecraft().playerController.attackEntity(player, target);
@@ -283,6 +287,17 @@ public class SpinAttack extends SkillActive
 			player.setAngles((clockwise ? speed: -speed), 0);
 		}
 		return true;
+	}
+
+	/**
+	 * Unlike the default targeting, Spin Attack damages invisible entities
+	 */
+	protected List<Predicate<Entity>> getTargetSelectors() {
+		List<Predicate<Entity>> list = Lists.<Predicate<Entity>>newArrayList();
+		list.add(TargetUtils.COLLIDABLE_ENTITY_SELECTOR);
+		list.add(TargetUtils.NON_RIDING_SELECTOR);
+		list.add(TargetUtils.NON_TEAM_SELECTOR);
+		return list;
 	}
 
 	/**
