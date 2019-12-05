@@ -115,6 +115,11 @@ public class Dash extends SkillActive
 		return isActive || impactTime > 0;
 	}
 
+	/** Number of ticks the player will not be able to block or use an item after impact */
+	private int getBlockCooldown() {
+		return (30 - (2 * level));
+	}
+
 	@Override
 	protected float getExhaustion() {
 		return 1.0F - (0.05F * level);
@@ -222,6 +227,10 @@ public class Dash extends SkillActive
 				if (result != null) {
 					PacketDispatcher.sendToServer(new DashImpactPacket(player, result));
 					player.resetCooldown(); // player effectively made an attack
+					// Force player to stop blocking upon impact
+					DSSPlayerInfo.get(player).setUseItemCooldown(getBlockCooldown());
+					KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
+					KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 					impactTime = 5;
 					if (result.typeOfHit == RayTraceResult.Type.ENTITY) {
 						target = result.entityHit;
@@ -271,6 +280,7 @@ public class Dash extends SkillActive
 				}
 			}
 		}
+		DSSPlayerInfo.get(player).setUseItemCooldown(getBlockCooldown());
 		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.SLAM, SoundCategory.PLAYERS, 0.4F, 0.5F);
 		setNotDashing();
 	}
