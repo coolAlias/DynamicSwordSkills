@@ -232,7 +232,6 @@ public class EndingBlow extends SkillActive
 			ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
 			if (skill == null || !skill.isComboInProgress()) {
 				lastNumHits = 0;
-				skillResult = 0;
 			}
 		}
 		if (isActive()) {
