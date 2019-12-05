@@ -210,7 +210,7 @@ public class ArmorBreak extends SkillActive
 				if (charge == 0) {
 					// can't use the standard animation methods to prevent key/mouse input,
 					// since Armor Break will not return true for isActive
-					DSSPlayerInfo.get(player).setAttackTime(4); // flag for isAnimating? no player parameter
+					DSSPlayerInfo.get(player).setAttackCooldown(4); // flag for isAnimating? no player parameter
 					if (requiresReset) { // activated by vanilla attack key: manually unset the key state (fix for mouse event issues)
 						KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack.getKeyCode(), false);
 					}

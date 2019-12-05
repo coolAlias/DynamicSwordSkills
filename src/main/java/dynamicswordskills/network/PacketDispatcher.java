@@ -48,7 +48,7 @@ public class PacketDispatcher
 		// Bidirectional packets
 		registerMessage(PlaySoundPacket.class);
 		registerMessage(ActivateSkillPacket.class);
-		registerMessage(AttackTimePacket.class);
+		registerMessage(ActionTimePacket.class);
 		registerMessage(DeactivateSkillPacket.class);
 
 		// Packets handled on CLIENT

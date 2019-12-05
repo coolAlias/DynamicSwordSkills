@@ -50,13 +50,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class DSSPlayerInfo
 {
-	/** Maximum time the player may be prevented from taking a left-click action */
-	private final static int MAX_ATTACK_DELAY = 50;
+	/** Maximum time the player may be prevented from taking a left- or right-click action */
+	private final static int MAX_CLICK_COOLDOWN = 50;
 
 	private final EntityPlayer player;
 
 	/** Time remaining until player may perform another left-click action, such as an attack */
 	private int attackTime;
+
+	/** Time remaining until player may perform another right-click action, such as blocking with a shield */
+	private int useItemCooldown;
 
 	/** Stores information on the player's skills */
 	private final Map<Byte, SkillBase> skills;
@@ -115,8 +118,30 @@ public class DSSPlayerInfo
 	 * Sets the number of ticks remaining before another action may be performed, but
 	 * no less than the current value and no more than MAX_ATTACK_DELAY.
 	 */
-	public void setAttackTime(int ticks) {
-		this.attackTime = MathHelper.clamp_int(ticks, attackTime, MAX_ATTACK_DELAY);
+	public void setAttackCooldown(int ticks) {
+		this.attackTime = MathHelper.clamp_int(ticks, attackTime, MAX_CLICK_COOLDOWN);
+	}
+
+	/**
+	 * True if the player can perform a right-click action (i.e. the action timer is zero)
+	 */
+	public boolean canUseItem() {
+		return useItemCooldown == 0 || player.capabilities.isCreativeMode;
+	}
+
+	/**
+	 * Returns the current amount of time remaining before a right-click action may be performed
+	 */
+	public int getUseItemCooldown() {
+		return useItemCooldown;
+	}
+
+	/**
+	 * Sets the number of ticks remaining before another right-click action may be performed, but
+	 * no less than the current value and no more than MAX_ATTACK_DELAY.
+	 */
+	public void setUseItemCooldown(int ticks) {
+		this.useItemCooldown = MathHelper.clamp_int(ticks, useItemCooldown, MAX_CLICK_COOLDOWN);
 	}
 
 	/**
@@ -537,6 +562,9 @@ public class DSSPlayerInfo
 		updateISkillItem();
 		if (attackTime > 0) {
 			--attackTime;
+		}
+		if (useItemCooldown > 0) {
+			--useItemCooldown;
 		}
 		if (itemSkill != null) {
 			itemSkill.onUpdate(player);

@@ -24,7 +24,7 @@ import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.AttackTimePacket;
+import dynamicswordskills.network.bidirectional.ActionTimePacket;
 import dynamicswordskills.network.client.EndingBlowPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
@@ -238,8 +238,8 @@ public class EndingBlow extends SkillActive
 			--activeTimer;
 			if (activeTimer == 0 && !player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
 				DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-				skills.setAttackTime(getDuration() * 2);
-				PacketDispatcher.sendTo(new AttackTimePacket(skills.getAttackTime()), (EntityPlayerMP) player);
+				skills.setAttackCooldown(getDuration() * 2);
+				PacketDispatcher.sendTo(new ActionTimePacket(skills.getAttackTime(), true), (EntityPlayerMP) player);
 			}
 		}
 		if (player.worldObj.isRemote && canUse(player)) {
@@ -264,8 +264,8 @@ public class EndingBlow extends SkillActive
 				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.3F, 0.8F);
 				if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
 					DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-					skills.setAttackTime(getDuration());
-					PacketDispatcher.sendTo(new AttackTimePacket(skills.getAttackTime()), (EntityPlayerMP) player);
+					skills.setAttackCooldown(getDuration());
+					PacketDispatcher.sendTo(new ActionTimePacket(skills.getAttackTime(), true), (EntityPlayerMP) player);
 				}
 			}
 			PacketDispatcher.sendTo(new EndingBlowPacket(result), (EntityPlayerMP) player);
