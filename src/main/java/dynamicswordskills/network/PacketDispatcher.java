@@ -25,22 +25,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.network.bidirectional.AttackTimePacket;
-import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
-import dynamicswordskills.network.bidirectional.PlaySoundPacket;
-import dynamicswordskills.network.client.EndingBlowPacket;
-import dynamicswordskills.network.client.MortalDrawPacket;
-import dynamicswordskills.network.client.SyncConfigPacket;
-import dynamicswordskills.network.client.SyncPlayerInfoPacket;
-import dynamicswordskills.network.client.SyncSkillPacket;
-import dynamicswordskills.network.client.UpdateComboPacket;
-import dynamicswordskills.network.server.AddExhaustionPacket;
-import dynamicswordskills.network.server.DashImpactPacket;
-import dynamicswordskills.network.server.EndComboPacket;
-import dynamicswordskills.network.server.OpenGuiPacket;
-import dynamicswordskills.network.server.RefreshSpinPacket;
-import dynamicswordskills.network.server.TargetIdPacket;
+import dynamicswordskills.network.bidirectional.*;
+import dynamicswordskills.network.client.*;
+import dynamicswordskills.network.server.*;
 import dynamicswordskills.ref.ModInfo;
 
 /**
@@ -61,7 +48,7 @@ public class PacketDispatcher
 		// Bidirectional packets
 		registerMessage(PlaySoundPacket.class);
 		registerMessage(ActivateSkillPacket.class);
-		registerMessage(AttackTimePacket.class);
+		registerMessage(ActionTimePacket.class);
 		registerMessage(DeactivateSkillPacket.class);
 
 		// Packets handled on CLIENT

@@ -51,6 +51,7 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
+import net.minecraftforge.event.entity.player.PlayerUseItemEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
@@ -144,7 +145,14 @@ public class DSSCombatEvents
 	 * Used for anti-spam of left click, if enabled in the configuration settings.
 	 */
 	public static void setPlayerAttackTime(EntityPlayer player) {
-		DSSPlayerInfo.get(player).setAttackTime(Config.getBaseSwingSpeed());
+		DSSPlayerInfo.get(player).setAttackCooldown(Config.getBaseSwingSpeed());
+	}
+
+	@SubscribeEvent
+	public void onStartItemUse(PlayerUseItemEvent.Start event) {
+		if (!DSSPlayerInfo.get(event.entityPlayer).canUseItem()) {
+			event.setCanceled(true);
+		}
 	}
 
 	/**

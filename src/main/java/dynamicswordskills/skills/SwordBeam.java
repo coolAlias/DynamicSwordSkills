@@ -146,7 +146,7 @@ public class SwordBeam extends SkillActive
 			world.spawnEntityInWorld(beam);
 		} else {
 			player.swingItem();
-			DSSPlayerInfo.get(player).setAttackTime(20 - level);
+			DSSPlayerInfo.get(player).setAttackCooldown(20 - level);
 		}
 		return true;
 	}
