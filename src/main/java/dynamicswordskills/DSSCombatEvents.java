@@ -20,6 +20,19 @@ package dynamicswordskills;
 import java.util.HashMap;
 import java.util.Map;
 
+import cpw.mods.fml.common.eventhandler.EventPriority;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.SyncConfigPacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.ArmorBreak;
+import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.LeapingBlow;
+import dynamicswordskills.skills.MortalDraw;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityBlaze;
@@ -51,19 +64,7 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
-import cpw.mods.fml.common.eventhandler.EventPriority;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.client.SyncConfigPacket;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.skills.ArmorBreak;
-import dynamicswordskills.skills.ICombo;
-import dynamicswordskills.skills.LeapingBlow;
-import dynamicswordskills.skills.MortalDraw;
-import dynamicswordskills.skills.SkillBase;
+import net.minecraftforge.event.entity.player.PlayerUseItemEvent;
 
 /**
  * 
@@ -144,8 +145,13 @@ public class DSSCombatEvents
 	 * Used for anti-spam of left click, if enabled in the configuration settings.
 	 */
 	public static void setPlayerAttackTime(EntityPlayer player) {
-		if (!player.capabilities.isCreativeMode) {
-			player.attackTime = Math.max(player.attackTime, Config.getBaseSwingSpeed());
+		DSSPlayerInfo.get(player).setAttackCooldown(Config.getBaseSwingSpeed());
+	}
+
+	@SubscribeEvent
+	public void onStartItemUse(PlayerUseItemEvent.Start event) {
+		if (!DSSPlayerInfo.get(event.entityPlayer).canUseItem()) {
+			event.setCanceled(true);
 		}
 	}
 

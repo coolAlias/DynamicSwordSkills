@@ -111,7 +111,7 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && checkHealth(player) && player.attackTime == 0 && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
+		return super.canUse(player) && checkHealth(player) && DSSPlayerInfo.get(player).canAttack() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class SwordBeam extends SkillActive
 			world.spawnEntityInWorld(beam);
 		} else {
 			player.swingItem();
-			player.attackTime = (player.capabilities.isCreativeMode ? 0 : 20 - level);
+			DSSPlayerInfo.get(player).setAttackCooldown(20 - level);
 		}
 		return true;
 	}

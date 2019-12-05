@@ -17,30 +17,17 @@
 
 package dynamicswordskills.network;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.network.bidirectional.AttackTimePacket;
-import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
-import dynamicswordskills.network.bidirectional.PlaySoundPacket;
-import dynamicswordskills.network.client.EndingBlowPacket;
-import dynamicswordskills.network.client.MortalDrawPacket;
-import dynamicswordskills.network.client.SyncConfigPacket;
-import dynamicswordskills.network.client.SyncPlayerInfoPacket;
-import dynamicswordskills.network.client.SyncSkillPacket;
-import dynamicswordskills.network.client.UpdateComboPacket;
-import dynamicswordskills.network.server.AddExhaustionPacket;
-import dynamicswordskills.network.server.DashImpactPacket;
-import dynamicswordskills.network.server.EndComboPacket;
-import dynamicswordskills.network.server.OpenGuiPacket;
-import dynamicswordskills.network.server.RefreshSpinPacket;
-import dynamicswordskills.network.server.TargetIdPacket;
+import dynamicswordskills.network.bidirectional.*;
+import dynamicswordskills.network.client.*;
+import dynamicswordskills.network.server.*;
 import dynamicswordskills.ref.ModInfo;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
  * 
@@ -59,7 +46,7 @@ public class PacketDispatcher
 	public static final void initialize() {
 		// Bidirectional packets
 		registerMessage(ActivateSkillPacket.class);
-		registerMessage(AttackTimePacket.class);
+		registerMessage(ActionTimePacket.class);
 		registerMessage(DeactivateSkillPacket.class);
 		registerMessage(PlaySoundPacket.class);
 

@@ -133,7 +133,7 @@ public class DSSClientEvents
 					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					event.setCanceled(true);
 				} else {
-					event.setCanceled(!skills.canInteract() || mc.thePlayer.attackTime > 0);
+					event.setCanceled(!skills.canInteract() || !skills.canAttack());
 				}
 			} else { // cancel mouse wheel and use key while animations are in progress
 				event.setCanceled(!skills.canInteract());

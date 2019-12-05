@@ -153,7 +153,7 @@ public class DSSKeyHandler
 			skill.getNextTarget(mc.thePlayer);
 		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
 			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK].getKey() : mc.gameSettings.keyBindAttack);
-			boolean flag = (mc.thePlayer.attackTime > 0);
+			boolean flag = (!skills.canAttack());
 			if (canInteract && !flag) {
 				KeyBinding.setKeyBindState(key.getKeyCode(), true);
 			} else if (!flag) {

@@ -19,38 +19,49 @@ package dynamicswordskills.network.bidirectional;
 
 import java.io.IOException;
 
+import cpw.mods.fml.relauncher.Side;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import cpw.mods.fml.relauncher.Side;
-import dynamicswordskills.network.AbstractMessage;
 
 /**
  * 
- * Sets the player's attack time on either the client or the server
+ * Sets the player's left- or right-click action timer on either the client or the server
  *
  */
-public class AttackTimePacket extends AbstractMessage<AttackTimePacket>
+public class ActionTimePacket extends AbstractMessage<ActionTimePacket>
 {
-	private int attackTime;
+	private int ticks;
 
-	public AttackTimePacket() {}
+	private boolean isAttack;
 
-	public AttackTimePacket(int attackTime) {
-		this.attackTime = attackTime;
+	public ActionTimePacket() {}
+
+	public ActionTimePacket(int ticks, boolean isAttack) {
+		this.ticks = ticks;
+		this.isAttack = isAttack;
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		this.attackTime = buffer.readInt();
+		this.ticks = buffer.readInt();
+		this.isAttack = buffer.readBoolean();
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeInt(attackTime);
+		buffer.writeInt(ticks);
+		buffer.writeBoolean(isAttack);
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		player.attackTime = attackTime;
+		// handled identically on both sides
+		if (isAttack) {
+			DSSPlayerInfo.get(player).setAttackCooldown(ticks);
+		} else {
+			DSSPlayerInfo.get(player).setUseItemCooldown(ticks);
+		}
 	}
 }
