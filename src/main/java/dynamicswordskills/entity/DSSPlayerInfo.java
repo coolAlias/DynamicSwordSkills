@@ -390,7 +390,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * when the dummy skill is otherwise null; if itemSkill is null, it will also
 	 * search for a Mortal Draw skill, using the same item if a dummy is needed
 	 */
-	private void retrieveDummySwordSkill() {
+	public void retrieveDummySwordSkill() {
 		boolean needsDummy = (getTrueSkillLevel(SkillBase.swordBasic.getId()) < 1 && dummySwordSkill == null);
 		if ((needsDummy || itemSkill == null) && persistentDummySkillSlot == -1) {
 			for (int i = 0; i < 9; ++i) {

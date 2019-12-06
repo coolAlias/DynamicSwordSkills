@@ -26,7 +26,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.ChatComponentTranslation;
@@ -86,10 +85,18 @@ public class PlayerUtils
 		return (isSword(stack) || WeaponRegistry.INSTANCE.isWeapon(stack.getItem()));
 	}
 
-	/** Returns true if the stack is either a {@link #isSwordItem(Item) sword} or {@link ISkillProvider provider} of this skill */
+	/** Returns true if the stack is either a {@link #isSword(ItemStack) sword} or {@link #isProvider(ItemStack, SkillBase) provider} of this skill */
 	public static boolean isSwordOrProvider(ItemStack stack, SkillBase skill) {
-		Item item = (stack != null ? stack.getItem() : null);
-		return (isSword(stack) || (item instanceof ISkillProvider && ((ISkillProvider) item).getSkillId(stack) == skill.getId()));
+		return (isSword(stack) || isProvider(stack, skill));
+	}
+
+	/**
+	 * Returns whether the stack is a {@link ISkillProvider} for the target skill
+	 */
+	public static boolean isProvider(ItemStack stack, SkillBase skill) {
+		return (stack != null 
+				&& stack.getItem() instanceof ISkillProvider 
+				&& ((ISkillProvider) stack.getItem()).getSkillId(stack) == skill.getId());
 	}
 
 	/** Returns the difference between player's max and current health */
