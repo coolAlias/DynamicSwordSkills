@@ -177,7 +177,6 @@ public class DSSKeyHandler
 			}
 			return true;
 		} else {
-			// Only works for keys mapped to custom key bindings, which is fine for remapped mouse keys
 			KeyBinding key = getKeyBindFromCode(mc, kb);
 			if (key != null) {
 				if (!canInteract || skills.onKeyPressed(mc, key)) {
@@ -195,9 +194,7 @@ public class DSSKeyHandler
 
 	/**
 	 * Returns the KeyBinding corresponding to the key code given, or NULL if no key binding is found
-	 * Currently handles all custom keys, plus the following vanilla keys:
-	 * 	Always allowed: keyBindForward, keyBindJump
-	 * 	{@link Config#allowVanillaControls}: keyBindLeft, keyBindRight, keyBindBack, keyBindAttack, keyBindUseItem
+	 * Certain vanilla keys may return null depending on config settings, see {@link #isVanillaControl(Minecraft, KeyBinding)}
 	 * @param keyCode	Will be a negative number for mouse keys, or positive for keyboard
 	 * @param mc		Pass in Minecraft instance as a workaround to get vanilla KeyBindings
 	 */
@@ -207,28 +204,20 @@ public class DSSKeyHandler
 				return k.getKey();
 			}
 		}
-		if (keyCode == mc.gameSettings.keyBindForward.getKeyCode()) {
-			return mc.gameSettings.keyBindForward;
-		} else if (keyCode == mc.gameSettings.keyBindJump.getKeyCode()) {
-			return mc.gameSettings.keyBindJump;
-		} else if (Config.allowVanillaControls()) {
-			if (keyCode == mc.gameSettings.keyBindLeft.getKeyCode()) {
-				return mc.gameSettings.keyBindLeft;
-			} else if (keyCode == mc.gameSettings.keyBindRight.getKeyCode()) {
-				return mc.gameSettings.keyBindRight;
-			} else if (keyCode == mc.gameSettings.keyBindBack.getKeyCode()) {
-				return mc.gameSettings.keyBindBack;
-			} else if (keyCode == mc.gameSettings.keyBindAttack.getKeyCode()) {
-				return mc.gameSettings.keyBindAttack;
-			} else if (keyCode == mc.gameSettings.keyBindUseItem.getKeyCode()) {
-				return mc.gameSettings.keyBindUseItem;
+		for (KeyBinding k : mc.gameSettings.keyBindings) {
+			if (k.getKeyCode() == keyCode) {
+				if (!Config.allowVanillaControls() && isVanillaControl(mc, k)) {
+					return null;
+				}
+				return k;
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * Returns true if the key is a vanilla keybinding restricted by the Config#allowVanillaControls setting
+	 * Returns whether the key usage is controlled by the Config#allowVanillaControls setting:
+	 *   vanilla key bindings for Left, Right, Back, Attack, Use Item
 	 */
 	public static boolean isVanillaControl(Minecraft mc, KeyBinding key) {
 		return (key == mc.gameSettings.keyBindLeft 
