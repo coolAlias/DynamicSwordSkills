@@ -307,6 +307,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
 			((SkillActive) itemSkill).onBeingAttacked(player, event.source);
+			event.setCanceled(((SkillActive) itemSkill).onBeingAttacked(player, event.source));
 		}
 	}
 
