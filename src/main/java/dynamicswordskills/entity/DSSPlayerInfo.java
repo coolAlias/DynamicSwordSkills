@@ -252,11 +252,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean canInteract() {
-		// don't set the current skill to null just yet if it is still animating
-		// this allows skills to prevent key/mouse input without having to be 'active'
-		if (animatingSkill != null && !animatingSkill.isActive() && !animatingSkill.isAnimating()) {//!isSkillActive(currentActiveSkill)) {
-			animatingSkill = null;
-		}
 		return animatingSkill == null || !animatingSkill.isAnimating();
 	}
 
@@ -495,7 +490,11 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		// flags whether a skill is currently animating
 		boolean flag = false;
 		if (animatingSkill != null) {
-			if (animatingSkill.isAnimating()) {
+			if (!skills.containsKey(animatingSkill.getId()) && itemSkill != animatingSkill) {
+				// Clear animating skill if no longer valid
+				setCurrentlyAnimatingSkill(null);
+			} else if (animatingSkill.isAnimating()) {
+				// Allow animations to complete even if skill is no longer considered active
 				flag = animatingSkill.onRenderTick(player, partialRenderTick);
 			} else if (!animatingSkill.isActive()) {
 				setCurrentlyAnimatingSkill(null);
