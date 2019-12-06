@@ -20,7 +20,6 @@ package dynamicswordskills.skills;
 import java.util.List;
 
 import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
@@ -58,7 +57,11 @@ public class SwordBreak extends SkillActive
 	/** Timer during which player is considered actively parrying */
 	private int breakTimer;
 
-	/** Only for double-tap activation: Current number of ticks remaining before skill will not activate */
+	/** Counter incremented when next correct key in sequence pressed; reset when activated or if ticksTilFail timer reaches 0 */
+	@SideOnly(Side.CLIENT)
+	private int keysPressed;
+
+	/** Reset each valid key press until executed; if timer reaches 0, full key sequence must be repeated */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 
@@ -121,7 +124,7 @@ public class SwordBreak extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand());
+		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand()) && !player.isHandActive();
 	}
 
 	/**
@@ -130,29 +133,32 @@ public class SwordBreak extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return canUse(player) && PlayerUtils.isBlocking(player);
+		return canUse(player) && keysPressed > 1 && ticksTilFail > 0;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_DOWN].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack));
+		// return (key == mc.gameSettings.keyBindForward || (keysPressed > 1 && (key == mc.gameSettings.keyBindUseItem || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKey())));
+		return true;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (canExecute(player)) {
-			if (Config.requiresDoubleTap()) {
-				if (ticksTilFail > 0) {
-					ticksTilFail = 0;
-					return activate(player);
-				} else {
-					ticksTilFail = 6;
-				}
-			} else if (key != mc.gameSettings.keyBindBack) { // activate on first press, but not for vanilla key!
-				return activate(player);
+		if (key == mc.gameSettings.keyBindForward) {
+			ticksTilFail = 6;
+			if (keysPressed < 2) {
+				keysPressed++;
 			}
+		} else if (key == mc.gameSettings.keyBindUseItem || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKey()) {
+			boolean flag = (canExecute(player) && activate(player));
+			ticksTilFail = 0;
+			keysPressed = 0;
+			return flag;
+		} else {
+			ticksTilFail = 0;
+			keysPressed = 0;
 		}
 		return false;
 	}
@@ -184,6 +190,9 @@ public class SwordBreak extends SkillActive
 			}
 		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
+			if (ticksTilFail < 1) {
+				keysPressed = 0;
+			}
 		}
 	}
 
