@@ -145,22 +145,21 @@ public class DSSClientEvents
 
 		ILockOnTarget skill = skills.getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
-			if (isAttackKey) {
+			if (!Config.allowVanillaControls()) {
+				// Left- and right-click are ignored while locked on if vanilla controls are not enabled
+				event.setCanceled(true);
+			} else if (isAttackKey) {
 				// mouse attack will always be canceled while locked on, as the click has been handled
-				if (Config.allowVanillaControls()) {
-					if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
-						// no skill activated - perform a 'standard' attack
-						performComboAttack(mc, skill);
-						// hack for Armor Break: allows charging to begin without having to press attack key a second time
-						if (skills.hasSkill(SkillBase.armorBreak)) {
-							skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
-						}
+				if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
+					// no skill activated - perform a 'standard' attack
+					performComboAttack(mc, skill);
+					// hack for Armor Break: allows charging to begin without having to press attack key a second time
+					if (skills.hasSkill(SkillBase.armorBreak)) {
+						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					}
 				}
-				// if vanilla controls not enabled, mouse click is ignored (i.e. canceled)
-				// if vanilla controls enabled, mouse click was already handled - cancel
 				event.setCanceled(true);
-			} else if (Config.allowVanillaControls()) {
+			} else {
 				event.setCanceled(skills.onKeyPressed(mc, mc.gameSettings.keyBindUseItem));
 			}
 		} else  if (isAttackKey) { // not locked on to a target, normal item swing: set attack time only
