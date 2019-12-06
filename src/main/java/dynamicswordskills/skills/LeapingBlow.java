@@ -141,8 +141,10 @@ public class LeapingBlow extends SkillActive
 		if (key == mc.gameSettings.keyBindJump) {
 			if (player.onGround && isKeyPressed() && canUse(player)) {
 				ticksTilFail = 10;
-				KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
-				KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
+				if (player.isHandActive()) {
+					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
+					KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
+				}
 				return true;
 			}
 		} else if (canExecute(player) && activate(player)) {
