@@ -25,10 +25,8 @@ import dynamicswordskills.client.gui.ComboOverlay;
 import dynamicswordskills.client.gui.GuiEndingBlowOverlay;
 import dynamicswordskills.client.gui.IGuiOverlay;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
-import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -55,15 +53,6 @@ public class DSSClientEvents
 	/** List of GUI overlays that have rendered this tick */
 	private final List<IGuiOverlay> rendered = new ArrayList<IGuiOverlay>();
 
-	/** Store the current key code for mouse buttons */
-	private int mouseKey;
-
-	/** Whether the button during mouse event is Minecraft's keyBindAttack */
-	private boolean isAttackKey;
-
-	/** Whether the button during mouse event is Minecraft's keyBindUseItem*/
-	private boolean isUseKey;
-
 	public DSSClientEvents() {
 		this.mc = Minecraft.getMinecraft();
 		overlays.add(new ComboOverlay(mc));
@@ -88,7 +77,6 @@ public class DSSClientEvents
 	 * doesn't return false (i.e. doesn't miss)
 	 * @param skill must implement BOTH {@link ILockOnTarget} AND {@link ICombo}
 	 */
-	@SideOnly(Side.CLIENT)
 	public static void performComboAttack(Minecraft mc, ILockOnTarget skill) {
 		if (!mc.thePlayer.isHandActive()) {
 			if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
@@ -102,70 +90,24 @@ public class DSSClientEvents
 	}
 
 	/**
-	 * Handles mouse clicks for skills, canceling where appropriate; note that left click will
-	 * ALWAYS be canceled, as the attack is passed to {@link #performComboAttack(Minecraft, ILockOnTarget) performComboAttack};
-	 * allowing left click results in the attack processing twice, doubling durability damage to weapons
-	 * no button clicked -1, left button 0, right click 1, middle click 2, possibly 3+ for other buttons
-	 * NOTE: Corresponding key codes for the mouse in Minecraft are (event.button -100)
+	 * Passes mouse key presses and releases to the appropriate DSSKeyHandler method
+	 * for skill usage and possibly event cancellation
 	 */
 	@SubscribeEvent
 	public void onMouseChanged(MouseEvent event) {
-		mouseKey = event.getButton() - 100;
-		isAttackKey = (mouseKey == mc.gameSettings.keyBindAttack.getKeyCode());
-		isUseKey = (mouseKey == mc.gameSettings.keyBindUseItem.getKeyCode());
 		if ((event.getButton() == -1 && event.getDwheel() == 0)) {
 			return;
-		} else if ((!isAttackKey && !isUseKey)) {
-			// pass mouse clicks to custom key handler when pressed, as KeyInputEvent no longer receives these
+		} else if (event.getDwheel() != 0) {
+			// Cancel mouse wheel while animations are in progress
+			event.setCanceled(!DSSPlayerInfo.get(mc.thePlayer).canInteract());
+		} else {
+			// Corresponding KeyBinding key codes for mouse buttons are (event.button - 100)
+			int mouseKey = event.getButton() - 100;
 			if (event.isButtonstate()) {
-				DSSKeyHandler.onKeyPressed(mc, mouseKey);
+				event.setCanceled(DSSKeyHandler.onKeyPressed(mc, mouseKey));
 			} else {
 				DSSKeyHandler.onKeyReleased(mc, mouseKey);
 			}
-			return;
-		}
-		DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
-		if (event.isButtonstate() || event.getDwheel() != 0) {
-			if (isAttackKey) {
-				// hack for spin attack: allows key press information to be received while animating
-				if (skills.isSkillActive(SkillBase.spinAttack) && skills.getActiveSkill(SkillBase.spinAttack).isAnimating()) {
-					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
-					event.setCanceled(true);
-				} else if (skills.isSkillActive(SkillBase.backSlice) && skills.getActiveSkill(SkillBase.backSlice).isAnimating()) {
-					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
-					event.setCanceled(true);
-				} else {
-					event.setCanceled(!skills.canInteract() || !skills.canAttack());
-				}
-			} else { // cancel mouse wheel and use key while animations are in progress
-				event.setCanceled(!skills.canInteract());
-			}
-		}
-		if (event.isCanceled() || !event.isButtonstate()) {
-			return;
-		}
-
-		ILockOnTarget skill = skills.getTargetingSkill();
-		if (skill != null && skill.isLockedOn()) {
-			if (!Config.allowVanillaControls()) {
-				// Left- and right-click are ignored while locked on if vanilla controls are not enabled
-				event.setCanceled(true);
-			} else if (isAttackKey) {
-				// mouse attack will always be canceled while locked on, as the click has been handled
-				if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
-					// no skill activated - perform a 'standard' attack
-					performComboAttack(mc, skill);
-					// hack for Armor Break: allows charging to begin without having to press attack key a second time
-					if (skills.hasSkill(SkillBase.armorBreak)) {
-						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
-					}
-				}
-				event.setCanceled(true);
-			} else {
-				event.setCanceled(skills.onKeyPressed(mc, mc.gameSettings.keyBindUseItem));
-			}
-		} else  if (isAttackKey) { // not locked on to a target, normal item swing: set attack time only
-			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
 		}
 	}
 }

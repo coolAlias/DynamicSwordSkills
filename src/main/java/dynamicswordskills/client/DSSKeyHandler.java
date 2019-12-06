@@ -105,8 +105,9 @@ public class DSSKeyHandler
 	 * key is pressed, not when it is released (i.e. when event.buttonstate is true).
 	 * @param mc	Pass in Minecraft instance, since this is a static method
 	 * @param kb	The key code of the key pressed; for the mouse, this is the mouse button number minus 100
+	 * @return true if the key press was 'handled'
 	 */
-	public static void onKeyPressed(Minecraft mc, int kb) {
+	public static boolean onKeyPressed(Minecraft mc, int kb) {
 		if (mc.inGameHasFocus && mc.thePlayer != null) {
 			DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
 			if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
@@ -116,9 +117,10 @@ public class DSSKeyHandler
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
 			} else {
-				handleTargetingKeys(mc, kb, skills);
+				return handleTargetingKeys(mc, kb, skills);
 			}
 		}
+		return false;
 	}
 
 	/**
@@ -142,12 +144,11 @@ public class DSSKeyHandler
 	/**
 	 * All ILockOnTarget skill related keys are handled here
 	 */
-	private static void handleTargetingKeys(Minecraft mc, int kb, DSSPlayerInfo skills) {
+	private static boolean handleTargetingKeys(Minecraft mc, int kb, DSSPlayerInfo skills) {
 		ILockOnTarget skill = skills.getTargetingSkill();
 		boolean canInteract = skills.canInteract();
-
 		if (skill == null || !skill.isLockedOn()) {
-			return;
+			return false;
 		}
 		if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
 			skill.getNextTarget(mc.thePlayer);
@@ -159,11 +160,9 @@ public class DSSKeyHandler
 			} else if (canAttack) {
 				// hack for Super Spin Attack, as it requires key press to be passed while animation is in progress
 				if (skills.isSkillActive(SkillBase.spinAttack)) {
-					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.thePlayer);
-					return;
+					return skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.thePlayer);
 				} else if (skills.isSkillActive(SkillBase.backSlice)) {
-					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, key, mc.thePlayer);
-					return;
+					return skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, key, mc.thePlayer);
 				}
 			}
 			// Only allow attack key to continue processing if it was set to pressed
@@ -176,10 +175,14 @@ public class DSSKeyHandler
 					}
 				}
 			}
-		} else if (canInteract) {
+			return true;
+		} else {
 			// Only works for keys mapped to custom key bindings, which is fine for remapped mouse keys
 			KeyBinding key = getKeyBindFromCode(mc, kb);
-			if (key != null && !skills.onKeyPressed(mc, key)) {
+			if (key != null) {
+				if (!canInteract || skills.onKeyPressed(mc, key)) {
+					return true;
+				}
 				KeyBinding.setKeyBindState(kb, true);
 				// Piggy-back on vanilla use item key so shield blocking will work with custom keybinding
 				if (kb == keys[KEY_BLOCK].getKeyCode()) {
@@ -187,17 +190,17 @@ public class DSSKeyHandler
 				}
 			}
 		}
+		return false;
 	}
 
 	/**
 	 * Returns the KeyBinding corresponding to the key code given, or NULL if no key binding is found
 	 * Currently handles all custom keys, plus the following vanilla keys:
 	 * 	Always allowed: keyBindForward, keyBindJump
-	 * 	{@link Config#allowVanillaControls}: keyBindLeft, keyBindRight, keyBindBack
+	 * 	{@link Config#allowVanillaControls}: keyBindLeft, keyBindRight, keyBindBack, keyBindAttack, keyBindUseItem
 	 * @param keyCode	Will be a negative number for mouse keys, or positive for keyboard
 	 * @param mc		Pass in Minecraft instance as a workaround to get vanilla KeyBindings
 	 */
-	@SideOnly(Side.CLIENT)
 	public static KeyBinding getKeyBindFromCode(Minecraft mc, int keyCode) {
 		for (KeyBindingHolder k : keys) {
 			if (k.getKeyCode() == keyCode) {
@@ -215,8 +218,23 @@ public class DSSKeyHandler
 				return mc.gameSettings.keyBindRight;
 			} else if (keyCode == mc.gameSettings.keyBindBack.getKeyCode()) {
 				return mc.gameSettings.keyBindBack;
+			} else if (keyCode == mc.gameSettings.keyBindAttack.getKeyCode()) {
+				return mc.gameSettings.keyBindAttack;
+			} else if (keyCode == mc.gameSettings.keyBindUseItem.getKeyCode()) {
+				return mc.gameSettings.keyBindUseItem;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns true if the key is a vanilla keybinding restricted by the Config#allowVanillaControls setting
+	 */
+	public static boolean isVanillaControl(Minecraft mc, KeyBinding key) {
+		return (key == mc.gameSettings.keyBindLeft 
+				|| key == mc.gameSettings.keyBindRight
+				|| key == mc.gameSettings.keyBindBack
+				|| key == mc.gameSettings.keyBindAttack
+				|| key == mc.gameSettings.keyBindUseItem);
 	}
 }
