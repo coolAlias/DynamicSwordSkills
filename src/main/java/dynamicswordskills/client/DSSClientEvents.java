@@ -159,13 +159,11 @@ public class DSSClientEvents
 						}
 					}
 				}
-
 				// if vanilla controls not enabled, mouse click is ignored (i.e. canceled)
 				// if vanilla controls enabled, mouse click was already handled - cancel
 				event.setCanceled(true);
-			} else if (isUseKey && Config.allowVanillaControls()) {
-				// is this case even possible?
-				event.setCanceled(!skills.canInteract());
+			} else if (Config.allowVanillaControls()) {
+				event.setCanceled(skills.onKeyPressed(mc, mc.gameSettings.keyBindUseItem));
 			}
 		} else  if (isAttackKey) { // not locked on to a target, normal item swing: set attack time only
 			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
