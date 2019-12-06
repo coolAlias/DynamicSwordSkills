@@ -63,6 +63,10 @@ public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 	protected void process(EntityPlayer player, Side side) {
 		// handled identically on both sides
 		DSSPlayerInfo info = DSSPlayerInfo.get(player);
+		// Force Mortal Draw to check for an ISkillProvider when needed to ensure skill can be activated
+		if (SkillBase.mortalDraw.getId() == skillId && info.getTrueSkillLevel(SkillBase.mortalDraw) < 1) {
+			info.retrieveDummySwordSkill();
+		}
 		info.activateSkill(info.getPlayerSkill(skillId), wasTriggered);
 	}
 }
