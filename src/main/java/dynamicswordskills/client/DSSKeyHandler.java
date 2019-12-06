@@ -199,17 +199,17 @@ public class DSSKeyHandler
 	 * @param mc		Pass in Minecraft instance as a workaround to get vanilla KeyBindings
 	 */
 	public static KeyBinding getKeyBindFromCode(Minecraft mc, int keyCode) {
-		for (KeyBindingHolder k : keys) {
-			if (k.getKeyCode() == keyCode) {
-				return k.getKey();
-			}
-		}
 		for (KeyBinding k : mc.gameSettings.keyBindings) {
 			if (k.getKeyCode() == keyCode) {
 				if (!Config.allowVanillaControls() && isVanillaControl(mc, k)) {
 					return null;
 				}
 				return k;
+			}
+		}
+		for (KeyBindingHolder k : keys) {
+			if (k.getKeyCode() == keyCode) {
+				return k.getKey();
 			}
 		}
 		return null;
