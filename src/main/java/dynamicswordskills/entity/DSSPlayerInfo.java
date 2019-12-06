@@ -330,7 +330,7 @@ public class DSSPlayerInfo
 			}
 		}
 		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
-			((SkillActive) itemSkill).onBeingAttacked(player, event.getSource());
+			event.setCanceled(((SkillActive) itemSkill).onBeingAttacked(player, event.getSource()));
 		}
 	}
 
