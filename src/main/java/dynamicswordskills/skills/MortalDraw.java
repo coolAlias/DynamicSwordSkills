@@ -132,10 +132,11 @@ public class MortalDraw extends SkillActive
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		swordSlot = -1;
+		int plvl = DSSPlayerInfo.get(player).getTrueSkillLevel(this);
 		if (super.canUse(player) && player.getHeldItemMainhand() == null && attackTimer == 0) {
 			for (int i = 0; i < 9; ++i) {
 				ItemStack stack = player.inventory.getStackInSlot(i);
-				if (stack != null && PlayerUtils.isSwordOrProvider(stack, this)) {
+				if (stack != null && ((plvl > 0 && PlayerUtils.isSword(stack)) || PlayerUtils.isProvider(stack, this))) {
 					swordSlot = i;
 					break;
 				}
