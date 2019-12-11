@@ -356,9 +356,25 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Called from LivingHurtEvent to trigger {@link SkillActive#postImpact} for each
-	 * currently active skill, potentially altering the value of event.ammount, as
-	 * well as calling {@link ICombo#onHurtTarget onHurtTarget} for the current ICombo.
+	 * Called from LivingHurtEvent to trigger {@link SkillActive#onImpact} for each
+	 * currently active skill, potentially altering the value of event.amount
+	 */
+	public void onImpact(LivingHurtEvent event) {
+		for (SkillBase skill : skills.values()) {
+			if (event.ammount <= 0.0F) {
+				return;
+			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+				event.ammount = ((SkillActive) skill).onImpact(player, event.entityLiving, event.ammount);
+			}
+		}
+		if (event.ammount > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+			event.ammount = (((SkillActive) itemSkill).onImpact(player, event.entityLiving, event.ammount));
+		}
+	}
+
+	/**
+	 * Calls {@link SkillActive#postImpact} for each currently active skill,
+	 * as well as calling {@link ICombo#onHurtTarget} for the current ICombo.
 	 */
 	public void onPostImpact(LivingHurtEvent event) {
 		for (SkillBase skill : skills.values()) {

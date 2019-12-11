@@ -304,19 +304,24 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
-	 * Called from LivingHurtEvent when a player using this skill first damages an entity,
-	 * before any other modifiers are applied.
-	 * The skill should currently be {@link #isActive() active}. Setting the event damage
-	 * to zero or canceling the event will prevent any further processing of the LivingHurtEvent.
-	 * @param player	The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
-	 * @param event		The hurt event may be canceled, damage amount modified, etc.
+	 * Called from LivingHurtEvent after increasing the damage amount based on the combo count and prior
+	 * to calling {@link ICombo#onPlayerHurt(EntityPlayer, LivingHurtEvent)} for a damaged player entity.
+	 * Only called if the skill is currently {@link #isActive() active} and the event amount is > 0.
+	 * 
+	 * @param player The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
+	 * @param entity The entity damaged, i.e. LivingHurtEvent's entityLiving
+	 * @param amount The current damage amount from {@link LivingHurtEvent#amount}
+	 * @return       The modified damage amount to inflict, or 0 to cancel the event
 	 */
-	//public void onImpact(EntityPlayer player, LivingHurtEvent event) {}
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		return amount;
+	}
 
 	/**
 	 * Called from LivingHurtEvent only if the skill is currently {@link #isActive() active}
 	 * for the player that inflicted the damage, after all damage modifiers have been taken
-	 * into account, providing a final chance to modify the damage or perform other actions.
+	 * into account, providing a final chance to modify the damage or perform other actions
+	 * before {@link ICombo#onHurtTarget} is called.
 	 * 
 	 * @param player	The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
 	 * @param entity	The entity damaged, i.e. LivingHurtEvent's entityLiving
