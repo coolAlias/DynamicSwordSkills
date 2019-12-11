@@ -22,12 +22,12 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
@@ -210,15 +210,17 @@ public class MortalDraw extends SkillActive
 	/**
 	 * Call upon landing a mortal draw blow
 	 */
-	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
+	@Override
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		// need to check time again, due to 2-tick delay for damage prevention
 		if (attackTimer > DELAY) {
 			attackTimer = DELAY;
-			event.ammount *= (1.0F + ((float) getDamageMultiplier() / 100F));
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_MORTALDRAW, 0.4F, 0.5F);
+			return (amount * (1.0F + ((float) getDamageMultiplier() / 100F)));
 		} else { // too late - didn't defend against this target!
 			target = null;
 		}
+		return amount;
 	}
 
 	/**

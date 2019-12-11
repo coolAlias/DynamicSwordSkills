@@ -33,7 +33,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -228,10 +227,11 @@ public class ArmorBreak extends SkillActive
 	 * which point ArmorBreak will no longer be active and the event may continue as
 	 * normal, but with armor-ignoring damage.
 	 */
-	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
+	@Override
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		activeTimer = 0;
 		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_ARMORBREAK, 0.4F, 0.5F);
-		DirtyEntityAccessor.damageEntity(event.entityLiving, DamageUtils.causeArmorBreakDamage(player), event.ammount);
-		event.ammount = 0.0F;
+		DirtyEntityAccessor.damageEntity(entity, DamageUtils.causeArmorBreakDamage(player), amount);
+		return 0.0F;
 	}
 }
