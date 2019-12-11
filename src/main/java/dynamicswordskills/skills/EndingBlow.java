@@ -201,6 +201,7 @@ public class EndingBlow extends SkillActive
 		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
 			DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), DSSPlayerInfo.get(player).getTargetingSkill());
 			this.lastActivationTime = Minecraft.getSystemTime();
+			this.skillResult = 0;
 		}
 		return isActive();
 	}
@@ -212,6 +213,7 @@ public class EndingBlow extends SkillActive
 		xp = 0;
 		if (world.isRemote) {
 			keyPressed = 0;
+			keyReleased = false;
 			ticksTilFail = 0;
 		}
 	}
@@ -236,14 +238,14 @@ public class EndingBlow extends SkillActive
 		}
 		if (isActive()) {
 			--activeTimer;
-			if (activeTimer == 0 && !player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
-				DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-				skills.setAttackCooldown(getDuration() * 2);
-				PacketDispatcher.sendTo(new ActionTimePacket(skills.getAttackTime(), true), (EntityPlayerMP) player);
+			if (activeTimer == 0 && !player.worldObj.isRemote) {
+				if (!player.capabilities.isCreativeMode) {
+					DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+					skills.setAttackCooldown(getDuration() * 2);
+					PacketDispatcher.sendTo(new ActionTimePacket(skills.getAttackTime(), true), (EntityPlayerMP) player);
+				}
+				PacketDispatcher.sendTo(new EndingBlowPacket((byte)-1), (EntityPlayerMP) player);
 			}
-		}
-		if (player.worldObj.isRemote && canUse(player)) {
-			skillResult = 0; // clear previous result when able to activate again
 		}
 	}
 
