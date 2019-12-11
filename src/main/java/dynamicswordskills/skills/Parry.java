@@ -110,12 +110,12 @@ public class Parry extends SkillActive
 
 	/** Number of ticks that skill will be considered active */
 	private int getActiveTime() {
-		return 6 + level;
+		return 9 + (level / 2);
 	}
 
 	/** Number of ticks before player may attempt to use this skill again */
 	private int getParryDelay() {
-		return (5 - (level / 2)); // 2 tick usage window at level 1
+		return (5 - (level / 2));
 	}
 
 	/** The maximum number of attacks that may be parried per use of the skill */
