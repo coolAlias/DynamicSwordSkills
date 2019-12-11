@@ -354,9 +354,26 @@ public class DSSPlayerInfo
 	}
 
 	/**
-	 * Called from LivingHurtEvent to trigger {@link SkillActive#postImpact} for each
-	 * currently active skill, potentially altering the value of event.amount, as
-	 * well as calling {@link ICombo#onHurtTarget onHurtTarget} for the current ICombo.
+	 * Called from LivingHurtEvent to trigger {@link SkillActive#onImpact} for each
+	 * currently active skill, potentially altering the value of event.amount
+	 */
+	public void onImpact(LivingHurtEvent event) {
+		for (SkillBase skill : skills.values()) {
+			if (event.getAmount() <= 0.0F) {
+				return;
+			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+				float amount = ((SkillActive) skill).onImpact(player, event.getEntityLiving(), event.getAmount());
+				event.setAmount(amount);
+			}
+		}
+		if (event.getAmount() > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+			event.setAmount(((SkillActive) itemSkill).onImpact(player, event.getEntityLiving(), event.getAmount()));
+		}
+	}
+
+	/**
+	 * Calls {@link SkillActive#postImpact} for each currently active skill,
+	 * as well as calling {@link ICombo#onHurtTarget} for the current ICombo.
 	 */
 	public void onPostImpact(LivingHurtEvent event) {
 		for (SkillBase skill : skills.values()) {

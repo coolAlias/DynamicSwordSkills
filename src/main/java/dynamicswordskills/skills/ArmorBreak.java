@@ -31,11 +31,11 @@ import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -241,10 +241,11 @@ public class ArmorBreak extends SkillActive
 	 * skill is no longer active it will behave normally. The current event's
 	 * damage is set to zero to avoid double damage.
 	 */
-	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
+	@Override
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		activeTimer = 0;
 		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.ARMOR_BREAK, SoundCategory.PLAYERS, 0.4F, 0.5F);
-		DirtyEntityAccessor.damageEntity(event.getEntityLiving(), DamageUtils.causeArmorBreakDamage(player), event.getAmount());
-		event.setAmount(0.0F);
+		DirtyEntityAccessor.damageEntity(entity, DamageUtils.causeArmorBreakDamage(player), amount);
+		return 0.0F;
 	}
 }

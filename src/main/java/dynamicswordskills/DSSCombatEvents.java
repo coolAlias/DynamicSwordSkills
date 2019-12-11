@@ -25,10 +25,8 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
-import dynamicswordskills.skills.ArmorBreak;
 import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.LeapingBlow;
-import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -174,12 +172,7 @@ public class DSSCombatEvents
 			if (combo != null && combo.getCombo() != null && !combo.getCombo().isFinished()) {
 				event.setAmount(event.getAmount() + combo.getCombo().getNumHits());
 			}
-			if (skills.isSkillActive(SkillBase.armorBreak)) {
-				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).onImpact(player, event);
-				return;
-			} else if (skills.isSkillActive(SkillBase.mortalDraw)) {
-				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).onImpact(player, event);
-			}
+			DSSPlayerInfo.get(player).onImpact(event);
 		}
 		if (event.getAmount() > 0.0F && event.getEntity() instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.getEntity();
@@ -190,6 +183,9 @@ public class DSSCombatEvents
 		}
 		if (event.getAmount() > 0.0F && event.getSource().getEntity() instanceof EntityPlayer) {
 			DSSPlayerInfo.get((EntityPlayer) event.getSource().getEntity()).onPostImpact(event);
+		}
+		if (event.getAmount() <= 0.0F) {
+			event.setCanceled(true);
 		}
 	}
 
