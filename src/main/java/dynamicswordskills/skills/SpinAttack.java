@@ -209,9 +209,11 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey()) {
-			if (isActive() && canRefresh() && canExecute(player)) {
-				PacketDispatcher.sendToServer(new RefreshSpinPacket());
-				arc += 360F;
+			if (isActive()) {
+				if (canRefresh() && canExecute(player)) {
+					PacketDispatcher.sendToServer(new RefreshSpinPacket());
+					arc += 360F;
+				}
 				return true;
 			}
 		} else if (!isCharging()) {
