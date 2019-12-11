@@ -18,9 +18,6 @@
 package dynamicswordskills.entity;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import cpw.mods.fml.relauncher.Side;
@@ -76,9 +73,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 
 	/** Slot of the item providing the persistent dummy sword skill, if any */
 	private int persistentDummySkillSlot = -1;
-
-	/** Currently active skills */
-	private final List<SkillActive> activeSkills = new LinkedList<SkillActive>();
 
 	/**
 	 * Currently animating skill that {@link SkillActive#hasAnimation() has an animation};
@@ -349,8 +343,8 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * returns immediately without processing any remaining active skills.
 	 */
 	public void onBeingAttacked(LivingAttackEvent event) {
-		for (SkillActive skill : activeSkills) {
-			if (skill.isActive() && skill.onBeingAttacked(player, event.source)) {
+		for (SkillBase skill : skills.values()) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isActive() && ((SkillActive) skill).onBeingAttacked(player, event.source)) {
 				event.setCanceled(true);
 				return;
 			}
@@ -367,9 +361,9 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * well as calling {@link ICombo#onHurtTarget onHurtTarget} for the current ICombo.
 	 */
 	public void onPostImpact(LivingHurtEvent event) {
-		for (SkillActive skill : activeSkills) {
-			if (skill.isActive()) {
-				event.ammount = skill.postImpact(player, event.entityLiving, event.ammount);
+		for (SkillBase skill : skills.values()) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+				event.ammount = ((SkillActive) skill).postImpact(player, event.entityLiving, event.ammount);
 			}
 		}
 		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
@@ -491,26 +485,19 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Called after {@link SkillActive#onActivated} returns true to add the skill to the
-	 * list of currently active skills, as well as set the currently animating skill
-	 */
-	private void onSkillActivated(SkillActive skill) {
-		if (skill.isActive()) {
-			activeSkills.add(skill);
-			if (player.worldObj.isRemote) {
-				setCurrentlyAnimatingSkill(skill);
-			}
-		}
-	}
-
-	/**
-	 * Attempts to activate the skill; if successful, {@link #onSkillActivated(SkillActive)} will be called
+	 * Activates the skill if possible
 	 * @param wasTriggered Whether the skill was triggered via some means other than direct user interaction (see {@link SkillActive#allowUserActivation})
 	 * @return true if the player has this skill and {@link SkillActive#trigger} returns true
 	 */
 	public boolean activateSkill(SkillBase skill, boolean wasTriggered) {
-		if (skill instanceof SkillActive && ((SkillActive) skill).trigger(player.worldObj, player, wasTriggered)) {
-			onSkillActivated((SkillActive) skill);
+		return (skill instanceof SkillActive && onSkillActivated((SkillActive) skill, wasTriggered));
+	}
+
+	private boolean onSkillActivated(SkillActive skill, boolean wasTriggered) {
+		if (skill.trigger(player.worldObj, player, wasTriggered)) {
+			if (player.worldObj.isRemote && skill.isActive()) {
+				setCurrentlyAnimatingSkill(skill);
+			}
 			return true;
 		}
 		return false;
@@ -576,14 +563,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 		for (SkillBase skill : skills.values()) {
 			skill.onUpdate(player);
-		}
-		// must use iterators to avoid concurrent modification exceptions to list
-		Iterator<SkillActive> iterator = activeSkills.iterator();
-		while (iterator.hasNext()) {
-			SkillActive skill = iterator.next();
-			if (!skill.isActive()) {
-				iterator.remove();
-			}
 		}
 	}
 
