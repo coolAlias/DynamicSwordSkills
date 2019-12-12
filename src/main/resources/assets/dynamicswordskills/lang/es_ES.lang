@@ -57,9 +57,8 @@ item.dss.skill_sword.gold.name=Golden Sword of %s
 item.dss.skill_sword.emerald.name=Diamond Sword of %s
 item.dss.training_stick.name=Training Stick of %s
 tooltip.dss.skillorb.desc.0=Right click para aprender
-tooltip.dss.skillprovider.desc.skill=Grants wielder %s
-tooltip.dss.skillprovider.desc.level=Grants Skill Level: %1$s/%2$s
-tooltip.dss.skillprovider.desc.provider=Provides %s
+tooltip.dss.skill_provider.desc.skill=Grants %2$s level %1$s
+tooltip.dss.skill_provider.desc.provider=Provides %s
 
 key.dss.label=Teclas DSS
 key.dss.activate.desc=Fijar Objetivo
