@@ -50,7 +50,12 @@ entity.dynamicswordskills.swordbeam.name=剑气
 
 itemGroup.dss.skills=动态技能
 item.dss.skillorb.name=%s技能球
-item.dss.skillitem.name=%s剑
+item.dss.skill_sword.wood.name=Wooden %s剑
+item.dss.skill_sword.stone.name=Stone %s剑
+item.dss.skill_sword.iron.name=Iron %s剑
+item.dss.skill_sword.gold.name=Golden %s剑
+item.dss.skill_sword.emerald.name=Diamond %s剑
+item.dss.training_stick.name=Training Stick of %s
 tooltip.dss.skillorb.desc.level=等级: %1$s/%2$s
 tooltip.dss.skillorb.desc.0=该技能球的功能未知
 tooltip.dss.skillprovider.desc.skill=Grants wielder %s

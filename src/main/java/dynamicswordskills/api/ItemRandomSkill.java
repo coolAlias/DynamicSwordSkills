@@ -144,12 +144,12 @@ public class ItemRandomSkill extends ItemSword implements ISkillProviderInfusabl
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
-		return StatCollector.translateToLocalFormatted("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName()));
+		return StatCollector.translateToLocalFormatted(getUnlocalizedName(stack) + ".name", (skill == null ? "" : skill.getDisplayName()));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean advanced) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null) {
 			list.add(StatCollector.translateToLocalFormatted("tooltip.dss.skillprovider.desc.skill", EnumChatFormatting.GOLD + skill.getDisplayName()));

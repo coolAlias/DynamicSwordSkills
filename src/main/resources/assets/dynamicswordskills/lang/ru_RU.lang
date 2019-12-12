@@ -51,7 +51,12 @@ entity.dynamicswordskills.leapingblow.name=Ударная волна
 entity.dynamicswordskills.swordbeam.name=Небесный удар
 
 item.dss.skillorb.name=Орб умения %s
-item.dss.skillitem.name=Меч с умением %s
+item.dss.skill_sword.wood.name=Wooden Sword of %s
+item.dss.skill_sword.stone.name=Stone Sword of %s
+item.dss.skill_sword.iron.name=Iron Sword of %s
+item.dss.skill_sword.gold.name=Golden Sword of %s
+item.dss.skill_sword.emerald.name=Diamond Sword of %s
+item.dss.training_stick.name=Меч с умением %s
 tooltip.dss.skillorb.desc.level=Уровень: %1$s/%2$s
 tooltip.dss.skillorb.desc.0=Щелкните ПКМ, чтобы выучить
 tooltip.dss.skillprovider.desc.skill=Даёт владельцу %s
