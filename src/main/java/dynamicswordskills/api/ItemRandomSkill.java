@@ -142,13 +142,14 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null) {
-			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()).getUnformattedText());
-			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.level", skill.getLevel(), skill.getMaxLevel()).getUnformattedText());
+			list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.skill", skill.getLevel(), TextFormatting.GOLD + skill.getDisplayName() + TextFormatting.GRAY).getUnformattedText());
 			if (grantsBasicSwordSkill(stack)) {
-				String name = TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + TextFormatting.RESET;
-				list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.provider", name).getUnformattedText());
+				String name = TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + TextFormatting.GRAY;
+				list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.provider", name).getUnformattedText());
 			}
-			list.addAll(skill.getDescription(player));
+			if (advanced) {
+				list.addAll(skill.getDescription(player));
+			}
 		}
 	}
 

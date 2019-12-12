@@ -59,9 +59,8 @@ item.dss.skill_sword.emerald.name=Diamond Sword of %s
 item.dss.training_stick.name=Меч с умением %s
 tooltip.dss.skillorb.desc.level=Уровень: %1$s/%2$s
 tooltip.dss.skillorb.desc.0=Щелкните ПКМ, чтобы выучить
-tooltip.dss.skillprovider.desc.skill=Даёт владельцу %s
-tooltip.dss.skillprovider.desc.level=Уровень умения: %1$s/%2$s
-tooltip.dss.skillprovider.desc.provider=Также даёт %s
+tooltip.dss.skill_provider.desc.skill=Даёт %2$s Уровень %1$s
+tooltip.dss.skill_provider.desc.provider=Также даёт %s
 
 key.dss.label=Dynamic Sword Skills
 key.dss.activate.desc=Захват цели
