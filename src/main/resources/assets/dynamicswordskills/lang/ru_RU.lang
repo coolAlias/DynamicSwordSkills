@@ -50,8 +50,8 @@ dss.hud.endingblow.success=FATALITY
 entity.dynamicswordskills.leapingblow.name=Ударная волна
 entity.dynamicswordskills.swordbeam.name=Небесный удар
 
-item.dss.skillorb.name=Орб умения
-item.dss.skillitem.name=Меч с умением
+item.dss.skillorb.name=Орб умения %s
+item.dss.skillitem.name=Меч с умением %s
 tooltip.dss.skillorb.desc.level=Уровень: %1$s/%2$s
 tooltip.dss.skillorb.desc.0=Щелкните ПКМ, чтобы выучить
 tooltip.dss.skillprovider.desc.skill=Даёт владельцу %s
