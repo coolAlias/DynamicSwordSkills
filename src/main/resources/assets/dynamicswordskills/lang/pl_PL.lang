@@ -50,8 +50,8 @@ dss.hud.endingblow.success=FATALITY
 entity.dynamicswordskills.leapingblow.name=Obszerny podmuch
 entity.dynamicswordskills.swordbeam.name=Sword Beam
 
-item.dss.skillorb.name=Skill Orb of
-item.dss.skillitem.name=Sword of
+item.dss.skillorb.name=Skill Orb of %s
+item.dss.skillitem.name=Sword of %s
 tooltip.dss.skillorb.desc.level=Level: %1$s/%2$s
 tooltip.dss.skillorb.desc.0=Right click to learn
 tooltip.dss.skillprovider.desc.skill=Grants wielder %s
