@@ -48,6 +48,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
+import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
@@ -109,21 +110,24 @@ public class DynamicSwordSkills
 					continue;
 				}
 				int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
-				item = new ItemSkillProvider(ToolMaterial.IRON, "iron_sword", skill, (byte) level).setCreativeTab(DynamicSwordSkills.tabSkills);
+				item = new ItemSkillProvider(ToolMaterial.WOOD, "stick", skill, (byte) level)
+						.setRegistryName(ModInfo.ID, "training_stick_" + skill.getUnlocalizedName())
+						.setUnlocalizedName("dss.training_stick")
+						.setCreativeTab(DynamicSwordSkills.tabSkills);
 				skillItems.add(item);
 				GameRegistry.register(item);
 			}
 		}
 		if (Config.areRandomSwordsEnabled()) {
-			skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword");
+			skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword").setRegistryName(ModInfo.ID, "skill_sword_wood").setUnlocalizedName("dss.skill_sword.wood");
 			GameRegistry.register(skillWood);
-			skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword");
+			skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword").setRegistryName(ModInfo.ID, "skill_sword_stone").setUnlocalizedName("dss.skill_sword.stone");
 			GameRegistry.register(skillStone);
-			skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword");
+			skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword").setRegistryName(ModInfo.ID, "skill_sword_iron").setUnlocalizedName("dss.skill_sword.iron");
 			GameRegistry.register(skillIron);
-			skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword");
+			skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword").setRegistryName(ModInfo.ID, "skill_sword_gold").setUnlocalizedName("dss.skill_sword.gold");
 			GameRegistry.register(skillGold);
-			skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword");
+			skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword").setRegistryName(ModInfo.ID, "skill_sword_diamond").setUnlocalizedName("dss.skill_sword.diamond");
 			GameRegistry.register(skillDiamond);
 		}
 		proxy.preInit();
@@ -163,6 +167,26 @@ public class DynamicSwordSkills
 		for (final FMLInterModComms.IMCMessage msg : event.getMessages()) {
 			WeaponRegistry.INSTANCE.processMessage(msg);
 		}
+	}
+
+	@Mod.EventHandler
+	public void processMissingMappings(FMLMissingMappingsEvent event) {
+		event.get().stream().forEach(s -> {
+			ResourceLocation location = null;
+			if (s.resourceLocation.getResourcePath().startsWith("skillitem_")) {
+				location = new ResourceLocation(s.resourceLocation.getResourceDomain(), s.resourceLocation.getResourcePath().replace("skillitem_", "training_stick_").toLowerCase());
+			} else if (s.resourceLocation.getResourcePath().startsWith("skillsword_")) {
+				location = new ResourceLocation(s.resourceLocation.getResourceDomain(), s.resourceLocation.getResourcePath().replace("skillsword", "skill_sword").toLowerCase());
+			}
+			if (location != null) {
+				Item item = Item.REGISTRY.getObject(location);
+				if (item == null) {
+					s.fail();
+				} else {
+					s.remap(item);
+				}
+			}
+		});
 	}
 
 	/**

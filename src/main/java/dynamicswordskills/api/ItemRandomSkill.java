@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Random;
 
 import dynamicswordskills.item.IModItem;
-import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -60,8 +59,6 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		this.texture = textureName;
 		this.quality = material.getHarvestLevel() + (material == ToolMaterial.GOLD ? 3 : 0);
 		setCreativeTab(null);
-		setRegistryName(ModInfo.ID, "skillsword_" + material.name());
-		setUnlocalizedName("dss.skill" + material.name());
 	}
 
 	@Override
@@ -137,12 +134,12 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
-		return new TextComponentTranslation("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
+		return new TextComponentTranslation(getUnlocalizedName(stack) + ".name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null) {
 			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()).getUnformattedText());

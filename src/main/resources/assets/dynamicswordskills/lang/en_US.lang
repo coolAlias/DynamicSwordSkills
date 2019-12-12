@@ -97,7 +97,12 @@ entity.dynamicswordskills.leapingblow.name=Leaping Blow
 entity.dynamicswordskills.swordbeam.name=Sword Beam
 
 item.dss.skillorb.name=Skill Orb of %s
-item.dss.skillitem.name=Sword of %s
+item.dss.skill_sword.wood.name=Wooden Sword of %s
+item.dss.skill_sword.stone.name=Stone Sword of %s
+item.dss.skill_sword.iron.name=Iron Sword of %s
+item.dss.skill_sword.gold.name=Golden Sword of %s
+item.dss.skill_sword.emerald.name=Diamond Sword of %s
+item.dss.training_stick.name=Training Stick of %s
 tooltip.dss.skillorb.desc.level=Level: %1$s/%2$s
 tooltip.dss.skillorb.desc.0=Right click to learn
 tooltip.dss.skillprovider.desc.skill=Grants wielder %s

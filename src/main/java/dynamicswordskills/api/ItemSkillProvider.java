@@ -22,7 +22,6 @@ import java.util.List;
 import com.google.common.collect.Multimap;
 
 import dynamicswordskills.item.IModItem;
-import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
@@ -42,6 +41,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import swordskillsapi.api.item.IWeapon;
 
 /**
  * 
@@ -113,14 +113,12 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 		super();
 		this.material = material;
 		this.texture = texture;
-		this.weaponDamage = 4.0F + this.material.getDamageVsEntity();
+		this.weaponDamage = 2.0F + this.material.getDamageVsEntity();
 		this.skillName = skill.getUnlocalizedName();
 		this.level = level;
 		this.grantsBasicSkill = grantsBasicSkill;
 		setMaxDamage(this.material.getMaxUses());
 		setMaxStackSize(1);
-		setRegistryName(ModInfo.ID, "skillitem_" + skill.getUnlocalizedName());
-		setUnlocalizedName("dss.skillitem" + skill.getId());
 	}
 
 	@Override
@@ -206,12 +204,12 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
-		return new TextComponentTranslation("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
+		return new TextComponentTranslation(getUnlocalizedName(stack) + ".name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null) {
 			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()).getUnformattedText());
