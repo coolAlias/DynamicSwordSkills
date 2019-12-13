@@ -178,7 +178,7 @@ public class MortalDraw extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		if (attackTimer > 0) {
 			--attackTimer;
-			if (attackTimer == DELAY && !player.worldObj.isRemote) {
+			if (attackTimer == DELAY && !player.worldObj.isRemote && player.getHeldItem() == null) {
 				drawSword(player, null);
 				if (player.getHeldItem() != null) {
 					PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
