@@ -369,7 +369,7 @@ public class DSSPlayerInfo
 	 * @return The MortalDraw instance from the ISkillProvider in the persistent slot, if found and higher level than the player's own skill
 	 *         (only for temporary use while holding a different ISkillProvider - use {@link #itemSkill} otherwise)
 	 */
-	public SkillBase retrieveDummySwordSkill() {
+	private SkillBase retrieveDummySwordSkill() {
 		boolean needsDummy = (getTrueSkillLevel(SkillBase.swordBasic) < 1);
 		byte plvl = getTrueSkillLevel(SkillBase.mortalDraw);
 		SkillBase mortalDraw = null;
