@@ -87,9 +87,12 @@ public class PlayerUtils
 	 * Returns whether the stack is a {@link ISkillProvider} for the target skill
 	 */
 	public static boolean isProvider(ItemStack stack, SkillBase skill) {
-		return (stack != null 
-				&& stack.getItem() instanceof ISkillProvider 
-				&& ((ISkillProvider) stack.getItem()).getSkillId(stack) == skill.getId());
+		if (stack == null || !(stack.getItem() instanceof ISkillProvider)) {
+			return false;
+		} else if (((ISkillProvider) stack.getItem()).getSkillId(stack) == skill.getId()) {
+			return true;
+		}
+		return SkillBase.swordBasic.is(skill) && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack);
 	}
 
 	/** Returns the difference between player's max and current health */
