@@ -38,7 +38,7 @@ import net.minecraft.world.World;
 
 /**
  * 
- * Base class providing all the functionality needed for ISkillItem as well as
+ * Base class providing all the functionality needed for ISkillProvider as well as
  * acting almost exactly like a regular sword (aside from the web-cutting ability),
  * without actually being a sword.
  * 
@@ -47,7 +47,7 @@ import net.minecraft.world.World;
  * allow the item to be used with skills that require swords, such as Mortal Draw,
  * even if it does not itself provide that skill.
  * 
- * Note that an ISkillProvider item will always be able to use the skill it provides,
+ * Note that an {@link ISkillProvider} item will always be able to use the skill it provides,
  * even if the item is not a sword and the skill would otherwise require such.
  * 
  * It is a simple class, having a set skill and level per item rather than using NBT.
@@ -76,7 +76,7 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	private final boolean grantsBasicSkill;
 
 	/**
-	 * Shortcut method sets ISkillItem to always grant Basic Sword skill if needed to use
+	 * Shortcut method sets {@link ISkillProvider} to always grant Basic Sword skill if needed to use
 	 * the main skill designated by the skill id below.
 	 * Standard sword-like weapon with max stack size of 1; be sure to set the unlocalized
 	 * name, texture, and creative tab using chained methods if using the class as is.
@@ -95,7 +95,7 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	 * @param skill				use SkillBase.{skill} during construction to ensure a valid skill
 	 * @param level				should be at least 1, and will be capped automatically at the skill's max level
 	 * @param grantsBasicSkill	if true, the player will be temporarily granted Basic Sword skill in
-	 * 							order to use the ISkillItem's main skill, if other than Basic Sword
+	 * 							order to use the {@link ISkillProvider} main skill, if other than Basic Sword
 	 */
 	public ItemSkillProvider(ToolMaterial material, SkillBase skill, byte level, boolean grantsBasicSkill) {
 		super();

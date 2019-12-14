@@ -64,13 +64,13 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	/** Stores information on the player's skills */
 	private final Map<Byte, SkillBase> skills;
 
-	/** Used to temporarily store skill used from ISkillItem */
+	/** Used to temporarily store skill used from {@link ISkillProvider} */
 	private SkillBase itemSkill = null;
 
-	/** Stores the last held ItemStack that was checked for ISkillItem */
+	/** Stores the last held ItemStack that was checked for {@link ISkillProvider} */
 	private ItemStack lastCheckedStack = null;
 
-	/** A dummy version of Basic Sword skill for use with ISkillItem skills when player's skill level is 0 */
+	/** A dummy version of Basic Sword skill provided by an {@link ISkillProvider} when the player's skill level is 0 */
 	private SkillBase dummySwordSkill = null;
 
 	/** Slot of the item providing the persistent dummy sword skill, if any */
@@ -237,7 +237,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		return (byte) Math.max(level, getTrueSkillLevel(skill));
 	}
 
-	/** Returns the player's true skill level, ignoring any ISkillItem that may be equipped */
+	/** Returns the player's true skill level, ignoring any {@link ISkillProvider} that may be equipped */
 	public byte getTrueSkillLevel(SkillBase skill) {
 		return (skills.containsKey(skill.getId()) ? skills.get(skill.getId()).getLevel() : 0);
 	}
@@ -421,7 +421,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Returns the skill instance for actual use, whether from the player or an ISkillItem or null 
+	 * Returns the skill instance for actual use, whether from the player or an {@link ISkillProvider} or null 
 	 */
 	public SkillBase getPlayerSkill(@Nullable SkillBase skill) {
 		if (skill == null) {
@@ -548,7 +548,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * This method should be called every update tick; currently called from LivingUpdateEvent
 	 */
 	public void onUpdate() {
-		updateISkillItem();
+		updateISkillProvider();
 		if (useItemCooldown > 0) {
 			--useItemCooldown;
 		}
@@ -569,7 +569,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	/**
 	 * Updates the current itemSkill and dummySwordSkill based on the player's currently held item
 	 */
-	private void updateISkillItem() {
+	private void updateISkillProvider() {
 		ItemStack stack = player.getHeldItem();
 		if (itemSkill != null && itemSkill.is(SkillBase.mortalDraw) &&
 				(stack == null || ((SkillActive) itemSkill).isActive()))

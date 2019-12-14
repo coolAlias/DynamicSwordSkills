@@ -158,7 +158,7 @@ public abstract class SkillBase
 	}
 
 	/**
-	 * Returns a leveled skill from an ISkillItem using {@link ISkillProvider#getSkillId(ItemStack)}
+	 * Returns a leveled skill from an ISkillProvider using {@link ISkillProvider#getSkillId(ItemStack)}
 	 * and {@link ISkillProvider#getSkillLevel(ItemStack)}, or null if not possible
 	 */
 	public static final SkillBase getSkillFromItem(final ItemStack stack, final ISkillProvider item) {
