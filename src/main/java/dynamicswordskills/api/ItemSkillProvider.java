@@ -45,7 +45,7 @@ import swordskillsapi.api.item.IWeapon;
 
 /**
  * 
- * Base class providing all the functionality needed for ISkillItem as well as
+ * Base class providing all the functionality needed for ISkillProvider as well as
  * acting almost exactly like a regular sword (aside from the web-cutting ability),
  * without actually being a sword.
  * 
@@ -86,7 +86,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	private final boolean grantsBasicSkill;
 
 	/**
-	 * Shortcut method sets ISkillItem to always grant Basic Sword skill if needed to use
+	 * Shortcut method sets ISkillProvider to always grant Basic Sword skill if needed to use
 	 * the main skill designated by the skill id below.
 	 * Standard sword-like weapon with max stack size of 1; be sure to set the unlocalized
 	 * name, texture, and creative tab using chained methods if using the class as is.
@@ -107,7 +107,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	 * @param skill            use SkillBase.{skill} during construction to ensure a valid skill
 	 * @param level            should be at least 1, and will be capped automatically at the skill's max level
 	 * @param grantsBasicSkill if true, the player will be temporarily granted Basic Sword skill in
-	 *                         order to use the ISkillItem's main skill, if other than Basic Sword
+	 *                         order to use the ISkillProvider main skill, if other than Basic Sword
 	 */
 	public ItemSkillProvider(ToolMaterial material, String texture, SkillBase skill, byte level, boolean grantsBasicSkill) {
 		super();
