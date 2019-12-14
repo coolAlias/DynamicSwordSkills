@@ -129,21 +129,29 @@ public class MortalDraw extends SkillActive
 	public boolean canUse(EntityPlayer player) {
 		swordSlot = -1;
 		if (super.canUse(player) && player.getHeldItem() == null && attackTimer == 0) {
-			int plvl = DSSPlayerInfo.get(player).getTrueSkillLevel(this);
-			boolean needsDummy = (DSSPlayerInfo.get(player).getTrueSkillLevel(SkillBase.swordBasic) < 1);
-			for (int i = 0; i < 9; ++i) {
-				ItemStack stack = player.inventory.getStackInSlot(i);
-				if (stack != null 
-						&& ((plvl > 0 && PlayerUtils.isSword(stack)) || PlayerUtils.isProvider(stack, this))
-						&& (!needsDummy || PlayerUtils.isProvider(stack, SkillBase.swordBasic))
-						)
-				{
-					swordSlot = i;
-					break;
-				}
-			}
+			swordSlot = getSwordSlot(player);
 		}
 		return swordSlot > -1;
+	}
+
+	/**
+	 * Returns the inventory slot index for the first Mortal Draw-eligible sword item in the player's hotbar
+	 * @return 0-8 or -1 if no eligible sword was found
+	 */
+	public static int getSwordSlot(EntityPlayer player) {
+		int plvl = DSSPlayerInfo.get(player).getTrueSkillLevel(SkillBase.mortalDraw);
+		boolean needsDummy = (DSSPlayerInfo.get(player).getTrueSkillLevel(SkillBase.swordBasic) < 1);
+		for (int i = 0; i < 9; ++i) {
+			ItemStack stack = player.inventory.getStackInSlot(i);
+			if (stack != null 
+					&& ((plvl > 0 && PlayerUtils.isSword(stack)) || PlayerUtils.isProvider(stack, SkillBase.mortalDraw))
+					&& (!needsDummy || PlayerUtils.isProvider(stack, SkillBase.swordBasic))
+					)
+			{
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	@Override
