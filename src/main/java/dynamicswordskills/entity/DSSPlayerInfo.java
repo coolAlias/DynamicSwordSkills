@@ -466,7 +466,7 @@ public class DSSPlayerInfo
 
 	/** Grants a skill with target level of current skill level plus one */
 	public boolean grantSkill(SkillBase skill) {
-		return grantSkill(skill, (byte)(getSkillLevel(skill) + 1));
+		return grantSkill(skill, (byte)(getTrueSkillLevel(skill) + 1));
 	}
 
 	/**
