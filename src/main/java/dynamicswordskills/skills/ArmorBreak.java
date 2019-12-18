@@ -139,7 +139,10 @@ public class ArmorBreak extends SkillActive
 	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (!isLockedOn) {
+			return false;
+		}
 		return false;
 	}
 

@@ -269,7 +269,8 @@ public class DSSPlayerInfo
 	 */
 	@SideOnly(Side.CLIENT)
 	public void onKeyPressedWhileAnimating(Minecraft mc, KeyBinding key) {
-		if (animatingSkill != null && animatingSkill.isKeyListener(mc, key)) {
+		boolean isLockedOn = (targetingSkill != null && targetingSkill.isLockedOn());
+		if (animatingSkill != null && animatingSkill.isKeyListener(mc, key, isLockedOn)) {
 			animatingSkill.keyPressedWhileAnimating(mc, key, player);
 		}
 	}
@@ -284,17 +285,18 @@ public class DSSPlayerInfo
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean onKeyPressed(Minecraft mc, KeyBinding key) {
+		boolean isLockedOn = (targetingSkill != null && targetingSkill.isLockedOn());
 		for (SkillBase skill : skills.values()) {
-			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key)) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key, isLockedOn)) {
 				if (((SkillActive) skill).keyPressed(mc, key, player)) {
 					return true;
 				}
 			}
 		}
-		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isKeyListener(mc, key) && ((SkillActive) itemSkill).keyPressed(mc, key, player)) {
+		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isKeyListener(mc, key, isLockedOn) && ((SkillActive) itemSkill).keyPressed(mc, key, player)) {
 			return true;
 		}
-		if (dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isKeyListener(mc, key) && ((SkillActive) dummySwordSkill).keyPressed(mc, key, player)) {
+		if (dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isKeyListener(mc, key, isLockedOn) && ((SkillActive) dummySwordSkill).keyPressed(mc, key, player)) {
 			return true;
 		}
 		return false;
@@ -305,15 +307,16 @@ public class DSSPlayerInfo
 	 */
 	@SideOnly(Side.CLIENT)
 	public void onKeyReleased(Minecraft mc, KeyBinding key) {
+		boolean isLockedOn = (targetingSkill != null && targetingSkill.isLockedOn());
 		for (SkillBase skill : skills.values()) {
-			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key)) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key, isLockedOn)) {
 				((SkillActive) skill).keyReleased(mc, key, player);
 			}
 		}
-		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isKeyListener(mc, key)) {
+		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isKeyListener(mc, key, isLockedOn)) {
 			((SkillActive) itemSkill).keyReleased(mc, key, player);
 		}
-		if (dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isKeyListener(mc, key)) {
+		if (dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isKeyListener(mc, key, isLockedOn)) {
 			((SkillActive) dummySwordSkill).keyReleased(mc, key, player);
 		}
 	}
