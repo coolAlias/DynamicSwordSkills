@@ -51,12 +51,13 @@ import dynamicswordskills.util.TargetUtils;
  * Attacking while blocking and locked on to a target will execute a bash attack.
  * The player charges into the target, inflicting damage and knocking the target back.
  * 
- * Range: 4 blocks plus 1 block per additional level
- * Damage: 2 plus 1 per additional level
- * Knockback: 2 blocks, plus 1 per additional level
+ * Range: 3 blocks plus 1 block per level
+ * Damage: up to 2 plus 1 per level at max range
+ * Knockback Strength: 0.3F per level plus an additional 0.1F per block traveled beyond the minimum (capped at 2.0F)
  * Exhaustion: Light [1.0F - (level * 0.05F)]
  * Special: Must be at least 2 blocks away from target when skill is activated to
  * 			inflict damage, minus 0.2F per level (down to 1 block at level 5)
+ * Special: Effects that increase player speed increase the effective range, damage, and knockback.
  * 
  */
 public class Dash extends SkillActive
@@ -103,10 +104,9 @@ public class Dash extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(getDamage(), false));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), 2 + level));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), String.format("%.1f", getKnockback())));
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
-				String.format("%.1f", getMinDistance())));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), String.format("%.1f", getMinDistance())));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
@@ -128,6 +128,11 @@ public class Dash extends SkillActive
 	/** Damage is base damage plus one per level */
 	private int getDamage() {
 		return (2 + level);
+	}
+
+	/** Returns base knockback strength, not accounting for distance traveled */
+	private float getKnockback() {
+		return 0.3F * level;
 	}
 
 	/** Range increases by 1 block per level */
@@ -242,20 +247,18 @@ public class Dash extends SkillActive
 			double dist = target.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord);
 			// Subtract half the width for each entity to account for their bounding box size
 			dist -= (target.width / 2.0F) + (player.width / 2.0F);
-
 			// Base player speed is 0.1D; heavy boots = 0.04D, pegasus = 0.13D
 			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue();
 			double sf = (1.0D + (speed - BASE_MOVE)); // speed factor
 			if (speed > 0.075D && dist > getMinDistance() && player.getDistanceSqToEntity(target) < 6.0D) {
-				float dmg = (float) getDamage() + (float)((dist / 2.0D) - 2.0D);
+				float dmg = (float)(sf * (float)getDamage() * distance / getRange());
 				impactTime = 5; // time player will be immune to damage from the target entity
-				target.attackEntityFrom(DamageSource.causePlayerDamage(player), (float)(dmg * sf * sf));
-				double resist = 1.0D;
+				target.attackEntityFrom(DamageSource.causePlayerDamage(player), dmg);
 				if (target instanceof EntityLivingBase) {
-					resist -= ((EntityLivingBase) target).getEntityAttribute(SharedMonsterAttributes.knockbackResistance).getAttributeValue();
+					float db = 0.1F * (float)(distance - getMinDistance());
+					float k = (float)sf * Math.min(db + getKnockback(), 2.0F);
+					TargetUtils.knockTargetBack((EntityLivingBase) target, player, k);
 				}
-				double k = sf * resist * (distance / 3.0F) * 0.6000000238418579D;
-				target.addVelocity(player.motionX * k * (0.2D + (0.1D * level)), 0.1D + k * (level * 0.025D), player.motionZ * k * (0.2D + (0.1D * level)));
 				if (target instanceof EntityPlayerMP && !player.worldObj.isRemote) {
 					((EntityPlayerMP) target).playerNetServerHandler.sendPacket(new S12PacketEntityVelocity(target));
 				}
