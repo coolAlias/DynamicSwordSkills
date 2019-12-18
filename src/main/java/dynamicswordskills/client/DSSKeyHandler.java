@@ -22,7 +22,6 @@ import org.lwjgl.input.Keyboard;
 import dynamicswordskills.CommonProxy;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.server.OpenGuiPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ILockOnTarget;
@@ -110,11 +109,7 @@ public class DSSKeyHandler
 	public static boolean onKeyPressed(Minecraft mc, int kb) {
 		if (mc.inGameHasFocus && mc.thePlayer != null) {
 			DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
-			if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
-				if (skills.hasSkill(SkillBase.swordBasic)) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.swordBasic, false));
-				}
-			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
+			if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
 			} else {
 				return handleTargetingKeys(mc, kb, skills);
@@ -148,7 +143,13 @@ public class DSSKeyHandler
 		ILockOnTarget skill = skills.getTargetingSkill();
 		boolean canInteract = skills.canInteract();
 		boolean isLockedOn = (skill != null && skill.isLockedOn());
-		if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
+		if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
+			if (isLockedOn) {
+				skills.deactivateTargetingSkill();
+			} else {
+				skills.activateTargetingSkill();
+			}
+		} else if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
 			if (isLockedOn) {
 				skill.getNextTarget(mc.thePlayer);
 			}
