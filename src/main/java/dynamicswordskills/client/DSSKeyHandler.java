@@ -147,11 +147,11 @@ public class DSSKeyHandler
 	private static boolean handleTargetingKeys(Minecraft mc, int kb, DSSPlayerInfo skills) {
 		ILockOnTarget skill = skills.getTargetingSkill();
 		boolean canInteract = skills.canInteract();
-		if (skill == null || !skill.isLockedOn()) {
-			return false;
-		}
+		boolean isLockedOn = (skill != null && skill.isLockedOn());
 		if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
-			skill.getNextTarget(mc.thePlayer);
+			if (isLockedOn) {
+				skill.getNextTarget(mc.thePlayer);
+			}
 		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
 			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK].getKey() : mc.gameSettings.keyBindAttack);
 			if (!skills.canAttack()) {
@@ -163,12 +163,14 @@ public class DSSKeyHandler
 				return true;
 			}
 			KeyBinding.setKeyBindState(key.getKeyCode(), true);
-			DSSClientEvents.performComboAttack(mc, skill);
+			if (isLockedOn) {
+				DSSClientEvents.performComboAttack(mc, skill);
+			}
 			// hack for Armor Break to begin charging without having to press attack again
 			if (skills.hasSkill(SkillBase.armorBreak)) {
 				skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.thePlayer);
 			}
-			return true;
+			return isLockedOn;
 		} else {
 			KeyBinding key = getKeyBindFromCode(mc, kb);
 			if (key != null) {

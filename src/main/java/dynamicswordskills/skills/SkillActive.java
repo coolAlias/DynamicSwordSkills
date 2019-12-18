@@ -127,9 +127,10 @@ public abstract class SkillActive extends SkillBase
 
 	/**
 	 * Returning true allows {@link #keyPressed} and {@link #receiveActiveKeys} to be called, as appropriate
+	 * @param isLockedOn Whether the player is currently locked on to a target with an ILockOnTarget skill
 	 */
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
 		return false;
 	}
 

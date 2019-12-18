@@ -191,8 +191,10 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		if (isAnimating()) {
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (!isLockedOn) {
+			return false;
+		} else if (isAnimating()) {
 			return (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey();
 		}
 		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
