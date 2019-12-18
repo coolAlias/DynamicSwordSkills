@@ -536,6 +536,33 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
+	 * Activates the first found targeting skill unless another is already active
+	 */
+	public void activateTargetingSkill() {
+		if (getTargetingSkill() != null) {
+			return;
+		}
+		for (SkillBase skill : SkillBase.getSkills()) {
+			if (skill instanceof ILockOnTarget && skill instanceof SkillActive) {
+				SkillBase instance = getPlayerSkill(skill);
+				if (instance != null) {
+					((SkillActive) instance).activate(player);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Deactivates the currently active targeting skill, if any
+	 */
+	public void deactivateTargetingSkill() {
+		getTargetingSkill();
+		if (targetingSkill != null) {
+			((SkillActive) targetingSkill).deactivate(player);
+		}
+	}
+
+	/**
 	 * Returns the first active ILockOnTarget skill instance, if any
 	 */
 	public ILockOnTarget getTargetingSkill() {
