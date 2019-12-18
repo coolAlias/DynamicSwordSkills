@@ -159,7 +159,10 @@ public class Parry extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (!isLockedOn) {
+			return false;
+		}
 		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_DOWN].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack));
 	}
 
