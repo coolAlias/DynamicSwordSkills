@@ -65,6 +65,12 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	/** Stores information on the player's skills */
 	private final Map<Byte, SkillBase> skills;
 
+	/** Reference to last active ICombo skill */
+	private ICombo comboSkill = null;
+
+	/** Reference to last active ILockOnTarget skill */
+	private ILockOnTarget targetingSkill = null;
+
 	/** Skill instance provided by currently held {@link ISkillProvider}, if any */
 	private SkillBase itemSkill = null;
 
@@ -425,16 +431,50 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * Returns first ICombo from a currently active skill, if any; ICombo may or may not be in progress
 	 */
 	public ICombo getComboSkill() {
-		SkillBase skill = getPlayerSkill(SkillBase.swordBasic);
-		if (skill != null && (((ICombo) skill).getCombo() != null || ((SkillActive) skill).isActive())) {
-			return (ICombo) skill;
+		if (comboSkill == null || comboSkill.getCombo() == null || !((SkillActive) comboSkill).isActive()) {
+			comboSkill = getFirstActiveComboSkill();
+		}
+		return comboSkill;
+	}
+
+	/**
+	 * Returns the first active ICombo skill instance, if any; ICombo may or may not be in progress
+	 */
+	private ICombo getFirstActiveComboSkill() {
+		for (SkillBase skill : SkillBase.getSkills()) {
+			if (skill instanceof ICombo && skill instanceof SkillActive) {
+				SkillBase instance = getPlayerSkill(skill);
+				if (instance != null && ((SkillActive) instance).isActive()) {
+					return (ICombo) instance;
+				}
+			}
 		}
 		return null;
 	}
 
-	/** Returns an ILockOnTarget skill, if any, with preference for currently active skill */
+	/**
+	 * Returns the first active ILockOnTarget skill instance, if any
+	 */
 	public ILockOnTarget getTargetingSkill() {
-		return (ILockOnTarget) getPlayerSkill(SkillBase.swordBasic);
+		if (targetingSkill == null || !((SkillActive) targetingSkill).isActive()) {
+			targetingSkill = getFirstActiveTargetingSkill();
+		}
+		return targetingSkill;
+	}
+
+	/**
+	 * Returns the first active ILockOnTarget instance, if any
+	 */
+	private ILockOnTarget getFirstActiveTargetingSkill() {
+		for (SkillBase skill : SkillBase.getSkills()) {
+			if (skill instanceof ILockOnTarget && skill instanceof SkillActive) {
+				SkillBase instance = getPlayerSkill(skill);
+				if (instance != null && ((SkillActive) instance).isActive()) {
+					return (ILockOnTarget) instance;
+				}
+			}
+		}
+		return null;
 	}
 
 	/** Grants a skill with target level of current skill level plus one */
