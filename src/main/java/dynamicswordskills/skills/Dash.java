@@ -230,7 +230,7 @@ public class Dash extends SkillActive
 				setNotDashing();
 			} else if (player.worldObj.isRemote) {
 				RayTraceResult result = TargetUtils.checkForImpact(player.worldObj, player, player, 0.5D, false);
-				if (result != null) {
+				if (result != null || player.isCollidedHorizontally) {
 					PacketDispatcher.sendToServer(new DashImpactPacket(player, result));
 					player.resetCooldown(); // player effectively made an attack
 					// Force player to stop blocking upon impact
@@ -238,7 +238,7 @@ public class Dash extends SkillActive
 					KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
 					KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 					impactTime = 5;
-					if (result.typeOfHit == RayTraceResult.Type.ENTITY) {
+					if (result != null && result.typeOfHit == RayTraceResult.Type.ENTITY) {
 						target = result.entityHit;
 					}
 					double d = Math.sqrt((player.motionX * player.motionX) + (player.motionZ * player.motionZ));
