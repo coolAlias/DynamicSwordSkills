@@ -19,6 +19,7 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -298,10 +299,12 @@ public class Dash extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		if (target instanceof EntityLivingBase && trajectory != null) {
-			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - BASE_MOVE;
-			double dfactor = (1.0D + (speed) + (speed * (1.0D - ((getRange() - distance) / getRange()))));
-			player.motionX = trajectory.xCoord * dfactor * dfactor;
-			player.motionZ = trajectory.zCoord * dfactor * dfactor;
+			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
+			double fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS()); 
+			// Bonus is roughly equivalent to sprinting plus an additional amount per level
+			double bonus = 1.3D + (0.1D * level);
+			double d = speed * bonus * fps;
+			player.addVelocity(trajectory.xCoord * d, 0.0D, trajectory.zCoord * d);
 		}
 		return false; // this skill doesn't need to control the camera
 	}
