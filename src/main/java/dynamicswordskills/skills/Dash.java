@@ -179,7 +179,7 @@ public class Dash extends SkillActive
 	protected boolean onActivated(World world, EntityPlayer player) {
 		isActive = true;
 		activeTime = 0;
-		initialPosition = new Vec3(player.posX, player.posY + player.getEyeHeight() - 0.10000000149011612D, player.posZ);
+		initialPosition = new Vec3(player.posX, player.posY, player.posZ);
 		ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
 			target = skill.getCurrentTarget();
