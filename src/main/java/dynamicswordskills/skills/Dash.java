@@ -219,6 +219,9 @@ public class Dash extends SkillActive
 			// If a collision is detected, DashImpactPacket is sent to conclude the server-side
 			if (!PlayerUtils.isBlocking(player)) {
 				setNotDashing();
+				if (!player.worldObj.isRemote) {
+					deactivate(player);
+				}
 			} else if (player.worldObj.isRemote) {
 				MovingObjectPosition mop = TargetUtils.checkForImpact(player.worldObj, player, player, 0.5D, false);
 				if (mop != null || player.isCollidedHorizontally) {
