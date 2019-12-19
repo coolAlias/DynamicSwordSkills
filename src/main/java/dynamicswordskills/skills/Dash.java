@@ -252,6 +252,9 @@ public class Dash extends SkillActive
 			// Base player speed is 0.1D; heavy boots = 0.04D, pegasus = 0.13D
 			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue();
 			double sf = (1.0D + (speed - BASE_MOVE)); // speed factor
+			if (player.isInWater() || player.isInLava()) {
+				sf *= 0.3D;
+			}
 			if (speed > 0.075D && dist > getMinDistance() && player.getDistanceSqToEntity(target) < 6.0D) {
 				float dmg = (float)(sf * (float)getDamage() * distance / getRange());
 				impactTime = 5; // time player will be immune to damage from the target entity
@@ -286,6 +289,9 @@ public class Dash extends SkillActive
 			// Bonus is roughly equivalent to sprinting plus an additional amount per level
 			double bonus = 1.3D + (0.1D * level);
 			double d = speed * bonus * fps;
+			if (player.isInWater() || player.isInLava()) {
+				d *= 0.3D;
+			}
 			player.addVelocity(trajectory.xCoord * d, 0.0D, trajectory.zCoord * d);
 		}
 		return false; // this skill doesn't need to control the camera
