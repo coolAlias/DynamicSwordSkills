@@ -70,8 +70,8 @@ public class Dash extends SkillActive
 	/** True when Slam is used and while the player is in motion towards the target */
 	private boolean isActive = false;
 
-	/** Total distance currently traveled */
-	private double distance;
+	/** Number of ticks since activation */
+	private int activeTime;
 
 	/**
 	 * The dash trajectory is set once when activated, to prevent the vec3 coordinates from
@@ -115,6 +115,11 @@ public class Dash extends SkillActive
 	@Override
 	public boolean isActive() {
 		return isActive || impactTime > 0;
+	}
+
+	/** Maximum active time in case player is unable to move an appropriate amount of distance */
+	protected int getMaxActiveTime() {
+		return 12 + level;
 	}
 
 	/** Number of ticks the player will not be able to block or use an item after impact */
@@ -192,6 +197,7 @@ public class Dash extends SkillActive
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		isActive = true;
+		activeTime = 0;
 		initialPosition = new Vec3d(player.posX, player.posY + player.getEyeHeight() - 0.10000000149011612D, player.posZ);
 		ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
@@ -210,6 +216,10 @@ public class Dash extends SkillActive
 
 	@Override
 	protected void onDeactivated(World world, EntityPlayer player) {
+		if (player.worldObj.isRemote) {
+			trajectory = null;
+		}
+		initialPosition = null;
 		impactTime = 0; // no longer active, target will be set to null from setNotDashing
 		setNotDashing(); // sets all remaining fields to 0 or null
 	}
@@ -222,7 +232,6 @@ public class Dash extends SkillActive
 				target = null;
 			}
 		}
-
 		// don't use isActive() method, as that also returns true after impact
 		if (isActive) {
 			// Only check for impact on the client, as the server is not reliable for this step
@@ -248,10 +257,14 @@ public class Dash extends SkillActive
 					setNotDashing();
 				}
 			}
-			// increment distance AFTER update, otherwise Dash thinks it can damage entities right in front of player
-			++distance;
-			if (distance > (getRange() + 1.0D) || !(target instanceof EntityLivingBase)) {
-				setNotDashing();
+		}
+		// Update active time if still active
+		if (isActive) {
+			++activeTime;
+			if (activeTime > getMaxActiveTime()) {
+				if (!player.worldObj.isRemote) {
+					deactivate(player);
+				}
 			}
 		}
 	}
@@ -265,15 +278,15 @@ public class Dash extends SkillActive
 	public void onImpact(World world, EntityPlayer player, RayTraceResult result) {
 		if (result != null && result.typeOfHit == RayTraceResult.Type.ENTITY) {
 			target = result.entityHit;
-			double dist = target.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord);
-			// Subtract half the width for each entity to account for their bounding box size
-			dist -= (target.width / 2.0F) + (player.width / 2.0F);
+			double distance = target.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord);
+			// Subtract hitbox modifier when comparing min distance to avoid hitting enemies right in front of the player
+			double bbMod = (target.width / 2.0F) + (player.width / 2.0F);
 			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
 			double sf = (1.0D + (speed - BASE_MOVE)); // speed factor
 			if (player.isInWater() || player.isInLava()) {
 				sf *= 0.3D;
 			}
-			if (speed > 0.075D && dist > getMinDistance() && player.getDistanceSqToEntity(target) < 6.0D) {
+			if (speed > 0.075D && (distance - bbMod) > getMinDistance() && distance < (getRange() + 1.0D) && player.getDistanceSqToEntity(target) < 6.0D) {
 				float dmg = (float)(sf * (float)getDamage() * distance / getRange());
 				impactTime = 5; // time player will be immune to damage from the target entity
 				target.attackEntityFrom(DamageSource.causePlayerDamage(player), dmg);
@@ -301,6 +314,13 @@ public class Dash extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
+		if (initialPosition == null || player.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord) > getRange()) {
+			player.addVelocity(-player.motionX * 0.5D, 0.0D, -player.motionZ * 0.5D);
+			trajectory = null;
+			if (isActive) {
+				deactivate(player);
+			}
+		}
 		if (target instanceof EntityLivingBase && trajectory != null) {
 			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
 			double fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS()); 
@@ -332,8 +352,6 @@ public class Dash extends SkillActive
 	 */
 	private void setNotDashing() {
 		isActive = false;
-		distance = 0.0D;
-		initialPosition = null;
 		if (!isActive()) {
 			target = null;
 		}
