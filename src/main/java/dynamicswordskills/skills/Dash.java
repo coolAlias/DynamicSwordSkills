@@ -211,14 +211,14 @@ public class Dash extends SkillActive
 				setNotDashing();
 			} else if (player.worldObj.isRemote) {
 				MovingObjectPosition mop = TargetUtils.checkForImpact(player.worldObj, player, player, 0.5D, false);
-				if (mop != null) {
+				if (mop != null || player.isCollidedHorizontally) {
 					PacketDispatcher.sendToServer(new DashImpactPacket(player, mop));
 					// Force player to stop blocking upon impact
 					DSSPlayerInfo.get(player).setUseItemCooldown(getBlockCooldown());
 					KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
 					KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 					impactTime = 5;
-					if (mop.typeOfHit == MovingObjectType.ENTITY) {
+					if (mop != null && mop.typeOfHit == MovingObjectType.ENTITY) {
 						target = mop.entityHit;
 					}
 					double d = Math.sqrt((player.motionX * player.motionX) + (player.motionZ * player.motionZ));
