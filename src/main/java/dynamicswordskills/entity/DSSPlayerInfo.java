@@ -95,9 +95,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	/** Whether the player has received the starting bonus gear or not yet */
 	private boolean receivedGear = false;
 
-	/** Reduces fall damage next impact; used for Rising Cut */
-	public float reduceFallAmount = 0.0F;
-
 	public DSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
 		this.skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());

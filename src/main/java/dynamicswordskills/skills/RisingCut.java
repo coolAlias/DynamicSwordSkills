@@ -26,6 +26,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSClientEvents;
@@ -53,8 +54,11 @@ public class RisingCut extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 
-	/** True while animation is in progress */
+	/** Set when activated and lasts until the player hits the ground or the duration expires */
 	private int activeTimer;
+
+	/** True while animation is in progress */
+	private int animationTimer;
 
 	/** Stores the entity struck to add velocity on the next update */
 	private Entity entityHit;
@@ -82,6 +86,11 @@ public class RisingCut extends SkillActive
 	@Override
 	public boolean isActive() {
 		return activeTimer > 0;
+	}
+
+	@Override
+	public boolean isAnimating() {
+		return animationTimer > 0;
 	}
 
 	@Override
@@ -127,16 +136,18 @@ public class RisingCut extends SkillActive
 
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
-		activeTimer = 5 + level;
+		animationTimer = 5 + level;
+		// Approximate time it should take to hit the ground with about 5 ticks of leeway
+		activeTimer = (20 + 3 * level);
 		entityHit = null;
 		player.motionY += 0.3D + (0.115D * level);
-		DSSPlayerInfo.get(player).reduceFallAmount += level;
 		return isActive();
 	}
 
 	@Override
 	protected void onDeactivated(World world, EntityPlayer player) {
 		activeTimer = 0;
+		animationTimer = 0;
 	}
 
 	@Override
@@ -145,8 +156,15 @@ public class RisingCut extends SkillActive
 			--ticksTilFail;
 		}
 		if (isActive()) {
-			--activeTimer;
-			if (entityHit != null) {
+			if (animationTimer > 0) {
+				--animationTimer;
+			}
+			if (activeTimer > 0) {
+				--activeTimer;
+			}
+			if (player.onGround) {
+				onDeactivated(player.worldObj, player);
+			} else if (entityHit != null) {
 				if (!entityHit.isDead) {
 					double addY = 0.3D + (0.125D * level);
 					double resist = 1.0D;
@@ -176,5 +194,14 @@ public class RisingCut extends SkillActive
 		boolean flag = !(entity instanceof EntityPlayer) || !PlayerUtils.isBlocking((EntityPlayer) entity);
 		this.entityHit = (flag ? entity : null);
 		return amount;
+	}
+
+	@Override
+	public boolean onFall(EntityPlayer player, LivingFallEvent event) {
+		if (isActive()) {
+			event.distance -= (1.0F + level);
+			onDeactivated(player.worldObj, player);
+		}
+		return false;
 	}
 }
