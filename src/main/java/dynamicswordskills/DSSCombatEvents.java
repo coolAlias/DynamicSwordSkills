@@ -221,12 +221,7 @@ public class DSSCombatEvents
 	@SubscribeEvent
 	public void onFall(LivingFallEvent event) {
 		if (event.getEntity() instanceof EntityPlayer) {
-			DSSPlayerInfo skills = DSSPlayerInfo.get((EntityPlayer) event.getEntity());
-			skills.onFall(event);
-			if (!event.isCanceled() && event.getDistance() > 0.0F && skills.reduceFallAmount > 0.0F) {
-				event.setDistance(event.getDistance() - skills.reduceFallAmount);
-				skills.reduceFallAmount = 0.0F;
-			}
+			DSSPlayerInfo.get((EntityPlayer) event.getEntity()).onFall(event);
 		}
 	}
 

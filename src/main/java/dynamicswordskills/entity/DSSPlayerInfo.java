@@ -91,9 +91,6 @@ public class DSSPlayerInfo
 	/** Whether the player has received the starting bonus gear or not yet */
 	private boolean receivedGear = false;
 
-	/** Reduces fall damage next impact; used for Rising Cut */
-	public float reduceFallAmount = 0.0F;
-
 	/** Used by certain skills for controlling the player's main arm rendering */
 	public float armSwing = 0.0F;
 
