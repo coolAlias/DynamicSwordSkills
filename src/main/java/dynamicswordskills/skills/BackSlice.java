@@ -177,11 +177,32 @@ public class BackSlice extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		if (isActive()) {
-			return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+		if (isAnimating()) {
+			return (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey();
 		}
 		return key == mc.gameSettings.keyBindForward || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() ||
 				((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void keyPressedWhileAnimating(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (isActive()) {
+			// Attack targeted entity directly rather than using mouse cursor object due to camera funkiness
+			Entity target = DSSPlayerInfo.get(player).getTargetingSkill().getCurrentTarget();
+			if (target != null && TargetUtils.canReachTarget(player, target)) {
+				mc.playerController.attackEntity(mc.thePlayer, target);
+			} else {
+				player.resetCooldown();
+				PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
+				ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
+				if (combo.isComboInProgress()) {
+					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) combo));
+				}
+			}
+			player.swingArm(EnumHand.MAIN_HAND);
+			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
+		}
 	}
 
 	@Override
@@ -198,22 +219,6 @@ public class BackSlice extends SkillActive
 			} else if (key != mc.gameSettings.keyBindForward) {
 				keyPressed = key;
 			}
-		} else if (isActive() && (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey())) {
-			// Attack targeted entity directly rather than using mouse cursor object due to camera funkiness
-			Entity target = DSSPlayerInfo.get(player).getTargetingSkill().getCurrentTarget();
-			if (target != null && TargetUtils.canReachTarget(player, target)) {
-				mc.playerController.attackEntity(mc.thePlayer, target);
-			} else {
-				player.resetCooldown();
-				PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
-				ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
-				if (combo.isComboInProgress()) {
-					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) combo));
-				}
-			}
-			player.swingArm(EnumHand.MAIN_HAND);
-			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
-			return true;
 		}
 		return false; // allow other skills to receive this key press (e.g. Spin Attack)
 	}

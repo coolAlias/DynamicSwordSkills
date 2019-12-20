@@ -126,7 +126,7 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
-	 * Return true if {@link #keyPressed} should be called when the given key is pressed
+	 * Returning true allows {@link #keyPressed} and {@link #receiveActiveKeys} to be called, as appropriate
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
@@ -134,9 +134,19 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
-	 * This method is called if {@link #isKeyListener} returns true for the given key,
-	 * allowing the skill to handle the key input accordingly. Note that each key press
-	 * may only be handled once, on a first-come first-serve basis.
+	 * Equivalent of {@link #keyPressed} but called only while this skill is animating.
+	 * Will not be called for the ATTACK key if {@link DSSPlayerInfo#canAttack()} returns false.
+	 * Will not be called for the USE_ITEM key if {@link DSSPlayerInfo#canUseItem()} returns false.
+	 * Note that key presses while animating are always considered 'handled' i.e. the button state will not be changed
+	 */
+	@SideOnly(Side.CLIENT)
+	public void keyPressedWhileAnimating(Minecraft mc, KeyBinding key, EntityPlayer player) {
+	}
+
+	/**
+	 * This method is called if {@link #isKeyListener} returns true for the given key and the
+	 * skill is not currently animating, allowing the skill to handle the key input accordingly.
+	 * Note that each key press may only be handled once, on a first-come first-serve basis.
 	 * @return	True signals that the key press was "handled" and prevents propagation to any
 	 * 			remaining listeners; this should usually only occur when a skill is activated
 	 */
@@ -148,6 +158,7 @@ public abstract class SkillActive extends SkillBase
 	/**
 	 * This method is called if {@link #isKeyListener} returns true for the given key,
 	 * allowing each skill to handle key releases accordingly.
+	 * Skills do not have to be {@link #isActive()} to receive key releases.
 	 */
 	@SideOnly(Side.CLIENT)
 	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {}

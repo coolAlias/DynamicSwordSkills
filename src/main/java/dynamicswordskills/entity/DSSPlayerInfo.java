@@ -264,6 +264,17 @@ public class DSSPlayerInfo
 	}
 
 	/**
+	 * Called when a key is pressed while a skill is animating (i.e. {@link #canInteract()} returns false);
+	 * calls {@link SkillActive#keyPressedWhileAnimating} for the animating skill if {@link SkillActive#isKeyListener} returns true
+	 */
+	@SideOnly(Side.CLIENT)
+	public void onKeyPressedWhileAnimating(Minecraft mc, KeyBinding key) {
+		if (animatingSkill != null && animatingSkill.isKeyListener(mc, key)) {
+			animatingSkill.keyPressedWhileAnimating(mc, key, player);
+		}
+	}
+
+	/**
 	 * Call when a key is pressed to pass the key press to the player's skills'
 	 * {@link SkillActive#keyPressed keyPressed} method, but only if the skill returns
 	 * true from {@link SkillActive#isKeyListener isKeyListener} for the key pressed.
