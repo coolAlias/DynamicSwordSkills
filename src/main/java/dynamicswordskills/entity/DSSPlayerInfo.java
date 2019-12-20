@@ -44,7 +44,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -371,6 +373,56 @@ public class DSSPlayerInfo
 		// combo gets updated last, after all damage modifications are completed
 		if (!event.isCanceled() && event.getAmount() > 0.0F && getComboSkill() != null) {
 			getComboSkill().onHurtTarget(player, event);
+		}
+	}
+
+	/**
+	 * Called from LivingFallEvent to trigger {@link SkillActive#onFall} for each currently active skill
+	 */
+	public void onFall(LivingFallEvent event) {
+		for (SkillBase skill : skills.values()) {
+			if (event.isCanceled() || event.getDistance() <= 0.0F) {
+				return;
+			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+				if (((SkillActive) skill).onFall(player, event)) {
+					return;
+				}
+			}
+		}
+		if (!event.isCanceled() && event.getDistance() > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+			if (((SkillActive) itemSkill).onFall(player, event)) {
+				return;
+			}
+		}
+		if (!event.isCanceled() && event.getDistance() > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+			if (((SkillActive) dummySwordSkill).onFall(player, event)) {
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Called from PlayerFlyableFallEvent to trigger {@link SkillActive#onCreativeFall} for each currently active skill
+	 */
+	public void onCreativeFall(PlayerFlyableFallEvent event) {
+		for (SkillBase skill : skills.values()) {
+			if (event.getDistance() <= 0.0F) {
+				return;
+			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+				if (((SkillActive) skill).onCreativeFall(player, event)) {
+					return;
+				}
+			}
+		}
+		if (event.getDistance() > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+			if (((SkillActive) itemSkill).onCreativeFall(player, event)) {
+				return;
+			}
+		}
+		if (event.getDistance() > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+			if (((SkillActive) dummySwordSkill).onCreativeFall(player, event)) {
+				return;
+			}
 		}
 	}
 
