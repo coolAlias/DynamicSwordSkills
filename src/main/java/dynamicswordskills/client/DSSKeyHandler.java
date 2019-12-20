@@ -154,32 +154,30 @@ public class DSSKeyHandler
 			skill.getNextTarget(mc.thePlayer);
 		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
 			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK].getKey() : mc.gameSettings.keyBindAttack);
-			boolean flag = (!skills.canAttack());
-			if (canInteract && !flag) {
-				KeyBinding.setKeyBindState(key.getKeyCode(), true);
-			} else if (!flag) {
-				// hack for Super Spin Attack, as it requires key press to be passed while animation is in progress
-				if (skills.isSkillActive(SkillBase.spinAttack)) {
-					return skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.thePlayer);
-				} else if (skills.isSkillActive(SkillBase.backSlice)) {
-					return skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, key, mc.thePlayer);
-				}
+			if (!skills.canAttack()) {
+				return true;
+			} else if (!canInteract) {
+				skills.onKeyPressedWhileAnimating(mc, key);
+				return true;
+			} else if (skills.onKeyPressed(mc, key)) {
+				return true;
 			}
-			// Only allow attack key to continue processing if it was set to pressed
-			if (key.getIsKeyPressed()) {
-				if (!skills.onKeyPressed(mc, key)) {
-					DSSClientEvents.performComboAttack(mc, skill);
-					// hack for Armor Break to begin charging without having to press attack again
-					if (skills.hasSkill(SkillBase.armorBreak)) {
-						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.thePlayer);
-					}
-				}
+			KeyBinding.setKeyBindState(key.getKeyCode(), true);
+			DSSClientEvents.performComboAttack(mc, skill);
+			// hack for Armor Break to begin charging without having to press attack again
+			if (skills.hasSkill(SkillBase.armorBreak)) {
+				skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.thePlayer);
 			}
 			return true;
 		} else {
 			KeyBinding key = getKeyBindFromCode(mc, kb);
 			if (key != null) {
-				if (!canInteract || skills.onKeyPressed(mc, key)) {
+				if (!canInteract) {
+					if (skills.canUseItem() || (kb != keys[KEY_BLOCK].getKeyCode() && kb != mc.gameSettings.keyBindUseItem.getKeyCode())) {
+						skills.onKeyPressedWhileAnimating(mc, key);
+					}
+					return true;
+				} else if (skills.onKeyPressed(mc, key)) {
 					return true;
 				}
 				KeyBinding.setKeyBindState(kb, true);
