@@ -36,6 +36,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 
 /**
  * 
@@ -178,11 +180,19 @@ public class LeapingBlow extends SkillActive
 		}
 	}
 
-	/**
-	 * Called from Forge fall Events (note that these are not fired if player lands in liquid!)
-	 * @param distance distance fallen, passed from Forge fall Event
-	 */
-	public void onImpact(EntityPlayer player, float distance) {
+	@Override
+	public boolean onFall(EntityPlayer player, LivingFallEvent event) {
+		onFall(player, event.distance);
+		return true;
+	}
+
+	@Override
+	public boolean onCreativeFall(EntityPlayer player, PlayerFlyableFallEvent event) {
+		onFall(player, event.distance);
+		return true;
+	}
+
+	private void onFall(EntityPlayer player, float distance) {
 		SwordBasic swordSkill = (SwordBasic) DSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
 		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this)) {
 			if (player.worldObj.isRemote) {

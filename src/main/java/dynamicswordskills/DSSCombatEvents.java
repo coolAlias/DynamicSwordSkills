@@ -29,7 +29,6 @@ import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.ICombo;
-import dynamicswordskills.skills.LeapingBlow;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -235,10 +234,8 @@ public class DSSCombatEvents
 		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-			if (skills.isSkillActive(SkillBase.leapingBlow)) {
-				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(player, event.distance);
-			}
-			if (skills.reduceFallAmount > 0.0F) {
+			skills.onFall(event);
+			if (!event.isCanceled() && event.distance > 0.0F && skills.reduceFallAmount > 0.0F) {
 				event.distance -= skills.reduceFallAmount;
 				skills.reduceFallAmount = 0.0F;
 			}
@@ -247,11 +244,6 @@ public class DSSCombatEvents
 
 	@SubscribeEvent
 	public void onCreativeFall(PlayerFlyableFallEvent event) {
-		DSSPlayerInfo skills = DSSPlayerInfo.get(event.entityPlayer);
-		if (skills != null) {
-			if (skills.isSkillActive(SkillBase.leapingBlow)) {
-				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(event.entityPlayer, event.distance);
-			}
-		}
+		DSSPlayerInfo.get(event.entityPlayer).onCreativeFall(event);
 	}
 }

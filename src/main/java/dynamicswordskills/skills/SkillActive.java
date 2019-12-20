@@ -35,7 +35,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 
 /**
  * 
@@ -332,6 +334,24 @@ public abstract class SkillActive extends SkillBase
 	 */
 	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		return amount;
+	}
+
+	/**
+	 * Called from Forge fall Events if the skill is currently {@link #isActive() active};
+	 * note that these are not fired if the player lands in liquid
+	 * @return True to prevent further processing without having to cancel the event or set distance to 0
+	 */
+	public boolean onFall(EntityPlayer player, LivingFallEvent event) {
+		return false;
+	}
+
+	/**
+	 * Called from Forge fall Events if the skill is currently {@link #isActive() active};
+	 * note that these are not fired if the player lands in liquid
+	 * @return True to prevent further processing without having to cancel the event or set distance to 0
+	 */
+	public boolean onCreativeFall(EntityPlayer player, PlayerFlyableFallEvent event) {
+		return false;
 	}
 
 	@Override
