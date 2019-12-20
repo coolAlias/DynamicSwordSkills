@@ -192,32 +192,26 @@ public class SpinAttack extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		// attack key is handled separately in order to intercept the key before it may be passed
-		// to other skills; this is necessary to prevent another skill activating while spin attack is active
-		return (//key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK] ||
-				(Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
+		if (isAnimating()) {
+			return (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey();
+		}
+		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
 				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey());
 	}
 
-	/**
-	 * Sets direction of spin and activates skill when left or right arrow key pressed
-	 * or adds extra spin for Super Spin Attack when attack key pressed
-	 * NOTE: Super Spin Attack requires this method to be called explicitly for the
-	 * 		 attack key, since the attack key is normally only processed if canInteract
-	 * 		 returns true, which is not the case while spin attack is active
-	 */
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void keyPressedWhileAnimating(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (isActive() && canRefresh() && canExecute(player)) {
+			PacketDispatcher.sendToServer(new RefreshSpinPacket());
+			arc += 360F;
+		}
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey()) {
-			if (isActive()) {
-				if (canRefresh() && canExecute(player)) {
-					PacketDispatcher.sendToServer(new RefreshSpinPacket());
-					arc += 360F;
-				}
-				return true;
-			}
-		} else if (!isCharging()) {
+		if (!isCharging()) {
 			// prevents activation of Dodge from interfering with spin direction
 			if (wasKeyPressed) {
 				wasKeyPressed = false;
