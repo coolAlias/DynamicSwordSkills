@@ -336,16 +336,16 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void onImpact(LivingHurtEvent event) {
 		for (SkillBase skill : skills.values()) {
-			if (event.ammount <= 0.0F) {
+			if (event.isCanceled() || event.ammount <= 0.0F) {
 				return;
 			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
 				event.ammount = ((SkillActive) skill).onImpact(player, event.entityLiving, event.ammount);
 			}
 		}
-		if (event.ammount > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+		if (!event.isCanceled() && event.ammount > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
 			event.ammount = (((SkillActive) itemSkill).onImpact(player, event.entityLiving, event.ammount));
 		}
-		if (event.ammount > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+		if (!event.isCanceled() && event.ammount > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
 			event.ammount = ((SkillActive) dummySwordSkill).onImpact(player, event.entityLiving, event.ammount);
 		}
 	}
@@ -356,18 +356,20 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void onPostImpact(LivingHurtEvent event) {
 		for (SkillBase skill : skills.values()) {
-			if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+			if (event.isCanceled() || event.ammount <= 0.0F) {
+				break;
+			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
 				event.ammount = ((SkillActive) skill).postImpact(player, event.entityLiving, event.ammount);
 			}
 		}
-		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+		if (!event.isCanceled() && event.ammount > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
 			event.ammount = ((SkillActive) itemSkill).postImpact(player, event.entityLiving, event.ammount);
 		}
-		if (dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+		if (!event.isCanceled() && event.ammount > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
 			event.ammount = ((SkillActive) dummySwordSkill).postImpact(player, event.entityLiving, event.ammount);
 		}
 		// combo gets updated last, after all damage modifications are completed
-		if (getComboSkill() != null) {
+		if (!event.isCanceled() && event.ammount > 0.0F && getComboSkill() != null) {
 			getComboSkill().onHurtTarget(player, event);
 		}
 	}
