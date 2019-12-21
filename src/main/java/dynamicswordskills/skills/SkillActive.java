@@ -306,7 +306,8 @@ public abstract class SkillActive extends SkillBase
 	/**
 	 * Called from LivingHurtEvent after increasing the damage amount based on the combo count and prior
 	 * to calling {@link ICombo#onPlayerHurt(EntityPlayer, LivingHurtEvent)} for a damaged player entity.
-	 * Only called if the skill is currently {@link #isActive() active} and the event amount is > 0.
+	 * Only called if the skill is currently {@link #isActive() active}, the event has not been canceled,
+	 * and the remaining damage amount is > 0.
 	 * 
 	 * @param player The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
 	 * @param entity The entity damaged, i.e. LivingHurtEvent's entityLiving
@@ -322,6 +323,7 @@ public abstract class SkillActive extends SkillBase
 	 * for the player that inflicted the damage, after all damage modifiers have been taken
 	 * into account, providing a final chance to modify the damage or perform other actions
 	 * before {@link ICombo#onHurtTarget} is called.
+	 * Not called if the event was canceled or the damage was reduced to <= 0 by {@link #onImpact}.
 	 * 
 	 * @param player	The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
 	 * @param entity	The entity damaged, i.e. LivingHurtEvent's entityLiving

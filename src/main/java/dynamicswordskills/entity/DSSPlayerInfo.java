@@ -334,17 +334,17 @@ public class DSSPlayerInfo
 	 */
 	public void onImpact(LivingHurtEvent event) {
 		for (SkillBase skill : skills.values()) {
-			if (event.getAmount() <= 0.0F) {
+			if (event.isCanceled() || event.getAmount() <= 0.0F) {
 				return;
 			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
 				float amount = ((SkillActive) skill).onImpact(player, event.getEntityLiving(), event.getAmount());
 				event.setAmount(amount);
 			}
 		}
-		if (event.getAmount() > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+		if (!event.isCanceled() && event.getAmount() > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
 			event.setAmount(((SkillActive) itemSkill).onImpact(player, event.getEntityLiving(), event.getAmount()));
 		}
-		if (event.getAmount() > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+		if (!event.isCanceled() && event.getAmount() > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
 			event.setAmount(((SkillActive) dummySwordSkill).onImpact(player, event.getEntityLiving(), event.getAmount()));
 		}
 	}
@@ -355,19 +355,21 @@ public class DSSPlayerInfo
 	 */
 	public void onPostImpact(LivingHurtEvent event) {
 		for (SkillBase skill : skills.values()) {
-			if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+			if (event.isCanceled() || event.getAmount() <= 0.0F) {
+				break;
+			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
 				float amount = ((SkillActive) skill).postImpact(player, event.getEntityLiving(), event.getAmount());
 				event.setAmount(amount);
 			}
 		}
-		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+		if (!event.isCanceled() && event.getAmount() > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
 			event.setAmount(((SkillActive) itemSkill).postImpact(player, event.getEntityLiving(), event.getAmount()));
 		}
-		if (dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+		if (!event.isCanceled() && event.getAmount() > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
 			event.setAmount(((SkillActive) dummySwordSkill).postImpact(player, event.getEntityLiving(), event.getAmount()));
 		}
 		// combo gets updated last, after all damage modifications are completed
-		if (getComboSkill() != null) {
+		if (!event.isCanceled() && event.getAmount() > 0.0F && getComboSkill() != null) {
 			getComboSkill().onHurtTarget(player, event);
 		}
 	}
