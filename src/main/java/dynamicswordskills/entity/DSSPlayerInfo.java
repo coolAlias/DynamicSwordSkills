@@ -607,7 +607,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		// flags whether a skill is currently animating
 		boolean flag = false;
 		if (animatingSkill != null) {
-			if (!skills.containsKey(animatingSkill.getId()) && itemSkill != animatingSkill) {
+			if (getSkillLevel(animatingSkill) < 1) {
 				// Clear animating skill if no longer valid
 				setCurrentlyAnimatingSkill(null);
 			} else if (animatingSkill.isAnimating()) {
