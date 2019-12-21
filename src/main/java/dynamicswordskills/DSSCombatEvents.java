@@ -178,14 +178,14 @@ public class DSSCombatEvents
 			}
 			DSSPlayerInfo.get(player).onImpact(event);
 		}
-		if (event.ammount > 0.0F && event.entity instanceof EntityPlayer) {
+		if (!event.isCanceled() && event.ammount > 0.0F && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
 			if (combo != null && event.ammount > 0) {
 				combo.onPlayerHurt(player, event);
 			}
 		}
-		if (event.ammount > 0.0F && event.source.getEntity() instanceof EntityPlayer) {
+		if (!event.isCanceled() && event.ammount > 0.0F && event.source.getEntity() instanceof EntityPlayer) {
 			DSSPlayerInfo.get((EntityPlayer) event.source.getEntity()).onPostImpact(event);
 		}
 		if (event.ammount <= 0.0F) {
