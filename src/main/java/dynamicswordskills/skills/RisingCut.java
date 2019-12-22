@@ -63,6 +63,9 @@ public class RisingCut extends SkillActive
 	/** Stores the entity struck to add velocity on the next update */
 	private Entity entityHit;
 
+	/** Flag to prevent a second attack from adding even more motionY */
+	private boolean hitEntity;
+
 	public RisingCut(String name) {
 		super(name);
 	}
@@ -143,6 +146,7 @@ public class RisingCut extends SkillActive
 		// Approximate time it should take to hit the ground with about 5 ticks of leeway
 		activeTimer = (20 + 3 * level);
 		entityHit = null;
+		hitEntity = false;
 		player.motionY += 0.3D + (0.115D * level);
 		return isActive();
 	}
@@ -194,8 +198,11 @@ public class RisingCut extends SkillActive
 	 */
 	@Override
 	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
-		boolean flag = !(entity instanceof EntityPlayer) || !PlayerUtils.isBlocking((EntityPlayer) entity);
-		this.entityHit = (flag ? entity : null);
+		if (!hitEntity) {
+			boolean flag = !(entity instanceof EntityPlayer) || !PlayerUtils.isBlocking((EntityPlayer) entity);
+			this.entityHit = (flag ? entity : null);
+		}
+		hitEntity = true;
 		return amount;
 	}
 
