@@ -25,7 +25,6 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.OpenGuiPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ILockOnTarget;
-import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -158,10 +157,6 @@ public class DSSKeyHandler
 			KeyBinding.setKeyBindState(kb, true);
 			if (isLockedOn) {
 				DSSClientEvents.performComboAttack(mc, skill);
-			}
-			// hack for Armor Break to begin charging without having to press attack again
-			if (skills.hasSkill(SkillBase.armorBreak)) {
-				skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 			}
 			return isLockedOn;
 		} else {
