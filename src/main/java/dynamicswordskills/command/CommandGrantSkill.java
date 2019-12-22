@@ -17,6 +17,7 @@
 
 package dynamicswordskills.command;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -116,7 +117,7 @@ public class CommandGrantSkill extends CommandBase
 		switch(args.length) {
 		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, server.getAllUsernames());
 		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
-		default: return null;
+		default: return Collections.<String>emptyList();
 		}
 	}
 }
