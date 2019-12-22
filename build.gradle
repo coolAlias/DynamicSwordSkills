@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 version = "1.7.1"
 group= "com.google.coolalias008.dynamicswordskills" 
-archivesBaseName = "1.7.10-DynamicSwordSkills"
+archivesBaseName = "DynamicSwordSkills-1.7.10"
 
 sourceCompatibility = targetCompatibility = "1.6"
 
