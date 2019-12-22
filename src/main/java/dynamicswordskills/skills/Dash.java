@@ -55,7 +55,7 @@ import net.minecraft.world.World;
  * 
  * Range: 3 blocks plus 1 block per level
  * Damage: up to 2 plus 1 per level at max range
- * Knockback Strength: 0.3F per level plus an additional 0.1F per block traveled beyond the minimum (capped at 2.0F)
+ * Knockback Strength: 0.4F per level plus an additional 0.15F per block traveled beyond the minimum (capped at 3.0F)
  * Exhaustion: Light [1.0F - (level * 0.05F)]
  * Special: Must be at least 2 blocks away from target when skill is activated to
  * 			inflict damage, minus 0.2F per level (down to 1 block at level 5)
@@ -139,7 +139,7 @@ public class Dash extends SkillActive
 
 	/** Returns base knockback strength, not accounting for distance traveled */
 	private float getKnockback() {
-		return 0.3F * level;
+		return 0.4F * level;
 	}
 
 	/** Range increases by 1 block per level */
@@ -275,9 +275,9 @@ public class Dash extends SkillActive
 				impactTime = 5; // time player will be immune to damage from the target entity
 				target.attackEntityFrom(DamageSource.causePlayerDamage(player), dmg);
 				if (target instanceof EntityLivingBase) {
-					float db = 0.1F * (float)(distance - getMinDistance());
-					float k = (float)sf * Math.min(db + getKnockback(), 2.0F);
-					TargetUtils.knockTargetBack((EntityLivingBase) target, player, k);
+					float db = 0.15F * (float)(distance - getMinDistance());
+					float k = (float)sf * Math.min(db + getKnockback(), 3.0F);
+					TargetUtils.knockTargetBack((EntityLivingBase) target, player, 0.5F * k);
 				}
 				if (target instanceof EntityPlayerMP && !player.worldObj.isRemote) {
 					((EntityPlayerMP) target).playerNetServerHandler.sendPacket(new S12PacketEntityVelocity(target));
