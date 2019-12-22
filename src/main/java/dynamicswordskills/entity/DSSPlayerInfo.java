@@ -511,11 +511,15 @@ public class DSSPlayerInfo
 	}
 
 	/**
-	 * Returns first ICombo from a currently active skill, if any; ICombo may or may not be in progress
+	 * Returns first ICombo from a currently active skill, if any, or the last active one;
+	 * ICombo skill may no longer be active and combo may or may not be in progress
 	 */
 	public ICombo getComboSkill() {
 		if (comboSkill == null || comboSkill.getCombo() == null || !((SkillActive) comboSkill).isActive()) {
-			comboSkill = getFirstActiveComboSkill();
+			ICombo combo = getFirstActiveComboSkill();
+			if (combo != null) {
+				comboSkill = combo;
+			}
 		}
 		return comboSkill;
 	}
