@@ -274,6 +274,9 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		if (animatingSkill != null && animatingSkill.isKeyListener(mc, key, isLockedOn)) {
 			animatingSkill.keyPressedWhileAnimating(mc, key, player);
 		}
+		if (isLockedOn && targetingSkill instanceof SkillActive && targetingSkill != animatingSkill && ((SkillActive) targetingSkill).isKeyListener(mc, key, isLockedOn)) {
+			((SkillActive) targetingSkill).keyPressedWhileAnimating(mc, key, player);
+		}
 	}
 
 	/**
