@@ -17,6 +17,7 @@
 
 package dynamicswordskills.command;
 
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.command.CommandBase;
@@ -87,6 +88,6 @@ public class CommandRemoveSkill extends CommandBase
 
 	@Override
 	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
-		return args.length == 1 ? getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames()) : null;
+		return args.length == 1 ? getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames()) : Collections.<String>emptyList();
 	}
 }

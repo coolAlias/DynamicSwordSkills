@@ -17,6 +17,7 @@
 
 package dynamicswordskills.command;
 
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.command.CommandBase;
@@ -114,7 +115,7 @@ public class CommandGrantSkill extends CommandBase
 		switch(args.length) {
 		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
 		case 2: return getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
-		default: return null;
+		default: return Collections.<String>emptyList();
 		}
 	}
 

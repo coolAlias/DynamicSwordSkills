@@ -17,6 +17,7 @@
 
 package dynamicswordskills.command;
 
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.command.CommandBase;
@@ -115,7 +116,7 @@ public class CommandWeaponRegistry extends CommandBase
 		switch (args.length) {
 		case 1: return getListOfStringsMatchingLastWord(args, "allow", "forbid");
 		case 2: return getListOfStringsMatchingLastWord(args, "sword", "weapon");
+		default: return Collections.<String>emptyList();
 		}
-		return null;
 	}
 }
