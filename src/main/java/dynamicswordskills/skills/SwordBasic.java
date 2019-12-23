@@ -167,15 +167,11 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
-		if (isActive) { // deactivate if already active
-			onDeactivated(world, player); // don't need to use deactivate, as packets already sent
-		} else { // otherwise activate
-			isActive = true;
-			if (!isComboInProgress()) {
-				combo = null;
-			}
-			currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true, getTargetSelectors());
+		isActive = true;
+		if (!isComboInProgress()) {
+			combo = null;
 		}
+		currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true, getTargetSelectors());
 		return true;
 	}
 
