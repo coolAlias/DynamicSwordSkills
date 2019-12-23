@@ -52,7 +52,7 @@ public class CommandRemoveSkill extends CommandBase
 	}
 
 	/**
-	 * removeskill <skill | all>
+	 * removeskill <player> <skill | all>
 	 */
 	@Override
 	public String getCommandUsage(ICommandSender player) {
@@ -61,21 +61,22 @@ public class CommandRemoveSkill extends CommandBase
 
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-		if (args != null && args.length == 1) {
-			boolean all = ("all").equals(args[0]);
+		if (args.length == 2) {
+			EntityPlayerMP commandSender = CommandBase.getCommandSenderAsPlayer(sender);
+			EntityPlayerMP player = CommandBase.getPlayer(server, sender, args[0]);
+			boolean all = ("all").equals(args[1]);
 			SkillBase skill = null;
 			if (!all) {
-				skill = SkillBase.getSkillByName(args[0]);
+				skill = SkillBase.getSkillByName(args[1]);
 				if (skill == null) {
-					throw new CommandException("commands.skill.generic.unknown", args[0]);
+					throw new CommandException("commands.skill.generic.unknown", args[1]);
 				}
 			}
-			EntityPlayerMP player = CommandBase.getCommandSenderAsPlayer(sender);
-			if (DSSPlayerInfo.get(player).removeSkill(args[0])) {
+			if (DSSPlayerInfo.get(player).removeSkill(args[1])) {
 				if (all) {
-					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.success.all", player.getDisplayName());
+					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.all", player.getDisplayName());
 				} else {
-					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.success.one", player.getDisplayName(), new TextComponentTranslation(skill.getTranslationString()));
+					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.one", player.getDisplayName(), new TextComponentTranslation(skill.getTranslationString()));
 				}
 			} else { // player didn't have this skill
 				if (all) {
@@ -91,6 +92,10 @@ public class CommandRemoveSkill extends CommandBase
 
 	@Override
 	public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
-		return args.length == 1 ? CommandBase.getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames()) : Collections.<String>emptyList();
+		switch(args.length) {
+		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
+		default: return Collections.<String>emptyList();
+		}
 	}
 }

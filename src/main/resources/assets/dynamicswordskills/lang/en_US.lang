@@ -34,7 +34,7 @@ commands.removeskill.failure.all=You did not have any skills to remove
 commands.removeskill.failure.one=You did not have any levels in %2$s
 commands.removeskill.success.all=Removed all skills
 commands.removeskill.success.one=Removed all levels of %2$s
-commands.removeskill.usage=/removeskill <skill> OR /removeskill all
+commands.removeskill.usage=/removeskill <player> <skill> OR /removeskill <player> all
 
 dss.config.title=DSS Configuration Settings
 dss.config.client.name=Client Settings
