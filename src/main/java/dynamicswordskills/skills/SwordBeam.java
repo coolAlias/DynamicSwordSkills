@@ -19,7 +19,6 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntitySwordBeam;
 import dynamicswordskills.ref.Config;
@@ -129,7 +128,7 @@ public class SwordBeam extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		}
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+		return key == mc.gameSettings.keyBindAttack;
 	}
 
 	@Override

@@ -21,10 +21,8 @@ import java.util.List;
 
 import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntityLeapingBlow;
-import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
@@ -135,9 +133,7 @@ public class LeapingBlow extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		}
-		return (key == mc.gameSettings.keyBindJump 
-				|| key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey() 
-				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+		return (key == mc.gameSettings.keyBindJump || key == mc.gameSettings.keyBindAttack);
 	}
 
 	@Override
@@ -148,7 +144,6 @@ public class LeapingBlow extends SkillActive
 				ticksTilFail = 10;
 				if (player.isHandActive()) {
 					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
-					KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 				}
 				return true;
 			}
@@ -164,7 +159,7 @@ public class LeapingBlow extends SkillActive
 	 */
 	@SideOnly(Side.CLIENT)
 	protected boolean isKeyPressed() {
-		return Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown() || DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown();
+		return Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown();
 	}
 
 	@Override

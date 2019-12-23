@@ -180,10 +180,10 @@ public class BackSlice extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		} else if (isAnimating()) {
-			return (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey();
+			return key == mc.gameSettings.keyBindAttack;
 		}
-		return key == mc.gameSettings.keyBindForward || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() ||
-				((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)));
+		return key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() ||
+				((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindForward || key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)));
 	}
 
 	@Override
@@ -211,14 +211,14 @@ public class BackSlice extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
-			if (keyPressed != null && keyPressed.isKeyDown() && key == mc.gameSettings.keyBindForward) {
+			if (keyPressed != null && keyPressed.isKeyDown() && ((Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey())) {
 				if (ticksTilFail > 0) {
 					ticksTilFail = 0;
 					return activate(player);
 				} else {
 					ticksTilFail = 6;
 				}
-			} else if (key != mc.gameSettings.keyBindForward) {
+			} else if (key != mc.gameSettings.keyBindForward && key != DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey()) {
 				keyPressed = key;
 			}
 		}

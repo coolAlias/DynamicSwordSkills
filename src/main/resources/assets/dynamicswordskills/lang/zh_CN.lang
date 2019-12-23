@@ -65,11 +65,10 @@ tooltip.dss.skill_provider.desc.provider=Provides %s
 key.dss.label=动态技能按键
 key.dss.activate.desc=Z-瞄准目标
 key.dss.next.desc=切换目标
-key.dss.attack.desc=攻击
-key.dss.left.desc=左闪避
-key.dss.right.desc=右闪避
-key.dss.down.desc=格挡
-key.dss.block.desc=锁定
+key.dss.forward.desc=Forward
+key.dss.back.desc=Back
+key.dss.left.desc=Left
+key.dss.right.desc=Right
 key.dss.skills_gui.desc=查看技能
 
 skill.dss.desc.area=面积: %s块

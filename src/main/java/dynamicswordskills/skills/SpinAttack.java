@@ -204,7 +204,7 @@ public class SpinAttack extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		} else if (isAnimating()) {
-			return (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey();
+			return key == mc.gameSettings.keyBindAttack;
 		}
 		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
 				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey());

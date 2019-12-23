@@ -45,22 +45,20 @@ public class DSSKeyHandler
 	KEY_SKILL_ACTIVATE = 0,
 	KEY_NEXT_TARGET = 1,
 	KEY_SKILLS_GUI = 2,
-	KEY_ATTACK = 3,
-	KEY_LEFT = 4,
-	KEY_RIGHT = 5,
-	KEY_DOWN = 6,
-	KEY_BLOCK = 7;
+	KEY_FORWARD = 3,
+	KEY_BACK = 4,
+	KEY_LEFT = 5,
+	KEY_RIGHT = 6;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
 	private static final String[] desc = {
 			"activate",
 			"next",
 			"skills_gui",
-			"attack",
+			"forward",
+			"back",
 			"left",
-			"right",
-			"down",
-			"block"
+			"right"
 	};
 
 	/** Default key values */
@@ -69,10 +67,9 @@ public class DSSKeyHandler
 			Keyboard.KEY_TAB,
 			Keyboard.KEY_P,
 			Keyboard.KEY_UP,
-			Keyboard.KEY_LEFT,
-			Keyboard.KEY_RIGHT,
 			Keyboard.KEY_DOWN,
-			Keyboard.KEY_RCONTROL
+			Keyboard.KEY_LEFT,
+			Keyboard.KEY_RIGHT
 	};
 
 	public static final KeyBindingHolder[] keys = new KeyBindingHolder[desc.length];
@@ -81,7 +78,7 @@ public class DSSKeyHandler
 		this.mc = Minecraft.getMinecraft();
 		for (int i = 0; i < desc.length; ++i) {
 			KeyBinding key = null;
-			if (Config.enableAdditionalControls() || i < KEY_ATTACK) {
+			if (Config.enableAdditionalControls() || i < KEY_FORWARD) {
 				key = new KeyBinding("key.dss." + desc[i] + ".desc", keyValues[i], new TextComponentTranslation("key.dss.label").getUnformattedText());
 				ClientRegistry.registerKeyBinding(key);
 			}
@@ -129,10 +126,6 @@ public class DSSKeyHandler
 		KeyBinding key = getKeyBindFromCode(mc, kb);
 		if (key != null && mc.inGameHasFocus && mc.thePlayer != null) {
 			DSSPlayerInfo.get(mc.thePlayer).onKeyReleased(mc, key);
-			// Hack for custom block keybinding
-			if (key.getKeyCode() == keys[KEY_BLOCK].getKeyCode()) {
-				KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
-			}
 		}
 	}
 
@@ -153,30 +146,29 @@ public class DSSKeyHandler
 			if (isLockedOn) {
 				skill.getNextTarget(mc.thePlayer);
 			}
-		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
-			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK].getKey() : mc.gameSettings.keyBindAttack);
+		} else if (kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
 			if (!skills.canAttack()) {
 				return true;
 			} else if (!canInteract) {
-				skills.onKeyPressedWhileAnimating(mc, key);
+				skills.onKeyPressedWhileAnimating(mc, mc.gameSettings.keyBindAttack);
 				return true;
-			} else if (skills.onKeyPressed(mc, key)) {
+			} else if (skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
 				return true;
 			}
-			KeyBinding.setKeyBindState(key.getKeyCode(), true);
+			KeyBinding.setKeyBindState(kb, true);
 			if (isLockedOn) {
 				DSSClientEvents.performComboAttack(mc, skill);
 			}
 			// hack for Armor Break to begin charging without having to press attack again
 			if (skills.hasSkill(SkillBase.armorBreak)) {
-				skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.thePlayer);
+				skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 			}
 			return isLockedOn;
 		} else {
 			KeyBinding key = getKeyBindFromCode(mc, kb);
 			if (key != null) {
 				if (!canInteract) {
-					if (skills.canUseItem() || (kb != keys[KEY_BLOCK].getKeyCode() && kb != mc.gameSettings.keyBindUseItem.getKeyCode())) {
+					if (skills.canUseItem() || kb != mc.gameSettings.keyBindUseItem.getKeyCode()) {
 						skills.onKeyPressedWhileAnimating(mc, key);
 					}
 					return true;
@@ -184,10 +176,6 @@ public class DSSKeyHandler
 					return true;
 				}
 				KeyBinding.setKeyBindState(kb, true);
-				// Piggy-back on vanilla use item key so shield blocking will work with custom keybinding
-				if (kb == keys[KEY_BLOCK].getKeyCode()) {
-					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), true);
-				}
 			}
 		}
 		return false;
@@ -212,14 +200,12 @@ public class DSSKeyHandler
 	}
 
 	/**
-	 * Returns whether the key usage is controlled by the Config#allowVanillaControls setting:
-	 *   vanilla key bindings for Left, Right, Back, Attack, Use Item
+	 * Returns whether the key usage is controlled by the Config#allowVanillaControls setting, i.e. WASD
 	 */
 	public static boolean isVanillaControl(Minecraft mc, KeyBinding key) {
 		return (key == mc.gameSettings.keyBindLeft 
 				|| key == mc.gameSettings.keyBindRight
-				|| key == mc.gameSettings.keyBindBack
-				|| key == mc.gameSettings.keyBindAttack
-				|| key == mc.gameSettings.keyBindUseItem);
+				|| key == mc.gameSettings.keyBindForward
+				|| key == mc.gameSettings.keyBindBack);
 	}
 }
