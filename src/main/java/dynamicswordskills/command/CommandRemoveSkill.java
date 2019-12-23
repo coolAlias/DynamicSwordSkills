@@ -28,6 +28,7 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
 
 public class CommandRemoveSkill extends CommandBase
@@ -47,7 +48,7 @@ public class CommandRemoveSkill extends CommandBase
 	}
 
 	/**
-	 * removeskill <skill | all>
+	 * removeskill <player> <skill | all>
 	 */
 	@Override
 	public String getCommandUsage(ICommandSender player) {
@@ -56,21 +57,22 @@ public class CommandRemoveSkill extends CommandBase
 
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
-		if (args != null && args.length == 1) {
-			boolean all = ("all").equals(args[0]);
+		if (args.length == 2) {
+			EntityPlayerMP commandSender = CommandBase.getCommandSenderAsPlayer(sender);
+			EntityPlayerMP player = CommandBase.getPlayer(sender, args[0]);
+			boolean all = ("all").equals(args[1]);
 			SkillBase skill = null;
 			if (!all) {
-				skill = SkillBase.getSkillByName(args[0]);
+				skill = SkillBase.getSkillByName(args[1]);
 				if (skill == null) {
-					throw new CommandException("commands.skill.generic.unknown", args[0]);
+					throw new CommandException("commands.skill.generic.unknown", args[1]);
 				}
 			}
-			EntityPlayerMP player = getCommandSenderAsPlayer(sender);
-			if (DSSPlayerInfo.get(player).removeSkill(args[0])) {
+			if (DSSPlayerInfo.get(player).removeSkill(args[1])) {
 				if (all) {
-					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.success.all", player.getCommandSenderName());
+					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.all", player.getCommandSenderName());
 				} else {
-					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
+					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
 				}
 			} else { // player didn't have this skill
 				if (all) {
@@ -85,7 +87,11 @@ public class CommandRemoveSkill extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args) {
-		return args.length == 1 ? getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames()) : null;
+	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args) {
+		switch(args.length) {
+		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
+		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
+		default: return null;
+		}
 	}
 }
