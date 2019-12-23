@@ -208,11 +208,6 @@ public class DSSKeyHandler
 				return k;
 			}
 		}
-		for (KeyBindingHolder k : keys) {
-			if (k.getKeyCode() == keyCode) {
-				return k.getKey();
-			}
-		}
 		return null;
 	}
 
