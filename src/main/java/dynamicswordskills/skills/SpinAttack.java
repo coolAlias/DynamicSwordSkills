@@ -183,7 +183,7 @@ public class SpinAttack extends SkillActive
 	 */
 	@SideOnly(Side.CLIENT)
 	private boolean isKeyPressed() {
-		return DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getIsKeyPressed() || DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getIsKeyPressed()
+		return (DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getIsKeyPressed() && DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getIsKeyPressed())
 				|| (Config.allowVanillaControls() && (Minecraft.getMinecraft().gameSettings.keyBindLeft.getIsKeyPressed()
 						&& Minecraft.getMinecraft().gameSettings.keyBindRight.getIsKeyPressed()));
 	}
