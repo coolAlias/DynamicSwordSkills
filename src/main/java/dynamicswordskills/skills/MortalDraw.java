@@ -25,7 +25,6 @@ import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.MortalDrawPacket;
-import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
@@ -157,8 +156,7 @@ public class MortalDraw extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.getIsKeyPressed()
-				|| DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getIsKeyPressed());
+		return player.getHeldItem() == null && Minecraft.getMinecraft().gameSettings.keyBindUseItem.getIsKeyPressed();
 	}
 
 	@Override
@@ -167,7 +165,7 @@ public class MortalDraw extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		}
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+		return key == mc.gameSettings.keyBindAttack;
 	}
 
 	@Override

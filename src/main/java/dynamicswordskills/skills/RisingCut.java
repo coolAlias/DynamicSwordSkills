@@ -22,9 +22,7 @@ import java.util.List;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.ref.Config;
 import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
@@ -118,8 +116,7 @@ public class RisingCut extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		}
-		return (key == mc.gameSettings.keyBindJump || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey()
-				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+		return (key == mc.gameSettings.keyBindJump || key == mc.gameSettings.keyBindAttack);
 	}
 
 	/**

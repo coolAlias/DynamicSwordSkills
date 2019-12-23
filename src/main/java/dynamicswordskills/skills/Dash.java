@@ -24,11 +24,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.IDashItem;
 import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.DashImpactPacket;
-import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
@@ -170,7 +168,7 @@ public class Dash extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		}
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+		return key == mc.gameSettings.keyBindAttack;
 	}
 
 	@Override
@@ -233,7 +231,6 @@ public class Dash extends SkillActive
 					// Force player to stop blocking upon impact
 					DSSPlayerInfo.get(player).setUseItemCooldown(getBlockCooldown());
 					KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
-					KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 					impactTime = 5;
 					if (mop != null && mop.typeOfHit == MovingObjectType.ENTITY) {
 						target = mop.entityHit;

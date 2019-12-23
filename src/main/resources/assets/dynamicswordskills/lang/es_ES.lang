@@ -63,11 +63,10 @@ tooltip.dss.skill_provider.desc.provider=Provides %s
 key.dss.label=Teclas DSS
 key.dss.activate.desc=Fijar Objetivo
 key.dss.next.desc=Siguiente Objetivo
-key.dss.attack.desc=Atacar
-key.dss.left.desc=Esquivar hacia la izquierda
-key.dss.right.desc=Esquivar hacia la derecha
-key.dss.down.desc=Rechazar
-key.dss.block.desc=Bloquear
+key.dss.forward.desc=Adelante
+key.dss.back.desc=Atrás
+key.dss.left.desc=Izquierda
+key.dss.right.desc=Derecha
 key.dss.skills_gui.desc=View Skills
 
 skill.dss.desc.area=Area: %s blocks

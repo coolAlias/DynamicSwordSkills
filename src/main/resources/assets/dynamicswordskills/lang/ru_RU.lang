@@ -65,11 +65,10 @@ tooltip.dss.skill_provider.desc.provider=Также даёт %s
 key.dss.label=Dynamic Sword Skills
 key.dss.activate.desc=Захват цели
 key.dss.next.desc=Следующая цель
-key.dss.attack.desc=Атака
-key.dss.left.desc=Уклонение влево
-key.dss.right.desc=Уклонение вправо
-key.dss.down.desc=Парирование
-key.dss.block.desc=Блок
+key.dss.forward.desc=Forward
+key.dss.back.desc=Back
+key.dss.left.desc=влево
+key.dss.right.desc=вправо
 key.dss.skills_gui.desc=Просмотр умений
 
 skill.dss.desc.area=Зона поражения: %s блоков

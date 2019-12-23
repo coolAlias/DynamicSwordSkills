@@ -163,7 +163,7 @@ public class Parry extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		}
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_DOWN].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack));
+		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_BACK].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack));
 	}
 
 	@Override

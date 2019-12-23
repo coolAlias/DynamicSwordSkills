@@ -64,11 +64,10 @@ tooltip.dss.skill_provider.desc.provider=Provides %s
 key.dss.label=DSS Keys
 key.dss.activate.desc=Z-Target
 key.dss.next.desc=Next Target
-key.dss.attack.desc=Attack
-key.dss.left.desc=Dodge Left
-key.dss.right.desc=Dodge Right
-key.dss.down.desc=Parry
-key.dss.block.desc=Block
+key.dss.forward.desc=Forward
+key.dss.back.desc=Back
+key.dss.left.desc=Left
+key.dss.right.desc=Right
 key.dss.skills_gui.desc=View Skills
 
 skill.dss.desc.area=Area: %s blocks
