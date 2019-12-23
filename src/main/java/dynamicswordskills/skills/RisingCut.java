@@ -30,9 +30,7 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.ref.Config;
 import dynamicswordskills.util.PlayerUtils;
 
 /**
@@ -118,8 +116,7 @@ public class RisingCut extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		}
-		return (key == mc.gameSettings.keyBindJump || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey()
-				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+		return (key == mc.gameSettings.keyBindJump || key == mc.gameSettings.keyBindAttack);
 	}
 
 	/**

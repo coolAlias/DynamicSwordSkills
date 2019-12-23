@@ -19,12 +19,10 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
@@ -61,20 +59,6 @@ public class ArmorBreak extends SkillActive
 
 	/** Current charge time */
 	private int charge = 0;
-
-	/**
-	 * Flags whether the vanilla keyBindAttack was used to trigger this skill, in which
-	 * case the keybinding state must be manually set to false once the skill activates;
-	 * this is because the key is still pressed, and vanilla behavior is to attack like
-	 * crazy as long as the key is held, which is not very cool. For custom key bindings
-	 * this is not an issue, as it only results in an attack when the key is first pressed.
-	 * 
-	 * Another issue: while mouse state is true, if the cursor moves over a block, the player
-	 * will furiously swing his arm at it, as though trying to break it. Perhaps it is better
-	 * to set the key state to false as before and track 'buttonstate' from within the skill,
-	 * though in that case it needs to listen for key releases as well as presses.
-	 */
-	private boolean requiresReset;
 
 	public ArmorBreak(String name) {
 		super(name);
@@ -149,16 +133,11 @@ public class ArmorBreak extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		requiresReset = (key == mc.gameSettings.keyBindAttack);
-		if (requiresReset || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey()) {
-			charge = getChargeTime(player);
-			if (requiresReset) {
-				// manually set the keybind state, since it will not be set by the canceled mouse event
-				// releasing the mouse unsets it normally, but it must be manually unset if the skill is triggered
-				KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), true);
-			}
-			return true; // doesn't matter, as ArmorBreak is handled outside the normal framework
-		}
+		charge = getChargeTime(player);
+		// manually set the keybind state, since it will not be set by the canceled mouse event
+		// releasing the mouse unsets it normally, but it must be manually unset if the skill is triggered
+		// note that doing so causes player to try to dig blocks when mousing over them
+		KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), true);
 		return false;
 	}
 
@@ -167,7 +146,7 @@ public class ArmorBreak extends SkillActive
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyPressed() {
-		return (DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].isKeyDown() || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.isKeyDown()));
+		return Minecraft.getMinecraft().gameSettings.keyBindAttack.isKeyDown();
 	}
 
 	@Override
@@ -203,9 +182,8 @@ public class ArmorBreak extends SkillActive
 					// since Armor Break will not return true for isActive
 					DSSPlayerInfo.get(player).setAttackCooldown(4); // flag for isAnimating? no player parameter
 					player.swingItem();
-					if (requiresReset) { // activated by vanilla attack key: manually unset the key state (fix for mouse event issues)
-						KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack.getKeyCode(), false);
-					}
+					// Manually unset the key state to prevent continually attacking while attack key held down
+					KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack.getKeyCode(), false);
 					SwordBasic skill = (SwordBasic) DSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
 					if (skill != null && skill.onAttack(player)) {
 						PacketDispatcher.sendToServer(new ActivateSkillPacket(this, true));

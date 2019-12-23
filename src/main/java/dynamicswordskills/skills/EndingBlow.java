@@ -160,8 +160,8 @@ public class EndingBlow extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		}
-		return (key == mc.gameSettings.keyBindForward || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey()
-				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+		return (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey()
+				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward));
 	}
 
 	/**
@@ -171,7 +171,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (key == mc.gameSettings.keyBindForward) {
+		if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward)) {
 			if (ticksTilFail == 0) {
 				ticksTilFail = 6;
 			}
@@ -188,7 +188,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (key == mc.gameSettings.keyBindForward) {
+		if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward)) {
 			keyReleased = (keyPressed > 0 && ticksTilFail > 0);
 		}
 	}

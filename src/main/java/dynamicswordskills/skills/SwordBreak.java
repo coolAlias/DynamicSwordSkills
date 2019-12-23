@@ -30,6 +30,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
@@ -145,12 +146,12 @@ public class SwordBreak extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (key == mc.gameSettings.keyBindForward) {
+		if ((Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey()) {
 			ticksTilFail = 6;
 			if (keysPressed < 2) {
 				keysPressed++;
 			}
-		} else if (key == mc.gameSettings.keyBindUseItem || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKey()) {
+		} else if (key == mc.gameSettings.keyBindUseItem) {
 			boolean flag = (canExecute(player) && activate(player));
 			ticksTilFail = 0;
 			keysPressed = 0;
@@ -168,7 +169,6 @@ public class SwordBreak extends SkillActive
 		playMissSound = true;
 		if (world.isRemote) {
 			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
-			KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 			player.swingItem();
 		}
 		return isActive();

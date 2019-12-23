@@ -30,11 +30,9 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.MortalDrawPacket;
-import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 
@@ -157,8 +155,7 @@ public class MortalDraw extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown()
-				|| DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown());
+		return player.getHeldItem() == null && Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown();
 	}
 
 	@Override
@@ -167,7 +164,7 @@ public class MortalDraw extends SkillActive
 		if (!isLockedOn) {
 			return false;
 		}
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+		return key == mc.gameSettings.keyBindAttack;
 	}
 
 	@Override
