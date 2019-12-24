@@ -261,7 +261,7 @@ public class SpinAttack extends SkillActive
 		charge = 0;
 		currentSpin = 0.0F;
 		arc = 0.0F;
-		DSSPlayerInfo.get(player).armSwing = 0.0F;
+		DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 	}
 
 	@Override
@@ -272,14 +272,15 @@ public class SpinAttack extends SkillActive
 				--charge;
 				int maxCharge = getChargeTime();
 				if (charge < maxCharge) {
-					DSSPlayerInfo.get(player).armSwing = 1F - 0.5F * ((float)(maxCharge - charge) / (float) maxCharge);
+					float f = 1F - 0.5F * ((float)(maxCharge - charge) / (float) maxCharge);
+					DSSPlayerInfo.get(player).setArmSwingProgress(f, f);
 				}
 				if (charge == 0 && canExecute(player)) {
 					activate(player);
 				}
 			} else {
 				charge = 0;
-				DSSPlayerInfo.get(player).armSwing = 0.0F;
+				DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 			}
 		} else if (isActive()) {
 			incrementSpin(player);
@@ -298,7 +299,7 @@ public class SpinAttack extends SkillActive
 				}
 			}
 			spawnParticles(player);
-			DSSPlayerInfo.get(player).armSwing = 0.5F;
+			DSSPlayerInfo.get(player).setArmSwingProgress(0.5F, 0.5F);
 			float fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS());
 			float speed = fps * this.getSpinSpeed();
 			player.setAngles((clockwise ? speed: -speed), 0);
