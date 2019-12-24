@@ -44,7 +44,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Range: Approximately 12 blocks, plus one block per level
  * Exhaustion: 2.0F - (0.1F * level)
  * Special:
- * 	- May only be used while locked on to a target
  *  - Amount of health required decreases with skill level, down to 1-1/2 hearts below max
  *  - Hitting a target with the beam counts as a direct strike for combos
  *  - At max level, the beam can penetrate multiple targets
@@ -125,7 +124,7 @@ public class SwordBeam extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
-		if (!isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
 		}
 		return key == mc.gameSettings.keyBindAttack;

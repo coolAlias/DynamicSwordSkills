@@ -190,7 +190,7 @@ public class SpinAttack extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
-		if (!isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
 		} else if (isAnimating()) {
 			return key == mc.gameSettings.keyBindAttack;

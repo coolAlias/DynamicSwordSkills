@@ -21,8 +21,8 @@ import java.util.List;
 
 import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntityLeapingBlow;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
@@ -129,7 +129,7 @@ public class LeapingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
-		if (!isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
 		}
 		return (key == mc.gameSettings.keyBindJump || key == mc.gameSettings.keyBindAttack);
@@ -191,8 +191,7 @@ public class LeapingBlow extends SkillActive
 	}
 
 	private void onFall(EntityPlayer player, float distance) {
-		SwordBasic swordSkill = (SwordBasic) DSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
-		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this)) {
+		if (isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this)) {
 			if (player.worldObj.isRemote) {
 				if (distance < 1.0F) {
 					DSSClientEvents.handlePlayerAttack(Minecraft.getMinecraft());
