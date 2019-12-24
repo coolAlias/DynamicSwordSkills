@@ -224,6 +224,11 @@ public class ArmorBreak extends SkillActive
 	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		activeTimer = 0;
 		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.ARMOR_BREAK, SoundCategory.PLAYERS, 0.4F, 0.5F);
+		// Fix combo modifier applied twice - once this event (which will be canceled) and again for the armor break damage hurt event
+		ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
+		if (combo != null && combo.getCombo() != null && !combo.getCombo().isFinished()) {
+			amount -= combo.getCombo().getNumHits();
+		}
 		DirtyEntityAccessor.damageEntity(entity, DamageUtils.causeArmorBreakDamage(player), amount);
 		return 0.0F;
 	}
