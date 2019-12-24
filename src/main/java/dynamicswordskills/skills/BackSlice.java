@@ -75,6 +75,12 @@ public class BackSlice extends SkillActive
 	/** Timer during which player may evade incoming attacks */
 	private int dodgeTimer = 0;
 
+	/** Flag set in onImpact to notify postImpact to process additional effects */
+	private boolean impacted;
+
+	/** Flag set in onImpact to notify postImpact to process additional effects */
+	private boolean success;
+
 	/** Used client side to get an extra renderTick for the targeting camera */
 	private SkillActive targetingSkill;
 
@@ -226,6 +232,8 @@ public class BackSlice extends SkillActive
 	public boolean onActivated(World world, EntityPlayer player) {
 		dodgeTimer = getActiveTime();
 		targetingSkill = DSSPlayerInfo.get(player).getActiveSkill(swordBasic);
+		impacted = false;
+		success = false;
 		return isActive();
 	}
 
@@ -242,6 +250,9 @@ public class BackSlice extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		if (isActive()) {
 			--dodgeTimer;
+			if (impacted) {
+				deactivate(player);
+			}
 		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
 			if (--ticksTilFail == 0) {
 				keyPressed = null;
@@ -290,24 +301,29 @@ public class BackSlice extends SkillActive
 	}
 
 	@Override
-	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		impacted = true;
 		if (isActive() && dodgeTimer <= (getActiveTime() - 5)) { // can strike any time after 5 ticks have passed
 			ILockOnTarget targeting = DSSPlayerInfo.get(player).getTargetingSkill();
 			if (targeting != null && targeting.getCurrentTarget() == entity) {
 				if (!TargetUtils.isTargetInFrontOf(entity, player, getAttackAngle())) {
 					amount *= 1.0F + (level * 0.1F);
 					PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_MORTALDRAW, 0.4F, 0.5F);
-					if (Config.canDisarmorPlayers() || !(entity instanceof EntityPlayer)) {
-						ItemStack armor = entity.getEquipmentInSlot(ArmorIndex.EQUIPPED_CHEST);
-						if (armor != null && player.worldObj.rand.nextFloat() < getDisarmorChance(armor, player.getHeldItem(), level)) {
-							PlayerUtils.spawnItemWithRandom(entity.worldObj, armor, entity.posX, entity.posY, entity.posZ);
-							entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, null);
-						}
-					}
+					success = true;
 				}
 			}
 		}
-		deactivate(player); // now deactivate on server side; if player missed, they just have to wait
 		return amount;
+	}
+
+	@Override
+	public void postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		if (success && Config.canDisarmorPlayers() || !(entity instanceof EntityPlayer)) {
+			ItemStack armor = entity.getEquipmentInSlot(ArmorIndex.EQUIPPED_CHEST);
+			if (armor != null && player.worldObj.rand.nextFloat() < getDisarmorChance(armor, player.getHeldItem(), level)) {
+				PlayerUtils.spawnItemWithRandom(entity.worldObj, armor, entity.posX, entity.posY, entity.posZ);
+				entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, null);
+			}
+		}
 	}
 }

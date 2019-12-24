@@ -196,6 +196,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		activeTimer = 3; // gives server some time for client attack to occur
+		entityHit = null;
 		ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
 		if (skill.getCombo() != null) {
 			lastNumHits = skill.getCombo().getNumHits();
@@ -280,16 +281,22 @@ public class EndingBlow extends SkillActive
 	}
 
 	@Override
-	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
-		activeTimer = 0;
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
 		ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
 		if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
 			amount *= 1.0F + (level * 0.2F);
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_MORTALDRAW, 0.4F, 0.5F);
 			entityHit = entity;
-			xp = level + 1 + player.worldObj.rand.nextInt(Math.max(2, MathHelper.ceiling_float_int(entity.getHealth())));
 		}
 		return amount;
+	}
+
+	@Override
+	public void postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		activeTimer = 0;
+		if (entityHit != null) {
+			xp = level + 1 + player.worldObj.rand.nextInt(Math.max(2, MathHelper.ceiling_float_int(entity.getHealth())));
+		}
 	}
 }
