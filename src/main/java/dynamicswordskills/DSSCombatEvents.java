@@ -158,8 +158,21 @@ public class DSSCombatEvents
 	 */
 	@SubscribeEvent
 	public void onAttacked(LivingAttackEvent event) {
+		if (event.source.getEntity() instanceof EntityPlayer) {
+			DSSPlayerInfo.get((EntityPlayer) event.source.getEntity()).onAttack(event);
+		}
 		if (!event.isCanceled() && event.entity instanceof EntityPlayer) {
 			DSSPlayerInfo.get((EntityPlayer) event.entity).onBeingAttacked(event);
+		}
+	}
+
+	@SubscribeEvent(priority=EventPriority.NORMAL)
+	public void onHurt(LivingHurtEvent event) {
+		if (event.source.getEntity() instanceof EntityPlayer) {
+			DSSPlayerInfo.get((EntityPlayer) event.source.getEntity()).onImpact(event);
+			if (event.ammount <= 0.0F) {
+				event.setCanceled(true);
+			}
 		}
 	}
 
@@ -167,16 +180,7 @@ public class DSSCombatEvents
 	 * Use LOW or LOWEST priority to prevent interrupting a combo when the event may be canceled elsewhere.
 	 */
 	@SubscribeEvent(priority=EventPriority.LOWEST)
-	public void onHurt(LivingHurtEvent event) {
-		if (event.source.getEntity() instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.source.getEntity();
-			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-			ICombo combo = skills.getComboSkill();
-			if (combo != null && combo.getCombo() != null && !combo.getCombo().isFinished()) {
-				event.ammount += combo.getCombo().getNumHits();
-			}
-			DSSPlayerInfo.get(player).onImpact(event);
-		}
+	public void onPostHurt(LivingHurtEvent event) {
 		if (!event.isCanceled() && event.ammount > 0.0F && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
@@ -186,9 +190,6 @@ public class DSSCombatEvents
 		}
 		if (!event.isCanceled() && event.ammount > 0.0F && event.source.getEntity() instanceof EntityPlayer) {
 			DSSPlayerInfo.get((EntityPlayer) event.source.getEntity()).onPostImpact(event);
-		}
-		if (event.ammount <= 0.0F) {
-			event.setCanceled(true);
 		}
 	}
 

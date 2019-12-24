@@ -194,13 +194,12 @@ public class RisingCut extends SkillActive
 	 * This is necessary because adding velocity right before the entity is damaged fails.
 	 */
 	@Override
-	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+	public void postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		if (!hitEntity) {
 			boolean flag = !(entity instanceof EntityPlayer) || !PlayerUtils.isBlocking((EntityPlayer) entity);
 			this.entityHit = (flag ? entity : null);
 		}
 		hitEntity = true;
-		return amount;
 	}
 
 	@Override

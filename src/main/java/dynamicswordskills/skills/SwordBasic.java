@@ -339,6 +339,14 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		if (combo != null && !combo.isFinished()) {
+			amount += combo.getNumHits();
+		}
+		return amount;
+	}
+
+	@Override
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event) {
 		if (!isLockedOn() || !isValidComboDamage(player, event.source)) { return; }
 		if (combo == null || combo.isFinished()) {

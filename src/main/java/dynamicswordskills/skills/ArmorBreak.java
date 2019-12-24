@@ -32,6 +32,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
 /**
@@ -202,25 +203,13 @@ public class ArmorBreak extends SkillActive
 		}
 	}
 
-	/**
-	 * WARNING: Something REALLY dirty is about to go down here.
-	 * Uses a custom accessor class planted in net.minecraft.entity package to access
-	 * protected method {@link EntityLivingBase#damageEntity damageEntity}; sets the
-	 * event amount to zero and deactivates the skill to prevent further processing
-	 * during this event cycle; LivingHurtEvent is posted again from damageEntity, at
-	 * which point ArmorBreak will no longer be active and the event may continue as
-	 * normal, but with armor-ignoring damage.
-	 */
 	@Override
-	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+	public boolean onAttack(EntityPlayer player, EntityLivingBase entity, DamageSource source, float amount) {
 		activeTimer = 0;
-		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_ARMORBREAK, 0.4F, 0.5F);
-		// Fix combo modifier applied twice - once this event (which will be canceled) and again for the armor break damage hurt event
-		ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
-		if (combo != null && combo.getCombo() != null && !combo.getCombo().isFinished()) {
-			amount -= combo.getCombo().getNumHits();
+		if (!player.worldObj.isRemote) { 
+			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_ARMORBREAK, 0.4F, 0.5F);
+			DirtyEntityAccessor.damageEntity(entity, DamageUtils.causeArmorBreakDamage(player), amount);
 		}
-		DirtyEntityAccessor.damageEntity(entity, DamageUtils.causeArmorBreakDamage(player), amount);
-		return 0.0F;
+		return true;
 	}
 }
