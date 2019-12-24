@@ -44,6 +44,7 @@ public class Config
 	private static boolean enableTargetPlayer;
 	private static boolean allowVanillaControls;
 	private static boolean requireDoubleTap;
+	private static boolean requireLockOn;
 	/* Combo HUD */
 	public static int comboHudDisplayTime;
 	private static int comboHudMaxHits;
@@ -127,6 +128,7 @@ public class Config
 			allowVanillaControls = true;
 		}
 		requireDoubleTap = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.requireDoubleTap", true, "Require double-tap for Dodge and Parry (always required when Vanilla Controls are enabled)").getBoolean(true);
+		requireLockOn = config.get(Configuration.CATEGORY_CLIENT, "dss.config.client.requireLockOn", true, "Require locking on to activate skills").getBoolean(true);
 		/* Combo HUD */
 		String[] xalign = {"left", "center", "right"};
 		String[] yalign = {"top", "center", "bottom"};
@@ -210,6 +212,7 @@ public class Config
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
 	public static boolean enableAdditionalControls() { return enableAdditionalControls; }
 	public static boolean requiresDoubleTap() { return requireDoubleTap; }
+	public static boolean requiresLockOn() { return requireLockOn; }
 	public static boolean autoTargetEnabled() { return enableAutoTarget; }
 	public static boolean canTargetPassiveMobs() { return enableTargetPassive; }
 	public static boolean canTargetPlayers() { return enableTargetPlayer; }

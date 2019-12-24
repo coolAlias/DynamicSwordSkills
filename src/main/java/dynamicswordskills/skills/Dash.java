@@ -22,6 +22,7 @@ import java.util.List;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.DashImpactPacket;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
 import dynamicswordskills.util.TargetUtils;
@@ -70,10 +71,7 @@ public class Dash extends SkillActive
 	/** Number of ticks since activation */
 	private int activeTime;
 
-	/**
-	 * The dash trajectory is set once when activated, to prevent the vec3 coordinates from
-	 * shrinking as the player nears the target; as a bonus, Dash is no longer 'homing'
-	 */
+	/** Trajectory based on player's last look vector while on the ground */
 	@SideOnly(Side.CLIENT)
 	private Vec3d trajectory;
 
@@ -182,7 +180,7 @@ public class Dash extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
-		if (!isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
 		}
 		return key == mc.gameSettings.keyBindAttack;
@@ -199,19 +197,8 @@ public class Dash extends SkillActive
 		isActive = true;
 		activeTime = 0;
 		player.setSprinting(true);
+		trajectory = player.getLookVec();
 		initialPosition = new Vec3d(player.posX, player.posY, player.posZ);
-		ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
-		if (skill != null && skill.isLockedOn()) {
-			target = skill.getCurrentTarget();
-		} else {
-			target = TargetUtils.acquireLookTarget(player, (int) getRange(), getRange(), true, TargetUtils.getDefaultSelectors());
-		}
-		if (target != null && world.isRemote) {
-			double d0 = (target.posX - player.posX);
-			double d1 = (target.posY + (double)(target.height / 3.0F) - player.posY);
-			double d2 = (target.posZ - player.posZ);
-			trajectory = new Vec3d(d0, d1, d2).normalize();
-		}
 		return isActive();
 	}
 
@@ -246,6 +233,9 @@ public class Dash extends SkillActive
 					double speed = bonus * player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
 					if (player.isInWater() || player.isInLava()) {
 						speed *= 0.15D;
+					}
+					if (player.onGround) { 
+						trajectory = player.getLookVec();
 					}
 					player.addVelocity(trajectory.xCoord * speed, -0.02D, trajectory.zCoord * speed);
 				}

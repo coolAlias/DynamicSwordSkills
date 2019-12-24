@@ -136,7 +136,7 @@ public class SwordBreak extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
-		if (!isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
 		}
 		return true;

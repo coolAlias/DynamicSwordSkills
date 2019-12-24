@@ -23,6 +23,7 @@ import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
@@ -32,6 +33,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -61,6 +63,9 @@ public class ArmorBreak extends SkillActive
 
 	/** Current charge time */
 	private int charge = 0;
+
+	/** Flag to allow armor break to begin charging even if mouse is over a block */
+	private boolean wasLockedOn;
 
 	@SideOnly(Side.CLIENT)
 	private KeyBinding attackKey;
@@ -113,17 +118,21 @@ public class ArmorBreak extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
-		if (!isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
 			// Need to receive key release when not locked on to stop charging
 			return charge > 0 && key == mc.gameSettings.keyBindAttack;
 		}
+		wasLockedOn = isLockedOn;
 		return key == mc.gameSettings.keyBindAttack;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		attackKey = key;
+		// Only begin charging if not mousing over a block or locked on, otherwise player cannot harvest blocks
+		if (wasLockedOn || mc.objectMouseOver == null || mc.objectMouseOver.typeOfHit != RayTraceResult.Type.BLOCK) {
+			attackKey = key;
+		}
 		return false;
 	}
 

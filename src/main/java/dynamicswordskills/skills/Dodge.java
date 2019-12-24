@@ -21,7 +21,6 @@ import java.util.List;
 
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
@@ -136,9 +135,7 @@ public class Dodge extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() 
-				&& !PlayerUtils.isBlocking(player) 
-				&& DSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() && !PlayerUtils.isBlocking(player);
 	}
 
 	@Override
@@ -150,7 +147,7 @@ public class Dodge extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
-		if (!isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
 		}
 		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
