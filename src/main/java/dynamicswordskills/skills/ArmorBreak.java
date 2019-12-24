@@ -20,7 +20,6 @@ package dynamicswordskills.skills;
 import java.util.List;
 
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.ModSounds;
@@ -217,9 +216,9 @@ public class ArmorBreak extends SkillActive
 	@Override
 	public boolean onAttack(EntityPlayer player, EntityLivingBase entity, DamageSource source, float amount) {
 		activeTimer = 0;
+		entity.attackEntityFrom(DamageUtils.causeArmorBreakDamage(player), amount);
 		if (!player.worldObj.isRemote) { 
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.ARMOR_BREAK, SoundCategory.PLAYERS, 0.4F, 0.5F);
-			DirtyEntityAccessor.damageEntity(entity, DamageUtils.causeArmorBreakDamage(player), amount);
 		}
 		return true;
 	}
