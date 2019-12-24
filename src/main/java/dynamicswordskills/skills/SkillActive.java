@@ -33,6 +33,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
@@ -306,6 +307,20 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
+	 * Use this method to e.g. attack the target entity with a different damage source.
+	 * Called from {@link LivingAttackEvent}; for players, this is called on both sides. 
+	 * 
+	 * @param player The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
+	 * @param entity The entity damaged, i.e. LivingHurtEvent's entityLiving
+	 * @param source The DamageSource from the event
+	 * @param amount The damage amount
+	 * @return       True to cancel the event
+	 */
+	public boolean onAttack(EntityPlayer player, EntityLivingBase entity, DamageSource source, float amount) {
+		return false;
+	}
+
+	/**
 	 * Called from LivingAttackEvent only if the skill is currently {@link #isActive() active}
 	 * @param player	The skill-using player under attack
 	 * @param source	The source of damage; source#getEntity() is the entity that will strike the player,
@@ -318,10 +333,8 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
-	 * Called from LivingHurtEvent after increasing the damage amount based on the combo count and prior
-	 * to calling {@link ICombo#onPlayerHurt(EntityPlayer, LivingHurtEvent)} for a damaged player entity.
-	 * Only called if the skill is currently {@link #isActive() active}, the event has not been canceled,
-	 * and the remaining damage amount is > 0.
+	 * Use this method to modify the damage amount for an entity attacked while this skill is active.
+	 * Called from LivingHurtEvent with NORMAL priority.
 	 * 
 	 * @param player The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
 	 * @param entity The entity damaged, i.e. LivingHurtEvent's entityLiving
@@ -333,19 +346,14 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
-	 * Called from LivingHurtEvent only if the skill is currently {@link #isActive() active}
-	 * for the player that inflicted the damage, after all damage modifiers have been taken
-	 * into account, providing a final chance to modify the damage or perform other actions
-	 * before {@link ICombo#onHurtTarget} is called.
-	 * Not called if the event was canceled or the damage was reduced to <= 0 by {@link #onImpact}.
+	 * Use this method to activate effects after damage has been done.
+	 * Called from LivingHurtEvent with LOWEST priority.
 	 * 
 	 * @param player	The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
 	 * @param entity	The entity damaged, i.e. LivingHurtEvent's entityLiving
 	 * @param amount	The current damage amount from {@link LivingHurtEvent#amount}
-	 * @return			The final damage amount to inflict
 	 */
-	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
-		return amount;
+	public void postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 	}
 
 	/**
