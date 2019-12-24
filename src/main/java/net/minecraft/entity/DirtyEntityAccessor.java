@@ -19,13 +19,8 @@ package net.minecraft.entity;
 
 import net.minecraft.util.DamageSource;
 
-public class DirtyEntityAccessor {
-
-	/** Damages the target for the amount of damage using the vanilla method; posts LivingHurtEvent */
-	public static void damageEntity(EntityLivingBase target, DamageSource source, float amount) {
-		target.damageEntity(source, amount);
-	}
-
+public class DirtyEntityAccessor
+{
 	/**
 	 * Returns the amount of damage the entity will receive after armor and potions are taken into account
 	 */

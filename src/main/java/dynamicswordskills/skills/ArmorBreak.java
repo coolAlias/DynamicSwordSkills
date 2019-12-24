@@ -206,9 +206,9 @@ public class ArmorBreak extends SkillActive
 	@Override
 	public boolean onAttack(EntityPlayer player, EntityLivingBase entity, DamageSource source, float amount) {
 		activeTimer = 0;
+		entity.attackEntityFrom(DamageUtils.causeArmorBreakDamage(player), amount);
 		if (!player.worldObj.isRemote) { 
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_ARMORBREAK, 0.4F, 0.5F);
-			DirtyEntityAccessor.damageEntity(entity, DamageUtils.causeArmorBreakDamage(player), amount);
 		}
 		return true;
 	}
