@@ -92,6 +92,12 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	/** Whether the player has received the starting bonus gear or not yet */
 	private boolean receivedGear = false;
 
+	/** Used by certain skills for controlling the player's main arm rendering; set to 0.0F for vanilla behavior */
+	public float swingProgress = 0.0F;
+
+	/** Used by certain skills for controlling the player's main arm rendering; set to 0.0F for vanilla behavior */
+	public float prevSwingProgress = 0.0F;
+
 	public DSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
 		this.skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
@@ -142,6 +148,16 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void setUseItemCooldown(int ticks) {
 		this.useItemCooldown = MathHelper.clamp_int(ticks, useItemCooldown, MAX_CLICK_COOLDOWN);
+	}
+
+	/**
+	 * Sets the current and previous arm swing amount; used by some skills for rendering the player's arm position
+	 * @param current  See {@link #swingProgress}
+	 * @param previous See {@link #prevSwingProgress}
+	 */
+	public void setArmSwingProgress(float current, float previous) {
+		this.swingProgress = current;
+		this.prevSwingProgress = previous;
 	}
 
 	/**
