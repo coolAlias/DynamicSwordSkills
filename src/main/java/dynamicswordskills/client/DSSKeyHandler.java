@@ -104,11 +104,10 @@ public class DSSKeyHandler
 	 */
 	public static boolean onKeyPressed(Minecraft mc, int kb) {
 		if (mc.inGameHasFocus && mc.thePlayer != null) {
-			DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
 			if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
 			} else {
-				return handleTargetingKeys(mc, kb, skills);
+				return handleSkillKeys(mc, kb);
 			}
 		}
 		return false;
@@ -128,10 +127,8 @@ public class DSSKeyHandler
 		}
 	}
 
-	/**
-	 * All ILockOnTarget skill related keys are handled here
-	 */
-	private static boolean handleTargetingKeys(Minecraft mc, int kb, DSSPlayerInfo skills) {
+	private static boolean handleSkillKeys(Minecraft mc, int kb) {
+		DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
 		ILockOnTarget skill = skills.getTargetingSkill();
 		boolean canInteract = skills.canInteract();
 		boolean isLockedOn = (skill != null && skill.isLockedOn());
