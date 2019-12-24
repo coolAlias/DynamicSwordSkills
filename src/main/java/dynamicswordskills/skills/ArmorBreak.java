@@ -164,18 +164,19 @@ public class ArmorBreak extends SkillActive
 	protected void onDeactivated(World world, EntityPlayer player) {
 		activeTimer = 0;
 		charge = 0;
+		DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 	}
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		if (isCharging(player)) {
 			if (isKeyPressed() && PlayerUtils.isWeapon(player.getHeldItem())) {
-				if (!player.isSwingInProgress) {
-					if (charge < (getChargeTime(player) - 1)) {
-						Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
-					}
-					--charge;
+				int maxCharge = getChargeTime(player);
+				if (charge < maxCharge - 1) {
+					float f = 0.25F + 0.75F * ((float)(maxCharge - charge) / (float) maxCharge);
+					DSSPlayerInfo.get(player).setArmSwingProgress(f, 0.0F);
 				}
+				--charge;
 				// ArmorBreak triggers here, on the client side first, so onActivated need not process on the client
 				if (charge == 0) {
 					// can't use the standard animation methods to prevent key/mouse input,
@@ -190,10 +191,12 @@ public class ArmorBreak extends SkillActive
 					}
 				}
 			} else {
+				DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 				charge = 0;
 			}
+		} else {
+			DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 		}
-
 		if (isActive()) {
 			activeTimer = 0;
 		}

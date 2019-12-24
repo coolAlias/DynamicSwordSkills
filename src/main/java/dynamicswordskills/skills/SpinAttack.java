@@ -246,6 +246,7 @@ public class SpinAttack extends SkillActive
 		charge = 0;
 		currentSpin = 0.0F;
 		arc = 0.0F;
+		DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 	}
 
 	@Override
@@ -253,8 +254,11 @@ public class SpinAttack extends SkillActive
 		// isCharging can only be true on the client, which is where charging is handled
 		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
 			if (PlayerUtils.isWeapon(player.getHeldItem()) && player.worldObj.isRemote && isKeyPressed()) {
-				if (charge < (getChargeTime() - 1)) {
-					Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
+				--charge;
+				int maxCharge = getChargeTime();
+				if (charge < maxCharge) {
+					float f = 1F - 0.5F * ((float)(maxCharge - charge) / (float) maxCharge);
+					DSSPlayerInfo.get(player).setArmSwingProgress(f, f);
 				}
 				--charge;
 				if (charge == 0 && canExecute(player)) {
@@ -262,6 +266,7 @@ public class SpinAttack extends SkillActive
 				}
 			} else {
 				charge = 0;
+				DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 			}
 		} else if (isActive()) {
 			incrementSpin(player);
@@ -280,7 +285,7 @@ public class SpinAttack extends SkillActive
 				}
 			}
 			spawnParticles(player);
-			player.swingProgress = 0.5F;
+			DSSPlayerInfo.get(player).setArmSwingProgress(0.5F, 0.5F);
 			float fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS());
 			float speed = fps * this.getSpinSpeed();
 			player.setAngles((clockwise ? speed: -speed), 0);

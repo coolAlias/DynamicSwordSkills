@@ -42,8 +42,15 @@ public class TargetingTickHandler
 	@SubscribeEvent
 	public void onRenderTick(RenderTickEvent event) {
 		if (event.phase == Phase.START) {
-			if (mc.thePlayer != null && DSSPlayerInfo.get(mc.thePlayer) != null) {
-				DSSPlayerInfo.get(mc.thePlayer).onRenderTick(event.renderTickTime);
+			DSSPlayerInfo skills = (mc.thePlayer == null ? null : DSSPlayerInfo.get(mc.thePlayer));
+			if (skills != null) {
+				skills.onRenderTick(event.renderTickTime);
+				if (skills.swingProgress > 0.0F) {
+					mc.thePlayer.swingProgress = skills.swingProgress;
+				}
+				if (skills.prevSwingProgress > 0.0F) {
+					mc.thePlayer.prevSwingProgress = skills.prevSwingProgress;
+				}
 			}
 		}
 	}
