@@ -27,24 +27,10 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class DirtyEntityAccessor {
 
-	/** Accessible reference to {@code EntityLivingBase#damageEntity} */
-	private static Method damageEntity;
 	/** Accessible reference to {@code EntityLivingBase#applyPotionDamageCalculations */
 	private static Method applyPotionDamageCalculations;
 	/** Accessible reference to {@code EntityLiving#experienceValue */
 	private static Field experienceValue;
-
-	/** Damages the target for the amount of damage using the vanilla method; posts LivingHurtEvent */
-	public static void damageEntity(EntityLivingBase target, DamageSource source, float amount) {
-		if (damageEntity == null) {
-			damageEntity = ReflectionHelper.findMethod(EntityLivingBase.class, target, new String[]{"func_70665_d","damageEntity"}, DamageSource.class, float.class);
-		}
-		try {
-			damageEntity.invoke(target, source, amount);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	/**
 	 * Returns the amount of damage the entity will receive after armor and potions are taken into account
