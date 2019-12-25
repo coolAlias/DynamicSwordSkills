@@ -21,9 +21,7 @@ import java.util.List;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.IDashItem;
-import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.DashImpactPacket;
@@ -117,7 +115,7 @@ public class Dash extends SkillActive
 
 	/** Maximum active time in case player is unable to move an appropriate amount of distance */
 	protected int getMaxActiveTime() {
-		return 12 + level;
+		return 14 + (2 * level);
 	}
 
 	/** Number of ticks the player will not be able to block or use an item after impact */
@@ -181,6 +179,7 @@ public class Dash extends SkillActive
 	protected boolean onActivated(World world, EntityPlayer player) {
 		isActive = true;
 		activeTime = 0;
+		player.setSprinting(true);
 		initialPosition = Vec3.createVectorHelper(player.posX, player.posY, player.posZ);
 		ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
@@ -199,12 +198,9 @@ public class Dash extends SkillActive
 
 	@Override
 	protected void onDeactivated(World world, EntityPlayer player) {
-		if (player.worldObj.isRemote) {
-			trajectory = null;
-		}
 		initialPosition = null;
 		impactTime = 0; // no longer active, target will be set to null from setNotDashing
-		setNotDashing(); // sets all remaining fields to 0 or null
+		setNotDashing(player); // sets all remaining fields to 0 or null
 	}
 
 	@Override
@@ -217,14 +213,23 @@ public class Dash extends SkillActive
 		}
 		// don't use isActive() method, as that also returns true after impact
 		if (isActive) {
+			player.setSprinting(true);
 			// Only check for impact on the client, as the server is not reliable for this step
 			// If a collision is detected, DashImpactPacket is sent to conclude the server-side
 			if (!PlayerUtils.isBlocking(player)) {
-				setNotDashing();
+				setNotDashing(player);
 				if (!player.worldObj.isRemote) {
 					deactivate(player);
 				}
 			} else if (player.worldObj.isRemote) {
+				if (trajectory != null) {
+					double bonus = 1.0D + (0.1D * level);
+					double speed = bonus * player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue();
+					if (player.isInWater() || player.handleLavaMovement()) {
+						speed *= 0.15D;
+					}
+					player.addVelocity(trajectory.xCoord * speed, 0.0D, trajectory.zCoord * speed);
+				}
 				MovingObjectPosition mop = TargetUtils.checkForImpact(player.worldObj, player, player, 0.5D, false);
 				if (mop != null || player.isCollidedHorizontally) {
 					PacketDispatcher.sendToServer(new DashImpactPacket(player, mop));
@@ -237,8 +242,10 @@ public class Dash extends SkillActive
 					}
 					double d = Math.sqrt((player.motionX * player.motionX) + (player.motionZ * player.motionZ));
 					player.setVelocity(-player.motionX * d, 0.15D * d, -player.motionZ * d);
-					trajectory = null; // set to null so player doesn't keep moving forward
-					setNotDashing();
+					setNotDashing(player);
+				} else if (initialPosition == null || player.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord) > getRange()) {
+					player.addVelocity(-player.motionX * 0.5D, 0.0D, -player.motionZ * 0.5D);
+					deactivate(player);
 				}
 			}
 		}
@@ -286,7 +293,7 @@ public class Dash extends SkillActive
 		}
 		DSSPlayerInfo.get(player).setUseItemCooldown(getBlockCooldown());
 		PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_SLAM, 0.4F, 0.5F);
-		setNotDashing();
+		setNotDashing(player);
 	}
 
 	@Override
@@ -298,24 +305,7 @@ public class Dash extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
-		if (initialPosition == null || player.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord) > getRange()) {
-			player.addVelocity(-player.motionX * 0.5D, 0.0D, -player.motionZ * 0.5D);
-			trajectory = null;
-			if (isActive) {
-				deactivate(player);
-			}
-		}
-		if (target instanceof EntityLivingBase && trajectory != null) {
-			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue();
-			double fps = (DynamicSwordSkills.BASE_FPS / (float) DSSClientEvents.getDebugFPS()); 
-			// Bonus is roughly equivalent to sprinting plus an additional amount per level
-			double bonus = 1.3D + (0.1D * level);
-			double d = speed * bonus * fps;
-			if (player.isInWater() || player.handleLavaMovement()) {
-				d *= 0.3D;
-			}
-			player.addVelocity(trajectory.xCoord * d, 0.0D, trajectory.zCoord * d);
-		}
+		player.setSprinting(true); // required for a smooth experience and sprinting particle effects
 		return false; // this skill doesn't need to control the camera
 	}
 
@@ -334,8 +324,12 @@ public class Dash extends SkillActive
 	 * {@link #isActive()} will return false if no entity was impacted, otherwise it
 	 * will still be true for {@link #impactTime} ticks to prevent damage from the {@link #target}. 
 	 */
-	private void setNotDashing() {
+	private void setNotDashing(EntityPlayer player) {
 		isActive = false;
+		player.setSprinting(false);
+		if (player.worldObj.isRemote) {
+			trajectory = null;
+		}
 		if (!isActive()) {
 			target = null;
 		}
