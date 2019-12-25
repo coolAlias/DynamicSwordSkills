@@ -260,8 +260,9 @@ public class Dash extends SkillActive
 					if (result != null && result.typeOfHit == RayTraceResult.Type.ENTITY) {
 						target = result.entityHit;
 					}
-					double d = Math.sqrt((player.motionX * player.motionX) + (player.motionZ * player.motionZ));
-					player.setVelocity(-player.motionX * d, 0.15D * d, -player.motionZ * d);
+					double d = (player.onGround ? 2.0D : 0.5D);
+					double dy = (player.onGround ? 0.3D : -0.15D);
+					player.setVelocity(-player.motionX * d, dy, -player.motionZ * d);
 					setNotDashing(player);
 				} else if (initialPosition == null || player.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord) > getRange()) {
 					player.addVelocity(-player.motionX * 0.5D, -0.02D, -player.motionZ * 0.5D);
