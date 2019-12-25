@@ -228,7 +228,7 @@ public class Dash extends SkillActive
 					if (player.isInWater() || player.handleLavaMovement()) {
 						speed *= 0.15D;
 					}
-					player.addVelocity(trajectory.xCoord * speed, 0.0D, trajectory.zCoord * speed);
+					player.addVelocity(trajectory.xCoord * speed, -0.02D, trajectory.zCoord * speed);
 				}
 				MovingObjectPosition mop = TargetUtils.checkForImpact(player.worldObj, player, player, 0.5D, false);
 				if (mop != null || player.isCollidedHorizontally) {
@@ -244,7 +244,7 @@ public class Dash extends SkillActive
 					player.setVelocity(-player.motionX * d, 0.15D * d, -player.motionZ * d);
 					setNotDashing(player);
 				} else if (initialPosition == null || player.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord) > getRange()) {
-					player.addVelocity(-player.motionX * 0.5D, 0.0D, -player.motionZ * 0.5D);
+					player.addVelocity(-player.motionX * 0.5D, -0.02D, -player.motionZ * 0.5D);
 					deactivate(player);
 				}
 			}
