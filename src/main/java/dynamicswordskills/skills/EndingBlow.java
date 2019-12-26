@@ -243,12 +243,7 @@ public class EndingBlow extends SkillActive
 		if (isActive()) {
 			--activeTimer;
 			if (activeTimer == 0 && !player.worldObj.isRemote) {
-				if (!player.capabilities.isCreativeMode) {
-					DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-					skills.setAttackCooldown(getDuration() * 2);
-					PacketDispatcher.sendTo(new ActionTimePacket(skills.getAttackTime(), true), (EntityPlayerMP) player);
-				}
-				PacketDispatcher.sendTo(new EndingBlowPacket((byte)-1), (EntityPlayerMP) player);
+				onFail(player, true);
 			}
 		}
 	}
@@ -258,23 +253,16 @@ public class EndingBlow extends SkillActive
 	 */
 	private void updateEntityState(EntityPlayer player) {
 		if (!player.worldObj.isRemote) {
-			byte result = -1;
 			if (entityHit.getHealth() <= 0.0F) {
-				result = 1;
 				if (entityHit instanceof EntityLiving) {
 					DirtyEntityAccessor.setLivingXp((EntityLiving) entityHit, xp, true);
 				} else {
 					PlayerUtils.spawnXPOrbsWithRandom(player.worldObj, player.worldObj.rand, entityHit.getPosition(), xp);
 				}
+				PacketDispatcher.sendTo(new EndingBlowPacket((byte) 1), (EntityPlayerMP) player);
 			} else {
-				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.3F, 0.8F);
-				if (!player.worldObj.isRemote && !player.capabilities.isCreativeMode) {
-					DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-					skills.setAttackCooldown(getDuration());
-					PacketDispatcher.sendTo(new ActionTimePacket(skills.getAttackTime(), true), (EntityPlayerMP) player);
-				}
+				onFail(player, false);
 			}
-			PacketDispatcher.sendTo(new EndingBlowPacket(result), (EntityPlayerMP) player);
 		}
 		entityHit = null;
 		xp = 0;
@@ -298,5 +286,18 @@ public class EndingBlow extends SkillActive
 		if (entityHit != null) {
 			xp = level + 1 + player.worldObj.rand.nextInt(Math.max(2, MathHelper.ceiling_float_int(entity.getHealth())));
 		}
+	}
+
+	private void onFail(EntityPlayer player, boolean timedOut) {
+		if (!player.capabilities.isCreativeMode) {
+			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+			int t = getDuration() * (timedOut ? 2 : 1);
+			skills.setAttackCooldown(t);
+			PacketDispatcher.sendTo(new ActionTimePacket(skills.getAttackTime(), true), (EntityPlayerMP) player);
+		}
+		if (!timedOut) {
+			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.3F, 0.8F);
+		}
+		PacketDispatcher.sendTo(new EndingBlowPacket((byte)-1), (EntityPlayerMP) player);
 	}
 }
