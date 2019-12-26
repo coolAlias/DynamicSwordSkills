@@ -271,7 +271,7 @@ public class BackSlice extends SkillActive
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		if (player.onGround) {
 			// force extra camera update so player can more easily hit target:
-			if (targetingSkill != null && targetingSkill.isActive()) {
+			if (Minecraft.getDebugFPS() < 90 && targetingSkill != null && targetingSkill.isActive()) {
 				targetingSkill.onRenderTick(player, partialTickTime);
 			}
 			double speed = 1.0D + 10.0D * (player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - Dash.BASE_MOVE);
