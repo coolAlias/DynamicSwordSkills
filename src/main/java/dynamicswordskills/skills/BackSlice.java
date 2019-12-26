@@ -200,7 +200,7 @@ public class BackSlice extends SkillActive
 				mc.playerController.attackEntity(mc.thePlayer, target);
 			} else {
 				PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
-				ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
+				IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
 				if (combo.isComboInProgress()) {
 					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) combo));
 				}

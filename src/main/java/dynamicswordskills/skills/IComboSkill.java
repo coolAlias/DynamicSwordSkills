@@ -25,8 +25,8 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
  * Interface for Skills that are Combo-capable. Only one such skill should be active at a time.
  *
  */
-public interface ICombo {
-	
+public interface IComboSkill
+{
 	/** Returns the Combo instance for associated class */
 	public Combo getCombo();
 	

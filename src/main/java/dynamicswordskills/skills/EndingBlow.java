@@ -135,7 +135,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		if (!isActive() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem())) {
-			ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
+			IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
 			ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
 			if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
 				if (lastNumHits > 0) {
@@ -197,7 +197,7 @@ public class EndingBlow extends SkillActive
 	protected boolean onActivated(World world, EntityPlayer player) {
 		activeTimer = 3; // gives server some time for client attack to occur
 		entityHit = null;
-		ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
+		IComboSkill skill = DSSPlayerInfo.get(player).getComboSkill();
 		if (skill.getCombo() != null) {
 			lastNumHits = skill.getCombo().getNumHits();
 		}
@@ -234,7 +234,7 @@ public class EndingBlow extends SkillActive
 			if (entityHit != null && xp > 0) {
 				updateEntityState(player);
 			}
-			ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
+			IComboSkill skill = DSSPlayerInfo.get(player).getComboSkill();
 			if (skill == null || !skill.isComboInProgress()) {
 				lastNumHits = 0;
 			}
@@ -282,7 +282,7 @@ public class EndingBlow extends SkillActive
 
 	@Override
 	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
-		ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
+		IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
 		ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
 		if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
 			amount *= 1.0F + (level * 0.2F);

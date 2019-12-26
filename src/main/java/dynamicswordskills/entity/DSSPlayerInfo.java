@@ -30,7 +30,7 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.network.client.SyncSkillPacket;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillActive;
@@ -67,8 +67,8 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	/** Stores information on the player's skills */
 	private final Map<Byte, SkillBase> skills;
 
-	/** Reference to last active ICombo skill */
-	private ICombo comboSkill = null;
+	/** Reference to last active {@link IComboSkill} */
+	private IComboSkill comboSkill = null;
 
 	/** Reference to last active ILockOnTarget skill */
 	private ILockOnTarget targetingSkill = null;
@@ -404,7 +404,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 
 	/**
 	 * Calls {@link SkillActive#postImpact} for each currently active skill,
-	 * as well as calling {@link ICombo#onHurtTarget} for the current ICombo.
+	 * as well as calling {@link IComboSkill#onHurtTarget} for the current ICombo.
 	 */
 	public void onPostImpact(LivingHurtEvent event) {
 		for (SkillBase skill : skills.values()) {
@@ -545,12 +545,12 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Returns first ICombo from a currently active skill, if any, or the last active one;
-	 * ICombo skill may no longer be active and combo may or may not be in progress
+	 * Returns first {@link IComboSkill} from a currently active skill, if any, or the last active one;
+	 * Combo skill may no longer be active and a combo may or may not be in progress
 	 */
-	public ICombo getComboSkill() {
+	public IComboSkill getComboSkill() {
 		if (comboSkill == null || comboSkill.getCombo() == null || !((SkillActive) comboSkill).isActive()) {
-			ICombo combo = getFirstActiveComboSkill();
+			IComboSkill combo = getFirstActiveComboSkill();
 			if (combo != null) {
 				comboSkill = combo;
 			}
@@ -559,14 +559,14 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Returns the first active ICombo skill instance, if any; ICombo may or may not be in progress
+	 * Returns the first active {@link IComboSkill} instance, if any; combo may or may not be in progress
 	 */
-	private ICombo getFirstActiveComboSkill() {
+	private IComboSkill getFirstActiveComboSkill() {
 		for (SkillBase skill : SkillBase.getSkills()) {
-			if (skill instanceof ICombo && skill instanceof SkillActive) {
+			if (skill instanceof IComboSkill && skill instanceof SkillActive) {
 				SkillBase instance = getPlayerSkill(skill);
 				if (instance != null && ((SkillActive) instance).isActive()) {
-					return (ICombo) instance;
+					return (IComboSkill) instance;
 				}
 			}
 		}

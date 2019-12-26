@@ -88,7 +88,7 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
  * Down arrow (tap) - Parry/Disarm
  * 
  */
-public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
+public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarget
 {
 	/** True if this skill is currently active */
 	private boolean isActive = false;

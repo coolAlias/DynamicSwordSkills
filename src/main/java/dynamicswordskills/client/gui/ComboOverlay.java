@@ -26,7 +26,7 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.Combo;
-import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
@@ -76,7 +76,7 @@ public class ComboOverlay extends AbstractGuiOverlay
 		if (Config.comboHudDisplayTime < 1) {
 			return false;
 		}
-		ICombo iCombo = DSSPlayerInfo.get(mc.thePlayer).getComboSkill();
+		IComboSkill iCombo = DSSPlayerInfo.get(mc.thePlayer).getComboSkill();
 		if (iCombo != null && iCombo.getCombo() != null) {
 			if (this.combo != iCombo.getCombo()) {
 				this.combo = iCombo.getCombo();

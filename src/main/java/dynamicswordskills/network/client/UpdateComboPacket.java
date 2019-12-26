@@ -24,7 +24,7 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 import dynamicswordskills.skills.Combo;
-import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -60,9 +60,9 @@ public class UpdateComboPacket extends AbstractClientMessage<UpdateComboPacket>
 	protected void process(EntityPlayer player, Side side) {
 		Combo combo = Combo.readFromNBT(compound);
 		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(combo.getSkillId()));
-		if (skill instanceof ICombo) {
+		if (skill instanceof IComboSkill) {
 			combo.getEntityFromWorld(player.worldObj);
-			((ICombo) skill).setCombo(combo);
+			((IComboSkill) skill).setCombo(combo);
 		} else {
 			DynamicSwordSkills.logger.error("Invalid Combo skill id: " + combo.getSkillId());
 		}
