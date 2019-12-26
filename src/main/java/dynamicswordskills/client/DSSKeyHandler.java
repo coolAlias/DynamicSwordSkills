@@ -25,6 +25,7 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.OpenGuiPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ILockOnTarget;
+import dynamicswordskills.skills.SkillActive;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.MovingObjectPosition;
@@ -130,18 +131,18 @@ public class DSSKeyHandler
 
 	private static boolean handleSkillKeys(Minecraft mc, int kb) {
 		DSSPlayerInfo skills = DSSPlayerInfo.get(mc.thePlayer);
-		ILockOnTarget skill = skills.getTargetingSkill();
+		ILockOnTarget lock = skills.getTargetingSkill();
 		boolean canInteract = skills.canInteract();
-		boolean isLockedOn = (skill != null && skill.isLockedOn());
+		boolean isLockedOn = (lock != null && lock.isLockedOn());
 		if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
-			if (isLockedOn) {
+			if (lock instanceof SkillActive && ((SkillActive) lock).isActive()) {
 				skills.deactivateTargetingSkill();
 			} else {
 				skills.activateTargetingSkill();
 			}
 		} else if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
 			if (isLockedOn) {
-				skill.getNextTarget(mc.thePlayer);
+				lock.getNextTarget(mc.thePlayer);
 			}
 		} else if (kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
 			if (!skills.canAttack()) {
