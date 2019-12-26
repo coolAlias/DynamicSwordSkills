@@ -328,7 +328,9 @@ public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarge
 
 	@Override
 	public void onMiss(EntityPlayer player) {
-		PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
+		if (PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
+			PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
+		}
 		if (isComboInProgress()) {
 			PacketDispatcher.sendToServer(new EndComboPacket(this));
 		}
