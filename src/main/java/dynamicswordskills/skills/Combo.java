@@ -37,9 +37,6 @@ import dynamicswordskills.network.client.UpdateComboPacket;
  * Each instance of this class is a self-synchronizing and mostly self-contained module containing
  * all the data necessary to keep track of a player's current attack combo.
  * 
- * When a combo ends, the player will gain the specified type of experience in an damage equal
- * to the combo size minus one, plus an additional damage proportional to the total damage dealt.
- * 
  * Specifications:
  * A new instance should be used for each new attack combo.
  * Each instance should be updated every tick from within its containing class' update method 
@@ -84,12 +81,9 @@ public class Combo
 	 * packet to the client player with the new Combo instance.
 	 * @param maxComboSize size at which the combo self-terminates
 	 * @param timeLimit damage of time allowed between strikes before combo self-terminates
-	 * @param xpType the Attribute that receives xp gained from combo
 	 */
 	public Combo(EntityPlayer player, SkillBase skill, int maxComboSize, int timeLimit) {
-		this.skillId = skill.getId();
-		this.maxComboSize = maxComboSize;
-		this.timeLimit = timeLimit;
+		this(skill.getId(), maxComboSize, timeLimit);
 		if (player instanceof EntityPlayerMP) {
 			PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 		}
@@ -99,7 +93,6 @@ public class Combo
 	 * Constructs a new Combo with specified max combo size and time limit
 	 * @param maxComboSize size at which the combo self-terminates
 	 * @param timeLimit damage of time allowed between strikes before combo self-terminates
-	 * @param xpType the Attribute that receives xp gained from combo
 	 */
 	private Combo(byte skillId, int maxComboSize, int timeLimit) {
 		this.skillId = skillId;
@@ -192,7 +185,7 @@ public class Combo
 	}
 
 	/**
-	 * Ends a combo and grants Xp
+	 * Ends the combo and notifies the client
 	 */
 	public void endCombo(EntityPlayer player) {
 		if (!isFinished) {
