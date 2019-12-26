@@ -26,11 +26,9 @@ import dynamicswordskills.client.gui.GuiEndingBlowOverlay;
 import dynamicswordskills.client.gui.IGuiOverlay;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.ICombo;
-import dynamicswordskills.skills.ILockOnTarget;
-import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -73,19 +71,30 @@ public class DSSClientEvents
 	}
 
 	/**
-	 * Attacks current target if player not currently using an item and {@link ICombo#onAttack}
-	 * doesn't return false (i.e. doesn't miss)
-	 * @param skill must implement BOTH {@link ILockOnTarget} AND {@link ICombo}
+	 * Attacks the current mouse over entity or calls {@link #handlePlayerMiss} as appropriate.
+	 * Modeled after Minecraft#clickMouse with a BLOCK hit being counted as a missed attack.
 	 */
-	public static void performComboAttack(Minecraft mc, ILockOnTarget skill) {
-		if (!mc.thePlayer.isHandActive()) {
-			if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
-				Entity entity = TargetUtils.getMouseOverEntity();
-				mc.playerController.attackEntity(mc.thePlayer, (entity != null ? entity : skill.getCurrentTarget()));
-			}
-			DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
-			mc.thePlayer.swingArm(EnumHand.MAIN_HAND);
+	public static void handlePlayerAttack(Minecraft mc) {
+		if (mc.thePlayer.isHandActive()) {
+			return;
+		}
+		if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY) {
+			mc.playerController.attackEntity(mc.thePlayer, mc.objectMouseOver.entityHit);
+		} else {
+			handlePlayerMiss(mc);
 			mc.thePlayer.resetCooldown();
+		}
+		mc.thePlayer.swingArm(EnumHand.MAIN_HAND);
+		DSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
+	}
+
+	/**
+	 * Call when a player attacked but did not hit an entity to call {@link ICombo#onMiss} if applicable
+	 */
+	public static void handlePlayerMiss(Minecraft mc) {
+		ICombo combo = DSSPlayerInfo.get(mc.thePlayer).getComboSkill();
+		if (combo != null) {
+			combo.onMiss(mc.thePlayer);
 		}
 	}
 

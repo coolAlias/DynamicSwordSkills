@@ -203,7 +203,7 @@ public class EndingBlow extends SkillActive
 			lastNumHits = skill.getCombo().getNumHits();
 		}
 		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
-			DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), DSSPlayerInfo.get(player).getTargetingSkill());
+			DSSClientEvents.handlePlayerAttack(Minecraft.getMinecraft());
 			this.lastActivationTime = Minecraft.getSystemTime();
 			this.skillResult = 0;
 		}

@@ -19,8 +19,6 @@ package dynamicswordskills.skills;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -39,12 +37,11 @@ public interface ICombo {
 	public boolean isComboInProgress();
 
 	/**
-	 * Should be called every time the player attacks (e.g. using MouseEvent for left click attack.)
-	 * If a combo should end when the player misses, this is the place to handle that.
-	 * @return true if the attack should continue as normal (i.e. the player will hit the target)
+	 * Called client side when the player attacks but there is no target within reach;
+	 * use this method to e.g. send a packet to the server to terminate a Combo.
+	 * The implementing skill is not guaranteed to be active or to have an in-progress Combo when this is called.
 	 */
-	@SideOnly(Side.CLIENT)
-	public boolean onAttack(EntityPlayer player);
+	public void onMiss(EntityPlayer player);
 
 	/**
 	 * Should be called when an EntityPlayer actively using a Combo damages an entity, creating a new
