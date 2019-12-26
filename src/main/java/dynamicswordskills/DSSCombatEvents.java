@@ -25,7 +25,7 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
-import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -179,7 +179,7 @@ public class DSSCombatEvents
 	public void onPostHurt(LivingHurtEvent event) {
 		if (!event.isCanceled() && event.getAmount() > 0.0F && event.getEntity() instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.getEntity();
-			ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
+			IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
 			if (combo != null && event.getAmount() > 0) {
 				combo.onPlayerHurt(player, event);
 			}

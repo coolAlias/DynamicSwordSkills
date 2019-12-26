@@ -163,7 +163,7 @@ public class SwordBeam extends SkillActive
 		if (missTimer > 0) {
 			--missTimer;
 			if (missTimer == 0 && !player.worldObj.isRemote) {
-				ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
+				IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
 				if (combo != null && combo.isComboInProgress()) {
 					combo.getCombo().endCombo(player);
 				}

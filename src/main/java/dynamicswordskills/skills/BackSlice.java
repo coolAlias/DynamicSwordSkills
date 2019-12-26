@@ -203,7 +203,7 @@ public class BackSlice extends SkillActive
 			} else {
 				player.resetCooldown();
 				PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
-				ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
+				IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
 				if (combo.isComboInProgress()) {
 					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) combo));
 				}
