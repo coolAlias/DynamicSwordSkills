@@ -70,6 +70,9 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	/** Reference to last active {@link IComboSkill} */
 	private IComboSkill comboSkill = null;
 
+	/** Flag to set comboSkill to null next update cycle, allowing combo HUD to receive final update packet */
+	private boolean invalidateCombo;
+
 	/** Reference to last active ILockOnTarget skill */
 	private ILockOnTarget targetingSkill = null;
 
@@ -553,6 +556,9 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			IComboSkill combo = getFirstActiveComboSkill();
 			if (combo != null) {
 				comboSkill = combo;
+				invalidateCombo = false;
+			} else if (comboSkill != null && !comboSkill.isComboInProgress()) {
+				invalidateCombo = true;
 			}
 		}
 		return comboSkill;
@@ -721,6 +727,10 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 		for (SkillBase skill : skills.values()) {
 			skill.onUpdate(player);
+		}
+		if (invalidateCombo) {
+			comboSkill = null;
+			invalidateCombo = false;
 		}
 	}
 

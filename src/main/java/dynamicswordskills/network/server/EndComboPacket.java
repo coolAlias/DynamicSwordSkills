@@ -61,8 +61,6 @@ public class EndComboPacket extends AbstractServerMessage<EndComboPacket>
 		if (skill instanceof IComboSkill) {
 			if (((IComboSkill) skill).isComboInProgress()) {
 				((IComboSkill) skill).getCombo().endCombo(player);
-			} else {
-				((IComboSkill) skill).setCombo(null);
 			}
 		}
 	}
