@@ -137,9 +137,11 @@ public class EndingBlow extends SkillActive
 	public boolean canUse(EntityPlayer player) {
 		if (!isActive() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 			IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
-			ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
-			if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
-				if (lastNumHits > 0) {
+			if (combo != null && combo.isComboInProgress()) {
+				ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
+				if (lock == null || (lock.isLockedOn() && lock.getCurrentTarget() != combo.getCombo().getLastEntityHit())) {
+					return false;
+				} else if (lastNumHits > 0) {
 					return combo.getCombo().getConsecutiveHits() > 1 && combo.getCombo().getNumHits() > lastNumHits + 2;
 				} else {
 					return combo.getCombo().getConsecutiveHits() > 1;
@@ -158,7 +160,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
-		if (!isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
 		}
 		return (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey()
@@ -199,7 +201,7 @@ public class EndingBlow extends SkillActive
 		activeTimer = 3; // gives server some time for client attack to occur
 		entityHit = null;
 		IComboSkill skill = DSSPlayerInfo.get(player).getComboSkill();
-		if (skill.getCombo() != null) {
+		if (skill != null && skill.getCombo() != null) {
 			lastNumHits = skill.getCombo().getNumHits();
 		}
 		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
@@ -271,8 +273,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
-		ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
-		if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
+		if (combo != null && combo.isComboInProgress() && entity == combo.getCombo().getLastEntityHit() && combo.getCombo().getConsecutiveHits() > 1) {
 			amount *= 1.0F + (level * 0.2F);
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			entityHit = entity;
