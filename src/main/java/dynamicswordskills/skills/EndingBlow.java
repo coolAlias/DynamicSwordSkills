@@ -276,6 +276,8 @@ public class EndingBlow extends SkillActive
 			amount *= 1.0F + (level * 0.2F);
 			PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_MORTALDRAW, 0.4F, 0.5F);
 			entityHit = entity;
+		} else if (!player.worldObj.isRemote) {
+			onFail(player, false);
 		}
 		return amount;
 	}
