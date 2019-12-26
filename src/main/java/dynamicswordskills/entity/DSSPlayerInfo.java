@@ -415,7 +415,7 @@ public class DSSPlayerInfo
 			((SkillActive) dummySwordSkill).postImpact(player, event.getEntityLiving(), event.getAmount());
 		}
 		// combo gets updated last, after all damage modifications are completed
-		if (!event.isCanceled() && event.getAmount() > 0.0F && getComboSkill() != null) {
+		if (!event.isCanceled() && event.getAmount() > 0.0F && getComboSkill() != null && ((SkillActive) getComboSkill()).isActive()) {
 			getComboSkill().onHurtTarget(player, event);
 		}
 	}
