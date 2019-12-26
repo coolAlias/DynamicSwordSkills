@@ -419,7 +419,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			((SkillActive) dummySwordSkill).postImpact(player, event.entityLiving, event.ammount);
 		}
 		// combo gets updated last, after all damage modifications are completed
-		if (!event.isCanceled() && event.ammount > 0.0F && getComboSkill() != null) {
+		if (!event.isCanceled() && event.ammount > 0.0F && getComboSkill() != null && ((SkillActive) getComboSkill()).isActive()) {
 			getComboSkill().onHurtTarget(player, event);
 		}
 	}
