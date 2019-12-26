@@ -25,7 +25,7 @@ import dynamicswordskills.client.gui.ComboOverlay;
 import dynamicswordskills.client.gui.GuiEndingBlowOverlay;
 import dynamicswordskills.client.gui.IGuiOverlay;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.IComboSkill;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.client.event.MouseEvent;
@@ -87,10 +87,10 @@ public class DSSClientEvents
 	}
 
 	/**
-	 * Call when a player attacked but did not hit an entity to call {@link ICombo#onMiss} if applicable
+	 * Call when a player attacked but did not hit an entity to call {@link IComboSkill#onMiss} if applicable
 	 */
 	public static void handlePlayerMiss(Minecraft mc) {
-		ICombo combo = DSSPlayerInfo.get(mc.thePlayer).getComboSkill();
+		IComboSkill combo = DSSPlayerInfo.get(mc.thePlayer).getComboSkill();
 		if (combo != null) {
 			combo.onMiss(mc.thePlayer);
 		}
