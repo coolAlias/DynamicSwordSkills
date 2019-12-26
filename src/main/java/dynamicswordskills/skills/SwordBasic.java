@@ -325,17 +325,11 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public boolean onAttack(EntityPlayer player) {
-		Entity mouseOver = TargetUtils.getMouseOverEntity();
-		boolean attackHit = (isLockedOn() && mouseOver != null && TargetUtils.canReachTarget(player, mouseOver));
-		if (!attackHit) {
-			PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
-			if (isComboInProgress()) {
-				PacketDispatcher.sendToServer(new EndComboPacket(this));
-			}
+	public void onMiss(EntityPlayer player) {
+		PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
+		if (isComboInProgress()) {
+			PacketDispatcher.sendToServer(new EndComboPacket(this));
 		}
-		return attackHit;
 	}
 
 	@Override

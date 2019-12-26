@@ -19,19 +19,15 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
-import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
@@ -154,24 +150,8 @@ public class ArmorBreak extends SkillActive
 		activeTimer = 4; // needs to be active for attack event to process correctly
 		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
 			attackKey = null;
-			ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
 			DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
-			if (skill != null && skill.isLockedOn()) {
-				DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), skill);
-			} else {
-				Entity target = TargetUtils.getMouseOverEntity();
-				if (target != null && TargetUtils.canReachTarget(player, target)) {
-					Minecraft.getMinecraft().playerController.attackEntity(player, target);
-				} else {
-					PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
-					ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
-					if (combo != null && combo.isComboInProgress()) {
-						PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) combo));
-					}
-				}
-				player.swingItem();
-				DSSCombatEvents.setPlayerAttackTime(player);
-			}
+			DSSClientEvents.handlePlayerAttack(Minecraft.getMinecraft());
 		}
 		return true;
 	}

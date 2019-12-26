@@ -195,7 +195,7 @@ public class LeapingBlow extends SkillActive
 		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this)) {
 			if (player.worldObj.isRemote) {
 				if (distance < 1.0F) {
-					DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);
+					DSSClientEvents.handlePlayerAttack(Minecraft.getMinecraft());
 				} else {
 					player.swingItem();
 				}
