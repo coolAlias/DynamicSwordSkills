@@ -48,7 +48,7 @@ public class MortalDrawPacket extends AbstractClientMessage<MortalDrawPacket>
 			((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
 			ILockOnTarget skill = skills.getTargetingSkill();
 			if (skill instanceof ICombo) {
-				DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), skill);
+				DSSClientEvents.handlePlayerAttack(Minecraft.getMinecraft());
 			}
 		}
 	}

@@ -32,6 +32,7 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ILockOnTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StatCollector;
 
 @SideOnly(Side.CLIENT)
@@ -153,7 +154,9 @@ public class DSSKeyHandler
 			}
 			KeyBinding.setKeyBindState(kb, true);
 			if (isLockedOn) {
-				DSSClientEvents.performComboAttack(mc, skill);
+				DSSClientEvents.handlePlayerAttack(mc);
+			} else if (mc.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.ENTITY) {
+				DSSClientEvents.handlePlayerMiss(mc);
 			}
 			return isLockedOn;
 		} else {

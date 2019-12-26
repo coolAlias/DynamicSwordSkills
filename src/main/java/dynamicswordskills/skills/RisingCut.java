@@ -22,7 +22,6 @@ import java.util.List;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
@@ -131,7 +130,7 @@ public class RisingCut extends SkillActive
 				ticksTilFail = 3; // this allows canExecute to return true for 3 ticks
 			}
 		} else if (canExecute(player) && activate(player)) {
-			DSSClientEvents.performComboAttack(mc, DSSPlayerInfo.get(player).getTargetingSkill());
+			DSSClientEvents.handlePlayerAttack(mc);
 			return true;
 		}
 		return false;
