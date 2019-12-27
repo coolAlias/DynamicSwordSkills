@@ -46,14 +46,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
- * Activated by left or right arrow; player spins in designated direction attacking
- * all enemies within 360 arc (like Link's spin attack in Zelda). With the Super Spin
- * Attack, most attributes are doubled, but it may only be used at full health.
+ * Player spins in a 360 degree arc, attacking all enemies within it.
+ * Super Spin Attack greatly improves the Spin Attack and allows spinning extra times
+ * by tapping the attack key, but it requires full or near-full health.
  * 
- * Activation: Hold left or right arrow key to charge up until spin attack commences
- * Vanilla: Begin moving either left or right, then press the other direction to
- * 			commence charging; both keys must be held to continue charging
- * 			Tapping attack will continue the spin (Super Spin Attack only)
+ * Activation: Hold both left and right movement keys to charge up until spin attack commences
+ * Super Spin Attack: Tap attack while spinning to spin again, up to once per level
  * Arc: 360 degrees, plus an extra 360 degrees for every level of Super Spin Attack
  * Charge time: 20 ticks, minus 2 per level
  * Range: 3.0D plus 0.5D per level each of Spin and Super Spin Attack
@@ -180,7 +178,7 @@ public class SpinAttack extends SkillActive
 	}
 
 	/**
-	 * Returns true if either left or right arrow key is currently being pressed (or both in the case of vanilla controls)
+	 * Returns true if both activation keys are currently being pressed
 	 */
 	@SideOnly(Side.CLIENT)
 	private boolean isKeyPressed() {
