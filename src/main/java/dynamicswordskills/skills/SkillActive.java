@@ -383,11 +383,4 @@ public abstract class SkillActive extends SkillBase
 	public final void readFromNBT(NBTTagCompound compound) {
 		level = compound.getByte("level");
 	}
-
-	@Override
-	public final SkillActive loadFromNBT(NBTTagCompound compound) {
-		SkillActive skill = (SkillActive) getNewSkillInstance(this);
-		skill.readFromNBT(compound);
-		return skill;
-	}
 }
