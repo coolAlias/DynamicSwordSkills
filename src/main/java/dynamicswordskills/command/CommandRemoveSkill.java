@@ -20,6 +20,8 @@ package dynamicswordskills.command;
 import java.util.Collections;
 import java.util.List;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.PlayerUtils;
@@ -65,7 +67,7 @@ public class CommandRemoveSkill extends CommandBase
 			boolean all = ("all").equals(args[1]);
 			SkillBase skill = null;
 			if (!all) {
-				skill = SkillBase.getSkillByName(args[1]);
+				skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(args[1]));
 				if (skill == null) {
 					throw new CommandException("commands.skill.generic.unknown", args[1]);
 				}
@@ -92,7 +94,7 @@ public class CommandRemoveSkill extends CommandBase
 	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		switch(args.length) {
 		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
-		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
+		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, SkillRegistry.getKeys());
 		default: return Collections.<String>emptyList();
 		}
 	}

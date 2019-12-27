@@ -22,7 +22,7 @@ import java.io.IOException;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.SkillActive;
-import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import dynamicswordskills.skills.SpinAttack;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
@@ -47,7 +47,7 @@ public class RefreshSpinPacket extends AbstractServerMessage<RefreshSpinPacket>
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		SkillActive skill = DSSPlayerInfo.get(player).getActiveSkill(SkillBase.spinAttack);
+		SkillActive skill = DSSPlayerInfo.get(player).getActiveSkill(Skills.spinAttack);
 		if (skill instanceof SpinAttack && skill.isActive()) {
 			((SpinAttack) skill).refreshServerSpin(player);
 		}

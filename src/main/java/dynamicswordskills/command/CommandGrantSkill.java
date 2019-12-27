@@ -20,6 +20,8 @@ package dynamicswordskills.command;
 import java.util.Collections;
 import java.util.List;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.SkillBase;
@@ -71,7 +73,7 @@ public class CommandGrantSkill extends CommandBase
 		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 		if (args.length == 2 && ("all").equals(args[1])) {
 			boolean flag = true;
-			for (SkillBase skill : SkillBase.getSkills()) {
+			for (SkillBase skill : SkillRegistry.getValues()) {
 				if (Config.isSkillEnabled(skill) && !skills.grantSkill(skill, skill.getMaxLevel())) {
 					flag = false;
 				}
@@ -85,7 +87,7 @@ public class CommandGrantSkill extends CommandBase
 				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantskill.success.partial", player.getDisplayName());
 			}
 		} else if (args.length == 3) {
-			SkillBase skill = SkillBase.getSkillByName(args[1]);
+			SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(args[1]));
 			if (skill == null) {
 				throw new CommandException("commands.skill.generic.unknown", args[1]);
 			}
@@ -114,7 +116,7 @@ public class CommandGrantSkill extends CommandBase
 	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		switch(args.length) {
 		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
-		case 2: return getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
+		case 2: return getListOfStringsMatchingLastWord(args, SkillRegistry.getKeys());
 		default: return Collections.<String>emptyList();
 		}
 	}

@@ -47,7 +47,7 @@ public class SyncSkillPacket extends AbstractClientMessage<SyncSkillPacket>
 	 * @param skill A level 0 skill will be removed
 	 */
 	public SyncSkillPacket(SkillBase skill) {
-		id = skill.getId();
+		this.id = skill.getId();
 		compound = new NBTTagCompound();
 		skill.writeToNBT(compound);
 	}

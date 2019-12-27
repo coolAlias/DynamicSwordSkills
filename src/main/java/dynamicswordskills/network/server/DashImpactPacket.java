@@ -23,7 +23,7 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.Dash;
-import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
@@ -85,7 +85,7 @@ public class DashImpactPacket extends AbstractServerMessage<DashImpactPacket>
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		Dash dash = (Dash) DSSPlayerInfo.get(player).getActiveSkill(SkillBase.dash);
+		Dash dash = (Dash) DSSPlayerInfo.get(player).getActiveSkill(Skills.dash);
 		if (dash != null && dash.isActive()) {
 			MovingObjectPosition mop = null;
 			if (hitType == MovingObjectType.ENTITY.ordinal()) {

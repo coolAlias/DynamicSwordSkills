@@ -26,6 +26,7 @@ import dynamicswordskills.api.WeaponRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.PlaySoundPacket;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -99,7 +100,7 @@ public class PlayerUtils
 		} else if (((ISkillProvider) stack.getItem()).getSkillId(stack) == skill.getId()) {
 			return true;
 		}
-		return SkillBase.swordBasic.is(skill) && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack);
+		return Skills.swordBasic.is(skill) && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack);
 	}
 
 	/** Returns the difference between player's max and current health */

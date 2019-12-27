@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.api.WeaponRegistry;
 import dynamicswordskills.command.DSSCommands;
 import dynamicswordskills.crafting.RecipeInfuseSkillOrb;
@@ -36,6 +37,7 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
@@ -97,6 +99,7 @@ public class DynamicSwordSkills
 			throw new RuntimeException("Dynamic Sword Skills may not be loaded at the same time as Zelda Sword Skills! Please remove one or the other.");
 		}
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
+		Skills.init();
 		Config.init(event);
 		tabSkills = new CreativeTabs("dss.skills") {
 			@Override
@@ -108,15 +111,17 @@ public class DynamicSwordSkills
 		skillOrb = new ItemSkillOrb().setUnlocalizedName("dss.skillorb");
 		GameRegistry.registerItem(skillOrb, skillOrb.getUnlocalizedName().substring(5));
 		if (Config.areCreativeSwordsEnabled()) {
-			skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
+			skillItems = new ArrayList<Item>(SkillRegistry.getValues().size());
 			Item item = null;
-			for (SkillBase skill : SkillBase.getSkills()) {
+			// Hack to maintain original display order
+			List<SkillBase> skills = SkillRegistry.getSortedList(new SkillRegistry.SortById());
+			for (SkillBase skill : skills) {
 				if (!(skill instanceof SkillActive)) {
 					continue;
 				}
 				int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
 				item = new ItemSkillProvider(ToolMaterial.WOOD, "stick", skill, (byte) level)
-						.setRegistryName(ModInfo.ID, "training_stick_" + skill.getUnlocalizedName())
+						.setRegistryName(ModInfo.ID, "training_stick_" + skill.getRegistryName().getResourcePath())
 						.setUnlocalizedName("dss.training_stick")
 						.setCreativeTab(DynamicSwordSkills.tabSkills);
 				skillItems.add(item);
@@ -179,10 +184,18 @@ public class DynamicSwordSkills
 		for (MissingMapping s : event.get()) {
 			ResourceLocation location = null;
 			if (s.resourceLocation.getResourcePath().matches("^dss.skillitem([0-9])+$")) {
+				// Update old skillitem to training_stick
 				int i = Integer.valueOf(s.resourceLocation.getResourcePath().replace("dss.skillitem", ""));
-				SkillBase skill = SkillBase.getSkill(i);
+				SkillBase skill = SkillRegistry.getSkillById(i);
 				if (skill != null) {
-					location = new ResourceLocation(s.resourceLocation.getResourceDomain(), "training_stick_" + skill.getUnlocalizedName());
+					location = new ResourceLocation(s.resourceLocation.getResourceDomain(), "training_stick_" + skill.getRegistryName().getResourcePath().toLowerCase());
+				}
+			} else if (s.resourceLocation.getResourcePath().startsWith("training_stick_")) {
+				// Handle skill registry name changes
+				String skill_name = s.resourceLocation.getResourcePath().substring("training_stick_".length());
+				SkillBase skill = SkillRegistry.get(new ResourceLocation(s.resourceLocation.getResourceDomain(), skill_name));
+				if (skill != null && !skill.getRegistryName().getResourcePath().equals(skill_name)) {
+					location = new ResourceLocation(s.resourceLocation.getResourceDomain(), "training_stick_" + skill.getRegistryName().getResourcePath().toLowerCase());
 				}
 			} else if (s.resourceLocation.getResourcePath().matches("^dss.skill(wood|stone|iron|diamond|gold)$")) {
 				location = new ResourceLocation(s.resourceLocation.getResourceDomain(), s.resourceLocation.getResourcePath().replace("dss.skill", "skill_sword_").toLowerCase());
@@ -199,7 +212,7 @@ public class DynamicSwordSkills
 	}
 
 	private void registerSkillOrbLoot() {
-		for (SkillBase skill : SkillBase.getSkills()) {
+		for (SkillBase skill : SkillRegistry.getValues()) {
 			if (Config.isSkillEnabled(skill)) {
 				addLootToAll(new WeightedRandomChestContent(new ItemStack(skillOrb, 1, skill.getId()), 1, 1, Config.getLootWeight()), false);
 			}
@@ -229,5 +242,18 @@ public class DynamicSwordSkills
 		if (bonus) {
 			ChestGenHooks.getInfo(ChestGenHooks.BONUS_CHEST).addItem(loot);
 		}
+	}
+
+	/**
+	 * Parses a String into a ResourceLocation, or NULL if format was invalid
+	 * @param name A valid ResourceLocation string e.g. 'modid:registry_name'
+	 */
+	public static ResourceLocation getResourceLocation(String name) {
+		try {
+			return new ResourceLocation(name);
+		} catch (NullPointerException e) {
+			DynamicSwordSkills.logger.error(String.format("Invalid ResourceLocation string: %s", name));
+		}
+		return null;
 	}
 }
