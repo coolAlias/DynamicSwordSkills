@@ -76,13 +76,13 @@ public class CommandRemoveSkill extends CommandBase
 				if (all) {
 					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.all", player.getDisplayName());
 				} else {
-					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.one", player.getDisplayName(), new ChatComponentTranslation(skill.getTranslationString()));
+					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.one", player.getDisplayName(), new ChatComponentTranslation(skill.getNameTranslationKey()));
 				}
 			} else { // player didn't have this skill
 				if (all) {
 					throw new CommandException("commands.removeskill.failure.all", player.getDisplayName());
 				} else {
-					throw new CommandException("commands.removeskill.failure.one", player.getDisplayName(), new ChatComponentTranslation(skill.getTranslationString()));
+					throw new CommandException("commands.removeskill.failure.one", player.getDisplayName(), new ChatComponentTranslation(skill.getNameTranslationKey()));
 				}
 			}
 		} else {

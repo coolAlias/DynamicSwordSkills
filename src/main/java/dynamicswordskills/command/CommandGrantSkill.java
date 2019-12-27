@@ -95,17 +95,17 @@ public class CommandGrantSkill extends CommandBase
 			int oldLevel = skills.getTrueSkillLevel(skill);
 			if (level > oldLevel) { // grants skill up to level or max level, whichever is reached first
 				if (!Config.isSkillEnabled(skill)) {
-					throw new CommandException("commands.grantskill.failure.disabled", new ChatComponentTranslation(skill.getTranslationString()));
+					throw new CommandException("commands.grantskill.failure.disabled", new ChatComponentTranslation(skill.getNameTranslationKey()));
 				} else if (skills.grantSkill(skill, (byte) level)) {
-					PlayerUtils.sendTranslatedChat(player, "commands.grantskill.notify.one", new ChatComponentTranslation(skill.getTranslationString()), skills.getTrueSkillLevel(skill));
+					PlayerUtils.sendTranslatedChat(player, "commands.grantskill.notify.one", new ChatComponentTranslation(skill.getNameTranslationKey()), skills.getTrueSkillLevel(skill));
 					if (commandSender != player) {
-						PlayerUtils.sendTranslatedChat(commandSender, "commands.grantskill.success.one", player.getDisplayName(), new ChatComponentTranslation(skill.getTranslationString()), skills.getTrueSkillLevel(skill));
+						PlayerUtils.sendTranslatedChat(commandSender, "commands.grantskill.success.one", player.getDisplayName(), new ChatComponentTranslation(skill.getNameTranslationKey()), skills.getTrueSkillLevel(skill));
 					}
 				} else {
-					throw new CommandException("commands.grantskill.failure.player", player.getDisplayName(), new ChatComponentTranslation(skill.getTranslationString()));
+					throw new CommandException("commands.grantskill.failure.player", player.getDisplayName(), new ChatComponentTranslation(skill.getNameTranslationKey()));
 				}
 			} else {
-				throw new CommandException("commands.grantskill.failure.low", player.getDisplayName(), new ChatComponentTranslation(skill.getTranslationString()), oldLevel);
+				throw new CommandException("commands.grantskill.failure.low", player.getDisplayName(), new ChatComponentTranslation(skill.getNameTranslationKey()), oldLevel);
 			}
 		} else {
 			throw new WrongUsageException(getCommandUsage(sender));

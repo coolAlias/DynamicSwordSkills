@@ -73,8 +73,8 @@ public class Parry extends SkillActive
 	/** Notification to play miss sound; set to true when activated and false when attack parried */
 	private boolean playMissSound;
 
-	public Parry(String name) {
-		super(name);
+	public Parry(String translationKey) {
+		super(translationKey);
 	}
 
 	private Parry(Parry skill) {

@@ -73,8 +73,8 @@ public class Dodge extends SkillActive
 	/** Entity dodged, since the attack event may fire multiple times in quick succession for mobs like zombies */
 	private Entity entityDodged;
 
-	public Dodge(String name) {
-		super(name);
+	public Dodge(String translationKey) {
+		super(translationKey);
 	}
 
 	private Dodge(Dodge skill) {

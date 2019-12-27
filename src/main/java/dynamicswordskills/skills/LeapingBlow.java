@@ -59,8 +59,8 @@ public class LeapingBlow extends SkillActive
 	/** Set to true when activated; set to false upon landing */
 	private boolean isActive = false;
 
-	public LeapingBlow(String name) {
-		super(name);
+	public LeapingBlow(String translationKey) {
+		super(translationKey);
 	}
 
 	private LeapingBlow(LeapingBlow skill) {
