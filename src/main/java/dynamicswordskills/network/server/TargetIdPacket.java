@@ -36,9 +36,6 @@ import net.minecraft.network.PacketBuffer;
  */
 public class TargetIdPacket extends AbstractServerMessage<TargetIdPacket>
 {
-	/** Id of ILockOnTarget skill */
-	private byte skillId;
-
 	/** Current target from ILockOnTarget skill */
 	private Entity targetEntity;
 
@@ -53,15 +50,17 @@ public class TargetIdPacket extends AbstractServerMessage<TargetIdPacket>
 	/**
 	 * Constructs packet that will update the provided skill's current target on the server
 	 */
-	public <T extends SkillBase & ILockOnTarget> TargetIdPacket(T skill) {
-		this.skillId = skill.getId();
-		this.targetEntity = ((ILockOnTarget) skill).getCurrentTarget();
+	public TargetIdPacket(SkillBase skill) throws IllegalArgumentException {
+		if (skill instanceof ILockOnTarget) {
+			this.targetEntity = ((ILockOnTarget) skill).getCurrentTarget();
+		} else {
+			throw new IllegalArgumentException("Parameter 'skill' must be an instance of ILockOnTarget while constructing TargetIdPacket");
+		}
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
 		if (buffer.readByte() == 1) {
-			this.skillId = buffer.readByte();
 			this.entityId = buffer.readInt();
 		} else {
 			this.isNull = true;
@@ -72,7 +71,6 @@ public class TargetIdPacket extends AbstractServerMessage<TargetIdPacket>
 	protected void write(PacketBuffer buffer) throws IOException {
 		if (targetEntity != null) {
 			buffer.writeByte((byte) 1);
-			buffer.writeByte(skillId);
 			buffer.writeInt(targetEntity.getEntityId());
 		} else {
 			buffer.writeByte((byte) 0);
