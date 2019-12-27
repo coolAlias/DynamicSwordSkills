@@ -55,8 +55,8 @@ public abstract class SkillBase
 	/** Unique ResourceLocation for this skill */
 	private ResourceLocation registryName = null;
 
-	/** Unlocalized name for language registry */
-	private final String unlocalizedName;
+	/** Language registry translation key */
+	public final String translationKey;
 
 	/** IDs are determined internally and may change between server sessions; do NOT use these for persistent storage */
 	private byte id;
@@ -68,10 +68,10 @@ public abstract class SkillBase
 	private final List<String> tooltip = new ArrayList<String>();
 
 	/**
-	 * @param name		this is the unlocalized name and should not contain any spaces
+	 * @param translationKey String used as the language translation key
 	 */
-	public SkillBase(String name) {
-		this.unlocalizedName = name;
+	public SkillBase(String translationKey) {
+		this.translationKey = translationKey;
 	}
 
 	/**
@@ -79,7 +79,7 @@ public abstract class SkillBase
 	 */
 	protected SkillBase(SkillBase skill) {
 		this.registryName = skill.registryName;
-		this.unlocalizedName = skill.unlocalizedName;
+		this.translationKey = skill.translationKey;
 		this.id = skill.id;
 		this.tooltip.addAll(skill.tooltip);
 	}
@@ -183,27 +183,22 @@ public abstract class SkillBase
 
 	/** Returns the translated skill name */
 	public final String getDisplayName() {
-		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".name");
+		return StatCollector.translateToLocal(getNameTranslationKey());
+	}
+
+	/** Returns the translation key prefixed by 'skill.dss.' */
+	public final String getTranslationKey() {
+		return "skill.dss." + translationKey;
 	}
 
 	/** Returns the string used to translate this skill's name */
-	public final String getTranslationString() {
-		return getFullUnlocalizedName() + ".name";
-	}
-
-	/** Returns the unlocalized name with no prefix, exactly as the skill was registered */
-	public final String getUnlocalizedName() {
-		return unlocalizedName;
-	}
-
-	/** Returns the unlocalized name prefixed by 'skill.dss' */
-	public final String getFullUnlocalizedName() {
-		return "skill.dss." + unlocalizedName;
+	public final String getNameTranslationKey() {
+		return getTranslationKey() + ".name";
 	}
 
 	/** Returns texture path for the skill's icon */
 	public String getIconTexture() {
-		return ModInfo.ID + ":skillorb_" + unlocalizedName;
+		return ModInfo.ID + ":skillorb_" + translationKey;
 	}
 
 	/** Each skill's ID can be used as a key to retrieve it from the map */
@@ -228,7 +223,7 @@ public abstract class SkillBase
 	 * @param n if less than zero, ".n" will not be appended
 	 */
 	protected final String getInfoString(String label, int n) {
-		return getFullUnlocalizedName() + ".desc." + label + (n < 0 ? "" : ("." + n));
+		return getTranslationKey() + ".desc." + label + (n < 0 ? "" : ("." + n));
 	}
 
 	/** Adds a single untranslated string to the skill's tooltip display */
@@ -294,7 +289,7 @@ public abstract class SkillBase
 
 	/** Returns the translated description of the skill's activation requirements (long version) */
 	public String getActivationDisplay() {
-		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".desc.activate");
+		return StatCollector.translateToLocal(getTranslationKey() + ".desc.activate");
 	}
 
 	/** Returns a translated description of the skill's AoE, using the value provided */
@@ -330,7 +325,7 @@ public abstract class SkillBase
 
 	/** Returns the translated description of the skill's effect (long version) */
 	public String getFullDescription() {
-		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".desc.full");
+		return StatCollector.translateToLocal(getTranslationKey() + ".desc.full");
 	}
 
 	/**

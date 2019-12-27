@@ -83,8 +83,8 @@ public class Dash extends SkillActive
 	/** Impact timer used to make player immune to damage from struck target only, vs. setting hurtResistantTime */
 	private int impactTime;
 
-	public Dash(String name) {
-		super(name);
+	public Dash(String translationKey) {
+		super(translationKey);
 	}
 
 	private Dash(Dash skill) {

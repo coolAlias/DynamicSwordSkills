@@ -38,9 +38,9 @@ public class SkillRegistry
 	 */
 	public static SkillBase register(SkillBase skill) {
 		Preconditions.checkArgument(skill != null, "Skill instance can not be null");
-		Preconditions.checkArgument(skill.getRegistryName() != null, String.format("Registry name can not be null for %s", skill.getUnlocalizedName()));
+		Preconditions.checkArgument(skill.getRegistryName() != null, String.format("Registry name can not be null for %s", skill.getTranslationKey()));
 		if (map.containsKey(skill.getRegistryName())) {
-			DynamicSwordSkills.logger.error(String.format("Registry name %s is already in use by %s", skill.getRegistryName().toString(), map.get(skill.getRegistryName()).getUnlocalizedName()));
+			DynamicSwordSkills.logger.error(String.format("Registry name %s is already in use by %s", skill.getRegistryName().toString(), map.get(skill.getRegistryName()).getTranslationKey()));
 			return map.get(skill.getRegistryName());
 		}
 		map.put(skill.getRegistryName(), skill);

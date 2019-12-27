@@ -54,8 +54,8 @@ public class SwordBeam extends SkillActive
 	/** Used to end combo if the sword beam fails to strike a target */
 	private int missTimer;
 
-	public SwordBeam(String name) {
-		super(name);
+	public SwordBeam(String translationKey) {
+		super(translationKey);
 	}
 
 	private SwordBeam(SwordBeam skill) {
