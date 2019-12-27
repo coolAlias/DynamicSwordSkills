@@ -166,10 +166,11 @@ public class BackSlice extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
+		ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
 		return super.canUse(player) && !isActive() 
 				&& !player.isUsingItem() 
 				&& PlayerUtils.isSwordOrProvider(player.getHeldItem(), this) 
-				&& DSSPlayerInfo.get(player).isSkillActive(swordBasic);
+				&& lock != null && lock.isLockedOn();
 	}
 
 	@Override
@@ -231,7 +232,7 @@ public class BackSlice extends SkillActive
 	@Override
 	public boolean onActivated(World world, EntityPlayer player) {
 		dodgeTimer = getActiveTime();
-		targetingSkill = DSSPlayerInfo.get(player).getActiveSkill(swordBasic);
+		targetingSkill = (SkillActive) DSSPlayerInfo.get(player).getTargetingSkill();
 		impacted = false;
 		success = false;
 		return isActive();
