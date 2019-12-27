@@ -140,9 +140,12 @@ public class SwordBeam extends SkillActive
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		if (!world.isRemote) {
+			// Base attack strength calculation from EntityPlayer#attackTargetEntityWithCurrentItem
+			float str = player.getCooledAttackStrength(0.5F);
+			float dmg = getDamage(player) * (0.2F + str * str * 0.8F);
 			missTimer = 12 + level;
 			PlayerUtils.playSoundAtEntity(world, player, ModSounds.WHOOSH, SoundCategory.PLAYERS, 0.4F, 0.5F);
-			EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level).setDamage(getDamage(player));
+			EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level).setDamage(dmg);
 			beam.setHeadingFromThrower(player, player.rotationPitch, player.rotationYaw, 0.0F, beam.getVelocity(), 1.0F);
 			world.spawnEntityInWorld(beam);
 		} else {
