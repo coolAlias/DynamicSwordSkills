@@ -20,6 +20,7 @@ package dynamicswordskills.network.bidirectional;
 import java.io.IOException;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.SkillActive;
@@ -35,32 +36,32 @@ import net.minecraftforge.fml.relauncher.Side;
  */
 public class DeactivateSkillPacket extends AbstractMessage<DeactivateSkillPacket>
 {
-	private byte skillId;
+	private byte id;
 
 	public DeactivateSkillPacket() {}
 
 	public DeactivateSkillPacket(SkillActive skill) {
-		this.skillId = skill.getId();
+		this.id = skill.getId();
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		skillId = buffer.readByte();
+		id = buffer.readByte();
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeByte(skillId);
+		buffer.writeByte(id);
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		// handled identically on both sides
-		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(skillId));
+		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillRegistry.getSkillById(id));
 		if (skill instanceof SkillActive) {
 			((SkillActive) skill).deactivate(player);
 		} else {
-			DynamicSwordSkills.logger.warn(String.format("Skill ID %d was not valid for %s while processing DeactivateSkillPacket", skillId, player));
+			DynamicSwordSkills.logger.warn(String.format("Skill ID %d was not valid for %s while processing DeactivateSkillPacket", id, player));
 		}
 	}
 }

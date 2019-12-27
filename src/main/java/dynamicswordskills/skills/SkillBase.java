@@ -18,16 +18,13 @@
 package dynamicswordskills.skills;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncSkillPacket;
 import dynamicswordskills.ref.ModInfo;
@@ -36,7 +33,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.FMLContainer;
+import net.minecraftforge.fml.common.InjectedModContainer;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -50,36 +52,14 @@ public abstract class SkillBase
 	/** Default maximum skill level */
 	public static final byte MAX_LEVEL = 5;
 
-	/** For convenience in providing initial id values */
-	private static byte skillIndex = 0;
-
-	/**  Map containing all registered skills */
-	private static final Map<Byte, SkillBase> skillsMap = new HashMap<Byte, SkillBase>();
-
-	/** List of registered skills' unlocalized names, for use in Commands */
-	// if the skillsMap was keyed by unlocalized name, could just return the key set
-	private static final List<String> skillNames = new ArrayList<String>();
-
-	public static final SkillBase swordBasic = new SwordBasic("swordbasic").addDescriptions(1);
-	public static final SkillBase armorBreak = new ArmorBreak("armorbreak").addDescriptions(1);
-	public static final SkillBase dodge = new Dodge("dodge").addDescriptions(1);
-	public static final SkillBase leapingBlow = new LeapingBlow("leapingblow").addDescriptions(1);
-	public static final SkillBase parry = new Parry("parry").addDescriptions(1);
-	public static final SkillBase dash = new Dash("dash").addDescriptions(1);
-	public static final SkillBase spinAttack = new SpinAttack("spinattack").addDescriptions(1);
-	public static final SkillBase superSpinAttack = new SpinAttack("superspinattack").addDescriptions(1);
-	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw").addDescriptions(1);
-	public static final SkillBase swordBreak = new SwordBreak("swordbreak").addDescriptions(1);
-	public static final SkillBase risingCut = new RisingCut("risingcut").addDescriptions(1);
-	public static final SkillBase endingBlow = new EndingBlow("endingblow").addDescriptions(1);
-	public static final SkillBase backSlice = new BackSlice("backslice").addDescriptions(1);
-	public static final SkillBase swordBeam = new SwordBeam("swordbeam").addDescriptions(1);
+	/** Unique ResourceLocation for this skill */
+	private ResourceLocation registryName = null;
 
 	/** Unlocalized name for language registry */
 	private final String unlocalizedName;
 
-	/** IDs are determined internally; used as key to retrieve skill instance from skills map */
-	private final byte id;
+	/** IDs are determined internally and may change between server sessions; do NOT use these for persistent storage */
+	private byte id;
 
 	/** Mutable field storing current level for this instance of SkillBase */
 	protected byte level = 0;
@@ -88,68 +68,64 @@ public abstract class SkillBase
 	private final List<String> tooltip = new ArrayList<String>();
 
 	/**
-	 * Constructs the first instance of a skill and stores it in the skill list
 	 * @param name		this is the unlocalized name and should not contain any spaces
-	 * @param register	whether to register the skill, adding the skill to the skill list;
-	 * 					seems to always be true since skills are declared statically
 	 */
-	protected SkillBase(String name, boolean register) {
+	public SkillBase(String name) {
 		this.unlocalizedName = name;
-		this.id = skillIndex++;
-		if (register) {
-			if (skillsMap.containsKey(id)) {
-				DynamicSwordSkills.logger.warn("CONFLICT @ skill " + id + " id already occupied by "
-						+ skillsMap.get(id).unlocalizedName + " while adding " + name);
-			}
-			skillsMap.put(id, this);
-			skillNames.add(unlocalizedName);
-		}
 	}
 
 	/**
 	 * Copy constructor creates a level zero version of the skill
 	 */
 	protected SkillBase(SkillBase skill) {
+		this.registryName = skill.registryName;
 		this.unlocalizedName = skill.unlocalizedName;
 		this.id = skill.id;
 		this.tooltip.addAll(skill.tooltip);
 	}
 
-	/** Returns true if the id provided is mapped to a skill */
-	public static final boolean doesSkillExist(int id) {
-		return (id >= 0 && id <= Byte.MAX_VALUE && skillsMap.containsKey((byte) id));
-	}
-
-	/** Returns the instance of the skill stored in the map if it exists, or null */
-	public static final SkillBase getSkill(int id) {
-		return (doesSkillExist(id) ? skillsMap.get((byte) id) : null);
-	}
-
-	/** Returns an iterable collection of all the skills in the map */
-	public static final Collection<SkillBase> getSkills() {
-		return Collections.unmodifiableCollection(skillsMap.values());
-	}
-
-	/** Returns the total number of registered skills */
-	public static final int getNumSkills() {
-		return skillsMap.size();
-	}
-
-	/** Returns all registered skills' unlocalized names as an array */
-	public static final String[] getSkillNames() {
-		return skillNames.toArray(new String[skillNames.size()]);
+	/**
+	 * Sets the registry name and registers this skill to the SkillRegistry
+	 * @param registryName
+	 * @return The registered skill instance
+	 */
+	public SkillBase register(String registryName) {
+		this.setRegistryName(registryName);
+		return SkillRegistry.register(this);
 	}
 
 	/**
-	 * Retrieves a skill by its unlocalized name, or null if not found
+	 * Called by the SkillRegistry after successfully registering a new skill to set the skill ID
 	 */
-	public static final SkillBase getSkillByName(String name) {
-		for (SkillBase skill : SkillBase.getSkills()) {
-			if (name.equals(skill.getUnlocalizedName())) {
-				return skill;
-			}
+	public final SkillBase onRegistered() {
+		this.id = (byte) SkillRegistry.getSkillId(this);
+		return this;
+	}
+
+	// Copied from IForgeRegistryEntry
+	public SkillBase setRegistryName(String name) {
+		if (getRegistryName() != null) {
+			throw new IllegalStateException("Attempted to set registry name with existing registry name! New: " + name + " Old: " + getRegistryName());
 		}
-		return null;
+		int index = name.lastIndexOf(':');
+		String oldPrefix = index == -1 ? "" : name.substring(0, index);
+		name = index == -1 ? name : name.substring(index + 1);
+		ModContainer mc = Loader.instance().activeModContainer();
+		String prefix = mc == null || (mc instanceof InjectedModContainer && ((InjectedModContainer)mc).wrappedContainer instanceof FMLContainer) ? ModInfo.ID : mc.getModId().toLowerCase();
+		if (!oldPrefix.equals(prefix) && oldPrefix.length() > 0) {
+			DynamicSwordSkills.logger.warn("Dangerous alternative prefix `%s` for name `%s`, expected `%s` invalid registry invocation/invalid name?", oldPrefix, name, prefix);
+			prefix = oldPrefix;
+		}
+		this.registryName = new ResourceLocation(prefix, name);
+		return this;
+	}
+
+	public SkillBase setRegistryName(ResourceLocation name) {
+		return this.setRegistryName(name.toString());
+	}
+
+	public ResourceLocation getRegistryName() {
+		return this.registryName;
 	}
 
 	/**
@@ -157,7 +133,7 @@ public abstract class SkillBase
 	 * and {@link ISkillProvider#getSkillLevel(ItemStack)}, or null if not possible
 	 */
 	public static final SkillBase getSkillFromItem(final ItemStack stack, final ISkillProvider item) {
-		SkillBase skill = SkillBase.getSkill(item.getSkillId(stack));
+		SkillBase skill = SkillRegistry.getSkillById(item.getSkillId(stack));
 		return createLeveledSkill(skill, item.getSkillLevel(stack));
 	}
 
@@ -202,7 +178,7 @@ public abstract class SkillBase
 		return (skill != null && this.getId() == skill.getId());
 	}
 
-	/** Returns a new instance of the skill with appropriate class type without registering it to the Skill database */
+	/** Return a new instance of the skill with appropriate class type */
 	public abstract SkillBase newInstance();
 
 	/** Returns the translated skill name */

@@ -23,6 +23,7 @@ import com.google.common.collect.Multimap;
 
 import dynamicswordskills.item.IModItem;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -34,6 +35,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -74,7 +76,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	private float weaponDamage;
 
 	/** The registry name of the skill provided by this item */
-	private final String skillName;
+	private final ResourceLocation skillName;
 
 	/** The skill level of the SkillBase.{skill} granted by this Item */
 	private final byte level;
@@ -114,7 +116,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 		this.material = material;
 		this.texture = texture;
 		this.weaponDamage = 2.0F + this.material.getDamageVsEntity();
-		this.skillName = skill.getUnlocalizedName();
+		this.skillName = skill.getRegistryName();
 		this.level = level;
 		this.grantsBasicSkill = grantsBasicSkill;
 		setMaxDamage(this.material.getMaxUses());
@@ -148,7 +150,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 
 	@Override
 	public int getSkillId(ItemStack stack) {
-		SkillBase skill = SkillBase.getSkillByName(this.skillName);
+		SkillBase skill = SkillRegistry.get(this.skillName);
 		return (skill == null ? -1 : skill.getId());
 	}
 
@@ -214,7 +216,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 		if (skill != null) {
 			list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.skill", skill.getLevel(), TextFormatting.GOLD + skill.getDisplayName() + TextFormatting.GRAY).getUnformattedText());
 			if (grantsBasicSwordSkill(stack)) {
-				String name = TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + TextFormatting.GRAY;
+				String name = TextFormatting.DARK_GREEN + Skills.swordBasic.getDisplayName() + TextFormatting.GRAY;
 				list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.provider", name).getUnformattedText());
 			}
 			if (advanced) {

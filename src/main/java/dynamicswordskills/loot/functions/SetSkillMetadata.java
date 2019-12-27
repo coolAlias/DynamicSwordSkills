@@ -25,6 +25,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.item.ItemStack;
@@ -74,7 +75,7 @@ public class SetSkillMetadata extends SkillFunction
 		@Override
 		public void serialize(JsonObject json, SetSkillMetadata instance, JsonSerializationContext context) {
 			if (instance.skill_name != null) {
-				SkillBase skill = SkillBase.getSkillByName(instance.skill_name);
+				SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(instance.skill_name));
 				if (skill == null) {
 					throw new JsonSyntaxException("Unknown skill '" + instance.skill_name + "'");
 				}
@@ -85,7 +86,7 @@ public class SetSkillMetadata extends SkillFunction
 		public SetSkillMetadata deserialize(JsonObject json, JsonDeserializationContext context, LootCondition[] conditions) {
 			if (json.has("skill_name")) {
 				String name = JsonUtils.getString(json, "skill_name");
-				SkillBase skill = SkillBase.getSkillByName(name);
+				SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
 				if (skill == null) {
 					throw new JsonSyntaxException("Unknown skill '" + name + "'");
 				}

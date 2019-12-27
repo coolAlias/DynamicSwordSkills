@@ -23,6 +23,7 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.EndingBlow;
 import dynamicswordskills.skills.SkillActive;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
@@ -64,7 +65,7 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 		if (Config.endingBlowHudDisplayTime < 1) {
 			return false;
 		}
-		SkillActive skill = DSSPlayerInfo.get(mc.thePlayer).getActiveSkill(SkillActive.endingBlow);
+		SkillActive skill = DSSPlayerInfo.get(mc.thePlayer).getActiveSkill(Skills.endingBlow);
 		if (skill == null) {
 			this.displayStartTime = 0;
 		} else if (skill.canUse(this.mc.thePlayer)) {

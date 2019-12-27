@@ -20,8 +20,11 @@ package dynamicswordskills.api;
 import java.util.List;
 import java.util.Random;
 
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.item.IModItem;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
@@ -88,7 +91,12 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 			return -1;
 		}
 		String name = stack.getTagCompound().getString("ItemSkillName");
-		SkillBase skill = SkillBase.getSkillByName(name);
+		// For backwards compatibility:
+		if (name.lastIndexOf(':') == -1) {
+			name = ModInfo.ID + ":" + name;
+			stack.getTagCompound().setString("ItemSkillName", name);
+		}
+		SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
 		return (skill == null ? -1 : skill.getId());
 	}
 
@@ -105,7 +113,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 
 	@Override
 	public int getInfusionCost(ItemStack stack, SkillBase skill) {
-		if (skill.is(SkillBase.swordBasic) && !grantsBasicSwordSkill(stack)) {
+		if (skill.is(Skills.swordBasic) && !grantsBasicSwordSkill(stack)) {
 			return 1;
 		} else if (!skill.is(getSkill(stack))) {
 			return 0;
@@ -117,7 +125,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	@Override
 	public ItemStack getInfusionResult(ItemStack stack, SkillBase skill) {
 		ItemStack result = stack.copy();
-		if (skill.is(SkillBase.swordBasic) && !grantsBasicSwordSkill(stack)) {
+		if (skill.is(Skills.swordBasic) && !grantsBasicSwordSkill(stack)) {
 			result.getTagCompound().setBoolean("grantsBasicSword", true);
 		} else {
 			int level = Math.min(skill.getMaxLevel(), getSkillLevel(stack) + 1);
@@ -144,7 +152,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		if (skill != null) {
 			list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.skill", skill.getLevel(), TextFormatting.GOLD + skill.getDisplayName() + TextFormatting.GRAY).getUnformattedText());
 			if (grantsBasicSwordSkill(stack)) {
-				String name = TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + TextFormatting.GRAY;
+				String name = TextFormatting.DARK_GREEN + Skills.swordBasic.getDisplayName() + TextFormatting.GRAY;
 				list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.provider", name).getUnformattedText());
 			}
 			if (advanced) {
@@ -180,10 +188,10 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 			stack.setTagCompound(new NBTTagCompound());
 		}
 		NBTTagCompound tag = stack.getTagCompound();
-		tag.setString("ItemSkillName", skill.getUnlocalizedName());
+		tag.setString("ItemSkillName", skill.getRegistryName().toString());
 		int level = 1 + rand.nextInt(Math.min(this.quality + 2, skill.getMaxLevel()));
 		tag.setByte("ItemSkillLevel", (byte) level);
-		boolean flag = (!skill.is(SkillBase.swordBasic) && rand.nextInt(16) > 9 - this.quality); 
+		boolean flag = (!skill.is(Skills.swordBasic) && rand.nextInt(16) > 9 - this.quality); 
 		tag.setBoolean("grantsBasicSword", flag);
 	}
 }

@@ -18,7 +18,7 @@
 package dynamicswordskills.entity;
 
 import dynamicswordskills.ref.ModSounds;
-import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import dynamicswordskills.skills.SwordBeam;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
@@ -128,7 +128,7 @@ public class EntitySwordBeam extends EntityThrowable
 	protected void onImpact(RayTraceResult result) {
 		if (!worldObj.isRemote) {
 			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
-			SwordBeam skill = (player != null ? (SwordBeam) DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
+			SwordBeam skill = (player != null ? (SwordBeam) DSSPlayerInfo.get(player).getPlayerSkill(Skills.swordBeam) : null);
 			if (result.typeOfHit == RayTraceResult.Type.ENTITY) {
 				if (result.entityHit == player) { return; }
 				if (player != null) {
@@ -140,7 +140,7 @@ public class EntitySwordBeam extends EntityThrowable
 					}
 					damage *= 0.8F;
 				}
-				if (this.level < SkillBase.swordBeam.getMaxLevel()) {
+				if (this.level < Skills.swordBeam.getMaxLevel()) {
 					setDead();
 				}
 			} else {

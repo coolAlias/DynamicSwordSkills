@@ -20,6 +20,7 @@ package dynamicswordskills;
 import java.util.HashMap;
 import java.util.Map;
 
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncConfigPacket;
@@ -27,6 +28,7 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityBlaze;
@@ -80,23 +82,23 @@ public class DSSCombatEvents
 	}
 
 	public static void initializeDrops() {
-		addDrop(EntityZombie.class, SkillBase.swordBasic);
-		addDrop(EntitySkeleton.class, SkillBase.swordBasic);
-		addDrop(EntityEnderman.class, SkillBase.dodge);
-		addDrop(EntitySilverfish.class, SkillBase.backSlice);
-		addDrop(EntitySlime.class, SkillBase.dash);
-		addDrop(EntityHorse.class, SkillBase.dash);
-		addDrop(EntityPigZombie.class, SkillBase.parry);
-		addDrop(EntityOcelot.class, SkillBase.mortalDraw);
-		addDrop(EntitySpider.class, SkillBase.endingBlow);
-		addDrop(EntityCaveSpider.class, SkillBase.leapingBlow);
-		addDrop(EntityMagmaCube.class, SkillBase.leapingBlow);
-		addDrop(EntityBlaze.class, SkillBase.spinAttack);
-		addDrop(EntityBat.class, SkillBase.risingCut);
-		addDrop(EntityCreeper.class, SkillBase.armorBreak);
-		addDrop(EntityIronGolem.class, SkillBase.swordBreak);
-		addDrop(EntityGhast.class, SkillBase.superSpinAttack);
-		addDrop(EntityWitch.class, SkillBase.swordBeam);
+		addDrop(EntityZombie.class, Skills.swordBasic);
+		addDrop(EntitySkeleton.class, Skills.swordBasic);
+		addDrop(EntityEnderman.class, Skills.dodge);
+		addDrop(EntitySilverfish.class, Skills.backSlice);
+		addDrop(EntitySlime.class, Skills.dash);
+		addDrop(EntityHorse.class, Skills.dash);
+		addDrop(EntityPigZombie.class, Skills.parry);
+		addDrop(EntityOcelot.class, Skills.mortalDraw);
+		addDrop(EntitySpider.class, Skills.endingBlow);
+		addDrop(EntityCaveSpider.class, Skills.leapingBlow);
+		addDrop(EntityMagmaCube.class, Skills.leapingBlow);
+		addDrop(EntityBlaze.class, Skills.spinAttack);
+		addDrop(EntityBat.class, Skills.risingCut);
+		addDrop(EntityCreeper.class, Skills.armorBreak);
+		addDrop(EntityIronGolem.class, Skills.swordBreak);
+		addDrop(EntityGhast.class, Skills.superSpinAttack);
+		addDrop(EntityWitch.class, Skills.swordBeam);
 	}
 
 	/**
@@ -109,8 +111,8 @@ public class DSSCombatEvents
 		}
 		ItemStack orb = null;
 		boolean flag = mob instanceof EntityPlayer;
-		int id = mob.worldObj.rand.nextInt(SkillBase.getNumSkills());
-		if (SkillBase.doesSkillExist(id) && (!flag || Config.arePlayerDropsEnabled())) {
+		int id = mob.worldObj.rand.nextInt(SkillRegistry.getValues().size());
+		if (SkillRegistry.getSkillById(id) != null && (!flag || Config.arePlayerDropsEnabled())) {
 			float chance = (flag ? Config.getPlayerDropFactor() : 1) * Config.getRandomMobDropChance();
 			if (dropsList.get(mob.getClass()) != null || mob.worldObj.rand.nextFloat() < chance) {
 				orb = new ItemStack(DynamicSwordSkills.skillOrb, 1, id);

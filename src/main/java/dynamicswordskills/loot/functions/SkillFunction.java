@@ -22,6 +22,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.loot.conditions.SkillCondition;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.SkillBase;
@@ -39,7 +40,7 @@ public abstract class SkillFunction extends LootFunction
 	/** List of skills that are enabled and allowed as loot */
 	private static final List<SkillBase> SKILLS;
 
-	/** Unlocalized name of the skill to grant if not random */
+	/** Skill to grant if not random */
 	protected String skill_name;
 
 	/**
@@ -64,7 +65,7 @@ public abstract class SkillFunction extends LootFunction
 	 */
 	protected SkillBase getSkill(Random rand) {
 		if (this.skill_name != null) {
-			SkillBase skill = SkillBase.getSkillByName(this.skill_name);
+			SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(this.skill_name));
 			if (skill == null) {
 				DynamicSwordSkills.logger.warn("Unknown skill '" + this.skill_name + "' - a random skill will be used instead.");
 			} else if (!Config.isSkillEnabled(skill)) {
@@ -95,6 +96,6 @@ public abstract class SkillFunction extends LootFunction
 	}
 
 	static {
-		SKILLS = SkillBase.getSkills().stream().filter(s -> Config.isSkillEnabled(s)).collect(Collectors.toList());
+		SKILLS = SkillRegistry.getValues().stream().filter(s -> Config.isSkillEnabled(s)).collect(Collectors.toList());
 	}
 }

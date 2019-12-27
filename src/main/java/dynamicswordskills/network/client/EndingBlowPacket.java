@@ -23,6 +23,7 @@ import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 import dynamicswordskills.skills.EndingBlow;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
@@ -54,7 +55,7 @@ public class EndingBlowPacket extends AbstractClientMessage<EndingBlowPacket>
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		SkillBase skill = DSSPlayerInfo.get(player).getActiveSkill(SkillBase.endingBlow);
+		SkillBase skill = DSSPlayerInfo.get(player).getActiveSkill(Skills.endingBlow);
 		if (skill instanceof EndingBlow) {
 			((EndingBlow) skill).skillResult = this.result;
 		}

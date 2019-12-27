@@ -23,6 +23,7 @@ import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.PlaySoundPacket;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -92,7 +93,7 @@ public class PlayerUtils
 		} else if (((ISkillProvider) stack.getItem()).getSkillId(stack) == skill.getId()) {
 			return true;
 		}
-		return SkillBase.swordBasic.is(skill) && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack);
+		return Skills.swordBasic.is(skill) && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack);
 	}
 
 	/** Returns the difference between player's max and current health */

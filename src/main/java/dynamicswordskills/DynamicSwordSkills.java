@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.command.DSSCommands;
 import dynamicswordskills.crafting.RecipeInfuseSkillOrb;
 import dynamicswordskills.entity.EntityLeapingBlow;
@@ -37,6 +38,7 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
@@ -92,6 +94,7 @@ public class DynamicSwordSkills
 		if (Loader.isModLoaded("zeldaswordskills")) {
 			throw new RuntimeException("Dynamic Sword Skills may not be loaded at the same time as Zelda Sword Skills! Please remove one or the other.");
 		}
+		Skills.init();
 		Config.init(event);
 		tabSkills = new CreativeTabs("dss.skills") {
 			@Override
@@ -103,15 +106,17 @@ public class DynamicSwordSkills
 		skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
 		GameRegistry.register(skillOrb);
 		if (Config.areCreativeSwordsEnabled()) {
-			skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
+			skillItems = new ArrayList<Item>(SkillRegistry.getValues().size());
 			Item item = null;
-			for (SkillBase skill : SkillBase.getSkills()) {
+			// Hack to maintain original display order
+			List<SkillBase> skills = SkillRegistry.getSortedList(new SkillRegistry.SortById());
+			for (SkillBase skill : skills) {
 				if (!(skill instanceof SkillActive)) {
 					continue;
 				}
 				int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
 				item = new ItemSkillProvider(ToolMaterial.WOOD, "stick", skill, (byte) level)
-						.setRegistryName(ModInfo.ID, "training_stick_" + skill.getUnlocalizedName())
+						.setRegistryName(ModInfo.ID, "training_stick_" + skill.getRegistryName().getResourcePath())
 						.setUnlocalizedName("dss.training_stick")
 						.setCreativeTab(DynamicSwordSkills.tabSkills);
 				skillItems.add(item);
@@ -174,7 +179,19 @@ public class DynamicSwordSkills
 		event.get().stream().forEach(s -> {
 			ResourceLocation location = null;
 			if (s.resourceLocation.getResourcePath().startsWith("skillitem_")) {
-				location = new ResourceLocation(s.resourceLocation.getResourceDomain(), s.resourceLocation.getResourcePath().replace("skillitem_", "training_stick_").toLowerCase());
+				// Update old skillitem to training_stick
+				String skill_name = s.resourceLocation.getResourcePath().substring("skillitem_".length());
+				SkillBase skill = SkillRegistry.get(new ResourceLocation(s.resourceLocation.getResourceDomain(), skill_name));
+				if (skill != null) {
+					location = new ResourceLocation(s.resourceLocation.getResourceDomain(), "training_stick_" + skill.getRegistryName().getResourcePath().toLowerCase());
+				}
+			} else if (s.resourceLocation.getResourcePath().startsWith("training_stick_")) {
+				// Handle skill registry name changes
+				String skill_name = s.resourceLocation.getResourcePath().substring("training_stick_".length());
+				SkillBase skill = SkillRegistry.get(new ResourceLocation(s.resourceLocation.getResourceDomain(), skill_name));
+				if (skill != null && !skill.getRegistryName().getResourcePath().equals(skill_name)) {
+					location = new ResourceLocation(s.resourceLocation.getResourceDomain(), "training_stick_" + skill.getRegistryName().getResourcePath().toLowerCase());
+				}
 			} else if (s.resourceLocation.getResourcePath().startsWith("skillsword_")) {
 				location = new ResourceLocation(s.resourceLocation.getResourceDomain(), s.resourceLocation.getResourcePath().replace("skillsword", "skill_sword").toLowerCase());
 			}
@@ -201,5 +218,18 @@ public class DynamicSwordSkills
 
 	private void registerSound(ResourceLocation location) {
 		GameRegistry.register(new SoundEvent(location).setRegistryName(location));
+	}
+
+	/**
+	 * Parses a String into a ResourceLocation, or NULL if format was invalid
+	 * @param name A valid ResourceLocation string e.g. 'modid:registry_name'
+	 */
+	public static ResourceLocation getResourceLocation(String name) {
+		try {
+			return new ResourceLocation(name);
+		} catch (NullPointerException e) {
+			DynamicSwordSkills.logger.error(String.format("Invalid ResourceLocation string: %s", name));
+		}
+		return null;
 	}
 }
