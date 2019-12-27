@@ -198,7 +198,10 @@ public class BackSlice extends SkillActive
 	public void keyPressedWhileAnimating(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (isActive()) {
 			// Attack targeted entity directly rather than using mouse cursor object due to camera funkiness
-			Entity target = DSSPlayerInfo.get(player).getTargetingSkill().getCurrentTarget();
+			Entity target = TargetUtils.getMouseOverEntity();
+			if (target == null && targetingSkill instanceof ILockOnTarget && targetingSkill.isActive()) {
+				target = ((ILockOnTarget) targetingSkill).getCurrentTarget();
+			}
 			if (target != null && TargetUtils.canReachTarget(player, target)) {
 				mc.playerController.attackEntity(mc.thePlayer, target);
 			} else {
