@@ -641,7 +641,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public boolean grantSkill(SkillBase skill, byte targetLevel) {
 		byte id = skill.getId();
-		SkillBase instance = skills.containsKey(id) ? (SkillBase) skills.get(id) : SkillBase.getNewSkillInstance(skill);
+		SkillBase instance = skills.containsKey(id) ? (SkillBase) skills.get(id) : skill.newInstance();
 		if (instance.grantSkill(player, targetLevel)) {
 			skills.put(id, instance);
 			return true;
@@ -678,7 +678,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	public void syncClientSideSkill(byte id, NBTTagCompound compound) {
 		SkillBase skill = SkillBase.getSkill(id);
 		if (skill != null) {
-			SkillBase instance = SkillBase.getNewSkillInstance(skill).loadFromNBT(compound);
+			SkillBase instance = skill.loadFromNBT(compound);
 			if (instance.getLevel() > 0) {
 				skills.put(id, instance);
 			} else {
