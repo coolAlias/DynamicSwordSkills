@@ -151,7 +151,6 @@ public class DynamicSwordSkills
 	public void init(FMLInitializationEvent event) {
 		proxy.init();
 		MinecraftForge.EVENT_BUS.register(new DSSCombatEvents());
-		MinecraftForge.EVENT_BUS.register(new LootHandler());
 		DSSCombatEvents.initializeDrops();
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
 		GameRegistry.addRecipe(new RecipeInfuseSkillOrb());
@@ -160,6 +159,7 @@ public class DynamicSwordSkills
 	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		Config.postInit();
+		MinecraftForge.EVENT_BUS.register(new LootHandler());
 	}
 
 	@Mod.EventHandler
