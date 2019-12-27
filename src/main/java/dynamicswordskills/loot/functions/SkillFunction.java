@@ -66,7 +66,7 @@ public abstract class SkillFunction extends LootFunction
 		if (this.skill_name != null) {
 			SkillBase skill = SkillBase.getSkillByName(this.skill_name);
 			if (skill == null) {
-				throw new RuntimeException("Unknown skill '" + this.skill_name + "'");
+				DynamicSwordSkills.logger.warn("Unknown skill '" + this.skill_name + "' - a random skill will be used instead.");
 			} else if (!Config.isSkillEnabled(skill)) {
 				DynamicSwordSkills.logger.warn(skill.getDisplayName() + " has been disabled in the Config settings; a random skill will be used instead.");
 			} else {
