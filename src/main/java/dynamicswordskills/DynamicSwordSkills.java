@@ -151,13 +151,6 @@ public class DynamicSwordSkills
 		DSSCombatEvents events = new DSSCombatEvents();
 		MinecraftForge.EVENT_BUS.register(events);
 		FMLCommonHandler.instance().bus().register(events); // for PlayerLoggedInEvent
-		DSSCombatEvents.initializeDrops();
-		if (Config.getLootWeight() > 0) {
-			registerSkillOrbLoot();
-		}
-		if (Config.areRandomSwordsEnabled()) {
-			registerRandomSwordLoot();
-		}
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
 		String link = "https://raw.githubusercontent.com/coolAlias/DynamicSwordSkills/master/src/main/resources/versionlist.json";
 		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", link);
@@ -167,6 +160,13 @@ public class DynamicSwordSkills
 	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		Config.postInit();
+		DSSCombatEvents.initializeDrops();
+		if (Config.getLootWeight() > 0) {
+			registerSkillOrbLoot();
+		}
+		if (Config.areRandomSwordsEnabled()) {
+			registerRandomSwordLoot();
+		}
 	}
 
 	@Mod.EventHandler
