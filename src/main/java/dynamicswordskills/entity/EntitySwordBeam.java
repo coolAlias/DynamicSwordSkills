@@ -20,7 +20,7 @@ package dynamicswordskills.entity;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import dynamicswordskills.skills.SwordBeam;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
@@ -127,7 +127,7 @@ public class EntitySwordBeam extends EntityThrowable
 	protected void onImpact(MovingObjectPosition mop) {
 		if (!worldObj.isRemote) {
 			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
-			SwordBeam skill = (player != null ? (SwordBeam) DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
+			SwordBeam skill = (player != null ? (SwordBeam) DSSPlayerInfo.get(player).getPlayerSkill(Skills.swordBeam) : null);
 			if (mop.typeOfHit == MovingObjectType.ENTITY) {
 				Entity entity = mop.entityHit;
 				if (entity == player) { return; }
@@ -140,7 +140,7 @@ public class EntitySwordBeam extends EntityThrowable
 					}
 					damage *= 0.8F;
 				}
-				if (this.level < SkillBase.swordBeam.getMaxLevel()) {
+				if (this.level < Skills.swordBeam.getMaxLevel()) {
 					setDead();
 				}
 			} else {

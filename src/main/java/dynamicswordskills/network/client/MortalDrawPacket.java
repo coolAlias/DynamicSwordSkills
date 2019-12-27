@@ -26,7 +26,7 @@ import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
-import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
@@ -44,8 +44,8 @@ public class MortalDrawPacket extends AbstractClientMessage<MortalDrawPacket>
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-		if (skills.hasSkill(SkillBase.mortalDraw)) {
-			((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
+		if (skills.hasSkill(Skills.mortalDraw)) {
+			((MortalDraw) skills.getPlayerSkill(Skills.mortalDraw)).drawSword(player, null);
 			ILockOnTarget skill = skills.getTargetingSkill();
 			if (skill instanceof IComboSkill) {
 				DSSClientEvents.handlePlayerAttack(Minecraft.getMinecraft());

@@ -19,12 +19,14 @@ package dynamicswordskills.ref;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.api.WeaponRegistry;
 import dynamicswordskills.client.gui.IGuiOverlay.HALIGN;
 import dynamicswordskills.client.gui.IGuiOverlay.VALIGN;
@@ -182,13 +184,15 @@ public class Config
 		requireFullHealth = config.get("general", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 
 		String category = "enabledskills";
+		// Sort per-skill config entries by registry name
+		List<SkillBase> skills = SkillRegistry.getSortedList(new SkillRegistry.SortByRegistryName());
 		config.addCustomCategoryComment(category,
 				"Disabling a skill prevents players from learning or using that skill, but does not change the player\'s known skills."
 				+ "\nSkill items previously generated as loot may be found but not used, and subsequent loot will not generate with that skill."
 				+ "\nSkill orbs may still drop from mobs / players unless disabled separately, but may not be used."
 				+ "\nThis setting is save-game safe: it may be disabled and re-enabled without affecting the saved game state.");
-		enableSkill = new boolean[SkillBase.getNumSkills()];
-		for (SkillBase skill : SkillBase.getSkills()) {
+		enableSkill = new boolean[SkillRegistry.getValues().size()];
+		for (SkillBase skill : skills) {
 			enableSkill[skill.getId()] = config.get(category, "Enable use of the skill " + skill.getDisplayName(), true).getBoolean(true);
 		}
 		/*================== DROPS =====================*/
@@ -197,8 +201,8 @@ public class Config
 		enableOrbDrops = config.get("drops", "Enable skill orbs to drop as loot from mobs (may still be disabled individually)", true).getBoolean(true);
 		randomDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("drops", "Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
 		genericMobDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("drops", "Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
-		orbDropChance = new HashMap<Byte, Float>(SkillBase.getNumSkills());
-		for (SkillBase skill : SkillBase.getSkills()) {
+		orbDropChance = new HashMap<Byte, Float>(SkillRegistry.getValues().size());
+		for (SkillBase skill : skills) {
 			int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
 			orbDropChance.put(skill.getId(), (0.001F * (float) i));
 		}

@@ -31,6 +31,7 @@ import net.minecraft.util.StatCollector;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.inventory.ContainerSkills;
 import dynamicswordskills.ref.Config;
@@ -232,13 +233,13 @@ public class GuiSkills extends GuiContainer
 	protected void mouseMovedOrUp(int mouseX, int mouseY, int which) {
 		Slot slot = this.getSlotAtPosition(mouseX, mouseY);
 		if (slot != null && slot.getStack() != null) {
-			int id = (slot.getStack().getItemDamage() % SkillBase.getNumSkills());
+			int id = (slot.getStack().getItemDamage() % SkillRegistry.getValues().size());
 			if (currentSkill == null || currentSkill.getId() != id) {
 				scrollY = 0.0F;
 				// clear the current description so it refreshes next time the screen draws
 				desc.clear();
 			}
-			currentSkill = DSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(SkillBase.getSkill(id));
+			currentSkill = DSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(SkillRegistry.getSkillById(id));
 		} else if (!isMouseInRegion(mouseX, mouseY, guiLeft + 155, guiLeft + 267, guiTop + 35, guiTop + 160)) {
 			currentSkill = null;
 			desc.clear();

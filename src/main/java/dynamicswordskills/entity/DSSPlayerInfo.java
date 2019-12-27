@@ -26,15 +26,18 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.network.client.SyncSkillPacket;
 import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -103,7 +106,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 
 	public DSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
-		this.skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
+		this.skills = new HashMap<Byte, SkillBase>(SkillRegistry.getValues().size());
 	}
 
 	@Override
@@ -165,7 +168,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 
 	/**
 	 * Removes the skill with the given name, or "all" skills
-	 * @param name	Unlocalized skill name or "all" to remove all skills
+	 * @param name	ResourceLocation string or "all" to remove all skills
 	 * @return		False if no skill was removed
 	 */
 	public boolean removeSkill(String name) {
@@ -175,7 +178,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		} else {
 			SkillBase dummy = null;
 			for (SkillBase skill : skills.values()) {
-				if (skill.getUnlocalizedName().equals(name)) {
+				if (skill.getRegistryName().toString().equals(name)) {
 					dummy = skill;
 					break;
 				}
@@ -203,7 +206,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void resetSkills() {
 		// need level zero skills for validation, specifically for attribute-affecting skills
-		for (SkillBase skill : SkillBase.getSkills()) {
+		for (SkillBase skill : SkillRegistry.getValues()) {
 			skills.put(skill.getId(), skill.newInstance());
 		}
 		validateSkills();
@@ -488,23 +491,23 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			ItemStack stack = player.inventory.getStackInSlot(swordSlot);
 			if (stack != null && stack.getItem() instanceof ISkillProvider) {
 				boolean flag = false;
-				boolean needsDummy = (getTrueSkillLevel(SkillBase.swordBasic) < 1);
+				boolean needsDummy = (getTrueSkillLevel(Skills.swordBasic) < 1);
 				if (needsDummy && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack)) {
 					flag = true;
 					if (dummySwordSkill == null) {
-						dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic, (byte) 1);
+						dummySwordSkill = SkillBase.createLeveledSkill(Skills.swordBasic, (byte) 1);
 					}
 				}
-				byte plvl = getTrueSkillLevel(SkillBase.mortalDraw);
+				byte plvl = getTrueSkillLevel(Skills.mortalDraw);
 				SkillBase skill = SkillBase.getSkillFromItem(stack, (ISkillProvider) stack.getItem());
-				if (SkillBase.mortalDraw.is(skill) && skill.getLevel() > plvl) {
+				if (Skills.mortalDraw.is(skill) && skill.getLevel() > plvl) {
 					flag = true;
 					if (itemSkill == null || !skill.equals(itemSkill)) {
 						itemSkill = skill;
 					}
 				}
 				// Found item is providing targeting skill but not mortal draw while held item is null
-				if (flag && !SkillBase.mortalDraw.is(itemSkill)) {
+				if (flag && !Skills.mortalDraw.is(itemSkill)) {
 					itemSkill = null;
 				}
 				return flag;
@@ -532,7 +535,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			return itemSkill;
 		} else if (skill.is(dummySwordSkill)) {
 			return dummySwordSkill;
-		} else if (skill.is(SkillBase.spinAttack) && SkillBase.superSpinAttack.is(itemSkill)) {
+		} else if (skill.is(Skills.spinAttack) && Skills.superSpinAttack.is(itemSkill)) {
 			SkillBase instance = getTruePlayerSkill(skill);
 			return (instance == null && !Config.isSpinAttackRequired() ? itemSkill : instance);
 		} else {
@@ -568,7 +571,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * Returns the first active {@link IComboSkill} instance, if any; combo may or may not be in progress
 	 */
 	private IComboSkill getFirstActiveComboSkill() {
-		for (SkillBase skill : SkillBase.getSkills()) {
+		for (SkillBase skill : SkillRegistry.getValues()) {
 			if (skill instanceof IComboSkill && skill instanceof SkillActive) {
 				SkillBase instance = getPlayerSkill(skill);
 				if (instance != null && ((SkillActive) instance).isActive()) {
@@ -586,7 +589,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		if (getTargetingSkill() != null) {
 			return;
 		}
-		for (SkillBase skill : SkillBase.getSkills()) {
+		for (SkillBase skill : SkillRegistry.getValues()) {
 			if (skill instanceof ILockOnTarget && skill instanceof SkillActive) {
 				SkillBase instance = getPlayerSkill(skill);
 				if (instance != null) {
@@ -620,7 +623,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * Returns the first active ILockOnTarget instance, if any
 	 */
 	private ILockOnTarget getFirstActiveTargetingSkill() {
-		for (SkillBase skill : SkillBase.getSkills()) {
+		for (SkillBase skill : SkillRegistry.getValues()) {
 			if (skill instanceof ILockOnTarget && skill instanceof SkillActive) {
 				SkillBase instance = getPlayerSkill(skill);
 				if (instance != null && ((SkillActive) instance).isActive()) {
@@ -676,13 +679,13 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	@SideOnly(Side.CLIENT)
 	public void syncClientSideSkill(byte id, NBTTagCompound compound) {
-		SkillBase skill = SkillBase.getSkill(id);
+		SkillBase skill = SkillRegistry.getSkillById(id);
 		if (skill != null) {
 			SkillBase instance = skill.loadFromNBT(compound);
 			if (instance.getLevel() > 0) {
-				skills.put(id, instance);
+				skills.put(skill.getId(), instance);
 			} else {
-				skills.remove(id);
+				skills.remove(skill.getId());
 			}
 		}
 	}
@@ -741,7 +744,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		ItemStack stack = player.getHeldItem();
 		// Mortal Draw from skill item requires special handling
 		boolean skipUpdate = false;
-		if (SkillBase.mortalDraw.is(itemSkill) && ((SkillActive) itemSkill).isActive()) {
+		if (Skills.mortalDraw.is(itemSkill) && ((SkillActive) itemSkill).isActive()) {
 			skipUpdate = true;
 		} else if (stack == null) {
 			lastCheckedStack = null;
@@ -764,8 +767,8 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 				}
 			}
 			if (provider.grantsBasicSwordSkill(stack)) {
-				if (dummySwordSkill == null && !skill.is(SkillBase.swordBasic) && getTrueSkillLevel(SkillBase.swordBasic) < 1) {
-					dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic, (byte) 1);
+				if (dummySwordSkill == null && !skill.is(Skills.swordBasic) && getTrueSkillLevel(Skills.swordBasic) < 1) {
+					dummySwordSkill = SkillBase.createLeveledSkill(Skills.swordBasic, (byte) 1);
 				}
 			} else if (dummySwordSkill != null) {
 				dummySwordSkill = null; // held item does not provide basic sword skill
@@ -783,7 +786,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	public void verifyStartingGear() {
 		if (!receivedGear && Config.giveBonusOrb()) {
 			receivedGear = player.inventory.addItemStackToInventory(
-					new ItemStack(DynamicSwordSkills.skillOrb,1,SkillBase.swordBasic.getId()));
+					new ItemStack(DynamicSwordSkills.skillOrb, 1, Skills.swordBasic.getId()));
 		}
 	}
 
@@ -838,7 +841,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		for (SkillBase skill : skills.values()) {
 			NBTTagCompound skillTag = new NBTTagCompound();
 			skill.writeToNBT(skillTag);
-			skillTag.setString("id", skill.getUnlocalizedName());
+			skillTag.setString("id", skill.getRegistryName().toString());
 			taglist.appendTag(skillTag);
 		}
 		compound.setTag("DynamicSwordSkills", taglist);
@@ -853,9 +856,13 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			NBTTagCompound skillTag = taglist.getCompoundTagAt(i);
 			SkillBase skill = null;
 			if (skillTag.hasKey("id", Constants.NBT.TAG_BYTE)) {
-				skill = SkillBase.getSkill(skillTag.getByte("id"));
+				skill = SkillRegistry.getSkillById(skillTag.getByte("id"));
 			} else {
-				skill = SkillBase.getSkillByName(skillTag.getString("id"));
+				String name = skillTag.getString("id");
+				if (name.lastIndexOf(':') == -1) {
+					name = ModInfo.ID + ":" + name;
+				}
+				skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
 			}
 			if (skill != null) {
 				skills.put(skill.getId(), skill.loadFromNBT(skillTag));

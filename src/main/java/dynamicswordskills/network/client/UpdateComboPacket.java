@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 import dynamicswordskills.skills.Combo;
@@ -59,7 +60,7 @@ public class UpdateComboPacket extends AbstractClientMessage<UpdateComboPacket>
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		Combo combo = Combo.readFromNBT(compound);
-		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(combo.getSkillId()));
+		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillRegistry.getSkillById(combo.getSkillId()));
 		if (skill instanceof IComboSkill) {
 			combo.getEntityFromWorld(player.worldObj);
 			((IComboSkill) skill).setCombo(combo);

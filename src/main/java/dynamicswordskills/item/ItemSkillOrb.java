@@ -24,6 +24,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillInfusionFuelItem;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
@@ -54,7 +55,7 @@ public class ItemSkillOrb extends Item implements ISkillInfusionFuelItem
 
 	@Override
 	public SkillBase getSkillToInfuse(ItemStack stack) {
-		return SkillBase.getSkill(stack.getItemDamage());
+		return SkillRegistry.getSkillById(stack.getItemDamage());
 	}
 
 	@Override
@@ -65,7 +66,7 @@ public class ItemSkillOrb extends Item implements ISkillInfusionFuelItem
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!player.worldObj.isRemote) {
-			SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
+			SkillBase skill = SkillRegistry.getSkillById(stack.getItemDamage());
 			if (skill != null) {
 				if (!Config.isSkillEnabled(skill)) {
 					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new ChatComponentTranslation(skill.getTranslationString()));
@@ -87,7 +88,7 @@ public class ItemSkillOrb extends Item implements ISkillInfusionFuelItem
 
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
-		SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
+		SkillBase skill = SkillRegistry.getSkillById(stack.getItemDamage());
 		return StatCollector.translateToLocalFormatted(super.getUnlocalizedName() + ".name", (skill == null ? "" : skill.getDisplayName()));
 	}
 
@@ -100,7 +101,9 @@ public class ItemSkillOrb extends Item implements ISkillInfusionFuelItem
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		for (SkillBase skill : SkillBase.getSkills()) {
+		// Hack to maintain original display order
+		List<SkillBase> skills = SkillRegistry.getSortedList(new SkillRegistry.SortById());
+		for (SkillBase skill : skills) {
 			list.add(new ItemStack(item, 1, skill.getId()));
 		}
 	}
@@ -108,8 +111,8 @@ public class ItemSkillOrb extends Item implements ISkillInfusionFuelItem
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister register) {
-		icons = new ArrayList<IIcon>(SkillBase.getNumSkills());
-		for (SkillBase skill : SkillBase.getSkills()) {
+		icons = new ArrayList<IIcon>(SkillRegistry.getValues().size());
+		for (SkillBase skill : SkillRegistry.getValues()) {
 			icons.add(register.registerIcon(skill.getIconTexture()));
 		}
 	}
@@ -117,17 +120,15 @@ public class ItemSkillOrb extends Item implements ISkillInfusionFuelItem
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		if (SkillBase.doesSkillExist(stack.getItemDamage())) {
-			SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
-			if (skill != null) {
-				if (!Config.isSkillEnabled(skill)) {
-					list.add(EnumChatFormatting.DARK_RED + StatCollector.translateToLocal("skill.dss.disabled"));
-				} else if (skill.getLevel() > 0) {
-					list.add(EnumChatFormatting.GOLD + skill.getLevelDisplay(true));
-					list.addAll(skill.getTranslatedTooltip(player));
-				} else {
-					list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.dss.skillorb.desc.0"));
-				}
+		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillRegistry.getSkillById(stack.getItemDamage()));
+		if (skill != null) {
+			if (!Config.isSkillEnabled(skill)) {
+				list.add(EnumChatFormatting.DARK_RED + StatCollector.translateToLocal("skill.dss.disabled"));
+			} else if (skill.getLevel() > 0) {
+				list.add(EnumChatFormatting.GOLD + skill.getLevelDisplay(true));
+				list.addAll(skill.getTranslatedTooltip(player));
+			} else {
+				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.dss.skillorb.desc.0"));
 			}
 		}
 	}

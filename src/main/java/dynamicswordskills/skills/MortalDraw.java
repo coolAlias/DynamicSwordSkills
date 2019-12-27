@@ -138,13 +138,13 @@ public class MortalDraw extends SkillActive
 	 * @return 0-8 or -1 if no eligible sword was found
 	 */
 	public static int getSwordSlot(EntityPlayer player) {
-		int plvl = DSSPlayerInfo.get(player).getTrueSkillLevel(SkillBase.mortalDraw);
-		boolean needsDummy = (DSSPlayerInfo.get(player).getTrueSkillLevel(SkillBase.swordBasic) < 1);
+		int plvl = DSSPlayerInfo.get(player).getTrueSkillLevel(Skills.mortalDraw);
+		boolean needsDummy = (DSSPlayerInfo.get(player).getTrueSkillLevel(Skills.swordBasic) < 1);
 		for (int i = 0; i < 9; ++i) {
 			ItemStack stack = player.inventory.getStackInSlot(i);
 			if (stack != null 
-					&& ((plvl > 0 && PlayerUtils.isSword(stack)) || PlayerUtils.isProvider(stack, SkillBase.mortalDraw))
-					&& (!needsDummy || PlayerUtils.isProvider(stack, SkillBase.swordBasic))
+					&& ((plvl > 0 && PlayerUtils.isSword(stack)) || PlayerUtils.isProvider(stack, Skills.mortalDraw))
+					&& (!needsDummy || PlayerUtils.isProvider(stack, Skills.swordBasic))
 					)
 			{
 				return i;

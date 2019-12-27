@@ -19,6 +19,10 @@ package dynamicswordskills.command;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.util.PlayerUtils;
@@ -30,6 +34,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ResourceLocation;
 
 public class CommandRemoveSkill extends CommandBase
 {
@@ -63,7 +68,7 @@ public class CommandRemoveSkill extends CommandBase
 			boolean all = ("all").equals(args[1]);
 			SkillBase skill = null;
 			if (!all) {
-				skill = SkillBase.getSkillByName(args[1]);
+				skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(args[1]));
 				if (skill == null) {
 					throw new CommandException("commands.skill.generic.unknown", args[1]);
 				}
@@ -90,7 +95,12 @@ public class CommandRemoveSkill extends CommandBase
 	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args) {
 		switch(args.length) {
 		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
-		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
+		case 2:
+			List<String> options = Lists.<String>newArrayList();
+			for (ResourceLocation name : SkillRegistry.getKeys()) {
+				options.add(name.toString());
+			}
+			return CommandBase.getListOfStringsMatchingLastWord(args, options.toArray(new String[0]));
 		default: return null;
 		}
 	}

@@ -20,6 +20,7 @@ package dynamicswordskills.network.server;
 import java.io.IOException;
 
 import cpw.mods.fml.relauncher.Side;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.IComboSkill;
@@ -57,7 +58,7 @@ public class EndComboPacket extends AbstractServerMessage<EndComboPacket>
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(id));
+		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillRegistry.getSkillById(id));
 		if (skill instanceof IComboSkill) {
 			if (((IComboSkill) skill).isComboInProgress()) {
 				((IComboSkill) skill).getCombo().endCombo(player);

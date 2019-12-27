@@ -18,6 +18,7 @@
 package dynamicswordskills.inventory;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,10 +39,10 @@ public class ContainerSkills extends Container
 
 	public ContainerSkills(EntityPlayer player) {
 		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-		inventory = new InventoryBasic("", true, SkillBase.getNumSkills());
+		inventory = new InventoryBasic("", true, SkillRegistry.getValues().size());
 		int x, y;
 
-		for (SkillBase skill : SkillBase.getSkills()) {
+		for (SkillBase skill : SkillRegistry.getValues()) {
 			if (skills.hasSkill(skill)) {
 				inventory.setInventorySlotContents(skill.getId(), new ItemStack(DynamicSwordSkills.skillOrb, 1, skill.getId()));
 			}

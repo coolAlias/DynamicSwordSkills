@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import cpw.mods.fml.relauncher.Side;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage;
 import dynamicswordskills.skills.SkillActive;
@@ -35,9 +36,9 @@ import net.minecraft.network.PacketBuffer;
  */
 public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 {
-	private boolean wasTriggered = false;
+	private byte id;
 
-	private byte skillId;
+	private boolean wasTriggered = false;
 
 	public ActivateSkillPacket() {}
 
@@ -45,31 +46,31 @@ public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 	 * See {@link DSSPlayerInfo#activateSkill(SkillBase, boolean)}
 	 */
 	public ActivateSkillPacket(SkillBase skill, boolean wasTriggered) {
+		this.id = skill.getId();
 		this.wasTriggered = wasTriggered;
-		this.skillId = skill.getId();
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
+		id = buffer.readByte();
 		wasTriggered = buffer.readBoolean();
-		skillId = buffer.readByte();
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
+		buffer.writeByte(id);
 		buffer.writeBoolean(wasTriggered);
-		buffer.writeByte(skillId);
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		// handled identically on both sides
 		DSSPlayerInfo info = DSSPlayerInfo.get(player);
-		SkillBase skill = info.getPlayerSkill(SkillBase.getSkill(skillId));
+		SkillBase skill = info.getPlayerSkill(SkillRegistry.getSkillById(id));
 		if (skill instanceof SkillActive) {
 			info.activateSkill(skill, wasTriggered);
 		} else {
-			DynamicSwordSkills.logger.warn(String.format("Skill ID %d was not valid for %s while processing ActivateSkillPacket", skillId, player));
+			DynamicSwordSkills.logger.warn(String.format("Skill ID %d was not valid for %s while processing ActivateSkillPacket", id, player));
 		}
 	}
 }

@@ -24,6 +24,7 @@ import com.google.common.collect.Multimap;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -33,6 +34,7 @@ import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
@@ -64,7 +66,7 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 	private float weaponDamage;
 
 	/** The registry name of the skill provided by this item */
-	private final String skillName;
+	private final ResourceLocation skillName;
 
 	/** The skill level of the SkillBase.{skill} granted by this Item */
 	private final byte level;
@@ -101,7 +103,7 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 		super();
 		this.material = material;
 		this.weaponDamage = 2.0F + this.material.getDamageVsEntity();
-		this.skillName = skill.getUnlocalizedName();
+		this.skillName = skill.getRegistryName();
 		this.level = level;
 		this.grantsBasicSkill = grantsBasicSkill;
 		setMaxDamage(this.material.getMaxUses());
@@ -135,7 +137,7 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 
 	@Override
 	public int getSkillId(ItemStack stack) {
-		SkillBase skill = SkillBase.getSkillByName(this.skillName);
+		SkillBase skill = SkillRegistry.get(this.skillName);
 		return (skill == null ? -1 : skill.getId());
 	}
 
@@ -207,7 +209,8 @@ public class ItemSkillProvider extends Item implements ISkillProvider
 		if (skill != null) {
 			list.add(StatCollector.translateToLocalFormatted("tooltip.dss.skill_provider.desc.skill", skill.getLevel(), EnumChatFormatting.GOLD + skill.getDisplayName() + EnumChatFormatting.GRAY));
 			if (grantsBasicSwordSkill(stack)) {
-				list.add(StatCollector.translateToLocalFormatted("tooltip.dss.skill_provider.desc.provider", EnumChatFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + EnumChatFormatting.GRAY));
+				String name = EnumChatFormatting.DARK_GREEN + Skills.swordBasic.getDisplayName() + EnumChatFormatting.GRAY;
+				list.add(StatCollector.translateToLocalFormatted("tooltip.dss.skill_provider.desc.provider", name));
 			}
 			if (advanced) {
 				list.addAll(skill.getDescription(player));

@@ -107,8 +107,8 @@ public class SpinAttack extends SkillActive
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		byte temp = level;
 		if (!isActive()) {
-			superLevel = (checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
-			level = DSSPlayerInfo.get(player).getSkillLevel(spinAttack);
+			superLevel = (checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(Skills.superSpinAttack) : 0);
+			level = DSSPlayerInfo.get(player).getSkillLevel(Skills.spinAttack);
 		}
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
@@ -232,7 +232,7 @@ public class SpinAttack extends SkillActive
 		currentSpin = 0F;
 		arc = 360F;
 		refreshed = 0;
-		superLevel = (checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
+		superLevel = (checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(Skills.superSpinAttack) : 0);
 		isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
 		startSpin(world, player);
 		return true;

@@ -19,6 +19,10 @@ package dynamicswordskills.command;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.SkillBase;
@@ -31,6 +35,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * 
@@ -69,7 +74,7 @@ public class CommandGrantSkill extends CommandBase
 		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
 		if (args.length == 2 && ("all").equals(args[1])) {
 			boolean flag = true;
-			for (SkillBase skill : SkillBase.getSkills()) {
+			for (SkillBase skill : SkillRegistry.getValues()) {
 				if (Config.isSkillEnabled(skill) && !skills.grantSkill(skill, skill.getMaxLevel())) {
 					flag = false;
 				}
@@ -83,7 +88,7 @@ public class CommandGrantSkill extends CommandBase
 				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantskill.success.partial", player.getCommandSenderName());
 			}
 		} else if (args.length == 3) {
-			SkillBase skill = SkillBase.getSkillByName(args[1]);
+			SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(args[1]));
 			if (skill == null) {
 				throw new CommandException("commands.skill.generic.unknown", args[1]);
 			}
@@ -109,10 +114,15 @@ public class CommandGrantSkill extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args) {
 		switch(args.length) {
-		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
-		case 2: return getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
+		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, getPlayers());
+		case 2:
+			List<String> options = Lists.<String>newArrayList();
+			for (ResourceLocation name : SkillRegistry.getKeys()) {
+				options.add(name.toString());
+			}
+			return CommandBase.getListOfStringsMatchingLastWord(args, options.toArray(new String[0]));
 		default: return null;
 		}
 	}

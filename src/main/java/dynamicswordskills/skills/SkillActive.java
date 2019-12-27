@@ -75,7 +75,7 @@ public abstract class SkillActive extends SkillBase
 	 * @param name	this is the unlocalized name and should not contain any spaces
 	 */
 	protected SkillActive(String name) {
-		super(name, true);
+		super(name);
 	}
 
 	protected SkillActive(SkillActive skill) {
