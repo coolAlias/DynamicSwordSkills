@@ -432,6 +432,9 @@ public abstract class SkillBase
 	public abstract void readFromNBT(NBTTagCompound compound);
 
 	/** Returns a new instance from NBT */
-	public abstract SkillBase loadFromNBT(NBTTagCompound compound);
-
+	public final SkillBase loadFromNBT(NBTTagCompound compound) {
+		SkillBase skill = SkillBase.getNewSkillInstance(this);
+		skill.readFromNBT(compound);
+		return skill;
+	}
 }
