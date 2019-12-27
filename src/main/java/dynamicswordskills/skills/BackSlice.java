@@ -277,12 +277,9 @@ public class BackSlice extends SkillActive
 			if (Minecraft.getDebugFPS() < 90 && targetingSkill != null && targetingSkill.isActive()) {
 				targetingSkill.onRenderTick(player, partialTickTime);
 			}
-			double speed = 1.0D + 10.0D * (player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - Dash.BASE_MOVE);
-			if (speed > 1.0D) {
-				speed = 1.0D;
-			}
+			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
 			double fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS());
-			double d = 0.15D * fps * speed * speed;
+			double d = 1.125D * fps * speed;
 			if (player.isInWater() || player.isInLava()) {
 				d *= 0.15D;
 			}
@@ -292,7 +289,7 @@ public class BackSlice extends SkillActive
 			} else {
 				player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
 			}
-			player.addVelocity(vec3.xCoord * d * 1.15D, 0.0D, vec3.zCoord * d * 1.15D);
+			player.addVelocity(vec3.xCoord * d, 0.0D, vec3.zCoord * d);
 		}
 		return false; // allow camera to update again
 	}
