@@ -41,7 +41,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * 
  * SWORD BREAK
- * Activation: Double-tap back while blocking
+ * Activation: Double-tap forward then right-click. Shield is not required.
  * Effect: A fierce block that is capable of destroying the opponent's blade
  * Exhaustion: 2.0F - (0.1 * level)
  * Damage: Up to 90 durability damage to the opponent's held item (15 * (level + 1))
@@ -50,7 +50,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Notes:
  * - Only works when being attacked by an enemy holding an item
  * - Has no effect other than blocking the attack if the attacker's held item can not be damaged
- * - Must release the block key in between uses
  *
  */
 public class SwordBreak extends SkillActive
@@ -128,9 +127,6 @@ public class SwordBreak extends SkillActive
 		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand()) && !player.isHandActive();
 	}
 
-	/**
-	 * Only allow activation if player is using item, to prevent clashing with Parry
-	 */
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
