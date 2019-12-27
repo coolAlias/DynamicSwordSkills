@@ -120,11 +120,6 @@ public abstract class SkillBase
 		return (id >= 0 && id <= Byte.MAX_VALUE && skillsMap.containsKey((byte) id));
 	}
 
-	/** Returns a new instance of the skill with id, or null if it doesn't exist */
-	public static final SkillBase getNewSkillInstance(@Nullable SkillBase skill) {
-		return (skill != null && skillsMap.containsKey(skill.getId()) ? skillsMap.get(skill.getId()).newInstance() : null);
-	}
-
 	/** Returns the instance of the skill stored in the map if it exists, or null */
 	public static final SkillBase getSkill(int id) {
 		return (doesSkillExist(id) ? skillsMap.get((byte) id) : null);
@@ -172,7 +167,7 @@ public abstract class SkillBase
 	 */
 	public static final SkillBase createLeveledSkill(@Nullable final SkillBase skill, final byte level) {
 		if (skill != null && level > 0) {
-			SkillBase instance = getNewSkillInstance(skill);
+			SkillBase instance = skill.newInstance();
 			instance.level = (level > skill.getMaxLevel() ? skill.getMaxLevel() : level);
 			return instance;
 		}
@@ -433,7 +428,7 @@ public abstract class SkillBase
 
 	/** Returns a new instance from NBT */
 	public final SkillBase loadFromNBT(NBTTagCompound compound) {
-		SkillBase skill = SkillBase.getNewSkillInstance(this);
+		SkillBase skill = this.newInstance();
 		skill.readFromNBT(compound);
 		return skill;
 	}
