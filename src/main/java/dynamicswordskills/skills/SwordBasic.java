@@ -105,8 +105,8 @@ public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarge
 	/** Set to a new instance each time a combo begins */
 	private Combo combo = null;
 
-	public SwordBasic(String name) {
-		super(name);
+	public SwordBasic(String translationKey) {
+		super(translationKey);
 	}
 
 	private SwordBasic(SwordBasic skill) {

@@ -70,8 +70,8 @@ public class ArmorBreak extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private KeyBinding attackKey;
 
-	public ArmorBreak(String name) {
-		super(name);
+	public ArmorBreak(String translationKey) {
+		super(translationKey);
 	}
 
 	private ArmorBreak(ArmorBreak skill) {

@@ -86,8 +86,8 @@ public class BackSlice extends SkillActive
 	/** Used client side to get an extra renderTick for the targeting camera */
 	private SkillActive targetingSkill;
 
-	public BackSlice(String name) {
-		super(name);
+	public BackSlice(String translationKey) {
+		super(translationKey);
 	}
 
 	private BackSlice(BackSlice skill) {

@@ -68,8 +68,8 @@ public class SwordBreak extends SkillActive
 	/** Notification to play miss sound; set to true when activated and false when attack parried */
 	private boolean playMissSound;
 
-	public SwordBreak(String name) {
-		super(name);
+	public SwordBreak(String translationKey) {
+		super(translationKey);
 	}
 
 	private SwordBreak(SwordBreak skill) {

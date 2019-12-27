@@ -64,8 +64,8 @@ public class RisingCut extends SkillActive
 	/** Flag to prevent a second attack from adding even more motionY */
 	private boolean hitEntity;
 
-	public RisingCut(String name) {
-		super(name);
+	public RisingCut(String translationKey) {
+		super(translationKey);
 	}
 
 	private RisingCut(RisingCut skill) {

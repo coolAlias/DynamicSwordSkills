@@ -70,12 +70,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public abstract class SkillActive extends SkillBase
 {
-	/**
-	 * Constructs the first instance of a skill and stores it in the skill list
-	 * @param name	this is the unlocalized name and should not contain any spaces
-	 */
-	protected SkillActive(String name) {
-		super(name, true);
+	public SkillActive(String translationKey) {
+		super(translationKey);
 	}
 
 	protected SkillActive(SkillActive skill) {
@@ -255,7 +251,7 @@ public abstract class SkillActive extends SkillBase
 	 */
 	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
 		if (!Config.isSkillEnabled(this)) {
-			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(getTranslationString()));
+			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(getNameTranslationKey()));
 			return false;
 		} else if (!wasTriggered && !allowUserActivation()) {
 			return false;
@@ -271,7 +267,7 @@ public abstract class SkillActive extends SkillBase
 			return onActivated(world, player);
 		} else {
 			if (level > 0) {
-				PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new TextComponentTranslation(getTranslationString()));
+				PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new TextComponentTranslation(getNameTranslationKey()));
 			}
 			return false;
 		}

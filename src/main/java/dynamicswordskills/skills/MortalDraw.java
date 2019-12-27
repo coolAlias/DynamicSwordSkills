@@ -71,8 +71,8 @@ public class MortalDraw extends SkillActive
 	 */
 	private Entity target;
 
-	public MortalDraw(String name) {
-		super(name);
+	public MortalDraw(String translationKey) {
+		super(translationKey);
 	}
 
 	private MortalDraw(MortalDraw skill) {

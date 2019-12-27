@@ -91,8 +91,8 @@ public class SpinAttack extends SkillActive
 	/** The player's Super Spin Attack level will allow multiple spins and extended range */
 	private int superLevel;
 
-	public SpinAttack(String name) {
-		super(name);
+	public SpinAttack(String translationKey) {
+		super(translationKey);
 	}
 
 	private SpinAttack(SpinAttack skill) {

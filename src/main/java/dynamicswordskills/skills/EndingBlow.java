@@ -91,8 +91,8 @@ public class EndingBlow extends SkillActive
 	/** Xp amount to grant if entityHit is dead on update tick */
 	private int xp;
 
-	public EndingBlow(String name) {
-		super(name);
+	public EndingBlow(String translationKey) {
+		super(translationKey);
 	}
 
 	private EndingBlow(EndingBlow skill) {

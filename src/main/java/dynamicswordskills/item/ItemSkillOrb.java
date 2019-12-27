@@ -68,16 +68,16 @@ public class ItemSkillOrb extends Item implements IModItem, ISkillInfusionFuelIt
 			SkillBase skill = SkillRegistry.getSkillById(stack.getItemDamage());
 			if (skill != null) {
 				if (!Config.isSkillEnabled(skill)) {
-					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(skill.getTranslationString()));
+					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(skill.getNameTranslationKey()));
 				} else if (DSSPlayerInfo.get(player).grantSkill(skill)) {
 					PlayerUtils.playSound(player, ModSounds.LEVEL_UP, SoundCategory.PLAYERS, 1.0F, 1.0F);
 					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.levelup",
-							new TextComponentTranslation(skill.getTranslationString()), DSSPlayerInfo.get(player).getTrueSkillLevel(skill));
+							new TextComponentTranslation(skill.getNameTranslationKey()), DSSPlayerInfo.get(player).getTrueSkillLevel(skill));
 					if (!player.capabilities.isCreativeMode) {
 						--stack.stackSize;
 					}
 				} else {
-					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.maxlevel", new TextComponentTranslation(skill.getTranslationString()));
+					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.maxlevel", new TextComponentTranslation(skill.getNameTranslationKey()));
 				}
 			}
 		}
