@@ -268,7 +268,15 @@ public class SpinAttack extends SkillActive
 				DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 			}
 		} else if (isActive()) {
-			incrementSpin(player);
+			if (player.worldObj.isRemote) {
+				if (!PlayerUtils.isWeapon(player.getHeldItem()) || !isKeyPressed()) {
+					deactivate(player);
+				} else {
+					incrementSpin(player);
+				}
+			} else {
+				incrementSpin(player);
+			}
 		}
 	}
 
