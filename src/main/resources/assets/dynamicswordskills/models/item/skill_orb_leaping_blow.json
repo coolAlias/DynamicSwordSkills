@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/skillorb_swordbasic"
+        "layer0": "dynamicswordskills:skills/leaping_blow"
     },
     "display": {
         "thirdperson": {

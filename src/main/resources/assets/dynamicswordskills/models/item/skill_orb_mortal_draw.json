@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/skillorb_armorbreak"
+        "layer0": "dynamicswordskills:skills/mortal_draw"
     },
     "display": {
         "thirdperson": {

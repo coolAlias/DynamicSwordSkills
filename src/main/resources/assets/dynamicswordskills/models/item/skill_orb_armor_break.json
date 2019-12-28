@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/skillorb_endingblow"
+        "layer0": "dynamicswordskills:skills/armor_break"
     },
     "display": {
         "thirdperson": {

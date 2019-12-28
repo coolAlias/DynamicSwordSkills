@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/skillorb_leapingblow"
+        "layer0": "dynamicswordskills:skills/super_spin_attack"
     },
     "display": {
         "thirdperson": {

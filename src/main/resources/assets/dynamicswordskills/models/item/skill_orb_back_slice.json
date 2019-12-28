@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/skillorb_spinattack"
+        "layer0": "dynamicswordskills:skills/back_slice"
     },
     "display": {
         "thirdperson": {

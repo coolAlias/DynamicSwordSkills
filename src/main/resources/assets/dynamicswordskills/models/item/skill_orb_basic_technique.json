@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/skillorb_risingcut"
+        "layer0": "dynamicswordskills:skills/basic_technique"
     },
     "display": {
         "thirdperson": {
