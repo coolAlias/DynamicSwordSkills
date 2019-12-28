@@ -48,9 +48,9 @@ import swordskillsapi.api.item.IDashItem;
 
 /**
  * 
- * Attacking while blocking and locked on to a target will execute a bash attack.
  * The player charges into the target, inflicting damage and knocking the target back.
  * 
+ * Activation: Press the attack key while moving forward and blocking
  * Range: 3 blocks plus 1 block per level
  * Damage: up to 2 plus 1 per level at max range
  * Knockback Strength: 0.4F per level plus an additional 0.15F per block traveled beyond the minimum (capped at 3.0F)
@@ -174,7 +174,7 @@ public class Dash extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.onGround && canUse(player);
+		return player.onGround && canUse(player) && Minecraft.getMinecraft().gameSettings.keyBindForward.isKeyDown();
 	}
 
 	@Override
@@ -223,7 +223,6 @@ public class Dash extends SkillActive
 			// Only check for impact on the client, as the server is not reliable for this step
 			// If a collision is detected, DashImpactPacket is sent to conclude the server-side
 			if (!PlayerUtils.isBlocking(player)) {
-				setNotDashing(player);
 				if (!player.worldObj.isRemote) {
 					deactivate(player);
 				}
@@ -256,6 +255,8 @@ public class Dash extends SkillActive
 					setNotDashing(player);
 				} else if (initialPosition == null || player.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord) > getRange()) {
 					player.addVelocity(-player.motionX * 0.5D, -0.02D, -player.motionZ * 0.5D);
+					deactivate(player);
+				} else if (!Minecraft.getMinecraft().gameSettings.keyBindForward.isKeyDown()) {
 					deactivate(player);
 				}
 			}
