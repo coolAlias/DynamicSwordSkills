@@ -1,0 +1,6 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "dynamicswordskills:skills/basic_technique"
+    }
+}

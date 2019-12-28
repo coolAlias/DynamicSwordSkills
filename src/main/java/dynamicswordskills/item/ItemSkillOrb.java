@@ -104,8 +104,7 @@ public class ItemSkillOrb extends ItemGrantSkill implements IModItem, ISkillInfu
 	public String[] getVariants() {
 		String[] variants = new String[skill_id_map.size()];
 		for (Entry<Integer, ResourceLocation> entry : skill_id_map.entrySet()) {
-			SkillBase skill = SkillRegistry.get(entry.getValue());
-			variants[entry.getKey()] = skill.getIconTexture();
+			variants[entry.getKey()] = entry.getValue().getResourceDomain() + ":skill_orb_" + entry.getValue().getResourcePath().toLowerCase();
 		}
 		return variants;
 	}

@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/skillorb_parry"
+        "layer0": "dynamicswordskills:skills/dodge"
     }
 }

@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/skillorb_dash"
+        "layer0": "dynamicswordskills:skills/ending_blow"
     }
 }
