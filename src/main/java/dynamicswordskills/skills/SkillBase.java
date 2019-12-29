@@ -28,7 +28,6 @@ import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncSkillPacket;
 import dynamicswordskills.ref.ModInfo;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -249,12 +248,12 @@ public abstract class SkillBase
 	 * Returns the translated tooltip, possibly with advanced display with player information
 	 */
 	@SideOnly(Side.CLIENT)
-	public final List<String> getTranslatedTooltip(EntityPlayer player) {
+	public final List<String> getTranslatedTooltip(EntityPlayer player, boolean advanced) {
 		List<String> desc = new ArrayList<String>(tooltip.size());
 		for (String s : tooltip) {
 			desc.add(StatCollector.translateToLocal(s));
 		}
-		if (Minecraft.getMinecraft().gameSettings.advancedItemTooltips) {
+		if (advanced) {
 			addInformation(desc, player);
 		}
 		return desc;
