@@ -209,7 +209,7 @@ public class Config
 		WeaponRegistry.INSTANCE.forbidItems(forbidden_weapons, "Config", false);
 		/*===================== SKILLS =====================*/
 		// Sort per-skill config entries by registry name
-		List<SkillBase> skills = SkillRegistry.getSortedList(new SkillRegistry.SortByRegistryName());
+		List<SkillBase> skills = SkillRegistry.getSortedList(SkillRegistry.SORT_BY_REGISTRY_NAME);
 		config.addCustomCategoryComment("enabledskills",
 				"Disabling a skill prevents players from using that skill, but does not change the player\'s known skills."
 				+ "\nSkill items previously generated as loot may be found but not used, and subsequent loot will not generate with that skill."
