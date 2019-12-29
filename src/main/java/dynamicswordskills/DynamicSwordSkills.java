@@ -114,7 +114,7 @@ public class DynamicSwordSkills
 		if (Config.areCreativeSwordsEnabled()) {
 			skillItems = new ArrayList<Item>(SkillRegistry.getValues().size());
 			// Hack to maintain original display order
-			List<SkillBase> skills = SkillRegistry.getSortedList(new SkillRegistry.SortById());
+			List<SkillBase> skills = SkillRegistry.getSortedList(SkillRegistry.SORT_BY_ID);
 			for (SkillBase skill : skills) {
 				if (!(skill instanceof SkillActive)) {
 					continue;

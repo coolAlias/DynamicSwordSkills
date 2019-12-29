@@ -107,17 +107,17 @@ public class SkillRegistry
 	/**
 	 * Sorts skills by order of registration
 	 */
-	public static class SortById implements Comparator<SkillBase> {
+	public static final Comparator<SkillBase> SORT_BY_ID = (new Comparator<SkillBase>() {
 		@Override
 		public int compare(SkillBase a, SkillBase b) {
 			return a.getId() - b.getId();
 		}
-	}
+	});
 
-	public static class SortByRegistryName implements Comparator<SkillBase> {
+	public static final Comparator<SkillBase> SORT_BY_REGISTRY_NAME = (new Comparator<SkillBase>() {
 		@Override
 		public int compare(SkillBase a, SkillBase b) {
 			return a.getRegistryName().toString().compareTo(b.getRegistryName().toString());
 		}
-	}
+	});
 }
