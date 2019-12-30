@@ -47,47 +47,14 @@ import swordskillsapi.api.damage.IComboDamage.IComboDamageFull;
 /**
  * 
  * BASIC SWORD SKILL
- * Description: Foundation for all other Sword Skills
- * Activation: Standard (toggle), but must be looking near a target within range
- * Effects:	1. must be active in order to use any of the Sword Skills (see below)
- * 			2. camera locks on to target so long as player remains within range
- * 			3. chain up to (2 + level) attacks:
- * 				- each attack adds the combo's current size minus one to damage
- * 				- taking more than (0.5F * level) in damage at once will terminate an ongoing combo, as will
- * 					missing a strike or taking too long between consecutive hits
+ * Description: Basic targeting and combo skill
+ * Activation: Toggled with the Z-targeting key while looking at a valid target within range
+ * Effects:	Chain up to (2 + level) attacks, adding bonus damage based on the combo size.
  * Exhaustion: 0.0F - does not cost exertion to use
  * Duration: (a) targeting: unlimited
  * 			 (b) combo: time allowed between strikes is 20 ticks + (2 * level)
  * Range: 6 + level, distance within which targets can be acquired, in blocks
- * Special:	- intended (but not required) for player to use keyboard instead of mouse while skill is active
- * 			- deactivates if the player is no longer holding a sword or if there are no longer any valid targets
- * 
- * Basic sword technique skill; it is a prerequisite for all other sword skills and may only
- * remain active while a sword is in hand.
- * 
- * While active, the player's field of view is locked onto the current target; pressing the 'next
- * target' key (default TAB) will switch to the next closest available target that hasn't been
- * targeted before, or the previous target if no new targets are available
- * 
- * While active, 'R-Ctrl' may be used to block in lieu of the right mouse button
- * 
- * Combos may be performed while locked on using normal attacks and any known sword skills.
- * 
- * Up to 3 attacks can be chained at level 1, plus an additional attack per skill level. Additionally,
- * each Basic Sword level increases the amount of time allowed between successive attacks while
- * chaining combos, the amount of damage the player can take before the combo is broken and also the
- * maximum distance at which the player may remain locked on to a target.
- * 
- * Default Controls
- * Tab (tap) - acquire next target
- * RCtrl (hold) - block
- * Up arrow (tap) - regular attack
- * Up arrow (tap while jumping) - Leaping Blow
- * Up arrow (tap while blocking) - Slam
- * Up arrow (hold) - Armor Break
- * Left / Right arrow (tap) - Dodge
- * Left / Right arrow (hold) - Spin Attack
- * Down arrow (tap) - Parry/Disarm
+ * Special: Missing an attack or taking too much damage breaks the current combo.
  * 
  */
 public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarget

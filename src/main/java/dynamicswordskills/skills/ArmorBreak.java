@@ -45,8 +45,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Activation: Hold attack for (20 - level) ticks
  * Effect: Unleashes an attack that inflicts normal weapon damage but ignores armor
  * Exhaustion: 2.0F - (0.1F * level)
- * Special: May only be used while locked on to a target
- * 			Charge time is reduced by 5 ticks when wielding a Master Sword
  * 
  * Using this skill performs an attack that ignores armor but otherwise deals exactly the
  * same damage as a normal attack with the given item would, including all bonuses from other

@@ -48,24 +48,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * used to store any data that needs to be maintained between game sessions.
  * 
  * Unless the skill's activation is handled exclusively by the client side, ONLY activate or trigger
- * the skill on the server, as a packet will be sent automatically to notify the client
- * 
- * Each Skill should contain the following documentation followed by a full description
- * 
- * NAME: name of the skill
- * Description: one-line summary of skill
- * Activation:  Standard - activated by selecting the skill in the Skill Bar and pressing 'x'
- * 				Triggered - this skill can not be directly activated by the player
- * 				(toggle) - this skill is toggled on or off when activated
- * 				other - give details of how to activate the skill
- * Exhaustion: format is [0.0F +- (amount * level)]
- * Damage: if any, give the amount and additional details as necessary
- * Duration: if any, give the amount in ticks or seconds, as applicable
- * Range: if restricted, give the range in an applicable format, such as in blocks
- * Area: if any, give the dimensions and additional details as necessary
- * Special: any special notes
- * 
- * Full description goes here.
+ * the skill on the server, as a packet will be sent automatically to notify the client.
  *
  */
 public abstract class SkillActive extends SkillBase
