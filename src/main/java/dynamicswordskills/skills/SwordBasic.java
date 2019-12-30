@@ -23,6 +23,7 @@ import com.google.common.base.Predicate;
 
 import dynamicswordskills.api.IComboDamage;
 import dynamicswordskills.api.IComboDamage.IComboDamageFull;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.EndComboPacket;
@@ -55,7 +56,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Special: Missing an attack or taking too much damage breaks the current combo.
  * 
  */
-public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarget
+public class SwordBasic extends BaseModSkill implements IComboSkill, ILockOnTarget
 {
 	/** True if this skill is currently active */
 	private boolean isActive = false;
@@ -81,6 +82,11 @@ public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarge
 	@Override
 	public SwordBasic newInstance() {
 		return new SwordBasic(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
 	}
 
 	@Override

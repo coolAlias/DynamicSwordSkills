@@ -19,6 +19,7 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.util.PlayerUtils;
@@ -46,7 +47,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Exhaustion: 3.0F - (level * 0.2F)
  * 
  */
-public class RisingCut extends SkillActive
+public class RisingCut extends BaseModSkill
 {
 	/** Flag for activation; set when player jumps while sneaking */
 	private int ticksTilFail;
@@ -74,6 +75,11 @@ public class RisingCut extends SkillActive
 	@Override
 	public RisingCut newInstance() {
 		return new RisingCut(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.SWORD_GROUP;
 	}
 
 	@Override

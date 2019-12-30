@@ -19,6 +19,7 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntitySwordBeam;
 import dynamicswordskills.ref.Config;
@@ -49,7 +50,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *  - At max level, the beam can penetrate multiple targets
  *  - Each additional target receives 20% less damage than the previous
  */
-public class SwordBeam extends SkillActive
+public class SwordBeam extends BaseModSkill
 {
 	/** Used to end combo if the sword beam fails to strike a target */
 	private int missTimer;
@@ -65,6 +66,11 @@ public class SwordBeam extends SkillActive
 	@Override
 	public SwordBeam newInstance() {
 		return new SwordBeam(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.SWORD_GROUP;
 	}
 
 	@Override

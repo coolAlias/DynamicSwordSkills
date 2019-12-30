@@ -19,6 +19,7 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
@@ -57,7 +58,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * - Failure to slay the target results in not being able to attack for the duration
  * 
  */
-public class EndingBlow extends SkillActive
+public class EndingBlow extends BaseModSkill
 {
 	/** Flag for isActive() so that skill can trigger upon impact from LivingHurtEvent */
 	private int activeTimer = 0;
@@ -101,6 +102,11 @@ public class EndingBlow extends SkillActive
 	@Override
 	public EndingBlow newInstance() {
 		return new EndingBlow(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP || group == Skills.TARGETED_GROUP;
 	}
 
 	@Override
