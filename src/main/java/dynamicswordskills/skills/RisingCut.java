@@ -28,6 +28,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -173,6 +175,9 @@ public class RisingCut extends SkillActive
 						resist = 1.0D - ((EntityLivingBase) entityHit).getEntityAttribute(SharedMonsterAttributes.knockbackResistance).getAttributeValue();
 					}
 					entityHit.addVelocity(0.0D, addY * resist, 0.0D);
+					if (entityHit instanceof EntityPlayerMP && !player.worldObj.isRemote) {
+						((EntityPlayerMP) entityHit).playerNetServerHandler.sendPacket(new S12PacketEntityVelocity(entityHit));
+					}
 				}
 				entityHit = null;
 			}
