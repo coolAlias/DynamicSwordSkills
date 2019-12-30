@@ -220,7 +220,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 				list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.provider", name).getUnformattedText());
 			}
 			if (advanced) {
-				list.addAll(skill.getDescription(player));
+				list.addAll(skill.getTooltip(player, true));
 			}
 		}
 	}

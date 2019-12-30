@@ -89,9 +89,9 @@ public class Dodge extends BaseModSkill
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(new TextComponentTranslation(getInfoString("info", 1),
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.chance",
 				(int)(getBaseDodgeChance(player) * 100)).getUnformattedText());
-		desc.add(new TextComponentTranslation(getInfoString("info", 2),
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.bonus",
 				(getDodgeTime() + level - 5) * 2).getUnformattedText()); // don't use real time bonus, since timer is zero
 		desc.add(getTimeLimitDisplay(getDodgeTime()));
 		desc.add(getExhaustionDisplay(getExhaustion()));

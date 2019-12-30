@@ -164,7 +164,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, IRandomSkill
 				list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.provider", name).getUnformattedText());
 			}
 			if (advanced) {
-				list.addAll(skill.getDescription(player));
+				list.addAll(skill.getTooltip(player, true));
 			}
 		}
 	}

@@ -80,7 +80,7 @@ public abstract class ItemGrantSkill extends Item
 				tooltip.add(TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled").getUnformattedText());
 			} else if (skill.getLevel() > 0) {
 				tooltip.add(TextFormatting.GOLD + skill.getLevelDisplay(true));
-				tooltip.addAll(skill.getTranslatedTooltip(player, advanced));
+				tooltip.addAll(skill.getTooltip(player, advanced));
 			} else {
 				tooltip.add(TextFormatting.ITALIC + new TextComponentTranslation("tooltip.dss.skillorb.desc.0").getUnformattedText());
 			}

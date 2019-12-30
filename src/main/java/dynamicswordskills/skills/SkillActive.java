@@ -62,7 +62,7 @@ public abstract class SkillActive extends SkillBase
 
 	@Override
 	public String getActivationDisplay() {
-		return new TextComponentTranslation(getTranslationKey() + ".desc.activate").getUnformattedText();
+		return new TextComponentTranslation(getTranslationKey() + ".activation").getUnformattedText();
 	}
 
 	/**

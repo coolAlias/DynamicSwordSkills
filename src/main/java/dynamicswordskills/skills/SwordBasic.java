@@ -95,9 +95,9 @@ public class SwordBasic extends BaseModSkill implements IComboSkill, ILockOnTarg
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(new TextComponentTranslation(getInfoString("info", 1), getMaxComboSize()).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.max", getMaxComboSize()).getUnformattedText());
 		desc.add(getTimeLimitDisplay(getComboTimeLimit()));
-		desc.add(new TextComponentTranslation(getInfoString("info", 2), String.format("%.1f", (0.5F * level))).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.tolerance", String.format("%.1f", getDamageTolerance())).getUnformattedText());
 	}
 
 	@Override
@@ -138,6 +138,10 @@ public class SwordBasic extends BaseModSkill implements IComboSkill, ILockOnTarg
 	/** Returns max distance at which targets may be acquired or remain targetable */
 	private final int getRange() {
 		return (6 + level);
+	}
+
+	private float getDamageTolerance() {
+		return (0.5F * level);
 	}
 
 	@Override
@@ -355,7 +359,7 @@ public class SwordBasic extends BaseModSkill implements IComboSkill, ILockOnTarg
 
 	@Override
 	public void onPlayerHurt(EntityPlayer player, LivingHurtEvent event) {
-		if (isComboInProgress() && DirtyEntityAccessor.getModifiedDamage(player, event.getSource(), event.getAmount()) > (0.5F * level)) {
+		if (isComboInProgress() && DirtyEntityAccessor.getModifiedDamage(player, event.getSource(), event.getAmount()) > getDamageTolerance()) {
 			combo.endCombo(player);
 		}
 	}
