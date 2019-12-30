@@ -37,14 +37,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * 
  * RISING CUT
  * Description: Rising slash flings enemy upward
- * Activation: Jump while sneaking and attack
+ * Activation: Crouch by pressing the sneak key, then jump and attack
  * Effect: Attacks target for normal sword damage and knocks the target into the air
  * Range: 2 + level blocks
  * Exhaustion: 3.0F - (level * 0.2F)
- * Special: May only be used while locked on to a target
  * 
- * Requires onRenderTick to be called each render tick while active.
- *  
  */
 public class RisingCut extends SkillActive
 {

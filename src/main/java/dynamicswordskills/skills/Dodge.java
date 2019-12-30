@@ -43,8 +43,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Activation: Tap left or right arrow key to dodge in that direction
  * Exhaustion: 0.05F
  * Duration: (5 + level) ticks; this is the amount of time during which damage may be avoided
- * Special: - May only be used while locked on to a target
- * 			- Chance to avoid damage is 10% per level, plus a timing bonus of up to 20%
+ * Special: Chance to avoid damage is 10% per level, plus a timing bonus of up to 20%
  * 
  * Tap 'left' or 'right' arrow key to dodge out of harm's way (activated when key released);
  * can be configured to require double-tap and / or to allow use of default movement keys ('a'
