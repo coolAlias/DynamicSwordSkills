@@ -58,6 +58,12 @@ public abstract class SkillBase
 	/** Unique ResourceLocation for this skill */
 	private ResourceLocation registryName = null;
 
+	/** Placeholder skill icon used by default */
+	private static final ResourceLocation DEFAULT_ICON = new ResourceLocation(ModInfo.ID, "textures/skills/default.png");
+
+	/** Icon texture location, if any */
+	private ResourceLocation iconLocation = null;
+
 	/** Language registry translation key */
 	public final String translationKey;
 
@@ -81,9 +87,10 @@ public abstract class SkillBase
 	 * Copy constructor creates a level zero version of the skill
 	 */
 	protected SkillBase(SkillBase skill) {
+		this.id = skill.id;
+		this.iconLocation = skill.iconLocation;
 		this.registryName = skill.registryName;
 		this.translationKey = skill.translationKey;
-		this.id = skill.id;
 		this.tooltip.addAll(skill.tooltip);
 	}
 
@@ -205,6 +212,17 @@ public abstract class SkillBase
 	 */
 	public boolean displayInGroup(SkillGroup group) {
 		return this.getRegistryName() != null && group.label.equalsIgnoreCase(this.getRegistryName().getResourceDomain());
+	}
+
+	/** Return the texture path for the skill's icon */
+	public ResourceLocation getIconLocation() {
+		return (iconLocation == null ? DEFAULT_ICON : iconLocation);
+	}
+
+	/** Sets the texture path for the skill's icon */
+	public SkillBase setIconLocation(String location) {
+		this.iconLocation = DynamicSwordSkills.getResourceLocation(location);
+		return this;
 	}
 
 	/** Each skill's ID can be used as a key to retrieve it from the map */
