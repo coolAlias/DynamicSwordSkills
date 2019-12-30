@@ -87,8 +87,8 @@ public class SwordBreak extends BaseModSkill
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), getMaxDamage()));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), getKnockbackStrength()));
+		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey() + ".info.durability", getMaxDamage()));
+		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey() + ".info.knockback", getKnockbackStrength()));
 		desc.add(getTimeLimitDisplay(getActiveTime() - getUseDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}

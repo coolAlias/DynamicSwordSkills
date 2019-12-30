@@ -118,7 +118,7 @@ public class SpinAttack extends BaseModSkill
 		}
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1).replace("super", ""), superLevel + 1));
+		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey().replace("super_", "") + ".info.max", superLevel + 1));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 		level = temp;
 	}

@@ -90,11 +90,9 @@ public class Parry extends BaseModSkill
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
-				(int)(getDisarmChance(player, null) * 100)));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
-				(int)(2.5F * (getActiveTime() - getParryDelay()))));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 3), getMaxParries()));
+		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey() + ".info.chance", (int)(getDisarmChance(player, null) * 100)));
+		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey() + ".info.bonus", (int)(2.5F * (getActiveTime() - getParryDelay()))));
+		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey() + ".info.max", getMaxParries()));
 		desc.add(getTimeLimitDisplay(getActiveTime() - getParryDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}

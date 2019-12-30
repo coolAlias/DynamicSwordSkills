@@ -87,7 +87,7 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 
 	@Override
 	protected void setup(ScaledResolution resolution) {
-		String textKey = (this.iconIndex == 2 ? "dss.hud.endingblow.failure" : (this.iconIndex == 1 ? "dss.hud.endingblow.success" : "dss.hud.endingblow.activate"));
+		String textKey = Skills.endingBlow.getTranslationKey() + (this.iconIndex == 2 ? ".hud.failure" : (this.iconIndex == 1 ? "hud.success" : "hud.activate"));
 		this.text = StatCollector.translateToLocal(textKey);
 		this.height = (Config.endingBlowHudText ? this.mc.fontRenderer.FONT_HEIGHT : ICON_SIZE);
 		this.width = (Config.endingBlowHudText ? this.mc.fontRenderer.getStringWidth(this.text) : ICON_SIZE);

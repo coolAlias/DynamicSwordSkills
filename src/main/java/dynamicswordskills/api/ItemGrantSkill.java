@@ -76,7 +76,7 @@ public abstract class ItemGrantSkill extends Item
 				tooltip.add(EnumChatFormatting.DARK_RED + StatCollector.translateToLocal("skill.dss.disabled"));
 			} else if (skill.getLevel() > 0) {
 				tooltip.add(EnumChatFormatting.GOLD + skill.getLevelDisplay(true));
-				tooltip.addAll(skill.getTranslatedTooltip(player, advanced));
+				tooltip.addAll(skill.getTooltip(player, advanced));
 			} else {
 				tooltip.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.dss.skillorb.desc.0"));
 			}

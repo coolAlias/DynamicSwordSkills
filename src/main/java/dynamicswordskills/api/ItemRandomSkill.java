@@ -185,7 +185,7 @@ public class ItemRandomSkill extends ItemSword implements IRandomSkill, ISkillPr
 				list.add(StatCollector.translateToLocalFormatted("tooltip.dss.skill_provider.desc.provider", name));
 			}
 			if (advanced) {
-				list.addAll(skill.getDescription(player));
+				list.addAll(skill.getTooltip(player, true));
 			}
 		}
 	}

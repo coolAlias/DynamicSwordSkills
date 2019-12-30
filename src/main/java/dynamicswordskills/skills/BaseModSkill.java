@@ -7,7 +7,7 @@ public abstract class BaseModSkill extends SkillActive
 	 */
 	public BaseModSkill(String translationKey) {
 		super(translationKey);
-		this.addDescriptions(1);
+		this.addTranslatedTooltip(getTranslationKey() + ".tooltip");
 	}
 
 	public BaseModSkill(SkillActive skill) {

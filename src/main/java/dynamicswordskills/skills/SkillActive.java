@@ -63,7 +63,7 @@ public abstract class SkillActive extends SkillBase
 
 	@Override
 	public String getActivationDisplay() {
-		return StatCollector.translateToLocal(getTranslationKey() + ".desc.activate");
+		return StatCollector.translateToLocal(getTranslationKey() + ".activation");
 	}
 
 	/**

@@ -106,9 +106,9 @@ public class BackSlice extends BaseModSkill
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), 360 - (2 * getAttackAngle())));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
-				String.format("%.2f", getDisarmorChance(null, player.getHeldItem(), level))));
+		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey() + ".info.angle", 360 - (2 * getAttackAngle())));
+		String chance = String.format("%.2f", getDisarmorChance(null, player.getHeldItem(), level));
+		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey() + ".info.chance", chance));
 		desc.add(getDamageDisplay(level * 10, true) + "%");
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}

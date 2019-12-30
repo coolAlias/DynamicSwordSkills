@@ -78,8 +78,7 @@ public class SwordBeam extends BaseModSkill
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(getDamageFactor(player), false) + "%");
 		desc.add(getRangeDisplay(12 + level));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
-				String.format("%.1f", Config.getHealthAllowance(level) / 2.0F)));
+		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey() + ".info.health", String.format("%.1f", Config.getHealthAllowance(level) / 2.0F)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
