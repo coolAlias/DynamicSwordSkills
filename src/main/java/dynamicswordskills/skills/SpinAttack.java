@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -57,7 +58,7 @@ import net.minecraft.world.World;
  * Exhaustion: 3.0F - 0.2F per level, added each spin
  *
  */
-public class SpinAttack extends SkillActive
+public class SpinAttack extends BaseModSkill
 {
 	/** Current charge time; only ever set on the client - server is never charging */
 	private int charge;
@@ -100,6 +101,11 @@ public class SpinAttack extends SkillActive
 	@Override
 	public SpinAttack newInstance() {
 		return new SpinAttack(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
 	}
 
 	@Override

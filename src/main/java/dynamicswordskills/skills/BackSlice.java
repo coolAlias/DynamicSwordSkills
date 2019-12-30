@@ -23,6 +23,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -62,7 +63,7 @@ import net.minecraft.world.World;
  * 		- Other enemies may take no damage at all, if they have a hard carapace or some such
  * 		- Chance to remove enemy's chest armor
  */
-public class BackSlice extends SkillActive
+public class BackSlice extends BaseModSkill
 {
 	/** Key that was pressed to initiate movement, either left or right */
 	@SideOnly(Side.CLIENT)
@@ -95,6 +96,11 @@ public class BackSlice extends SkillActive
 	@Override
 	public BackSlice newInstance() {
 		return new BackSlice(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.SWORD_GROUP || group == Skills.TARGETED_GROUP;
 	}
 
 	@Override

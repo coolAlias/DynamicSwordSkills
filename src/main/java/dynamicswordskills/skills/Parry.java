@@ -21,6 +21,7 @@ import java.util.List;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
@@ -49,7 +50,7 @@ import net.minecraft.world.World;
  *   - For players of equal parry skill, chance to disarm is based solely on timing
  * 
  */
-public class Parry extends SkillActive
+public class Parry extends BaseModSkill
 {
 	/** Timer during which player is considered actively parrying */
 	private int parryTimer;
@@ -79,6 +80,11 @@ public class Parry extends SkillActive
 	@Override
 	public Parry newInstance() {
 		return new Parry(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
 	}
 
 	@Override

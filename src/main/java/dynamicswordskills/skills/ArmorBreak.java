@@ -21,6 +21,7 @@ import java.util.List;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
@@ -53,7 +54,7 @@ import net.minecraft.world.World;
  * the player will perform the Armor Break attack automatically.
  * 
  */
-public class ArmorBreak extends SkillActive
+public class ArmorBreak extends BaseModSkill
 {
 	/** Set when triggered; set to 0 when target struck in onImpact() */
 	private int activeTimer = 0;
@@ -78,6 +79,11 @@ public class ArmorBreak extends SkillActive
 	@Override
 	public ArmorBreak newInstance() {
 		return new ArmorBreak(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
 	}
 
 	@Override

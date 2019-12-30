@@ -52,7 +52,7 @@ import net.minecraft.world.World;
  * While dodging, there is a chance to avoid any incoming attacks.
  * 
  */
-public class Dodge extends SkillActive
+public class Dodge extends BaseModSkill
 {
 	/** Key that was pressed to initiate dodge */
 	@SideOnly(Side.CLIENT)

@@ -22,6 +22,7 @@ import java.util.List;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DSSCombatEvents;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.ref.Config;
@@ -51,7 +52,7 @@ import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
  * are weakened temporarily.
  * 
  */
-public class LeapingBlow extends SkillActive
+public class LeapingBlow extends BaseModSkill
 {
 	/** Activation window for pressing the attack key, set when player initially leaps */
 	private int ticksTilFail;
@@ -70,6 +71,11 @@ public class LeapingBlow extends SkillActive
 	@Override
 	public LeapingBlow newInstance() {
 		return new LeapingBlow(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.SWORD_GROUP;
 	}
 
 	@Override

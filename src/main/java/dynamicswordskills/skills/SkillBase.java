@@ -30,6 +30,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncSkillPacket;
@@ -194,6 +195,14 @@ public abstract class SkillBase
 	/** Returns the string used to translate this skill's name */
 	public final String getNameTranslationKey() {
 		return getTranslationKey() + ".name";
+	}
+
+	/**
+	 * Default implementation returns true if the group's label matches the resource domain of this skill's registry name
+	 * @return True if the skill should be displayed in the requested group by default; user settings may override this.
+	 */
+	public boolean displayInGroup(SkillGroup group) {
+		return this.getRegistryName() != null && group.label.equalsIgnoreCase(this.getRegistryName().getResourceDomain());
 	}
 
 	/** Each skill's ID can be used as a key to retrieve it from the map */

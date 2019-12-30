@@ -19,17 +19,9 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.DirtyEntityAccessor;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
@@ -39,6 +31,15 @@ import dynamicswordskills.network.client.EndingBlowPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.DirtyEntityAccessor;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.World;
 
 /**
  * 
@@ -57,7 +58,7 @@ import dynamicswordskills.util.PlayerUtils;
  * - Failure to slay the target results in not being able to attack for the duration
  * 
  */
-public class EndingBlow extends SkillActive
+public class EndingBlow extends BaseModSkill
 {
 	/** Flag for isActive() so that skill can trigger upon impact from LivingHurtEvent */
 	private int activeTimer = 0;
@@ -101,6 +102,11 @@ public class EndingBlow extends SkillActive
 	@Override
 	public EndingBlow newInstance() {
 		return new EndingBlow(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP || group == Skills.TARGETED_GROUP;
 	}
 
 	@Override

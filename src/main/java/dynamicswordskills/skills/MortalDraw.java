@@ -21,7 +21,7 @@ import java.util.List;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.MortalDrawPacket;
@@ -51,7 +51,7 @@ import net.minecraft.world.World;
  * - There is a 1.5s cooldown between uses, representing re-sheathing of the sword
  *
  */
-public class MortalDraw extends SkillActive
+public class MortalDraw extends BaseModSkill
 {
 	/** Delay before skill can be used again */
 	private static final int DELAY = 30;
@@ -79,6 +79,11 @@ public class MortalDraw extends SkillActive
 	@Override
 	public MortalDraw newInstance() {
 		return new MortalDraw(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.SWORD_GROUP || group == Skills.TARGETED_GROUP;
 	}
 
 	@Override

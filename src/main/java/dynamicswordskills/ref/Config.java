@@ -22,11 +22,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.api.WeaponRegistry;
 import dynamicswordskills.client.gui.IGuiOverlay.HALIGN;
@@ -50,6 +56,7 @@ public class Config
 	private static boolean allowVanillaControls;
 	private static boolean requireDoubleTap;
 	private static boolean requireLockOn;
+	private static Map<String, Set<String>> skillGroupLists = Maps.<String, Set<String>>newHashMap();
 	/* Combo HUD */
 	public static int comboHudDisplayTime;
 	private static int comboHudMaxHits;
@@ -222,6 +229,30 @@ public class Config
 		for (SkillBase skill : skills) {
 			enableSkill[skill.getId()] = config.get("enabledskills", "Enable use of the skill " + skill.getDisplayName(), true).getBoolean(true);
 		}
+		// Skill Groups
+		List<String> groupList = Lists.<String>newArrayList();
+		for (SkillGroup group : SkillGroup.getAll()) {
+			groupList.add(group.label);
+		}
+		String[] groups = config.get("skillgroups", "skillGroups", groupList.toArray(new String[0]), "Enter desired Skill Groups in the order you wish them to appear, each on a separate line between the '<' and '>'").getStringList();
+		int i = groups.length;
+		for (String label : groups) {
+			SkillGroup group = new SkillGroup(label).setDisplayName(label).register();
+			if (group == null) {
+				continue;
+			}
+			group.priority = i--;
+			// Skill List for this group
+			List<String> skillList = Lists.<String>newArrayList();
+			for (SkillBase skill : SkillRegistry.getValues()) {
+				if (skill.displayInGroup(group)) {
+					skillList.add(skill.getRegistryName().toString());
+				}
+			}
+			String[] groupSkills = config.get("skillgroupskills", label, skillList.toArray(new String[0]), "Enter skill registry names for each skill you wish to appear in this category, each on a separate line between the '<' and '>'").getStringList();
+			Set<String> set = Sets.newHashSet(groupSkills);
+			skillGroupLists.put(group.label, set);
+		}
 		if (config.hasChanged()) {
 			config.save();
 		}
@@ -235,6 +266,13 @@ public class Config
 	public static boolean autoTargetEnabled() { return enableAutoTarget; }
 	public static boolean canTargetPassiveMobs() { return enableTargetPassive; }
 	public static boolean canTargetPlayers() { return enableTargetPlayer; }
+	public static boolean isSkillInGroup(SkillBase skill, SkillGroup group) {
+		if (skill.getRegistryName() == null) { return false; }
+		Set<String> set = skillGroupLists.get(group.label);
+		String name = skill.getRegistryName().toString();
+		String alt = skill.getRegistryName().getResourceDomain() + ":*";
+		return set != null && (set.contains(name) || set.contains(alt));
+	}
 	/*================== SKILLS =====================*/
 	public static boolean giveBonusOrb() { return enableBonusOrb; }
 	public static int getLootWeight() { return chestLootWeight; }

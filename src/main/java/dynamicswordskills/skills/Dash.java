@@ -59,7 +59,7 @@ import net.minecraft.world.World;
  * Special: Effects that increase player speed increase the effective range, damage, and knockback.
  * 
  */
-public class Dash extends SkillActive
+public class Dash extends BaseModSkill
 {
 	/** Player's base movement speed */
 	public static final double BASE_MOVE = 0.10000000149011612D;
