@@ -36,8 +36,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -93,9 +93,9 @@ public class SwordBasic extends BaseModSkill implements IComboSkill, ILockOnTarg
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), getMaxComboSize()));
+		desc.add(new ChatComponentTranslation(getTranslationKey() + ".info.max", getMaxComboSize()).getUnformattedText());
 		desc.add(getTimeLimitDisplay(getComboTimeLimit()));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), String.format("%.1f", (0.5F * level))));
+		desc.add(new ChatComponentTranslation(getTranslationKey() + ".info.tolerance", String.format("%.1f", getDamageTolerance())).getUnformattedText());
 	}
 
 	@Override
@@ -136,6 +136,10 @@ public class SwordBasic extends BaseModSkill implements IComboSkill, ILockOnTarg
 	/** Returns max distance at which targets may be acquired or remain targetable */
 	private final int getRange() {
 		return (6 + level);
+	}
+
+	private float getDamageTolerance() {
+		return (0.5F * level);
 	}
 
 	@Override
@@ -353,7 +357,7 @@ public class SwordBasic extends BaseModSkill implements IComboSkill, ILockOnTarg
 
 	@Override
 	public void onPlayerHurt(EntityPlayer player, LivingHurtEvent event) {
-		if (isComboInProgress() && DirtyEntityAccessor.getModifiedDamage(player, event.source, event.ammount) > (0.5F * level)) {
+		if (isComboInProgress() && DirtyEntityAccessor.getModifiedDamage(player, event.source, event.ammount) > getDamageTolerance()) {
 			combo.endCombo(player);
 		}
 	}
