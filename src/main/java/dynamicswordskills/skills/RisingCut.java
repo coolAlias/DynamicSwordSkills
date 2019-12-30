@@ -30,6 +30,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -48,7 +49,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RisingCut extends SkillActive
 {
 	/** Flag for activation; set when player jumps while sneaking */
-	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 
 	/** Set when activated and lasts until the player hits the ground or the duration expires */
@@ -98,6 +98,18 @@ public class RisingCut extends SkillActive
 		return 3.0F - (level * 0.2F);
 	}
 
+	/** The amount of upward velocity to apply to affected entities */
+	protected double getMotionY() {
+		return 0.15D + (0.115D * level);
+	}
+
+	private void jump(EntityPlayer player) {
+		player.motionY += getMotionY();
+		if (player instanceof EntityPlayerMP) {
+			((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new S12PacketEntityVelocity(player));
+		}
+	}
+
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && !isActive() && !player.isUsingItem() && PlayerUtils.isSwordOrProvider(player.getHeldItem(), this);
@@ -138,43 +150,60 @@ public class RisingCut extends SkillActive
 
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
-		animationTimer = 5 + level;
 		// Approximate time it should take to hit the ground with about 5 ticks of leeway
+		// If the player misses, they will have a short delay before they can use Rising Cut again
 		activeTimer = (20 + 3 * level);
+		animationTimer = 5 + level;
 		entityHit = null;
 		hitEntity = false;
-		player.motionY += 0.3D + (0.115D * level);
 		return isActive();
+	}
+
+	private boolean canAttack(EntityLivingBase entity) {
+		return (!(entity instanceof EntityPlayer) || !PlayerUtils.isBlocking((EntityPlayer) entity));
+	}
+
+	@Override
+	public boolean onAttack(EntityPlayer player, EntityLivingBase entity, DamageSource source, float amount) {
+		if (canAttack(entity)) {
+			hitEntity = true;
+			if (!player.worldObj.isRemote) {
+				jump(player);
+			}
+		}
+		return false;
 	}
 
 	@Override
 	protected void onDeactivated(World world, EntityPlayer player) {
 		activeTimer = 0;
 		animationTimer = 0;
+		hitEntity = false;
+		entityHit = null;
 	}
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (player.worldObj.isRemote && ticksTilFail > 0) {
+		if (ticksTilFail > 0) {
 			--ticksTilFail;
 		}
-		if (isActive()) {
-			if (animationTimer > 0) {
-				--animationTimer;
-			}
-			if (activeTimer > 0) {
-				--activeTimer;
-			}
+		if (animationTimer > 0) {
+			--animationTimer;
+		}
+		if (activeTimer > 0) {
+			--activeTimer;
 			if (player.onGround) {
-				onDeactivated(player.worldObj, player);
+				if (!player.worldObj.isRemote && hitEntity) {
+					deactivate(player);
+				}
 			} else if (entityHit != null) {
 				if (!entityHit.isDead) {
-					double addY = 0.3D + (0.125D * level);
 					double resist = 1.0D;
 					if (entityHit instanceof EntityLivingBase) {
 						resist = 1.0D - ((EntityLivingBase) entityHit).getEntityAttribute(SharedMonsterAttributes.knockbackResistance).getAttributeValue();
 					}
-					entityHit.addVelocity(0.0D, addY * resist, 0.0D);
+					double dy = getMotionY() * resist;
+					entityHit.addVelocity(0.0D, dy, 0.0D);
 					if (entityHit instanceof EntityPlayerMP && !player.worldObj.isRemote) {
 						((EntityPlayerMP) entityHit).playerNetServerHandler.sendPacket(new S12PacketEntityVelocity(entityHit));
 					}
@@ -197,16 +226,14 @@ public class RisingCut extends SkillActive
 	 */
 	@Override
 	public void postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
-		if (!hitEntity) {
-			boolean flag = !(entity instanceof EntityPlayer) || !PlayerUtils.isBlocking((EntityPlayer) entity);
-			this.entityHit = (flag ? entity : null);
+		if (canAttack(entity)) {
+			entityHit = entity;
 		}
-		hitEntity = true;
 	}
 
 	@Override
 	public boolean onFall(EntityPlayer player, LivingFallEvent event) {
-		if (isActive()) {
+		if (isActive() && hitEntity) {
 			event.distance -= (1.0F + level);
 			onDeactivated(player.worldObj, player);
 		}
