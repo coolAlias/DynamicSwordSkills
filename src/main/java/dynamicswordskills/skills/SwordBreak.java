@@ -19,6 +19,7 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
@@ -52,7 +53,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * - Has no effect other than blocking the attack if the attacker's held item can not be damaged
  *
  */
-public class SwordBreak extends SkillActive
+public class SwordBreak extends BaseModSkill
 {
 	/** Timer during which player is considered actively parrying */
 	private int breakTimer;
@@ -79,6 +80,11 @@ public class SwordBreak extends SkillActive
 	@Override
 	public SwordBreak newInstance() {
 		return new SwordBreak(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
 	}
 
 	@Override

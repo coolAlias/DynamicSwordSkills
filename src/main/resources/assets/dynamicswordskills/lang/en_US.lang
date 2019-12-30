@@ -86,6 +86,13 @@ dss.config.client.endingBlowHud.yoffset.tooltip=Number of pixels to offset HUD a
 
 itemGroup.dss.skills=DSS Skills
 
+skillGroup.sword=Sword Skills
+skillGroup.sword.tooltip=Can only be used while wielding a sword.
+skillGroup.targeted=Targeted Skills
+skillGroup.targeted.tooltip=Require locking on to a target.
+skillGroup.weapon=Weapon Skills
+skillGroup.weapon.tooltip=Can only be used while wielding a weapon.
+
 death.attack.armorBreak=%1$s's armor was pierced by %2$s
 death.attack.armorBreak.item=%1$s's armor was pierced by %2$s using %3$s
 death.attack.indirectSword=%1$s was slain by %2$s
@@ -131,6 +138,7 @@ skill.dss.disabled=DISABLED
 skill.dss.level.max=MAX LEVEL
 skill.dss.seconds=seconds
 skill.dss.ticks=ticks
+
 skill.dss.gui.activation=ACTIVATION
 skill.dss.gui.activation.text=This section describes the conditions necessary to activate the skill.\nSkills with the [Sword] tag can only be activated while wielding a sword.\nSkills with the [Target] tag can only be activated while locked on to a target.
 skill.dss.gui.additional=ADDITIONAL INFORMATION
