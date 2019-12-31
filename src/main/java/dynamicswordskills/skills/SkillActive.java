@@ -32,6 +32,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
@@ -59,6 +60,11 @@ public abstract class SkillActive extends SkillBase
 
 	protected SkillActive(SkillActive skill) {
 		super(skill);
+	}
+
+	@Override
+	public String getActivationDisplay() {
+		return StatCollector.translateToLocal(getTranslationKey() + ".desc.activate");
 	}
 
 	/**
