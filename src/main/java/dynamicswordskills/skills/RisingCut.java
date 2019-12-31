@@ -42,7 +42,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Description: Rising slash flings enemy upward
  * Activation: Crouch by pressing the sneak key, then jump and attack
  * Effect: Attacks target for normal sword damage and knocks the target into the air
- * Range: 2 + level blocks
+ * Range: Up to 4 + 0.5 blocks per level
  * Exhaustion: 3.0F - (level * 0.2F)
  * 
  */
@@ -79,7 +79,7 @@ public class RisingCut extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(getRangeDisplay(2 + level));
+		desc.add(getRangeDisplay(4 + (level / 2)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
@@ -100,7 +100,7 @@ public class RisingCut extends SkillActive
 
 	/** The amount of upward velocity to apply to affected entities */
 	protected double getMotionY() {
-		return 0.15D + (0.115D * level);
+		return (0.4D + (0.065D * level));
 	}
 
 	private void jump(EntityPlayer player) {
