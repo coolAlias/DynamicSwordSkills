@@ -156,6 +156,9 @@ public class RisingCut extends SkillActive
 		animationTimer = 5 + level;
 		entityHit = null;
 		hitEntity = false;
+		if (!player.worldObj.isRemote && Config.canHighJump()) {
+			jump(player);
+		}
 		return isActive();
 	}
 
@@ -167,7 +170,7 @@ public class RisingCut extends SkillActive
 	public boolean onAttack(EntityPlayer player, EntityLivingBase entity, DamageSource source, float amount) {
 		if (canAttack(entity)) {
 			hitEntity = true;
-			if (!player.worldObj.isRemote) {
+			if (!player.worldObj.isRemote && !Config.canHighJump()) {
 				jump(player);
 			}
 		}
@@ -193,7 +196,7 @@ public class RisingCut extends SkillActive
 		if (activeTimer > 0) {
 			--activeTimer;
 			if (player.onGround) {
-				if (!player.worldObj.isRemote && hitEntity) {
+				if (!player.worldObj.isRemote && (hitEntity || Config.canHighJump())) {
 					deactivate(player);
 				}
 			} else if (entityHit != null) {
@@ -233,7 +236,7 @@ public class RisingCut extends SkillActive
 
 	@Override
 	public boolean onFall(EntityPlayer player, LivingFallEvent event) {
-		if (isActive() && hitEntity) {
+		if (isActive() && (hitEntity || Config.canHighJump())) {
 			event.setDistance(event.getDistance() - (1.0F + level));
 			onDeactivated(player.worldObj, player);
 		}

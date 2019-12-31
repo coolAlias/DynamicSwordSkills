@@ -87,6 +87,8 @@ public class Config
 	private static float disarmTimingBonus;
 	/** [Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20] */
 	private static float disarmPenalty;
+	/** [Rising Cut] Allow the player to activate Rising Cut without hitting a target, i.e. perform a High Jump */
+	private static boolean enableHighJump;
 	/** [Skill Swords] Enable randomized Skill Swords to appear as loot in various chests */
 	private static boolean enableRandomSkillSwords;
 	/** [Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples) */
@@ -174,6 +176,7 @@ public class Config
 		allowDisarmorPlayer = config.get("general", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
 		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("general", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 50);
 		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("general", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
+		enableHighJump = config.get("general", "[Rising Cut] Allow the player to activate Rising Cut without hitting a target, i.e. perform a High Jump", false).getBoolean(false);
 		enableRandomSkillSwords = config.get("general", "[Skill Swords] Enable randomized Skill Swords to appear as loot in various chests", true).getBoolean(true);
 		enableCreativeSkillSwords = config.get("general", "[Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples)", true).getBoolean(true);
 		skillSwordLevel = MathHelper.clamp_int(config.get("general", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt(), 1, 5);
@@ -235,6 +238,7 @@ public class Config
 	public static boolean canDisarmorPlayers() { return allowDisarmorPlayer; }
 	public static float getDisarmPenalty() { return disarmPenalty; }
 	public static float getDisarmTimingBonus() { return disarmTimingBonus; }
+	public static boolean canHighJump() { return enableHighJump; }
 	public static int getSkillSwordLevel() { return skillSwordLevel; }
 	public static boolean isSpinAttackRequired() { return requireSpinAttack; }
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
