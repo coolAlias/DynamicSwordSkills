@@ -61,6 +61,11 @@ public abstract class SkillActive extends SkillBase
 		super(skill);
 	}
 
+	@Override
+	public String getActivationDisplay() {
+		return new TextComponentTranslation(getTranslationKey() + ".desc.activate").getUnformattedText();
+	}
+
 	/**
 	 * Return false if this skill may not be directly activated manually, in which case it
 	 * should have some other method of {@link #trigger(World, EntityPlayer) triggering}

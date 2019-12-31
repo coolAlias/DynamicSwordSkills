@@ -154,11 +154,16 @@ public class GuiSkills extends GuiContainer
 			desc.add(new TextComponentTranslation("skill.dss.gui.summary").getUnformattedText());
 			currentSkill.addInformation(desc, mc.thePlayer);
 			desc.add("");
-			desc.add(new TextComponentTranslation("skill.dss.gui.activation").getUnformattedText());
-			Stream.of(currentSkill.getActivationDisplay().split("\\\\n")).forEach(s -> {
-				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
-			});
-			desc.add("");
+			// Activation requirements, if any
+			String activation = currentSkill.getActivationDisplay();
+			if (activation != null) {
+				desc.add(new TextComponentTranslation("skill.dss.gui.activation").getUnformattedText());
+				Stream.of(activation.split("\\\\n")).forEach(s -> {
+					desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+				});
+				desc.add("");
+			}
+			// Full description
 			desc.add(new TextComponentTranslation("skill.dss.gui.description").getUnformattedText());
 			Stream.of(currentSkill.getFullDescription().split("\\\\n")).forEach(s -> {
 				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
