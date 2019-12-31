@@ -281,9 +281,10 @@ public abstract class SkillBase
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {}
 
-	/** Returns the translated description of the skill's activation requirements (long version) */
+	/** Returns the translated description of the skill's activation requirements, if any */
+	@Nullable
 	public String getActivationDisplay() {
-		return StatCollector.translateToLocal(getTranslationKey() + ".desc.activate");
+		return null;
 	}
 
 	/** Returns a translated description of the skill's AoE, using the value provided */

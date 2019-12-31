@@ -154,12 +154,17 @@ public class GuiSkills extends GuiContainer
 			desc.add(StatCollector.translateToLocal("skill.dss.gui.summary"));
 			currentSkill.addInformation(desc, mc.thePlayer);
 			desc.add("");
-			desc.add(StatCollector.translateToLocal("skill.dss.gui.activation"));
-			temp = currentSkill.getActivationDisplay().split("\\\\n");
-			for (String s : temp) {
-				desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+			// Activation requirements, if any
+			String activation = currentSkill.getActivationDisplay();
+			if (activation != null) {
+				desc.add(StatCollector.translateToLocal("skill.dss.gui.activation"));
+				temp = activation.split("\\\\n");
+				for (String s : temp) {
+					desc.addAll(fontRendererObj.listFormattedStringToWidth(s, 101));
+				}
+				desc.add("");
 			}
-			desc.add("");
+			// Full description
 			desc.add(StatCollector.translateToLocal("skill.dss.gui.description"));
 			temp = currentSkill.getFullDescription().split("\\\\n");
 			for (String s : temp) {
