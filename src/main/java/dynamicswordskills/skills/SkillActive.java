@@ -240,6 +240,10 @@ public abstract class SkillActive extends SkillBase
 	 */
 	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
 		if (!Config.isSkillEnabled(this)) {
+			// Force client to deactivate in case client config settings differ
+			if (!world.isRemote) {
+				PacketDispatcher.sendTo(new DeactivateSkillPacket(this), (EntityPlayerMP) player);
+			}
 			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new ChatComponentTranslation(getNameTranslationKey()));
 			return false;
 		} else if (!wasTriggered && !allowUserActivation()) {
