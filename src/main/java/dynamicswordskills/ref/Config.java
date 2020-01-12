@@ -267,5 +267,8 @@ public class Config
 		}
 		Config.baseSwingSpeed = msg.baseSwingSpeed;
 		Config.requireFullHealth = msg.requireFullHealth;
+		for (Byte b : msg.disabledIds) {
+			Config.enableSkill[b] = false;
+		}
 	}
 }
