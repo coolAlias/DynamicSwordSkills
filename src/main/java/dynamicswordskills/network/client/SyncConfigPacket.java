@@ -18,9 +18,14 @@
 package dynamicswordskills.network.client;
 
 import java.io.IOException;
+import java.util.List;
 
+import com.google.common.collect.Lists;
+
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
 import dynamicswordskills.ref.Config;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
@@ -36,6 +41,7 @@ public class SyncConfigPacket extends AbstractClientMessage<SyncConfigPacket>
 	private boolean isValid;
 	public int baseSwingSpeed;
 	public boolean requireFullHealth;
+	public List<Byte> disabledIds = Lists.<Byte>newArrayList();
 
 	public SyncConfigPacket() {}
 
@@ -51,12 +57,25 @@ public class SyncConfigPacket extends AbstractClientMessage<SyncConfigPacket>
 		baseSwingSpeed = buffer.readInt();
 		requireFullHealth = buffer.readBoolean();
 		isValid = true;
+		int n = buffer.readInt();
+		for (int i = 0; i < n; ++i) {
+			disabledIds.add(buffer.readByte());
+		}
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeInt(Config.getBaseSwingSpeed());
 		buffer.writeBoolean(Config.getHealthAllowance(1) == 0.0F);
+		for (SkillBase skill : SkillRegistry.getValues()) {
+			if (!Config.isSkillEnabled(skill)) {
+				disabledIds.add(skill.getId());
+			}
+		}
+		buffer.writeInt(disabledIds.size());
+		for (Byte b : disabledIds) {
+			buffer.writeByte(b);
+		}
 	}
 
 	@Override
