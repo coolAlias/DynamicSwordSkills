@@ -38,12 +38,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * 
  * SWORD BREAK
- * Activation: Double-tap forward then right-click. Shield is not required.
+ * Activation: Double-tap forward then right-click while wielding a weapon
  * Effect: A fierce block that is capable of destroying the opponent's blade
  * Exhaustion: 2.0F - (0.1 * level)
  * Damage: Up to 90 durability damage to the opponent's held item (15 * (level + 1))
  * Knockback: 0.5F + (0.1F * level), slightly better than a standard block
- * Duration: Time allowed before skill fails is 2 ticks at level 1, up to 8 ticks at max level
+ * Duration: Timing window starts at 4 ticks and increases to 8 by max level
  * Notes:
  * - Only works when being attacked by an enemy holding an item
  * - Has no effect other than blocking the attack if the attacker's held item can not be damaged
@@ -99,12 +99,12 @@ public class SwordBreak extends SkillActive
 
 	/** Number of ticks that skill will be considered active */
 	private int getActiveTime() {
-		return 6 + level;
+		return 9 + (level / 2);
 	}
 
 	/** Number of ticks before player may attempt to use this skill again */
 	private int getUseDelay() {
-		return (5 - (level / 2)); // 2 tick usage window at level 1
+		return (5 - (level / 2));
 	}
 
 	/** Maximum amount of damage that may be caused to the opponent's weapon */
