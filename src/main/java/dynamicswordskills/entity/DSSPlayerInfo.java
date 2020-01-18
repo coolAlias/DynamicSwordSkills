@@ -32,7 +32,6 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.network.client.SyncSkillPacket;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
@@ -674,17 +673,14 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Reads a SkillBase from stream and updates the local skills map; if the skill
-	 * loaded from NBT is level 0, that skill will be removed.
+	 * Updates the local skills map with the skill, removing it if level is < 1.
 	 * Called client side only for synchronizing a skill with the server version.
 	 */
 	@SideOnly(Side.CLIENT)
-	public void syncClientSideSkill(byte id, NBTTagCompound compound) {
-		SkillBase skill = SkillRegistry.getSkillById(id);
+	public void syncClientSideSkill(SkillBase skill) {
 		if (skill != null) {
-			SkillBase instance = skill.loadFromNBT(compound);
-			if (instance.getLevel() > 0) {
-				skills.put(skill.getId(), instance);
+			if (skill.getLevel() > 0) {
+				skills.put(skill.getId(), skill);
 			} else {
 				skills.remove(skill.getId());
 			}
@@ -840,10 +836,7 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	public void saveNBTData(NBTTagCompound compound) {
 		NBTTagList taglist = new NBTTagList();
 		for (SkillBase skill : skills.values()) {
-			NBTTagCompound skillTag = new NBTTagCompound();
-			skill.writeToNBT(skillTag);
-			skillTag.setString("id", skill.getRegistryName().toString());
-			taglist.appendTag(skillTag);
+			taglist.appendTag(skill.writeToNBT());
 		}
 		compound.setTag("DynamicSwordSkills", taglist);
 		compound.setBoolean("receivedGear", receivedGear);
@@ -854,19 +847,10 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		skills.clear(); // allows skills to reset on client without re-adding all the skills
 		NBTTagList taglist = compound.getTagList("DynamicSwordSkills", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < taglist.tagCount(); ++i) {
-			NBTTagCompound skillTag = taglist.getCompoundTagAt(i);
-			SkillBase skill = null;
-			if (skillTag.hasKey("id", Constants.NBT.TAG_BYTE)) {
-				skill = SkillRegistry.getSkillById(skillTag.getByte("id"));
-			} else {
-				String name = skillTag.getString("id");
-				if (name.lastIndexOf(':') == -1) {
-					name = ModInfo.ID + ":" + name;
-				}
-				skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
-			}
+			NBTTagCompound tag = taglist.getCompoundTagAt(i);
+			SkillBase skill = SkillBase.loadFromNBT(tag);
 			if (skill != null) {
-				skills.put(skill.getId(), skill.loadFromNBT(skillTag));
+				skills.put(skill.getId(), skill);
 			}
 		}
 		receivedGear = compound.getBoolean("receivedGear");
