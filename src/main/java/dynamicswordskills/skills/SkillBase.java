@@ -34,6 +34,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.FMLContainer;
 import net.minecraftforge.fml.common.InjectedModContainer;
 import net.minecraftforge.fml.common.Loader;
@@ -382,18 +383,54 @@ public abstract class SkillBase
 	public void onUpdate(EntityPlayer player) {}
 
 	/**
-	 * Write mutable data to NBT.
-	 * NOT responsible for storing this skill's identity (e.g. id) - if that is needed, write it separately.
+	 * Calls {@link #writeAdditionalData(NBTTagCompound)} with a new tag and appends this skill's registry name and level
 	 */
-	public abstract void writeToNBT(NBTTagCompound compound);
+	public final NBTTagCompound writeToNBT() {
+		NBTTagCompound tag = new NBTTagCompound();
+		this.writeAdditionalData(tag);
+		tag.setString("id", this.getRegistryName().toString());
+		tag.setByte("level", level);
+		return tag;
+	}
 
-	/** Reads mutable data from NBT. */
-	public abstract void readFromNBT(NBTTagCompound compound);
+	/**
+	 * Calls {@link #readAdditionalData(NBTTagCompound)} after loading the skill's {@link #level} field from NBT.
+	 */
+	public void readFromNBT(NBTTagCompound tag) {
+		this.level = tag.getByte("level");
+		this.readAdditionalData(tag);
+	}
 
-	/** Returns a new instance from NBT */
-	public final SkillBase loadFromNBT(NBTTagCompound compound) {
-		SkillBase skill = this.newInstance();
-		skill.readFromNBT(compound);
+	/**
+	 * Called from {@link #writeToNBT()} to write additional data to the skill's NBT tag.
+	 */
+	public void writeAdditionalData(NBTTagCompound tag) {}
+
+	/**
+	 * Called from {@link #readFromNBT()} to read additional data from the skill's NBT tag.
+	 */
+	public void readAdditionalData(NBTTagCompound tag) {}
+
+	/**
+	 * Creates a new skill instance of the appropriate type based on the NBT data
+	 * and calls {@link #readFromNBT(NBTTagCompound)} prior to returning it.
+	 * @return May be null for an invalid NBT tag
+	 */
+	public static final SkillBase loadFromNBT(NBTTagCompound tag) {
+		SkillBase skill = null;
+		if (tag.hasKey("id", Constants.NBT.TAG_BYTE)) {
+			skill = SkillRegistry.getSkillById(tag.getByte("id"));
+		} else {
+			String name = tag.getString("id");
+			if (name.lastIndexOf(':') == -1) {
+				name = ModInfo.ID + ":" + name;
+			}
+			skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
+		}
+		if (skill != null) {
+			skill = skill.newInstance();
+			skill.readFromNBT(tag);
+		}
 		return skill;
 	}
 }
