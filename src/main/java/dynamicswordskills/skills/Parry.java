@@ -37,21 +37,16 @@ import net.minecraft.world.World;
 
 /**
  * 
- * Tap 'down' arrow to parry an incoming attack with chance to disarm opponent. Only works on
- * opponents wielding an item, not against raw physical attacks such as a zombie touch.
- * 
- * Once activated, their is a short window (4 ticks at level 1) during which all incoming
- * attacks will be parried, followed by another short period during which parry cannot be
- * activated again (to prevent spamming). The 'cooldown' time decreases with level, whereas
- * the 'window' time increases.
- * 
- * Chance to Disarm: 0.1F per level + a time bonus of up to 0.2F
+ * PARRY
+ * Activation: Double-tap back then right-click while wielding a weapon
+ * Effect: A defensive flourish that blocks incoming weapon attacks and may disarm the opponent
  * Exhaustion: 0.3F minus 0.02F per level (0.2F at level 5)
- * Notes: For players of equal parry skill, chance to disarm is based solely on timing
- * 
- * Using vanilla controls, Parry is activated just like the Dodge skill, requiring either a
- * single tap and release, or a double-tap based on the Config settings. Parry never requires
- * a double tap when using the arrow key.
+ * Chance to Disarm: 0.1F per level + a time bonus of up to 0.2F
+ * Duration: Timing window starts at 4 ticks and increases to 8 by max level
+ * Max Attacks Parried: 1 + (level / 2)
+ * Notes:
+ *   - Only works on attacks made with an item, not against raw physical attacks such as a zombie touch
+ *   - For players of equal parry skill, chance to disarm is based solely on timing
  * 
  */
 public class Parry extends SkillActive
@@ -62,13 +57,13 @@ public class Parry extends SkillActive
 	/** Number of attacks parried this activation cycle */
 	private int attacksParried;
 
+	/** Counter incremented when next correct key in sequence pressed; reset when activated or if ticksTilFail timer reaches 0 */
+	@SideOnly(Side.CLIENT)
+	private int keysPressed;
+
 	/** Only for double-tap activation: Current number of ticks remaining before skill will not activate */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
-
-	/** Only for double-tap activation; true after the first key press and release */
-	@SideOnly(Side.CLIENT)
-	private boolean keyReleased;
 
 	/** Notification to play miss sound; set to true when activated and false when attack parried */
 	private boolean playMissSound;
@@ -154,7 +149,7 @@ public class Parry extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return canUse(player);
+		return canUse(player) && keysPressed > 1 && ticksTilFail > 0;
 	}
 
 	@Override
@@ -163,31 +158,30 @@ public class Parry extends SkillActive
 		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
 		}
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_BACK].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack));
+		return true;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (canExecute(player)) {
-			if (Config.requiresDoubleTap()) {
-				if (keyReleased && ticksTilFail > 0) {
-					ticksTilFail = 0;
-					return activate(player);
-				} else {
-					ticksTilFail = 6;
+		if ((Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_BACK].getKey()) {
+			ticksTilFail = 6;
+			if (keysPressed < 2) {
+				if (!Config.requiresDoubleTap() && key == DSSKeyHandler.keys[DSSKeyHandler.KEY_BACK].getKey()) {
+					keysPressed++;
 				}
-			} else if (key != mc.gameSettings.keyBindBack) { // activate on first press, but not for vanilla key!
-				return activate(player);
+				keysPressed++;
 			}
+		} else if (key == mc.gameSettings.keyBindUseItem) {
+			boolean flag = (canExecute(player) && activate(player));
+			ticksTilFail = 0;
+			keysPressed = 0;
+			return flag;
+		} else {
+			ticksTilFail = 0;
+			keysPressed = 0;
 		}
 		return false;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		keyReleased = (ticksTilFail > 0);
 	}
 
 	@Override
@@ -213,8 +207,8 @@ public class Parry extends SkillActive
 			}
 		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
-			if (ticksTilFail == 0) {
-				keyReleased = false;
+			if (ticksTilFail < 1) {
+				keysPressed = 0;
 			}
 		}
 	}
