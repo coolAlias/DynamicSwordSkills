@@ -145,6 +145,9 @@ public class SwordBreak extends SkillActive
 		if ((Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey()) {
 			ticksTilFail = 6;
 			if (keysPressed < 2) {
+				if (!Config.requiresDoubleTap() && key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey()) {
+					keysPressed++;
+				}
 				keysPressed++;
 			}
 		} else if (key == mc.gameSettings.keyBindUseItem) {
