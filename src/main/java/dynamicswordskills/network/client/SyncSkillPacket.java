@@ -19,13 +19,13 @@ package dynamicswordskills.network.client;
 
 import java.io.IOException;
 
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 
@@ -34,9 +34,6 @@ import dynamicswordskills.skills.SkillBase;
  */
 public class SyncSkillPacket extends AbstractClientMessage<SyncSkillPacket>
 {
-	/** The ID of the skill to update */
-	private byte id;
-
 	/** Stores the skill's data */
 	private NBTTagCompound compound;
 
@@ -47,25 +44,21 @@ public class SyncSkillPacket extends AbstractClientMessage<SyncSkillPacket>
 	 * @param skill A level 0 skill will be removed
 	 */
 	public SyncSkillPacket(SkillBase skill) {
-		this.id = skill.getId();
-		compound = new NBTTagCompound();
-		skill.writeToNBT(compound);
+		compound = skill.writeToNBT();
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		id = buffer.readByte();
 		compound = buffer.readNBTTagCompoundFromBuffer();
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeByte(id);
 		buffer.writeNBTTagCompoundToBuffer(compound);
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		DSSPlayerInfo.get(player).syncClientSideSkill(id, compound);
+		DSSPlayerInfo.get(player).syncClientSideSkill(SkillBase.loadFromNBT(compound));
 	}
 }

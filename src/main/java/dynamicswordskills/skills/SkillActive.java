@@ -29,7 +29,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -360,15 +359,5 @@ public abstract class SkillActive extends SkillBase
 	 */
 	public boolean onCreativeFall(EntityPlayer player, PlayerFlyableFallEvent event) {
 		return false;
-	}
-
-	@Override
-	public final void writeToNBT(NBTTagCompound compound) {
-		compound.setByte("level", level);
-	}
-
-	@Override
-	public final void readFromNBT(NBTTagCompound compound) {
-		level = compound.getByte("level");
 	}
 }
