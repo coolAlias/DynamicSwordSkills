@@ -41,7 +41,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Activation: Double-tap back then right-click while wielding a weapon
  * Effect: A defensive flourish that blocks incoming weapon attacks and may disarm the opponent
  * Exhaustion: 0.3F minus 0.02F per level (0.2F at level 5)
- * Chance to Disarm: 0.1F per level + a time bonus of up to 0.2F
+ * Chance to Disarm: 0.1F per level + a time bonus of up to 0.2F - 0.05F for each attack parried beyond the first
  * Duration: Timing window starts at 4 ticks and increases to 8 by max level
  * Max Attacks Parried: 1 + (level / 2)
  * Notes:
@@ -120,14 +120,13 @@ public class Parry extends SkillActive
 
 	/**
 	 * Returns player's chance to disarm an attacker
-	 * @param attacker if the attacker is an EntityPlayer, their Parry score will decrease their chance
-	 * of being disarmed
+	 * @param attacker if the attacker is an EntityPlayer, their Parry score will decrease their chance of being disarmed
 	 */
 	private float getDisarmChance(EntityPlayer player, EntityLivingBase attacker) {
-		float penalty = 0.0F;
+		float penalty = 0.05F * attacksParried;
 		float bonus = Config.getDisarmTimingBonus() * (parryTimer > 0 ? (parryTimer - getParryDelay()) : 0);
 		if (attacker instanceof EntityPlayer) {
-			penalty = Config.getDisarmPenalty() * DSSPlayerInfo.get((EntityPlayer) attacker).getSkillLevel(this);
+			penalty += Config.getDisarmPenalty() * DSSPlayerInfo.get((EntityPlayer) attacker).getSkillLevel(this);
 		}
 		return ((level * 0.1F) - penalty + bonus);
 	}
@@ -221,7 +220,7 @@ public class Parry extends SkillActive
 				if (player.worldObj.rand.nextFloat() < getDisarmChance(player, attacker)) {
 					PlayerUtils.dropHeldItem(attacker);
 				}
-				++attacksParried; // increment after disarm
+				++attacksParried; // increment after disarm check
 				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_SWORDSTRIKE, 0.4F, 0.5F);
 				playMissSound = false;
 				TargetUtils.knockTargetBack(attacker, player, getKnockbackStrength());
