@@ -118,7 +118,7 @@ public class GuiSkills extends GuiContainer
 		fontRendererObj.setUnicodeFlag(true);
 		fontRendererObj.drawString(s, 158, 38, 4210752);
 		if (currentSkill != null) {
-			if (Config.isSkillEnabled(currentSkill)) {
+			if (Config.isSkillAllowed(currentSkill)) {
 				s = currentSkill.getLevelDisplay(false);
 			} else {
 				s = (EnumChatFormatting.DARK_RED + StatCollector.translateToLocal("skill.dss.disabled"));

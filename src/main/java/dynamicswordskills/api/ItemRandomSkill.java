@@ -69,7 +69,7 @@ public class ItemRandomSkill extends ItemSword implements IRandomSkill, ISkillPr
 		if (SKILLS == null) {
 			SKILLS = Lists.<Byte>newArrayList();
 			for (SkillBase skill : SkillRegistry.getValues()) {
-				if (Config.isSkillEnabled(skill) && skill instanceof SkillActive) {
+				if (Config.isSkillAllowed(skill) && skill instanceof SkillActive) {
 					SKILLS.add(skill.getId());
 				}
 			}

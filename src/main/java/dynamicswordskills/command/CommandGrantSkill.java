@@ -75,7 +75,7 @@ public class CommandGrantSkill extends CommandBase
 		if (args.length == 2 && ("all").equals(args[1])) {
 			boolean flag = true;
 			for (SkillBase skill : SkillRegistry.getValues()) {
-				if (Config.isSkillEnabled(skill) && !skills.grantSkill(skill, skill.getMaxLevel())) {
+				if (Config.isSkillAllowed(skill) && !skills.grantSkill(skill, skill.getMaxLevel())) {
 					flag = false;
 				}
 			}
@@ -95,7 +95,7 @@ public class CommandGrantSkill extends CommandBase
 			int level = parseIntBounded(sender, args[2], 1, 10);
 			int oldLevel = skills.getTrueSkillLevel(skill);
 			if (level > oldLevel) { // grants skill up to level or max level, whichever is reached first
-				if (!Config.isSkillEnabled(skill)) {
+				if (!Config.isSkillAllowed(skill)) {
 					throw new CommandException("commands.grantskill.failure.disabled", new ChatComponentTranslation(skill.getNameTranslationKey()));
 				} else if (skills.grantSkill(skill, (byte) level)) {
 					PlayerUtils.sendTranslatedChat(player, "commands.grantskill.notify.one", new ChatComponentTranslation(skill.getNameTranslationKey()), skills.getTrueSkillLevel(skill));

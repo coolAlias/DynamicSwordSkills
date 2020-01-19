@@ -238,7 +238,7 @@ public abstract class SkillActive extends SkillBase
 	 * @return	Returns {@link #onActivated}, signaling whether or not to add the skill to the list of currently active skills.
 	 */
 	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
-		if (!Config.isSkillEnabled(this)) {
+		if (!Config.isSkillAllowed(this)) {
 			// Force client to deactivate in case client config settings differ
 			if (!world.isRemote) {
 				PacketDispatcher.sendTo(new DeactivateSkillPacket(this), (EntityPlayerMP) player);
