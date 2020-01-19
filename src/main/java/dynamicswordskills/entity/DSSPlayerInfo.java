@@ -595,8 +595,8 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		for (SkillBase skill : SkillRegistry.getValues()) {
 			if (skill instanceof ILockOnTarget && skill instanceof SkillActive) {
 				SkillBase instance = getPlayerSkill(skill);
-				if (instance != null) {
-					((SkillActive) instance).activate(player);
+				if (instance != null && ((SkillActive) instance).activate(player)) {
+					break;
 				}
 			}
 		}
