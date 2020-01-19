@@ -116,7 +116,7 @@ public class DSSCombatEvents
 		ItemStack orb = null;
 		boolean flag = mob instanceof EntityPlayer;
 		SkillBase skill = ((IRandomSkill) DynamicSwordSkills.skillOrb).getRandomSkill(mob.worldObj.rand);
-		if (Config.isSkillEnabled(skill) && (!flag || Config.arePlayerDropsEnabled())) {
+		if (Config.isSkillAllowed(skill) && (!flag || Config.arePlayerDropsEnabled())) {
 			int damage = ((IMetadataSkillItem) DynamicSwordSkills.skillOrb).getItemDamage(skill);
 			float chance = (flag ? Config.getPlayerDropFactor() : 1) * Config.getRandomMobDropChance();
 			if (damage > -1 && (dropsList.get(mob.getClass()) != null || mob.worldObj.rand.nextFloat() < chance)) {

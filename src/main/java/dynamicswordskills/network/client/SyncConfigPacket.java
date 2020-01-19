@@ -68,7 +68,7 @@ public class SyncConfigPacket extends AbstractClientMessage<SyncConfigPacket>
 		buffer.writeInt(Config.getBaseSwingSpeed());
 		buffer.writeBoolean(Config.getHealthAllowance(1) == 0.0F);
 		for (SkillBase skill : SkillRegistry.getValues()) {
-			if (!Config.isSkillEnabled(skill)) {
+			if (!Config.isSkillAllowed(skill)) {
 				disabledIds.add(skill.getId());
 			}
 		}

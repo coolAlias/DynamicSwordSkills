@@ -54,7 +54,7 @@ public abstract class ItemGrantSkill extends Item
 		if (!player.worldObj.isRemote) {
 			SkillBase skill = getSkillToGrant(stack);
 			if (skill != null) {
-				if (!Config.isSkillEnabled(skill)) {
+				if (!Config.isSkillAllowed(skill)) {
 					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(skill.getNameTranslationKey()));
 				} else if (DSSPlayerInfo.get(player).grantSkill(skill)) {
 					PlayerUtils.playSound(player, ModSounds.LEVEL_UP, SoundCategory.PLAYERS, 1.0F, 1.0F);
@@ -76,7 +76,7 @@ public abstract class ItemGrantSkill extends Item
 	public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advanced) {
 		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(getSkillToGrant(stack));
 		if (skill != null) {
-			if (!Config.isSkillEnabled(skill)) {
+			if (!Config.isSkillAllowed(skill)) {
 				tooltip.add(TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled").getUnformattedText());
 			} else if (skill.getLevel() > 0) {
 				tooltip.add(TextFormatting.GOLD + skill.getLevelDisplay(true));

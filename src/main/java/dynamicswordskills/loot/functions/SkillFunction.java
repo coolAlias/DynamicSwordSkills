@@ -67,7 +67,7 @@ public abstract class SkillFunction extends LootFunction
 			SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(this.skill_name));
 			if (skill == null) {
 				DynamicSwordSkills.logger.warn("Unknown skill '" + this.skill_name + "' - a random skill may be selected instead.");
-			} else if (!Config.isSkillEnabled(skill)) {
+			} else if (!Config.isSkillAllowed(skill)) {
 				DynamicSwordSkills.logger.warn(skill.getDisplayName() + " has been disabled in the Config settings; a random skill may be selected instead.");
 			} else {
 				return skill;
@@ -95,6 +95,6 @@ public abstract class SkillFunction extends LootFunction
 	}
 
 	static {
-		SKILLS = SkillRegistry.getValues().stream().filter(s -> Config.isSkillEnabled(s)).collect(Collectors.toList());
+		SKILLS = SkillRegistry.getValues().stream().filter(s -> Config.isSkillAllowed(s)).collect(Collectors.toList());
 	}
 }

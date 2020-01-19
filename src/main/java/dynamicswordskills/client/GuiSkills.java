@@ -120,7 +120,7 @@ public class GuiSkills extends GuiContainer
 		fontRendererObj.setUnicodeFlag(true);
 		fontRendererObj.drawString(s, 158, 38, 4210752);
 		if (currentSkill != null) {
-			if (Config.isSkillEnabled(currentSkill)) {
+			if (Config.isSkillAllowed(currentSkill)) {
 				s = currentSkill.getLevelDisplay(false);
 			} else {
 				s = (TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled").getUnformattedText()) + TextFormatting.RESET;

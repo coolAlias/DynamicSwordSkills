@@ -70,7 +70,7 @@ public class SetSkillMetadata extends SkillFunction
 				skill = ((IRandomSkill) stack.getItem()).getRandomSkill(rand);
 			}
 			int damage = (skill == null ? -1 : ((IMetadataSkillItem) stack.getItem()).getItemDamage(skill));
-			if (damage < 0 || !Config.isSkillEnabled(skill)) {
+			if (damage < 0 || !Config.isSkillAllowed(skill)) {
 				stack.stackSize = 0; // invalidate loot stack
 			} else {
 				stack.setItemDamage(damage);
