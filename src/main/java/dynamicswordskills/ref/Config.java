@@ -63,7 +63,6 @@ public class Config
 	private static boolean clickedPageSound;
 	private static boolean clickedSkillSound;
 	private static boolean showBannedSkills;
-	private static boolean showOneGroupPerPage;
 	private static boolean showPaginationLabels;
 	private static boolean showPlainTextIndex;
 	private static boolean showSkillGroupTooltips;
@@ -167,7 +166,6 @@ public class Config
 		clickedPageSound = config.get("skillgui", "dss.config.client.skillGui.clickedPageSound", true, "Play a sound when the page index changes").getBoolean(true);
 		clickedSkillSound = config.get("skillgui", "dss.config.client.skillGui.clickedSkillSound", true, "Play a sound when clicking on a Skill entry").getBoolean(true);
 		showBannedSkills = config.get("skillgui", "dss.config.client.skillGui.showBannedSkills", false, "Display entries in the Skill Manual for skills disabled by the server").getBoolean(false);
-		showOneGroupPerPage= config.get("skillgui", "dss.config.client.skillGui.showOneGroupPerPage", true, "Display all skills in a group on a single page (enables scrolling)").getBoolean(true);
 		showPaginationLabels = config.get("skillgui", "dss.config.client.skillGui.showPaginationLabels", true, "Display text labels for 'Prev' and 'Next' page buttons").getBoolean(true);
 		showPlainTextIndex = config.get("skillgui", "dss.config.client.skillGui.showPlainTextIndex", true, "Display table of contents without the standard button texture").getBoolean(true);
 		showSkillGroupTooltips= config.get("skillgui", "dss.config.client.skillGui.showSkillGroupTooltips", true, "Display tooltips when hovering over the Table of Contents entries for Skill Groups that support them").getBoolean(true);
@@ -297,7 +295,6 @@ public class Config
 	public static boolean clickedPageSound() { return clickedPageSound; }
 	public static boolean clickedSkillSound() { return clickedSkillSound; }
 	public static boolean showBannedSkills() { return showBannedSkills; }
-	public static boolean showOneGroupPerPage() { return showOneGroupPerPage; }
 	public static boolean showPaginationLabels() { return showPaginationLabels; }
 	public static boolean showPlainTextIndex() { return showPlainTextIndex; }
 	public static boolean showSkillGroupTooltips() { return showSkillGroupTooltips; }

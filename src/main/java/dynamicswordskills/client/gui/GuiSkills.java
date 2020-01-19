@@ -544,9 +544,6 @@ public class GuiSkills extends GuiScreen
 
 	public static class SkillSlotContainer extends GuiElementContainer<SkillSlot>
 	{
-		/** Maximum number of skills that can be displayed per page without scrolling, accounting for padding between elements */
-		protected int skillsPerPage = 6;
-
 		public final GuiSkills skillScreen;
 
 		/** The currently hovered slot, if any */
@@ -607,9 +604,6 @@ public class GuiSkills extends GuiScreen
 
 		@Override
 		public boolean canAdd(@Nullable SkillSlot slot) {
-			if (!Config.showOneGroupPerPage() && this.elements.size() >= this.skillsPerPage) {
-				return false;
-			}
 			return slot.skill == null || Config.isSkillInGroup(slot.skill, this.group);
 		}
 
@@ -625,7 +619,6 @@ public class GuiSkills extends GuiScreen
 		public SkillSlotContainer setElementPadding(int x, int y) {
 			super.setElementPadding(x, y);
 			this.lineHeight = 18 + y;
-			this.skillsPerPage = (this.height - this.padding.height() + y) / this.lineHeight;
 			return this;
 		}
 
