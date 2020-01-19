@@ -43,6 +43,7 @@ import dynamicswordskills.skills.Skills;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 
 public class Config
 {
@@ -56,6 +57,7 @@ public class Config
 	private static boolean allowVanillaControls;
 	private static boolean requireDoubleTap;
 	private static boolean requireLockOn;
+	private static Set<String> deactivatedSkills = Sets.<String>newHashSet();
 	private static Map<String, Set<String>> skillGroupLists = Maps.<String, Set<String>>newHashMap();
 	/* Combo HUD */
 	public static int comboHudDisplayTime;
@@ -128,7 +130,11 @@ public class Config
 		refreshClient();
 		refreshServer();
 	}
-	
+
+	private static Property getDeactivatedSkillsProperty() {
+		return config.get("client", "dss.config.client.deactivatedSkills", new String[0], "Deactivating a skill on the client prevents it from being activated only for that client. This can be used to disable a skill temporarily, perhaps to swap between skills with the same activation key sequence. Enter the registry names for each skill to deactivate, each on a separate line between the '<' and '>'");
+	}
+
 	public static void refreshClient() {
 		/* General client settings */
 		config.addCustomCategoryComment("client", "This category contains client side settings; i.e. they are not synchronized with the server.");
@@ -143,6 +149,9 @@ public class Config
 		}
 		requireDoubleTap = config.get("client", "dss.config.client.requireDoubleTap", true, "Require double-tap for Dodge and Parry (always required when Vanilla Controls are enabled)").getBoolean(true);
 		requireLockOn = config.get("client", "dss.config.client.requireLockOn", false, "Require locking on to activate skills").getBoolean(false);
+		String[] deactivated = getDeactivatedSkillsProperty().getStringList();
+		deactivatedSkills.clear();
+		deactivatedSkills.addAll(Lists.<String>newArrayList(deactivated));
 		/* Combo HUD */
 		String[] xalign = {"left", "center", "right"};
 		String[] yalign = {"top", "center", "bottom"};
@@ -285,6 +294,18 @@ public class Config
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));
+	}
+	/** @return true if the skill has been disabled either by the server or client settings */
+	public static final boolean isSkillDisabled(@Nullable SkillBase skill) {
+		if (skill == null || skill.getRegistryName() == null) {
+			return true;
+		}
+		String s = skill.getRegistryName().toString();
+		return bannedSkills.contains(s) || deactivatedSkills.contains(s);
+	}
+	/** @return true if the skill is allowed by the client, i.e. not deactivated */
+	public static final boolean isSkillActive(@Nullable SkillBase skill) {
+		return skill != null && skill.getRegistryName() != null && !deactivatedSkills.contains(skill.getRegistryName().toString());
 	}
 	/** @return true if the skill is allowed by the server, i.e. not banned */
 	public static final boolean isSkillAllowed(@Nullable SkillBase skill) {

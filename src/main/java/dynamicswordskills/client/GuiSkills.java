@@ -118,11 +118,7 @@ public class GuiSkills extends GuiContainer
 		fontRendererObj.setUnicodeFlag(true);
 		fontRendererObj.drawString(s, 158, 38, 4210752);
 		if (currentSkill != null) {
-			if (Config.isSkillAllowed(currentSkill)) {
-				s = currentSkill.getLevelDisplay(false);
-			} else {
-				s = (EnumChatFormatting.DARK_RED + StatCollector.translateToLocal("skill.dss.disabled"));
-			}
+			s = currentSkill.getLevelDisplay(false);
 			fontRendererObj.drawString(s, 262 - fontRendererObj.getStringWidth(s), 38, 4210752);
 		}
 		refreshDescription();
@@ -151,6 +147,11 @@ public class GuiSkills extends GuiContainer
 		}
 		String[] temp;
 		if (currentSkill != null) {
+			if (Config.isSkillDisabled(currentSkill)) {
+				String tk = "skill.dss.disabled." + (Config.isSkillAllowed(currentSkill) ? "client" : "server");
+				desc.add(EnumChatFormatting.DARK_RED + StatCollector.translateToLocal(tk) + EnumChatFormatting.RESET);
+				desc.add("");
+			}
 			desc.add(StatCollector.translateToLocal("skill.dss.gui.summary"));
 			currentSkill.addInformation(desc, mc.thePlayer);
 			desc.add("");

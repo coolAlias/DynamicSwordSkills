@@ -1,6 +1,6 @@
 chat.dss.skill.levelup=Learned %s level %d!
 chat.dss.skill.maxlevel=%s is already at max level!
-chat.dss.skill.use.disabled=%s has been disabled
+chat.dss.skill.use.disabled=%s has been disabled by the server
 chat.dss.skill.use.fail=Can't currently use %s!
 
 combo.combo=Combo: %s
@@ -21,7 +21,7 @@ combo.label.11=Masterful
 combo.label.12=Legendary
 
 commands.skill.generic.unknown=%1$s is not a recognized skill
-commands.grantskill.failure.disabled=%1$s is disabled
+commands.grantskill.failure.disabled=%1$s is disabled by the server
 commands.grantskill.failure.low=%1$s already has %2$s level %3$d 
 commands.grantskill.failure.player=%1$s was unable to learn %2$s
 commands.grantskill.notify.one=You have been granted %1$s level %2$d!
@@ -51,6 +51,8 @@ commands.dssweaponregistry.usage=/dssweaponregistry <allow|forbid> <sword|weapon
 dss.config.title=DSS Configuration Settings
 dss.config.client.name=Client Settings
 dss.config.client.name.tooltip=These settings do not affect the server or other players
+dss.config.client.deactivatedSkills=Deactivated Skills
+dss.config.client.deactivatedSkills.tooltip=Deactivating a skill on the client prevents it from being activated only for that client. This can be used to disable a skill temporarily, perhaps to swap between skills with the same activation key sequence.
 dss.config.client.enableAdditionalControls=Enable Additional Controls
 dss.config.client.enableAdditionalControls.tooltip=Enables additional WASD-equivalent keybindings for activating skills with e.g. a gamepad
 dss.config.client.enableAutoTarget=Enable Auto-Targeting
@@ -141,7 +143,8 @@ skill.dss.info.exhaustion=Exhaustion: %s
 skill.dss.info.level=Level: %1$s/%2$s
 skill.dss.info.range=Range: %s blocks
 skill.dss.info.time=Time Limit: %d ticks
-skill.dss.disabled=DISABLED
+skill.dss.disabled.client=DISABLED BY USER
+skill.dss.disabled.server=DISABLED BY SERVER
 skill.dss.level.max=MAX LEVEL
 skill.dss.seconds=seconds
 skill.dss.ticks=ticks
