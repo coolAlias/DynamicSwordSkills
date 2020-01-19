@@ -106,8 +106,8 @@ public class Config
 	private static boolean requireSpinAttack;
 	/** [SYNC] [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
 	private static boolean requireFullHealth;
-	/** Enable use of a skill */
-	private static boolean[] enableSkill;
+	/** Skills not allowed on this server */
+	private static Set<String> bannedSkills = Sets.<String>newHashSet();
 	/*================== DROPS =====================*/
 	/** [Player] Enable skill orbs to drop from players when killed in PvP */
 	private static boolean enablePlayerDrops;
@@ -195,6 +195,14 @@ public class Config
 		skillSwordLevel = MathHelper.clamp_int(config.get("general", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt(), 1, 5);
 		requireSpinAttack = config.get("general", "[Skill Swords][Super Spin Attack] Require player to have at least one level in Spin Attack to perform extra spins using a skill item", false).getBoolean(false);
 		requireFullHealth = config.get("general", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
+		config.addCustomCategoryComment("general.bannedskills",
+				"Disabling a skill on the server prevents players from using that skill, but does not change the player\'s known skills."
+				+ "\nSkill items previously generated as loot may be found but not used, and subsequent loot will not generate with that skill."
+				+ "\nSkill orb-like items may still drop from mobs / players unless disabled separately, but usually may not be used."
+				+ "\nThis setting is save-game safe: skills may be disabled and re-enabled without affecting the saved game state.");
+		String[] banned = config.get("general.bannedskills", "bannedSkills", new String[0], "Enter the registry names for each skill disallowed on this server, each on a separate line between the '<' and '>'").getStringList();
+		bannedSkills.clear();
+		bannedSkills.addAll(Lists.<String>newArrayList(banned));
 		/*================== DROPS =====================*/
 		enablePlayerDrops = config.get("drops", "[Player] Enable skill orbs to drop from players when killed in PvP", true).getBoolean(true);
 		playerDropFactor = MathHelper.clamp_int(config.get("drops", "[Player] Factor by which to multiply chance for skill orb to drop by slain players [1-20]", 5).getInt(), 1, 20);
@@ -218,17 +226,6 @@ public class Config
 		WeaponRegistry.INSTANCE.forbidItems(forbidden_swords, "Config", true);
 		WeaponRegistry.INSTANCE.forbidItems(forbidden_weapons, "Config", false);
 		/*===================== SKILLS =====================*/
-		// Sort per-skill config entries by registry name
-		List<SkillBase> skills = SkillRegistry.getSortedList(SkillRegistry.SORT_BY_REGISTRY_NAME);
-		config.addCustomCategoryComment("enabledskills",
-				"Disabling a skill prevents players from using that skill, but does not change the player\'s known skills."
-				+ "\nSkill items previously generated as loot may be found but not used, and subsequent loot will not generate with that skill."
-				+ "\nSkill orb-like items may still drop from mobs / players unless disabled separately, but usually may not be used."
-				+ "\nThis setting is save-game safe: it may be disabled and re-enabled without affecting the saved game state.");
-		enableSkill = new boolean[skills.size()];
-		for (SkillBase skill : skills) {
-			enableSkill[skill.getId()] = config.get("enabledskills", "Enable use of the skill " + skill.getDisplayName(), true).getBoolean(true);
-		}
 		// Skill Groups
 		List<String> groupList = Lists.<String>newArrayList();
 		for (SkillGroup group : SkillGroup.getAll()) {
@@ -289,8 +286,10 @@ public class Config
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));
 	}
-	public static final boolean isSkillEnabled(@Nullable SkillBase skill) { return skill != null && isSkillEnabled(skill.getId()); }
-	private static final boolean isSkillEnabled(int id) { return (id > -1 && id < enableSkill.length ? enableSkill[id] : false); }
+	/** @return true if the skill is allowed by the server, i.e. not banned */
+	public static final boolean isSkillAllowed(@Nullable SkillBase skill) {
+		return skill != null && skill.getRegistryName() != null && !bannedSkills.contains(skill.getRegistryName().toString());
+	}
 	/*================== DROPS =====================*/
 	public static boolean arePlayerDropsEnabled() { return enablePlayerDrops; }
 	public static float getPlayerDropFactor() { return playerDropFactor; }
@@ -311,8 +310,12 @@ public class Config
 		}
 		Config.baseSwingSpeed = msg.baseSwingSpeed;
 		Config.requireFullHealth = msg.requireFullHealth;
+		Config.bannedSkills.clear();
 		for (Byte b : msg.disabledIds) {
-			Config.enableSkill[b] = false;
+			SkillBase skill = SkillRegistry.getSkillById(b);
+			if (skill != null && skill.getRegistryName() != null) {
+				Config.bannedSkills.add(skill.getRegistryName().toString());
+			}
 		}
 	}
 }
