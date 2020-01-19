@@ -66,8 +66,10 @@ public class GuiFactoryConfig implements cpw.mods.fml.client.IModGuiFactory
 			@Override
 			protected GuiScreen buildChildScreen() {
 				List<IConfigElement> list = (new ConfigElement(Config.config.getCategory("client"))).getChildElements();
+				List<IConfigElement> skill_gui = (new ConfigElement(Config.config.getCategory("skillgui"))).getChildElements();
 				List<IConfigElement> combo_hud = (new ConfigElement(Config.config.getCategory("combohud"))).getChildElements();
 				List<IConfigElement> ending_blow_hud = (new ConfigElement(Config.config.getCategory("endingblowhud"))).getChildElements();
+				list.add(new DummyCategoryElement("dssSkillGuiConfig", "dss.config.client.skillgui.name", skill_gui));
 				list.add(new DummyCategoryElement("dssComboHudConfig", "dss.config.client.combohud.name", combo_hud));
 				list.add(new DummyCategoryElement("dssEndingBlowHudConfig", "dss.config.client.endingblowhud.name", ending_blow_hud));
 				return new GuiConfig(this.owningScreen,
