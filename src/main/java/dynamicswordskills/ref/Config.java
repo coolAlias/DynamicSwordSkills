@@ -198,7 +198,7 @@ public class Config
 		config.addCustomCategoryComment("general.bannedskills",
 				"Disabling a skill on the server prevents players from using that skill, but does not change the player\'s known skills."
 				+ "\nSkill items previously generated as loot may be found but not used, and subsequent loot will not generate with that skill."
-				+ "\nSkill orb-like items may still drop from mobs / players unless disabled separately, but usually may not be used."
+				+ "\nSkill orb-like items may still drop from mobs / players unless disabled separately, but may not be used to learn the skill."
 				+ "\nThis setting is save-game safe: skills may be disabled and re-enabled without affecting the saved game state.");
 		String[] banned = config.get("general.bannedskills", "bannedSkills", new String[0], "Enter the registry names for each skill disallowed on this server, each on a separate line between the '<' and '>'").getStringList();
 		bannedSkills.clear();
