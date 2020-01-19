@@ -34,6 +34,7 @@ import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncSkillPacket;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -355,7 +356,9 @@ public abstract class SkillBase
 	 * Attempts to level up the skill to target level, returning true if skill's level increased (not necessarily to the target level)
 	 */
 	public final boolean grantSkill(EntityPlayer player, int targetLevel) {
-		if (targetLevel <= level || targetLevel > getMaxLevel()) {
+		if (!Config.isSkillAllowed(this)) {
+			return false;
+		} else if (targetLevel <= level || targetLevel > getMaxLevel()) {
 			return false;
 		}
 		byte oldLevel = level;
