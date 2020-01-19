@@ -339,12 +339,30 @@ public abstract class SkillBase
 		return ((level + 1) == targetLevel && targetLevel <= getMaxLevel());
 	}
 
-	/** Called each time a skill's level increases; responsible for everything OTHER than increasing the skill's level: applying any bonuses, handling Xp, etc. */
-	protected abstract void levelUp(EntityPlayer player);
+	/**
+	 * Called each time a skill's level increases; the {@link #level} value has already been incremented when this is called.
+	 * Default implementation calls {@link #resetModifiers(EntityPlayer)} - override if leveling up requires more complexity.
+	 */
+	protected void levelUp(EntityPlayer player) {
+		resetModifiers(player);
+	}
 
-	/** Recalculates bonuses, etc. upon player respawn; Override if levelUp does things other than just calculate bonuses! */
-	public void validateSkill(EntityPlayer player) {
-		levelUp(player);
+	/**
+	 * Implementations should remove all applied modifiers and reapply them based on the current skill level.
+	 * Skill level may be 0 when e.g. removing a skill completely.
+	 */
+	protected abstract void resetModifiers(EntityPlayer player);
+
+	/**
+	 * Calls {@link #resetModifiers(EntityPlayer)} to ensure modifiers are correct upon respawn, skill removal, etc. 
+	 */
+	public final void validateSkill(EntityPlayer player) {
+		byte lvl = this.level;
+		if (!Config.isSkillAllowed(this)) {
+			this.level = 0;
+		}
+		resetModifiers(player);
+		this.level = lvl;
 	}
 
 	/** Shortcut method to grant skill at current level + 1 */

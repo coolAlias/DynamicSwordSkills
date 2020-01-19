@@ -90,7 +90,7 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	@Override
-	protected void levelUp(EntityPlayer player) {}
+	protected void resetModifiers(EntityPlayer player) {}
 
 	/**
 	 * Returns true if this skill can currently be used by the player (i.e. activated or triggered)
