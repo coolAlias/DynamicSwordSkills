@@ -20,9 +20,8 @@ package dynamicswordskills.client;
 import org.lwjgl.input.Keyboard;
 
 import dynamicswordskills.CommonProxy;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.server.OpenGuiPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillActive;
@@ -109,7 +108,7 @@ public class DSSKeyHandler
 	public static boolean onKeyPressed(Minecraft mc, int kb) {
 		if (mc.inGameHasFocus && mc.thePlayer != null) {
 			if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
-				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
+				mc.thePlayer.openGui(DynamicSwordSkills.instance, CommonProxy.GUI_SKILLS, mc.thePlayer.worldObj, (int) mc.thePlayer.posX, (int) mc.thePlayer.posY, (int) mc.thePlayer.posZ);
 			} else {
 				return handleSkillKeys(mc, kb);
 			}

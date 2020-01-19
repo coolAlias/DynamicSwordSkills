@@ -58,6 +58,16 @@ public class Config
 	private static boolean requireDoubleTap;
 	private static boolean requireLockOn;
 	private static Set<String> deactivatedSkills = Sets.<String>newHashSet();
+	/* Skill Manual GUI */
+	private static boolean clickedGroupFilterSound;
+	private static boolean clickedPageSound;
+	private static boolean clickedSkillSound;
+	private static boolean showBannedSkills;
+	private static boolean showOneGroupPerPage;
+	private static boolean showPaginationLabels;
+	private static boolean showPlainTextIndex;
+	private static boolean showSkillGroupTooltips;
+	private static boolean showUnknownSkills;
 	private static Map<String, Set<String>> skillGroupLists = Maps.<String, Set<String>>newHashMap();
 	/* Combo HUD */
 	public static int comboHudDisplayTime;
@@ -152,6 +162,16 @@ public class Config
 		String[] deactivated = getDeactivatedSkillsProperty().getStringList();
 		deactivatedSkills.clear();
 		deactivatedSkills.addAll(Lists.<String>newArrayList(deactivated));
+		/* Skill Manual GUI */
+		clickedGroupFilterSound = config.get("skillgui", "dss.config.client.skillGui.clickedGroupFilterSound", true, "Play a sound when applying or removing a Skill Group filter").getBoolean(true);
+		clickedPageSound = config.get("skillgui", "dss.config.client.skillGui.clickedPageSound", true, "Play a sound when the page index changes").getBoolean(true);
+		clickedSkillSound = config.get("skillgui", "dss.config.client.skillGui.clickedSkillSound", true, "Play a sound when clicking on a Skill entry").getBoolean(true);
+		showBannedSkills = config.get("skillgui", "dss.config.client.skillGui.showBannedSkills", false, "Display entries in the Skill Manual for skills disabled by the server").getBoolean(false);
+		showOneGroupPerPage= config.get("skillgui", "dss.config.client.skillGui.showOneGroupPerPage", true, "Display all skills in a group on a single page (enables scrolling)").getBoolean(true);
+		showPaginationLabels = config.get("skillgui", "dss.config.client.skillGui.showPaginationLabels", true, "Display text labels for 'Prev' and 'Next' page buttons").getBoolean(true);
+		showPlainTextIndex = config.get("skillgui", "dss.config.client.skillGui.showPlainTextIndex", true, "Display table of contents without the standard button texture").getBoolean(true);
+		showSkillGroupTooltips= config.get("skillgui", "dss.config.client.skillGui.showSkillGroupTooltips", true, "Display tooltips when hovering over the Table of Contents entries for Skill Groups that support them").getBoolean(true);
+		showUnknownSkills = config.get("skillgui", "dss.config.client.skillGui.showUnknownSkills", true, "Display entries in the Skill Manual for skills not yet learned").getBoolean(true);
 		/* Combo HUD */
 		String[] xalign = {"left", "center", "right"};
 		String[] yalign = {"top", "center", "bottom"};
@@ -272,6 +292,16 @@ public class Config
 	public static boolean autoTargetEnabled() { return enableAutoTarget; }
 	public static boolean canTargetPassiveMobs() { return enableTargetPassive; }
 	public static boolean canTargetPlayers() { return enableTargetPlayer; }
+	/* Skill GUI */
+	public static boolean clickedGroupFilterSound() { return clickedGroupFilterSound; }
+	public static boolean clickedPageSound() { return clickedPageSound; }
+	public static boolean clickedSkillSound() { return clickedSkillSound; }
+	public static boolean showBannedSkills() { return showBannedSkills; }
+	public static boolean showOneGroupPerPage() { return showOneGroupPerPage; }
+	public static boolean showPaginationLabels() { return showPaginationLabels; }
+	public static boolean showPlainTextIndex() { return showPlainTextIndex; }
+	public static boolean showSkillGroupTooltips() { return showSkillGroupTooltips; }
+	public static boolean showUnknownSkills() { return showUnknownSkills; }
 	public static boolean isSkillInGroup(SkillBase skill, SkillGroup group) {
 		if (skill.getRegistryName() == null) { return false; }
 		Set<String> set = skillGroupLists.get(group.label);
@@ -294,6 +324,27 @@ public class Config
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));
+	}
+	/**
+	 * Toggles the skill's client-side deactivation state
+	 * @param skill
+	 * @return current deactivation state
+	 */
+	public static final boolean toggleDeactivatedSkill(SkillBase skill) {
+		String s = skill.getRegistryName().toString();
+		if (deactivatedSkills.contains(s)) {
+			deactivatedSkills.remove(s);
+			return false;
+		}
+		deactivatedSkills.add(s);
+		return true;
+	}
+	/** Saves changes made to the {@link #deactivatedSkills} list */
+	public static void updateDeactivatedSkills() {
+		getDeactivatedSkillsProperty().set(deactivatedSkills.toArray(new String[0]));
+		if (Config.config.hasChanged()) {
+			Config.config.save();
+		}
 	}
 	/** @return true if the skill has been disabled either by the server or client settings */
 	public static final boolean isSkillDisabled(@Nullable SkillBase skill) {
