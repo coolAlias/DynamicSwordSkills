@@ -59,10 +59,13 @@ public abstract class SkillBase
 	private ResourceLocation registryName = null;
 
 	/** Placeholder skill icon used by default */
-	private static final ResourceLocation DEFAULT_ICON = new ResourceLocation(ModInfo.ID, "textures/skills/default.png");
+	public static final ResourceLocation DEFAULT_ICON = new ResourceLocation(ModInfo.ID, "textures/skills/default.png");
 
 	/** Icon texture location, if any */
 	private ResourceLocation iconLocation = null;
+
+	/** Icon texture resolution */
+	private int iconResolution = 16;
 
 	/** Language registry translation key */
 	public final String translationKey;
@@ -214,6 +217,26 @@ public abstract class SkillBase
 		return this.getRegistryName() != null && group.label.equalsIgnoreCase(this.getRegistryName().getResourceDomain());
 	}
 
+	/**
+	 * Called when the player does not have any levels in this skill and the GUI is configured to display unknown skills.
+	 * Note that this method is NOT called on the player's actual skill instance, but a dummy version.
+	 * @return true to display this skill's actual icon rather than the placeholder icon
+	 */
+	@SideOnly(Side.CLIENT)
+	public boolean showIconIfUnknown(EntityPlayer player) {
+		return false;
+	}
+
+	/**
+	 * Called when the player does not have any levels in this skill and the GUI is configured to display unknown skills.
+	 * Note that this method is NOT called on the player's actual skill instance, but a dummy version.
+	 * @return true to display this skill's actual display name rather than the placeholder text
+	 */
+	@SideOnly(Side.CLIENT)
+	public boolean showNameIfUnknown(EntityPlayer player) {
+		return false;
+	}
+
 	/** Return the texture path for the skill's icon */
 	public ResourceLocation getIconLocation() {
 		return (iconLocation == null ? DEFAULT_ICON : iconLocation);
@@ -222,6 +245,20 @@ public abstract class SkillBase
 	/** Sets the texture path for the skill's icon */
 	public SkillBase setIconLocation(String location) {
 		this.iconLocation = DynamicSwordSkills.getResourceLocation(location);
+		return this;
+	}
+
+	/** Returns the skill icon's resolution */
+	public int getIconResolution() {
+		return this.iconResolution;
+	}
+
+	/**
+	 * Sets the texture resolution for the skill's icon
+	 * @param resolution For best results, use either 16, 32, or 64 
+	 */
+	public SkillBase setIconResolution(int resolution) {
+		this.iconResolution = resolution;
 		return this;
 	}
 
