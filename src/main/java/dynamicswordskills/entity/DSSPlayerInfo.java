@@ -309,7 +309,7 @@ public class DSSPlayerInfo
 	public boolean onKeyPressed(Minecraft mc, KeyBinding key) {
 		boolean isLockedOn = (targetingSkill != null && targetingSkill.isLockedOn());
 		for (SkillBase skill : skills.values()) {
-			if (!Config.isSkillAllowed(skill)) {
+			if (Config.isSkillDisabled(skill)) {
 				continue;
 			}
 			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key, isLockedOn)) {

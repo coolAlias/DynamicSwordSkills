@@ -77,7 +77,7 @@ public abstract class ItemGrantSkill extends Item
 		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(getSkillToGrant(stack));
 		if (skill != null) {
 			if (!Config.isSkillAllowed(skill)) {
-				tooltip.add(TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled").getUnformattedText());
+				tooltip.add(TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled.server").getUnformattedText());
 			} else if (skill.getLevel() > 0) {
 				tooltip.add(TextFormatting.GOLD + skill.getLevelDisplay(true));
 				tooltip.addAll(skill.getTooltip(player, advanced));
