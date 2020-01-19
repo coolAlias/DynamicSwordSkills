@@ -189,7 +189,7 @@ public abstract class SkillActive extends SkillBase
 	 * @return The result of {@link DSSPlayerInfo#activateSkill(SkillBase, boolean)}
 	 */
 	public final boolean activate(EntityPlayer player) {
-		if (!allowUserActivation()) {
+		if (!Config.isSkillAllowed(this) || !allowUserActivation()) {
 			return false;
 		} else if (player.worldObj.isRemote) {
 			PacketDispatcher.sendToServer(new ActivateSkillPacket(this, false));
