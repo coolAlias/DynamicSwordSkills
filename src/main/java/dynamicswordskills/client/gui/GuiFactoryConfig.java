@@ -48,7 +48,7 @@ public class GuiFactoryConfig implements cpw.mods.fml.client.IModGuiFactory
 
 		private static List<IConfigElement> getConfigElements() {
 			List<IConfigElement> list = new ArrayList<IConfigElement>();
-			list.add(new DummyCategoryElement("dssClientConfig", "dss.config.client.name", ClientEntry.class));
+			list.add(new DummyCategoryElement("dssClientConfig", "dss.config.client", ClientEntry.class));
 			return list;
 		}
 
@@ -71,9 +71,9 @@ public class GuiFactoryConfig implements cpw.mods.fml.client.IModGuiFactory
 				skill_gui.add(new DummyCategoryElement("dssSkillGroupLists", "dss.config.client.skillGui.skillGroupLists", skill_group_lists));
 				List<IConfigElement> combo_hud = (new ConfigElement(Config.config.getCategory("combohud"))).getChildElements();
 				List<IConfigElement> ending_blow_hud = (new ConfigElement(Config.config.getCategory("endingblowhud"))).getChildElements();
-				list.add(new DummyCategoryElement("dssSkillGuiConfig", "dss.config.client.skillgui.name", skill_gui));
-				list.add(new DummyCategoryElement("dssComboHudConfig", "dss.config.client.combohud.name", combo_hud));
-				list.add(new DummyCategoryElement("dssEndingBlowHudConfig", "dss.config.client.endingblowhud.name", ending_blow_hud));
+				list.add(new DummyCategoryElement("dssSkillGuiConfig", "dss.config.client.skillgui", skill_gui));
+				list.add(new DummyCategoryElement("dssComboHudConfig", "dss.config.client.combohud", combo_hud));
+				list.add(new DummyCategoryElement("dssEndingBlowHudConfig", "dss.config.client.endingblowhud", ending_blow_hud));
 				return new GuiConfig(this.owningScreen,
 						list,
 						this.owningScreen.modID,
