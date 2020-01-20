@@ -68,8 +68,8 @@ public class GuiFactoryConfig implements IModGuiFactory
 			@Override
 			protected GuiScreen buildChildScreen() {
 				List<IConfigElement> list = (new ConfigElement(Config.config.getCategory(Configuration.CATEGORY_CLIENT))).getChildElements();
-				List<IConfigElement> combo_hud = (new ConfigElement(Config.config.getCategory("comboHud"))).getChildElements();
-				List<IConfigElement> ending_blow_hud = (new ConfigElement(Config.config.getCategory("endingBlowHud"))).getChildElements();
+				List<IConfigElement> combo_hud = (new ConfigElement(Config.config.getCategory("combohud"))).getChildElements();
+				List<IConfigElement> ending_blow_hud = (new ConfigElement(Config.config.getCategory("endingblowhud"))).getChildElements();
 				list.add(new DummyCategoryElement("dssComboHudConfig", "dss.config.client.comboHud.name", combo_hud));
 				list.add(new DummyCategoryElement("dssEndingBlowHudConfig", "dss.config.client.endingBlowHud.name", ending_blow_hud));
 				return new GuiConfig(this.owningScreen,
