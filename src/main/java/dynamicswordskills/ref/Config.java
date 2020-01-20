@@ -128,20 +128,20 @@ public class Config
 		/* Combo HUD */
 		String[] xalign = {"left", "center", "right"};
 		String[] yalign = {"top", "center", "bottom"};
-		comboHudDisplayTime = config.get("combohud", "dss.config.client.combohud.displayTime", 5000, "Number of milliseconds Combo HUD will remain on screen (0 to disable)", 0, 20000).getInt();
-		comboHudMaxHits = config.get("combohud", "dss.config.client.combohud.maxHits", 3, "Maximum number of recent hits to display [0-12]", 0, 12).getInt();
-		comboHudXAlign = HALIGN.fromString(config.get("combohud", "dss.config.client.combohud.xalign", "left", "Base HUD alignment on the X-Axis").setValidValues(xalign).getString());
-		comboHudXOffset = config.get("combohud", "dss.config.client.combohud.xoffset", 0, "Number of pixels to offset HUD alignment on the X-Axis").getInt();
-		comboHudYAlign = VALIGN.fromString(config.get("combohud", "dss.config.client.combohud.yalign", "top", "Base HUD alignment on the Y-Axis").setValidValues(yalign).getString());
-		comboHudYOffset = config.get("combohud", "dss.config.client.combohud.yoffset", 0, "Number of pixels to offset HUD alignment on the Y-Axis").getInt();
+		comboHudDisplayTime = config.get("combohud", "dss.config.client.comboHud.displayTime", 5000, "Number of milliseconds Combo HUD will remain on screen (0 to disable)", 0, 20000).getInt();
+		comboHudMaxHits = config.get("combohud", "dss.config.client.comboHud.maxHits", 3, "Maximum number of recent hits to display [0-12]", 0, 12).getInt();
+		comboHudXAlign = HALIGN.fromString(config.get("combohud", "dss.config.client.comboHud.xalign", "left", "Base HUD alignment on the X-Axis").setValidValues(xalign).getString());
+		comboHudXOffset = config.get("combohud", "dss.config.client.comboHud.xoffset", 0, "Number of pixels to offset HUD alignment on the X-Axis").getInt();
+		comboHudYAlign = VALIGN.fromString(config.get("combohud", "dss.config.client.comboHud.yalign", "top", "Base HUD alignment on the Y-Axis").setValidValues(yalign).getString());
+		comboHudYOffset = config.get("combohud", "dss.config.client.comboHud.yoffset", 0, "Number of pixels to offset HUD alignment on the Y-Axis").getInt();
 		/* Ending Blow HUD */
-		endingBlowHudDisplayTime = config.get("endingblowhud", "dss.config.client.endingblowhud.displayTime", 1000, "Number of milliseconds Ending Blow HUD will remain on screen (0 to disable)", 0, 20000).getInt();
-		endingBlowHudResult = config.get("endingblowhud", "dss.config.client.endingblowhud.enableResultNotification", true, "Display success / failure notification when Ending Blow is used").getBoolean(true);
-		endingBlowHudText = config.get("endingblowhud", "dss.config.client.endingblowhud.enableText", false, "Display text instead of icons for Ending Blow notifications").getBoolean(false);
-		endingBlowHudXAlign = HALIGN.fromString(config.get("endingblowhud", "dss.config.client.endingblowhud.xalign", "center", "Base HUD alignment on the X-Axis").setValidValues(xalign).getString());
-		endingBlowHudXOffset = config.get("endingblowhud", "dss.config.client.endingblowhud.xoffset", 0, "Number of pixels to offset HUD alignment on the X-Axis").getInt();
-		endingBlowHudYAlign = VALIGN.fromString(config.get("endingblowhud", "dss.config.client.endingblowhud.yalign", "top", "Base HUD alignment on the Y-Axis").setValidValues(yalign).getString());
-		endingBlowHudYOffset = config.get("endingblowhud", "dss.config.client.endingblowhud.yoffset", 30, "Number of pixels to offset HUD alignment on the Y-Axis").getInt();
+		endingBlowHudDisplayTime = config.get("endingblowhud", "dss.config.client.endingBlowHud.displayTime", 1000, "Number of milliseconds Ending Blow HUD will remain on screen (0 to disable)", 0, 20000).getInt();
+		endingBlowHudResult = config.get("endingblowhud", "dss.config.client.endingBlowHud.enableResultNotification", true, "Display success / failure notification when Ending Blow is used").getBoolean(true);
+		endingBlowHudText = config.get("endingblowhud", "dss.config.client.endingBlowHud.enableText", false, "Display text instead of icons for Ending Blow notifications").getBoolean(false);
+		endingBlowHudXAlign = HALIGN.fromString(config.get("endingblowhud", "dss.config.client.endingBlowHud.xalign", "center", "Base HUD alignment on the X-Axis").setValidValues(xalign).getString());
+		endingBlowHudXOffset = config.get("endingblowhud", "dss.config.client.endingBlowHud.xoffset", 0, "Number of pixels to offset HUD alignment on the X-Axis").getInt();
+		endingBlowHudYAlign = VALIGN.fromString(config.get("endingblowhud", "dss.config.client.endingBlowHud.yalign", "top", "Base HUD alignment on the Y-Axis").setValidValues(yalign).getString());
+		endingBlowHudYOffset = config.get("endingblowhud", "dss.config.client.endingBlowHud.yoffset", 30, "Number of pixels to offset HUD alignment on the Y-Axis").getInt();
 		if (config.hasChanged()) {
 			config.save();
 		}
