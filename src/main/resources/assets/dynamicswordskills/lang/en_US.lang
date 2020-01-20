@@ -152,6 +152,7 @@ key.dss.left.desc=Left
 key.dss.right.desc=Right
 key.dss.skills_gui.desc=View Skills
 
+skillGroup.dynamicswordskills=DSS Skills
 skillGroup.sword=Sword Skills
 skillGroup.sword.tooltip=Can only be used while wielding a sword.
 skillGroup.targeted=Targeted Skills
