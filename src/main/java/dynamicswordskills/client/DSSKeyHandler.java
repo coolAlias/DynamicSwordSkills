@@ -179,9 +179,8 @@ public class DSSKeyHandler
 		} else if (canInteract) {
 			// Only works for keys mapped to custom key bindings, which is fine for remapped mouse keys
 			KeyBinding key = getKeyBindFromCode(mc, kb);
-			if (key != null) {
+			if (key != null && !skills.onKeyPressed(mc, key)) {
 				KeyBinding.setKeyBindState(kb, true);
-				skills.onKeyPressed(mc, key);
 				// Piggy-back on vanilla use item key so shield blocking will work with custom keybinding
 				if (kb == keys[KEY_BLOCK].getKeyCode()) {
 					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), true);
