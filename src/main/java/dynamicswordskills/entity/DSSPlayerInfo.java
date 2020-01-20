@@ -23,6 +23,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.ISkillProvider;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.SyncPlayerInfoPacket;
+import dynamicswordskills.network.client.SyncSkillPacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.ILockOnTarget;
+import dynamicswordskills.skills.SkillActive;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -37,19 +49,6 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.api.ISkillProvider;
-import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.client.SyncPlayerInfoPacket;
-import dynamicswordskills.network.client.SyncSkillPacket;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.skills.ICombo;
-import dynamicswordskills.skills.ILockOnTarget;
-import dynamicswordskills.skills.SkillActive;
-import dynamicswordskills.skills.SkillBase;
 
 public class DSSPlayerInfo implements IExtendedEntityProperties
 {
@@ -584,13 +583,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			SkillActive skill = iterator.next();
 			if (!skill.isActive()) {
 				iterator.remove();
-			}
-		}
-		if (player.worldObj.isRemote) {
-			if (DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getIsKeyPressed() &&
-					isSkillActive(SkillBase.swordBasic) && player.getHeldItem() != null)
-			{
-				Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
 			}
 		}
 	}
