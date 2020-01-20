@@ -48,6 +48,8 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class Config
 {
 	public static Configuration config;
+	/** Flag set after {@link #postInit()} has been called */
+	private static boolean loaded;
 	/*================== CLIENT SIDE SETTINGS =====================*/
 	/* General client settings */
 	private static boolean enableAdditionalControls;
@@ -170,6 +172,9 @@ public class Config
 		showPlainTextIndex = config.get("skillgui", "dss.config.client.skillGui.showPlainTextIndex", true, "Display table of contents without the standard button texture").getBoolean(true);
 		showSkillGroupTooltips= config.get("skillgui", "dss.config.client.skillGui.showSkillGroupTooltips", true, "Display tooltips when hovering over the Table of Contents entries for Skill Groups that support them").getBoolean(true);
 		showUnknownSkills = config.get("skillgui", "dss.config.client.skillGui.showUnknownSkills", true, "Display entries in the Skill Manual for skills not yet learned").getBoolean(true);
+		if (Config.loaded) {
+			refreshSkillGroups();
+		}
 		/* Combo HUD */
 		String[] xalign = {"left", "center", "right"};
 		String[] yalign = {"top", "center", "bottom"};
@@ -247,18 +252,12 @@ public class Config
 		}
 	}
 
-	public static void postInit() {
-		WeaponRegistry.INSTANCE.registerItems(swords, "Config", true);
-		WeaponRegistry.INSTANCE.registerItems(weapons, "Config", false);
-		WeaponRegistry.INSTANCE.forbidItems(forbidden_swords, "Config", true);
-		WeaponRegistry.INSTANCE.forbidItems(forbidden_weapons, "Config", false);
-		/*===================== SKILLS =====================*/
-		// Skill Groups
+	private static void refreshSkillGroups() {
 		List<String> groupList = Lists.<String>newArrayList();
 		for (SkillGroup group : SkillGroup.getAll()) {
 			groupList.add(group.label);
 		}
-		String[] groups = config.get("skillGroups", "skillGroups", groupList.toArray(new String[0]), "Enter desired Skill Groups in the order you wish them to appear, each on a separate line between the '<' and '>'").getStringList();
+		String[] groups = config.get("skillgui", "dss.config.client.skillGui.skillGroups", groupList.toArray(new String[0]), "Enter desired Skill Group labels in the order you wish them to appear, each on a separate line between the '<' and '>'").getStringList();
 		int i = groups.length;
 		for (String label : groups) {
 			SkillGroup group = new SkillGroup(label).setDisplayName(label).register();
@@ -273,10 +272,19 @@ public class Config
 					skillList.add(skill.getRegistryName().toString());
 				}
 			}
-			String[] groupSkills = config.get("skillGroupSkills", label, skillList.toArray(new String[0]), "Enter skill registry names for each skill you wish to appear in this category, each on a separate line between the '<' and '>'").getStringList();
+			String[] groupSkills = config.get("skillgrouplists", label, skillList.toArray(new String[0]), "Enter skill registry names for each skill you wish to appear in this category, each on a separate line between the '<' and '>'").getStringList();
 			Set<String> set = Sets.newHashSet(groupSkills);
 			skillGroupLists.put(group.label, set);
 		}
+	}
+
+	public static void postInit() {
+		WeaponRegistry.INSTANCE.registerItems(swords, "Config", true);
+		WeaponRegistry.INSTANCE.registerItems(weapons, "Config", false);
+		WeaponRegistry.INSTANCE.forbidItems(forbidden_swords, "Config", true);
+		WeaponRegistry.INSTANCE.forbidItems(forbidden_weapons, "Config", false);
+		refreshSkillGroups();
+		Config.loaded = true;
 		if (config.hasChanged()) {
 			config.save();
 		}
