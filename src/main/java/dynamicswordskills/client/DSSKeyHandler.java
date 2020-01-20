@@ -182,6 +182,10 @@ public class DSSKeyHandler
 			if (key != null) {
 				KeyBinding.setKeyBindState(kb, true);
 				skills.onKeyPressed(mc, key);
+				// Piggy-back on vanilla use item key so shield blocking will work with custom keybinding
+				if (kb == keys[KEY_BLOCK].getKeyCode()) {
+					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), true);
+				}
 			}
 		}
 	}

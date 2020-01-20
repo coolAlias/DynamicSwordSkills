@@ -41,7 +41,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
-import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.network.client.SyncSkillPacket;
@@ -590,11 +589,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			SkillActive skill = iterator.next();
 			if (!skill.isActive()) {
 				iterator.remove();
-			}
-		}
-		if (player.worldObj.isRemote) {
-			if (DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown() && isSkillActive(SkillBase.swordBasic) && player.getHeldItem() != null) {
-				Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
 			}
 		}
 	}
