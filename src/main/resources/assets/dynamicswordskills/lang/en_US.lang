@@ -112,6 +112,7 @@ dss.config.client.endingBlowHud.yoffset.tooltip=Number of pixels to offset HUD a
 
 itemGroup.dss.skills=DSS Skills
 
+skillGroup.dynamicswordskills=DSS Skills
 skillGroup.sword=Sword Skills
 skillGroup.sword.tooltip=Can only be used while wielding a sword.
 skillGroup.targeted=Targeted Skills
