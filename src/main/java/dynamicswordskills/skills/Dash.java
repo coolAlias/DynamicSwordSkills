@@ -102,9 +102,9 @@ public class Dash extends BaseModSkill
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(getDamage(), false));
 		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.knockback", String.format("%.1f", getKnockback())).getUnformattedText());
-		desc.add(new TextComponentTranslation(getRangeDisplay(getRange())).getUnformattedText());
+		desc.add(getRangeDisplay(getRange()));
 		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.min_range", String.format("%.1f", getMinDistance())).getUnformattedText());
-		desc.add(new TextComponentTranslation(getExhaustionDisplay(getExhaustion())).getUnformattedText());
+		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
 	@Override
