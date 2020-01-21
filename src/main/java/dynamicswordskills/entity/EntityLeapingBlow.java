@@ -20,6 +20,12 @@ package dynamicswordskills.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.util.DamageUtils;
+import dynamicswordskills.util.PlayerUtils;
+import dynamicswordskills.util.TargetUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -32,13 +38,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
-
-import org.apache.commons.lang3.ArrayUtils;
-
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.util.DamageUtils;
-import dynamicswordskills.util.PlayerUtils;
-import dynamicswordskills.util.TargetUtils;
 
 public class EntityLeapingBlow extends EntityThrowable
 {
