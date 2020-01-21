@@ -22,6 +22,17 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.ISkillProvider;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.SyncPlayerInfoPacket;
+import dynamicswordskills.network.client.SyncSkillPacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.ILockOnTarget;
+import dynamicswordskills.skills.MortalDraw;
+import dynamicswordskills.skills.SkillActive;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -40,17 +51,6 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.api.ISkillProvider;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.client.SyncPlayerInfoPacket;
-import dynamicswordskills.network.client.SyncSkillPacket;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.skills.ICombo;
-import dynamicswordskills.skills.ILockOnTarget;
-import dynamicswordskills.skills.MortalDraw;
-import dynamicswordskills.skills.SkillActive;
-import dynamicswordskills.skills.SkillBase;
 
 public class DSSPlayerInfo implements IExtendedEntityProperties
 {

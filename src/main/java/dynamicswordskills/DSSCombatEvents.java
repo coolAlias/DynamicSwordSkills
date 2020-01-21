@@ -20,6 +20,13 @@ package dynamicswordskills;
 import java.util.HashMap;
 import java.util.Map;
 
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.SyncConfigPacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityBlaze;
@@ -55,13 +62,6 @@ import net.minecraftforge.event.entity.player.PlayerUseItemEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.client.SyncConfigPacket;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.skills.ICombo;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 

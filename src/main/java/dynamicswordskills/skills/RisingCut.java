@@ -19,6 +19,9 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.client.DSSClientEvents;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -29,9 +32,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.util.PlayerUtils;
 
 /**
  * 

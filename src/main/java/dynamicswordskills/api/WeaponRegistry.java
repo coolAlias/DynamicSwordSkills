@@ -20,12 +20,12 @@ package dynamicswordskills.api;
 import java.util.HashSet;
 import java.util.Set;
 
+import dynamicswordskills.DynamicSwordSkills;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemSword;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import dynamicswordskills.DynamicSwordSkills;
 
 /**
  * 

@@ -20,6 +20,10 @@ package dynamicswordskills.command;
 import java.util.Collections;
 import java.util.List;
 
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
@@ -29,10 +33,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.PlayerUtils;
 
 /**
  * 

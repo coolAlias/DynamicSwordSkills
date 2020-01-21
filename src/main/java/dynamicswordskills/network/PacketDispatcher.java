@@ -17,6 +17,10 @@
 
 package dynamicswordskills.network;
 
+import dynamicswordskills.network.bidirectional.*;
+import dynamicswordskills.network.client.*;
+import dynamicswordskills.network.server.*;
+import dynamicswordskills.ref.ModInfo;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -25,10 +29,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
-import dynamicswordskills.network.bidirectional.*;
-import dynamicswordskills.network.client.*;
-import dynamicswordskills.network.server.*;
-import dynamicswordskills.ref.ModInfo;
 
 /**
  * 

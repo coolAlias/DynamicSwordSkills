@@ -17,14 +17,14 @@
 
 package dynamicswordskills.inventory;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 

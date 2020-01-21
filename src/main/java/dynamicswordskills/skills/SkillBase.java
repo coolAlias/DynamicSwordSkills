@@ -26,6 +26,11 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.ISkillProvider;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.client.SyncSkillPacket;
+import dynamicswordskills.ref.ModInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -34,11 +39,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.api.ISkillProvider;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.client.SyncSkillPacket;
-import dynamicswordskills.ref.ModInfo;
 
 /**
  * 

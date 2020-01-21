@@ -19,10 +19,6 @@ package dynamicswordskills.network.client;
 
 import java.io.IOException;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
@@ -30,6 +26,10 @@ import dynamicswordskills.skills.ICombo;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 
 public class MortalDrawPacket extends AbstractClientMessage<MortalDrawPacket>
 {

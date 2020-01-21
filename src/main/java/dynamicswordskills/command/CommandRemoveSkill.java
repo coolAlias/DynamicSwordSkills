@@ -20,6 +20,9 @@ package dynamicswordskills.command;
 import java.util.Collections;
 import java.util.List;
 
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
@@ -28,9 +31,6 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.PlayerUtils;
 
 public class CommandRemoveSkill extends CommandBase
 {

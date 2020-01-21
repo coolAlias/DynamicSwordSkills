@@ -19,6 +19,12 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -30,12 +36,6 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.util.PlayerUtils;
 
 /**
  * 

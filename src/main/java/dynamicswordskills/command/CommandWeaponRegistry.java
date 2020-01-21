@@ -20,6 +20,7 @@ package dynamicswordskills.command;
 import java.util.Collections;
 import java.util.List;
 
+import dynamicswordskills.api.WeaponRegistry;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
@@ -29,7 +30,6 @@ import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import dynamicswordskills.api.WeaponRegistry;
 
 public class CommandWeaponRegistry extends CommandBase
 {

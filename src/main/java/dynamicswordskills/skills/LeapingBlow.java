@@ -19,6 +19,13 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.DSSCombatEvents;
+import dynamicswordskills.client.DSSClientEvents;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.entity.EntityLeapingBlow;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.util.PlayerUtils;
+import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -29,13 +36,6 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.DSSCombatEvents;
-import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.entity.EntityLeapingBlow;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.util.PlayerUtils;
-import dynamicswordskills.util.TargetUtils;
 
 /**
  * 

@@ -19,15 +19,15 @@ package dynamicswordskills.network.server;
 
 import java.io.IOException;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.relauncher.Side;
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.AbstractMessage.AbstractServerMessage;
 import dynamicswordskills.skills.ILockOnTarget;
 import dynamicswordskills.skills.SkillBase;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * 

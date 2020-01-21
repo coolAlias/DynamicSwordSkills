@@ -22,6 +22,15 @@ import java.util.List;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.server.RefreshSpinPacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.util.PlayerUtils;
+import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -34,15 +43,6 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.server.RefreshSpinPacket;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.util.PlayerUtils;
-import dynamicswordskills.util.TargetUtils;
 
 /**
  * 

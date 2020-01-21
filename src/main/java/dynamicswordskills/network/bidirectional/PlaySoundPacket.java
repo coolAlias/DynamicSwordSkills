@@ -19,12 +19,12 @@ package dynamicswordskills.network.bidirectional;
 
 import java.io.IOException;
 
+import dynamicswordskills.network.AbstractMessage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.relauncher.Side;
-import dynamicswordskills.network.AbstractMessage;
 
 /**
  * 

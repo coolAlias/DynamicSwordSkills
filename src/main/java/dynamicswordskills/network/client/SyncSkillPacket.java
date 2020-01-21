@@ -19,13 +19,13 @@ package dynamicswordskills.network.client;
 
 import java.io.IOException;
 
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 

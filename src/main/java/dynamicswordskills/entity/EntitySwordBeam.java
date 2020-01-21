@@ -17,6 +17,11 @@
 
 package dynamicswordskills.entity;
 
+import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.SwordBeam;
+import dynamicswordskills.util.DamageUtils;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -29,11 +34,6 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.ref.ModInfo;
-import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.skills.SwordBeam;
-import dynamicswordskills.util.DamageUtils;
-import dynamicswordskills.util.PlayerUtils;
 
 /**
  * 

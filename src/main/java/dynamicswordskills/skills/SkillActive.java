@@ -17,6 +17,13 @@
 
 package dynamicswordskills.skills;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
+import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
+import dynamicswordskills.ref.Config;
+import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
@@ -31,13 +38,6 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.util.PlayerUtils;
 
 /**
  * 

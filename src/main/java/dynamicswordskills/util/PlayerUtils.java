@@ -19,6 +19,13 @@ package dynamicswordskills.util;
 
 import java.util.Random;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.ISkillProvider;
+import dynamicswordskills.api.IWeapon;
+import dynamicswordskills.api.WeaponRegistry;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.bidirectional.PlaySoundPacket;
+import dynamicswordskills.skills.SkillBase;
 import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -31,13 +38,6 @@ import net.minecraft.item.ItemSword;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.api.ISkillProvider;
-import dynamicswordskills.api.IWeapon;
-import dynamicswordskills.api.WeaponRegistry;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.PlaySoundPacket;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 
