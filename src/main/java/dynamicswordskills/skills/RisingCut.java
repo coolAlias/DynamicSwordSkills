@@ -174,7 +174,7 @@ public class RisingCut extends BaseModSkill
 
 	@Override
 	public boolean onAttack(EntityPlayer player, EntityLivingBase entity, DamageSource source, float amount) {
-		if (canAttack(entity)) {
+		if (!hitEntity && canAttack(entity)) {
 			hitEntity = true;
 			if (!player.worldObj.isRemote && !Config.canHighJump()) {
 				jump(player);
