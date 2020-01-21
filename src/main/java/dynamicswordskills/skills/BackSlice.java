@@ -305,13 +305,10 @@ public class BackSlice extends SkillActive
 	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		impacted = true;
 		if (isActive() && dodgeTimer <= (getActiveTime() - 5)) { // can strike any time after 5 ticks have passed
-			ILockOnTarget targeting = DSSPlayerInfo.get(player).getTargetingSkill();
-			if (targeting != null && targeting.getCurrentTarget() == entity) {
-				if (!TargetUtils.isTargetInFrontOf(entity, player, getAttackAngle())) {
-					amount *= 1.0F + (level * 0.1F);
-					PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_MORTALDRAW, 0.4F, 0.5F);
-					success = true;
-				}
+			if (!TargetUtils.isTargetInFrontOf(entity, player, getAttackAngle())) {
+				amount *= 1.0F + (level * 0.1F);
+				PlayerUtils.playSoundAtEntity(player.worldObj, player, ModInfo.SOUND_MORTALDRAW, 0.4F, 0.5F);
+				success = true;
 			}
 		}
 		return amount;
