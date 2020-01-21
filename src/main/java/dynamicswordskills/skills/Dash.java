@@ -36,7 +36,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
@@ -148,14 +148,27 @@ public class Dash extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		Item item = (player.getHeldItem() != null ? player.getHeldItem().getItem() : null);
-		return super.canUse(player) && !isActive() && (PlayerUtils.isWeapon(player.getHeldItem()) || item instanceof IDashItem);
+		return super.canUse(player) && !isActive() && canHeldItemDash(player);
+	}
+
+	/**
+	 * @return true if the currently held item allows dashing, either the player is blocking or an IDashItem in use
+	 */
+	private boolean canHeldItemDash(EntityPlayer player) {
+		if (PlayerUtils.isBlocking(player)) {
+			return true;
+		}
+		ItemStack stack = player.getHeldItem();
+		if (stack != null && stack.getItem() instanceof IDashItem) {
+			return player.isUsingItem();
+		}
+		return false;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.onGround && PlayerUtils.isBlocking(player) && canUse(player) && Minecraft.getMinecraft().gameSettings.keyBindForward.getIsKeyPressed();
+		return player.onGround && canUse(player) && Minecraft.getMinecraft().gameSettings.keyBindForward.getIsKeyPressed();
 	}
 
 	@Override
@@ -203,7 +216,7 @@ public class Dash extends SkillActive
 			player.setSprinting(true);
 			// Only check for impact on the client, as the server is not reliable for this step
 			// If a collision is detected, DashImpactPacket is sent to conclude the server-side
-			if (!PlayerUtils.isBlocking(player)) {
+			if (!canHeldItemDash(player)) {
 				if (!player.worldObj.isRemote) {
 					deactivate(player);
 				}
