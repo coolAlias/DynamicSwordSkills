@@ -71,7 +71,6 @@ public class Dash extends BaseModSkill
 	private int activeTime;
 
 	/** Trajectory based on player's last look vector while on the ground */
-	@SideOnly(Side.CLIENT)
 	private Vec3 trajectory;
 
 	/** Player's starting position is used to determine actual distance traveled upon impact */
@@ -332,9 +331,7 @@ public class Dash extends BaseModSkill
 	private void setNotDashing(EntityPlayer player) {
 		isActive = false;
 		player.setSprinting(false);
-		if (player.worldObj.isRemote) {
-			trajectory = null;
-		}
+		trajectory = null;
 		if (!isActive()) {
 			target = null;
 		}
