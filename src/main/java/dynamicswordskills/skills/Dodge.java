@@ -40,16 +40,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * 
  * DODGE
  * Description: Avoid damage by quickly dodging out of the way
- * Activation: Tap left or right arrow key to dodge in that direction
+ * Activation: Double-tap left or right to dodge in that direction
  * Exhaustion: 0.05F
  * Duration: (5 + level) ticks; this is the amount of time during which damage may be avoided
  * Special: Chance to avoid damage is 10% per level, plus a timing bonus of up to 20%
- * 
- * Tap 'left' or 'right' arrow key to dodge out of harm's way (activated when key released);
- * can be configured to require double-tap and / or to allow use of default movement keys ('a'
- * and 'd') for activation in addition to arrow keys.
- * 
- * While dodging, there is a chance to avoid any incoming attacks.
  * 
  */
 public class Dodge extends BaseModSkill
@@ -59,12 +53,13 @@ public class Dodge extends BaseModSkill
 	private KeyBinding keyPressed;
 
 	/** Current number of ticks remaining before dodge will not activate */
-	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 
 	/** Only for double-tap activation; true after the first key press and release */
-	@SideOnly(Side.CLIENT)
 	private boolean keyReleased;
+
+	/** Trajectory based on player's look vector and Dodge direction */
+	private Vec3 trajectory;
 
 	/** Timer during which player may evade incoming attacks */
 	private int dodgeTimer = 0;
@@ -137,7 +132,7 @@ public class Dodge extends BaseModSkill
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.onGround && canUse(player);
+		return player.onGround && canUse(player) && keyReleased && ticksTilFail > 0;
 	}
 
 	@Override
@@ -146,40 +141,70 @@ public class Dodge extends BaseModSkill
 		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
 		}
-		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
-				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey());
+		return true;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (canExecute(player)) {
-			if (Config.requiresDoubleTap()) {
-				if (keyReleased && ticksTilFail > 0 && key == keyPressed) {
-					ticksTilFail = 0;
-					return activate(player);
-				} else {
-					keyPressed = key;
-					ticksTilFail = 6;
-				}
-				// Single-tap activation only allowed using custom key bindings:
-			} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey()) {
-				return activate(player);
+		if (key == keyPressed) {
+			boolean flag = canExecute(player) && activate(player);
+			resetKeyState(flag);
+			return flag;
+		} else if (Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) {
+			firstKeyPress(mc, key, player);
+		} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey()) {
+			firstKeyPress(mc, key, player);
+			if (!Config.requiresDoubleTap()) {
+				keyReleased = true;
+				boolean flag = canExecute(player) && activate(player);
+				resetKeyState(true);
+				return flag;
 			}
+		} else {
+			keyPressed = null;
 		}
-		return false; // allow other skills to receive this key press (e.g. Spin Attack)
+		return false;
+	}
+
+	@SideOnly(Side.CLIENT)
+	private void firstKeyPress(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		keyPressed = key;
+		keyReleased = false;
+		ticksTilFail = 6;
+	}
+
+	@SideOnly(Side.CLIENT)
+	private void resetKeyState(boolean flag) {
+		keyReleased = false;
+		ticksTilFail = 0;
+		if (!flag) {
+			keyPressed = null;
+		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		keyReleased = (key == keyPressed && ticksTilFail > 0);
+		keyReleased = (key == keyPressed);
+		if (keyReleased && ticksTilFail < 1) {
+			keyPressed = null;
+		}
 	}
 
 	@Override
 	public boolean onActivated(World world, EntityPlayer player) {
 		dodgeTimer = getDodgeTime();
 		entityDodged = null;
+		if (player.worldObj.isRemote) {
+			trajectory = player.getLookVec();
+			if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
+				trajectory = new Vec3(-trajectory.zCoord, 0.0D, trajectory.xCoord);
+			} else {
+				trajectory = new Vec3(trajectory.zCoord, 0.0D, -trajectory.xCoord);
+			}
+			keyPressed = null;
+		}
 		return isActive();
 	}
 
@@ -193,38 +218,28 @@ public class Dodge extends BaseModSkill
 	public void onUpdate(EntityPlayer player) {
 		if (isActive()) {
 			--dodgeTimer;
-		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
+		}
+		if (ticksTilFail > 0) {
 			--ticksTilFail;
-			if (ticksTilFail == 0) {
-				keyReleased = false;
-			}
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isAnimating() {
-		return (dodgeTimer > level);
+		return (dodgeTimer > level && trajectory != null);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
-		double speed = 1.0D + 10.0D * (player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - Dash.BASE_MOVE);
-		if (speed > 1.0D) {
-			speed = 1.0D;
-		}
+		double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue();
 		double fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS()); 
-		double d = 0.15D * fps * speed * speed;
+		double d = 1.15D * fps * speed;
 		if (player.isInWater() || player.isInLava()) {
 			d *= 0.15D;
 		}
-		Vec3 vec3 = player.getLookVec();
-		if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
-			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
-		} else {
-			player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
-		}
+		player.addVelocity(trajectory.xCoord * d, -0.02D * fps, trajectory.zCoord * d);
 		return true;
 	}
 
