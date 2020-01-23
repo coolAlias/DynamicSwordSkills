@@ -89,7 +89,9 @@ public class DSSKeyHandler
 	@SubscribeEvent
 	public void onKeyInput(KeyInputEvent event) {
 		if (Keyboard.getEventKeyState()) {
-			onKeyPressed(mc, Keyboard.getEventKey());
+			if (!Keyboard.isRepeatEvent()) {
+				onKeyPressed(mc, Keyboard.getEventKey());
+			}
 		} else {
 			onKeyReleased(mc, Keyboard.getEventKey());
 		}
