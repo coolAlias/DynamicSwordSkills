@@ -77,10 +77,6 @@ public class SpinAttack extends BaseModSkill
 	@SideOnly(Side.CLIENT)
 	private boolean clockwise;
 
-	/** Used to allow vanilla keys to determine spin direction */
-	@SideOnly(Side.CLIENT)
-	private boolean wasKeyPressed;
-
 	/** Entities within range upon activation so no entity targeted more than once */
 	@SideOnly(Side.CLIENT)
 	private List<EntityLivingBase> targets;
@@ -217,19 +213,10 @@ public class SpinAttack extends BaseModSkill
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (!isCharging()) {
-			// prevents activation of Dodge from interfering with spin direction
-			if (wasKeyPressed) {
-				wasKeyPressed = false;
-			} else {
-				clockwise = (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || key == mc.gameSettings.keyBindRight);
-				wasKeyPressed = true;
-			}
-			if (isKeyPressed()) {
-				wasKeyPressed = false;
-				charge = getChargeTime();
-				return true;
-			}
+		if (!isCharging() && isKeyPressed()) {
+			clockwise = (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || key == mc.gameSettings.keyBindRight);
+			charge = getChargeTime();
+			return true;
 		}
 		return false;
 	}
