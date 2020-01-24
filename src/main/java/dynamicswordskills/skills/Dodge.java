@@ -154,6 +154,11 @@ public class Dodge extends BaseModSkill
 		} else if (Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) {
 			firstKeyPress(mc, key, player);
 		} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey()) {
+			if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() && mc.gameSettings.keyBindRight.getIsKeyPressed()) {
+				return false;
+			} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() && mc.gameSettings.keyBindLeft.getIsKeyPressed()) {
+				return false;
+			}
 			firstKeyPress(mc, key, player);
 			if (!Config.requiresDoubleTap()) {
 				keyReleased = true;
