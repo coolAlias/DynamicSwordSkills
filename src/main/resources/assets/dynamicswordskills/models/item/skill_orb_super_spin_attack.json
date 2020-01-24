@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "dynamicswordskills:skills/super_spin_attack"
+        "layer0": "dynamicswordskills:items/super_spin_attack"
     }
 }

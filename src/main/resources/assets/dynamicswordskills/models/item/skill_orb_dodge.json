@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "dynamicswordskills:skills/dodge"
+        "layer0": "dynamicswordskills:items/dodge"
     }
 }

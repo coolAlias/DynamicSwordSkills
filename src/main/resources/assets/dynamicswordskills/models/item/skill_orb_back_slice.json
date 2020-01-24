@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "dynamicswordskills:skills/back_slice"
+        "layer0": "dynamicswordskills:items/back_slice"
     }
 }
