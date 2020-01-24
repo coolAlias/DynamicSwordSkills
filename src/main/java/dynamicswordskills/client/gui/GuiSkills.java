@@ -464,7 +464,7 @@ public class GuiSkills extends GuiScreen
 
 	protected void displaySkillGroupTooltip(int mouseX, int mouseY) {
 		for (GuiButton button : (List<GuiButton>)this.buttonList) {
-			if (!button.func_146115_a()) {
+			if (!button.visible || !button.func_146115_a()) {
 				continue;
 			} else if (button instanceof GroupIndexButton) {
 				List<String> tooltip = ((GroupIndexButton) button).group.getTooltip();
