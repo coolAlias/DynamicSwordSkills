@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:skills/ending_blow"
+        "layer0": "dynamicswordskills:items/ending_blow"
     },
     "display": {
         "thirdperson": {
