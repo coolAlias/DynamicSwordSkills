@@ -194,8 +194,10 @@ public class SpinAttack extends BaseModSkill
 	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
 		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
-		} else if (isAnimating()) {
+		} else if (isAnimating() && !Config.isSkillDisabled(Skills.superSpinAttack)) {
 			return key == mc.gameSettings.keyBindAttack;
+		} else if (Config.isSkillDisabled(Skills.spinAttack)) {
+			return false;
 		}
 		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
 				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey());
@@ -226,7 +228,7 @@ public class SpinAttack extends BaseModSkill
 		currentSpin = 0F;
 		arc = 360F;
 		refreshed = 0;
-		superLevel = (checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(Skills.superSpinAttack) : 0);
+		superLevel = (!Config.isSkillDisabled(Skills.superSpinAttack) && checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(Skills.superSpinAttack) : 0);
 		isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
 		startSpin(world, player);
 		return true;
