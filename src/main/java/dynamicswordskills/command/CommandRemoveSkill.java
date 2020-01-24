@@ -53,7 +53,7 @@ public class CommandRemoveSkill extends CommandBase
 	}
 
 	/**
-	 * removeskill <player> <skill | all>
+	 * removeskill <skill | all> <player>
 	 */
 	@Override
 	public String getCommandUsage(ICommandSender player) {
@@ -62,45 +62,50 @@ public class CommandRemoveSkill extends CommandBase
 
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
-		if (args.length == 2) {
-			EntityPlayerMP commandSender = CommandBase.getCommandSenderAsPlayer(sender);
-			EntityPlayerMP player = CommandBase.getPlayer(sender, args[0]);
-			boolean all = ("all").equals(args[1]);
-			SkillBase skill = null;
-			if (!all) {
-				skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(args[1]));
-				if (skill == null) {
-					throw new CommandException("commands.skill.generic.unknown", args[1]);
-				}
-			}
-			if (DSSPlayerInfo.get(player).removeSkill(args[1])) {
-				if (all) {
-					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.all", player.getCommandSenderName());
-				} else {
-					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getNameTranslationKey()));
-				}
-			} else { // player didn't have this skill
-				if (all) {
-					throw new CommandException("commands.removeskill.failure.all", player.getCommandSenderName());
-				} else {
-					throw new CommandException("commands.removeskill.failure.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getNameTranslationKey()));
-				}
-			}
-		} else {
+		if (args.length < 1 || args.length > 2) {
 			throw new WrongUsageException(getCommandUsage(sender));
+		}
+		EntityPlayerMP commandSender = CommandBase.getCommandSenderAsPlayer(sender);
+		EntityPlayerMP player = (args.length == 2 ? CommandBase.getPlayer(sender, args[1]) : commandSender);
+		boolean all = ("all").equals(args[0]);
+		SkillBase skill = null;
+		if (!all) {
+			skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(args[0]));
+			if (skill == null) {
+				throw new CommandException("commands.skill.generic.unknown", args[0]);
+			}
+		}
+		if (DSSPlayerInfo.get(player).removeSkill(args[0])) {
+			if (all) {
+				PlayerUtils.sendTranslatedChat(player, "commands.removeskill.notify.all");
+				if (player != commandSender) {
+					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.all", player.getDisplayName());
+				}
+			} else {
+				PlayerUtils.sendTranslatedChat(player, "commands.removeskill.notify.one", new ChatComponentTranslation(skill.getNameTranslationKey()));
+				if (player != commandSender) {
+					PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.one", player.getDisplayName(), new ChatComponentTranslation(skill.getNameTranslationKey()));
+				}
+			}
+		} else { // player didn't have this skill
+			if (all) {
+				throw new CommandException("commands.removeskill.failure.all", player.getDisplayName());
+			} else {
+				throw new CommandException("commands.removeskill.failure.one", player.getDisplayName(), new ChatComponentTranslation(skill.getNameTranslationKey()));
+			}
 		}
 	}
 
 	@Override
 	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args) {
 		switch(args.length) {
-		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
-		case 2:
+		case 1:
 			List<String> options = Lists.<String>newArrayList();
 			for (ResourceLocation name : SkillRegistry.getKeys()) {
 				options.add(name.toString());
 			}
 			return CommandBase.getListOfStringsMatchingLastWord(args, options.toArray(new String[0]));
+		case 2: return CommandBase.getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
 		default: return null;
 		}
 	}
