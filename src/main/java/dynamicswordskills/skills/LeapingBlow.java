@@ -145,14 +145,12 @@ public class LeapingBlow extends BaseModSkill
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (key == mc.gameSettings.keyBindJump) {
-			if (player.onGround && PlayerUtils.isBlocking(player) && canUse(player)) {
+			if (player.onGround && mc.gameSettings.keyBindUseItem.getIsKeyPressed() && canUse(player)) {
 				ticksTilFail = 10;
-				if (player.isUsingItem()) {
-					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
-				}
 				return true;
 			}
 		} else if (canExecute(player) && activate(player)) {
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
 			DSSCombatEvents.setPlayerAttackTime(player); // prevent left-click spam
 			return true;
 		}
