@@ -146,26 +146,16 @@ public class LeapingBlow extends BaseModSkill
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (key == mc.gameSettings.keyBindJump) {
-			if (player.onGround && isKeyPressed() && canUse(player)) {
+			if (player.onGround && mc.gameSettings.keyBindUseItem.isKeyDown() && canUse(player)) {
 				ticksTilFail = 10;
-				if (player.isHandActive()) {
-					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
-				}
 				return true;
 			}
 		} else if (canExecute(player) && activate(player)) {
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
 			DSSCombatEvents.setPlayerAttackTime(player); // prevent left-click spam
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * Returns true if either the custom block key or vanilla use item key is currently down
-	 */
-	@SideOnly(Side.CLIENT)
-	protected boolean isKeyPressed() {
-		return Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown();
 	}
 
 	@Override
