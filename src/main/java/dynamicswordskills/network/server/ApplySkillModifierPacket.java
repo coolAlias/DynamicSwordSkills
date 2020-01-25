@@ -68,10 +68,10 @@ public class ApplySkillModifierPacket extends AbstractServerMessage<ApplySkillMo
 		SkillBase refMod = SkillRegistry.getSkillById(this.modifierId);
 		SkillBase modifier = skills.getPlayerSkill(refMod);
 		if (skill instanceof IModifiableSkill && skill.isActive() && modifier instanceof ISkillModifier && modifier.getLevel() > 0) {
-			if (!((SkillActive & IModifiableSkill) skill).getSkillModifiers().contains(refMod)) {
+			if (!((IModifiableSkill) skill).getSkillModifiers().contains(refMod)) {
 				DynamicSwordSkills.logger.error(String.format("Received invalid skill modifier %s for skill %s", modifier.getRegistryName().toString(), skill.getRegistryName().toString()));
 			} else {
-				((SkillActive & IModifiableSkill) skill).applySkillModifier((SkillBase & ISkillModifier) modifier, player);
+				((IModifiableSkill) skill).applySkillModifier((SkillBase & ISkillModifier) modifier, player);
 			}
 		}
 	}
