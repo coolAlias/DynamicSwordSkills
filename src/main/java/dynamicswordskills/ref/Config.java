@@ -351,7 +351,7 @@ public class Config
 			Config.config.save();
 		}
 	}
-	/** @return true if the skill has been disabled either by the server or client settings */
+	/** @return true if the skill has been disabled either by the server or client settings, or if it is null */
 	public static final boolean isSkillDisabled(@Nullable SkillBase skill) {
 		if (skill == null || skill.getRegistryName() == null) {
 			return true;
