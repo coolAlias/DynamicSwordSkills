@@ -570,9 +570,6 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 			return itemSkill;
 		} else if (skill.is(dummySwordSkill)) {
 			return dummySwordSkill;
-		} else if (skill.is(Skills.spinAttack) && Skills.superSpinAttack.is(itemSkill)) {
-			SkillBase instance = getTruePlayerSkill(skill);
-			return (instance == null && !Config.isSpinAttackRequired() ? itemSkill : instance);
 		} else {
 			return getTruePlayerSkill(skill);
 		}

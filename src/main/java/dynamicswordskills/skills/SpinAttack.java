@@ -18,16 +18,16 @@
 package dynamicswordskills.skills;
 
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.server.RefreshSpinPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.util.PlayerUtils;
@@ -59,7 +59,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Exhaustion: 3.0F - 0.2F per level, added each spin
  *
  */
-public class SpinAttack extends BaseModSkill
+public class SpinAttack extends BaseModSkill implements IModifiableSkill
 {
 	/** Current charge time; only ever set on the client - server is never charging */
 	private int charge;
@@ -87,6 +87,9 @@ public class SpinAttack extends BaseModSkill
 	/** The player's Super Spin Attack level will allow multiple spins and extended range */
 	private int superLevel;
 
+	/** Bonus sword range provided by Super Spin Attack modifier, if any */
+	private float bonusRange;
+
 	public SpinAttack(String translationKey) {
 		super(translationKey);
 	}
@@ -108,16 +111,13 @@ public class SpinAttack extends BaseModSkill
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		byte temp = level;
-		if (!isActive()) {
-			superLevel = (checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(Skills.superSpinAttack) : 0);
-			level = DSSPlayerInfo.get(player).getSkillLevel(Skills.spinAttack);
-		}
+		superLevel = 0;
+		bonusRange = 0.0F;
+		SkillActive.applyActivationSkillModifiers(this, player);
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey().replace("super_", "") + ".info.max", superLevel + 1));
+		desc.add(StatCollector.translateToLocalFormatted(getTranslationKey() + ".info.spins", superLevel + 1));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		level = temp;
 	}
 
 	@Override
@@ -147,13 +147,13 @@ public class SpinAttack extends BaseModSkill
 	}
 
 	/** Returns true if the arc may be extended by 360 more degrees */
-	private boolean canRefresh() {
+	private boolean canRefreshArc() {
 		return (refreshed < (superLevel + 1) && arc == (360F * refreshed));
 	}
 
 	/** Max sword range for striking targets */
 	private float getRange() {
-		return (3.0F + ((superLevel + level) * 0.5F));
+		return 3.0F + (level * 0.5F) + bonusRange;
 	}
 
 	/** Returns the spin speed modified based on the skill's level */
@@ -161,22 +161,21 @@ public class SpinAttack extends BaseModSkill
 		return 70 + (3 * (superLevel + level));
 	}
 
-	/** Returns true if players current health is within the allowed limit */
-	private boolean checkHealth(EntityPlayer player) {
-		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= Config.getHealthAllowance(level);
+	/** Returns true if the player can spin, i.e. holding a weapon, not using an item, and super#canUse returns true */
+	protected boolean canSpin(EntityPlayer player) {
+		// return super.canUse instead of this.canUse to avoid !isActive() check
+		return super.canUse(player) && !player.isUsingItem() && PlayerUtils.isWeapon(player.getHeldItem());
 	}
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
+		return !isActive() && canSpin(player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		// return super.canUse instead of this.canUse to avoid !isActive() check; allows
-		// canExecute to be checked when refreshing super spin attack
-		return super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem());
+		return canSpin(player);
 	}
 
 	/**
@@ -194,22 +193,9 @@ public class SpinAttack extends BaseModSkill
 	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
 		if (Config.requiresLockOn() && !isLockedOn) {
 			return false;
-		} else if (isAnimating() && !Config.isSkillDisabled(Skills.superSpinAttack)) {
-			return key == mc.gameSettings.keyBindAttack;
-		} else if (Config.isSkillDisabled(Skills.spinAttack)) {
-			return false;
 		}
 		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
 				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey());
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void keyPressedWhileAnimating(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (isActive() && canRefresh() && canExecute(player)) {
-			PacketDispatcher.sendToServer(new RefreshSpinPacket());
-			arc += 360F;
-		}
 	}
 
 	@Override
@@ -225,13 +211,18 @@ public class SpinAttack extends BaseModSkill
 
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
-		currentSpin = 0F;
+		currentSpin = 0.0F;
 		arc = 360F;
 		refreshed = 0;
-		superLevel = (!Config.isSkillDisabled(Skills.superSpinAttack) && checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(Skills.superSpinAttack) : 0);
+		superLevel = 0;
+		bonusRange = 0.0F;
 		isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
-		startSpin(world, player);
 		return true;
+	}
+
+	@Override
+	protected void postActivated(EntityPlayer player) {
+		startSpin(player);
 	}
 
 	@Override
@@ -310,10 +301,10 @@ public class SpinAttack extends BaseModSkill
 	 * Client populates the nearby target list
 	 * Server plays spin sound and, if not the first spin, adds exhaustion
 	 */
-	private void startSpin(World world, EntityPlayer player) {
+	private void startSpin(EntityPlayer player) {
 		++refreshed;
-		if (world.isRemote) {
-			targets = world.getEntitiesWithinAABB(EntityLivingBase.class, player.getEntityBoundingBox().expand(getRange(), 0.0D, getRange()));
+		if (player.worldObj.isRemote) {
+			targets = player.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, player.getEntityBoundingBox().expand(getRange(), 0.0D, getRange()));
 			if (targets.contains(player)) {
 				targets.remove(player);
 			}
@@ -335,7 +326,7 @@ public class SpinAttack extends BaseModSkill
 		if (currentSpin >= arc) {
 			deactivate(player);
 		} else if (currentSpin > (360F * refreshed)) {
-			startSpin(player.worldObj, player);
+			startSpin(player);
 		}
 	}
 
@@ -352,11 +343,18 @@ public class SpinAttack extends BaseModSkill
 		}
 	}
 
-	/**
-	 * Called on the server after receiving the {@link RefreshSpinPacket}
-	 */
-	public void refreshServerSpin(EntityPlayer player) {
-		if (canRefresh() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem())) {
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends SkillBase & ISkillModifier> Set<T> getSkillModifiers() {
+		return Sets.<T>newHashSet((T) Skills.superSpinAttack);
+	}
+
+	@Override
+	public <T extends SkillBase & ISkillModifier> void applySkillModifier(T modifier, EntityPlayer player) {
+		if (currentSpin < 0.01F) {
+			superLevel = modifier.getLevel();
+			bonusRange = ((SuperSpinAttack) modifier).getRangeModifier();
+		} else if (canRefreshArc() && canSpin(player)) {
 			arc += 360F;
 		}
 	}

@@ -21,7 +21,7 @@ public class Skills
 	public static final SkillBase parry = new Parry("parry").register("parry");
 	public static final SkillBase dash = new Dash("dash").register("dash");
 	public static final SkillBase spinAttack = new SpinAttack("spin_attack").register("spin_attack");
-	public static final SkillBase superSpinAttack = new SpinAttack("super_spin_attack").register("super_spin_attack");
+	public static final SkillBase superSpinAttack = new SuperSpinAttack("super_spin_attack").register("super_spin_attack");
 	public static final SkillBase mortalDraw = new MortalDraw("mortal_draw").register("mortal_draw");
 	public static final SkillBase swordBreak = new SwordBreak("sword_break").register("sword_break");
 	public static final SkillBase risingCut = new RisingCut("rising_cut").register("rising_cut");
