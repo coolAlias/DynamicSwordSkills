@@ -65,7 +65,6 @@ public class PacketDispatcher
 		registerMessage(DashImpactPacket.class);
 		registerMessage(EndComboPacket.class);
 		registerMessage(OpenGuiPacket.class);
-		registerMessage(RefreshSpinPacket.class);
 		registerMessage(TargetIdPacket.class);
 	}
 
