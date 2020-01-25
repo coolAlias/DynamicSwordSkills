@@ -519,7 +519,8 @@ public class DSSPlayerInfo
 	 * Returns a SkillActive version of the player's actual skill instance,
 	 * or null if the player doesn't have the skill or it is not the correct type
 	 */
-	public SkillActive getActiveSkill(SkillBase skill) {
+	@Nullable
+	public SkillActive getActiveSkill(@Nullable SkillBase skill) {
 		SkillBase active = getPlayerSkill(skill);
 		return (active instanceof SkillActive ? (SkillActive) active : null);
 	}
@@ -527,6 +528,7 @@ public class DSSPlayerInfo
 	/**
 	 * Returns the skill instance for actual use, whether from the player or an ISkillProvider or null 
 	 */
+	@Nullable
 	public SkillBase getPlayerSkill(@Nullable SkillBase skill) {
 		if (skill == null) {
 			return null;
@@ -545,6 +547,7 @@ public class DSSPlayerInfo
 	/**
 	 * Returns the player's actual skill instance or null if the player doesn't have the skill 
 	 */
+	@Nullable
 	public SkillBase getTruePlayerSkill(SkillBase skill) {
 		return (skills.containsKey(skill.getId()) ? skills.get(skill.getId()) : null);
 	}
