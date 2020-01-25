@@ -201,7 +201,7 @@ public class SpinAttack extends BaseModSkill implements IModifiableSkill
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (!isCharging() && isKeyPressed()) {
+		if (!isCharging() && isKeyPressed() && canSpin(player)) {
 			clockwise = (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || key == mc.gameSettings.keyBindRight);
 			charge = getChargeTime();
 			return true;
@@ -237,7 +237,7 @@ public class SpinAttack extends BaseModSkill implements IModifiableSkill
 	public void onUpdate(EntityPlayer player) {
 		// isCharging can only be true on the client, which is where charging is handled
 		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
-			if (PlayerUtils.isWeapon(player.getHeldItem()) && player.worldObj.isRemote && isKeyPressed()) {
+			if (player.worldObj.isRemote && canSpin(player) && isKeyPressed()) {
 				--charge;
 				int maxCharge = getChargeTime();
 				if (charge < maxCharge) {
