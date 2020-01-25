@@ -243,9 +243,8 @@ public abstract class SkillActive extends SkillBase
 				PacketDispatcher.sendTo(new DeactivateSkillPacket(this), (EntityPlayerMP) player);
 			}
 			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(getNameTranslationKey()));
-			return false;
 		} else if (!wasTriggered && !allowUserActivation()) {
-			return false;
+			// no-op
 		} else if (canUse(player)) {
 			if (autoAddExhaustion() && !player.capabilities.isCreativeMode) {
 				player.addExhaustion(getExhaustion());
@@ -255,13 +254,35 @@ public abstract class SkillActive extends SkillBase
 					PacketDispatcher.sendTo(new ActivateSkillPacket(this, wasTriggered), (EntityPlayerMP) player);
 				}
 			}
-			return onActivated(world, player);
-		} else {
-			if (level > 0) {
-				PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new TextComponentTranslation(getNameTranslationKey()));
+			if (onActivated(world, player)) {
+				SkillActive.applyActivationSkillModifiers((SkillActive & IModifiableSkill) this, player);
+				postActivated(player);
+				return true;
 			}
-			return false;
+		} else if (level > 0) {
+			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new TextComponentTranslation(getNameTranslationKey()));
 		}
+		return false;
+	}
+
+	/**
+	 * Called after {@link #onActivated(World, EntityPlayer)} has returned true and any {@link ISkillModifier}s have had a chance to be applied
+	 */
+	protected void postActivated(EntityPlayer player) {
+	}
+
+	/**
+	 * Applies all modifiers that {@link ISkillModifier#applyOnActivated(SkillActive, EntityPlayer) apply on activation} to the parent skill,
+	 * provided the player has at least 1 level in the modifier and it is not {@link Config#isSkillDisabled(SkillBase) disabled}
+	 */
+	protected static <T extends SkillActive & IModifiableSkill> void applyActivationSkillModifiers(T parent, EntityPlayer player) {
+		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+		parent.getSkillModifiers().stream().filter(t -> !Config.isSkillDisabled(t)).forEach(t -> {
+			SkillBase instance = skills.getPlayerSkill(t);
+			if (instance instanceof ISkillModifier && instance.getLevel() > 0 && ((ISkillModifier) instance).applyOnActivated(player)) {
+				parent.applySkillModifier((SkillBase & ISkillModifier) instance, player);
+			}
+		});
 	}
 
 	/**

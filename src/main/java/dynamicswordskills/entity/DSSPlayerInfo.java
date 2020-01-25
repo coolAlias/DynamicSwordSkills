@@ -29,9 +29,12 @@ import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.network.client.SyncSkillPacket;
+import dynamicswordskills.network.server.ApplySkillModifierPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.ILockOnTarget;
+import dynamicswordskills.skills.IModifiableSkill;
+import dynamicswordskills.skills.ISkillModifier;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
@@ -292,9 +295,28 @@ public class DSSPlayerInfo
 		if (animatingSkill != null && animatingSkill.isKeyListener(mc, key, isLockedOn)) {
 			animatingSkill.keyPressedWhileAnimating(mc, key, player);
 		}
-		if (isLockedOn && targetingSkill instanceof SkillActive && targetingSkill != animatingSkill && ((SkillActive) targetingSkill).isKeyListener(mc, key, isLockedOn)) {
-			((SkillActive) targetingSkill).keyPressedWhileAnimating(mc, key, player);
+		if (animatingSkill instanceof IModifiableSkill) {
+			applyKeyPressSkillModifiers((SkillActive & IModifiableSkill) animatingSkill, mc, key);
 		}
+		if (isLockedOn && targetingSkill instanceof SkillActive && targetingSkill != animatingSkill) {
+			if (((SkillActive) targetingSkill).isKeyListener(mc, key, isLockedOn)) {
+				((SkillActive) targetingSkill).keyPressedWhileAnimating(mc, key, player);
+			}
+			if (targetingSkill instanceof IModifiableSkill) {
+				applyKeyPressSkillModifiers((SkillActive & IModifiableSkill) targetingSkill, mc, key);
+			}
+		}
+	}
+
+	@SideOnly(Side.CLIENT)
+	private <T extends SkillActive & IModifiableSkill> void applyKeyPressSkillModifiers(T parent, Minecraft mc, KeyBinding key) {
+		parent.getSkillModifiers().stream().filter(t -> !Config.isSkillDisabled(t)).forEach(t -> {
+			SkillBase instance = this.getPlayerSkill(t);
+			if (instance instanceof ISkillModifier && instance.getLevel() > 0 && ((ISkillModifier) instance).applyOnKeyPress(mc, key, player)) {
+				parent.applySkillModifier((SkillBase & ISkillModifier) instance, player);
+				PacketDispatcher.sendToServer(new ApplySkillModifierPacket(parent, (SkillBase & ISkillModifier) instance));
+			}
+		});
 	}
 
 	/**
