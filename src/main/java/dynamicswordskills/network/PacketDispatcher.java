@@ -60,6 +60,7 @@ public class PacketDispatcher
 
 		// Packets handled on SERVER
 		registerMessage(AddExhaustionPacket.class);
+		registerMessage(ApplySkillModifierPacket.class);
 		registerMessage(DashImpactPacket.class);
 		registerMessage(EndComboPacket.class);
 		registerMessage(OpenGuiPacket.class);

@@ -237,16 +237,16 @@ public abstract class SkillActive extends SkillBase
 	 * @param wasTriggered Whether the skill was triggered via some means other than direct user interaction (see {@link #allowUserActivation})
 	 * @return	Returns {@link #onActivated}, signaling whether or not to add the skill to the list of currently active skills.
 	 */
-	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
+	@SuppressWarnings("unchecked")
+	public final <T extends SkillActive & IModifiableSkill> boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
 		if (!Config.isSkillAllowed(this)) {
 			// Force client to deactivate in case client config settings differ
 			if (!world.isRemote) {
 				PacketDispatcher.sendTo(new DeactivateSkillPacket(this), (EntityPlayerMP) player);
 			}
 			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new ChatComponentTranslation(getNameTranslationKey()));
-			return false;
 		} else if (!wasTriggered && !allowUserActivation()) {
-			return false;
+			// no-op
 		} else if (canUse(player)) {
 			if (autoAddExhaustion() && !player.capabilities.isCreativeMode) {
 				player.addExhaustion(getExhaustion());
@@ -256,12 +256,40 @@ public abstract class SkillActive extends SkillBase
 					PacketDispatcher.sendTo(new ActivateSkillPacket(this, wasTriggered), (EntityPlayerMP) player);
 				}
 			}
-			return onActivated(world, player);
-		} else {
-			if (level > 0) {
-				PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new ChatComponentTranslation(getNameTranslationKey()));
+			if (onActivated(world, player)) {
+				if (this instanceof IModifiableSkill) {
+					SkillActive.applyActivationSkillModifiers((T) this, player);
+				}
+				postActivated(player);
+				return true;
 			}
-			return false;
+		} else if (level > 0) {
+			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new ChatComponentTranslation(getNameTranslationKey()));
+		}
+		return false;
+	}
+
+	/**
+	 * Called after {@link #onActivated(World, EntityPlayer)} has returned true and any {@link ISkillModifier}s have had a chance to be applied
+	 */
+	protected void postActivated(EntityPlayer player) {
+	}
+
+	/**
+	 * Applies all modifiers that {@link ISkillModifier#applyOnActivated(SkillActive, EntityPlayer) apply on activation} to the parent skill,
+	 * provided the player has at least 1 level in the modifier and it is not {@link Config#isSkillDisabled(SkillBase) disabled}
+	 */
+	@SuppressWarnings("unchecked")
+	protected static <T extends SkillActive & IModifiableSkill, M extends SkillBase & ISkillModifier> void applyActivationSkillModifiers(T parent, EntityPlayer player) {
+		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+		for (SkillBase t : parent.getSkillModifiers()) {
+			if (Config.isSkillDisabled(t)) {
+				continue;
+			}
+			SkillBase instance = skills.getPlayerSkill(t);
+			if (instance instanceof ISkillModifier && instance.getLevel() > 0 && ((ISkillModifier) instance).applyOnActivated(player)) {
+				parent.applySkillModifier((M) instance, player);
+			}
 		}
 	}
 
