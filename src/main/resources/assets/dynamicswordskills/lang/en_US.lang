@@ -184,6 +184,7 @@ skill.dss.gui.main.body=This book contains entries for each skill you have learn
 skill.dss.gui.heading.index=Table of Contents
 skill.dss.gui.heading.activation=Activation
 skill.dss.gui.heading.description=Description
+skill.dss.gui.heading.modifiers=Modifiers
 skill.dss.gui.heading.summary=Summary
 skill.dss.gui.button.label.main=Introduction
 skill.dss.gui.button.label.next=Next

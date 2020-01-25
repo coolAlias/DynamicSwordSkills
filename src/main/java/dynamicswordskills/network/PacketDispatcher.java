@@ -46,10 +46,10 @@ public class PacketDispatcher
 	 */
 	public static final void initialize() {
 		// Bidirectional packets
-		registerMessage(PlaySoundPacket.class);
 		registerMessage(ActivateSkillPacket.class);
 		registerMessage(ActionTimePacket.class);
 		registerMessage(DeactivateSkillPacket.class);
+		registerMessage(PlaySoundPacket.class);
 
 		// Packets handled on CLIENT
 		registerMessage(EndingBlowPacket.class);
@@ -61,6 +61,7 @@ public class PacketDispatcher
 
 		// Packets handled on SERVER
 		registerMessage(AddExhaustionPacket.class);
+		registerMessage(ApplySkillModifierPacket.class);
 		registerMessage(DashImpactPacket.class);
 		registerMessage(EndComboPacket.class);
 		registerMessage(OpenGuiPacket.class);

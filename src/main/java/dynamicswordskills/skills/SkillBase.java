@@ -385,7 +385,8 @@ public abstract class SkillBase
 	}
 
 	/**
-	 * Implementations should remove all applied modifiers and reapply them based on the current skill level.
+	 * Implementations should remove any modifiers applied to the player (e.g. AttributeModifiers) and
+	 * reapply them based on the current skill level.
 	 * Skill level may be 0 when e.g. removing a skill completely.
 	 */
 	protected abstract void resetModifiers(EntityPlayer player);

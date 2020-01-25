@@ -29,9 +29,12 @@ import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.network.client.SyncSkillPacket;
+import dynamicswordskills.network.server.ApplySkillModifierPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.ILockOnTarget;
+import dynamicswordskills.skills.IModifiableSkill;
+import dynamicswordskills.skills.ISkillModifier;
 import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
@@ -293,14 +296,38 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 	 * Called when a key is pressed while a skill is animating (i.e. {@link #canInteract()} returns false);
 	 * calls {@link SkillActive#keyPressedWhileAnimating} for the animating skill if {@link SkillActive#isKeyListener} returns true
 	 */
+	@SuppressWarnings("unchecked")
 	@SideOnly(Side.CLIENT)
-	public void onKeyPressedWhileAnimating(Minecraft mc, KeyBinding key) {
+	public <T extends SkillActive & IModifiableSkill> void onKeyPressedWhileAnimating(Minecraft mc, KeyBinding key) {
 		boolean isLockedOn = (targetingSkill != null && targetingSkill.isLockedOn());
 		if (animatingSkill != null && animatingSkill.isKeyListener(mc, key, isLockedOn)) {
 			animatingSkill.keyPressedWhileAnimating(mc, key, player);
 		}
-		if (isLockedOn && targetingSkill instanceof SkillActive && targetingSkill != animatingSkill && ((SkillActive) targetingSkill).isKeyListener(mc, key, isLockedOn)) {
-			((SkillActive) targetingSkill).keyPressedWhileAnimating(mc, key, player);
+		if (animatingSkill instanceof IModifiableSkill) {
+			applyKeyPressSkillModifiers((T) animatingSkill, mc, key);
+		}
+		if (isLockedOn && targetingSkill instanceof SkillActive && targetingSkill != animatingSkill) {
+			if (((SkillActive) targetingSkill).isKeyListener(mc, key, isLockedOn)) {
+				((SkillActive) targetingSkill).keyPressedWhileAnimating(mc, key, player);
+			}
+			if (targetingSkill instanceof IModifiableSkill) {
+				applyKeyPressSkillModifiers((T) targetingSkill, mc, key);
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@SideOnly(Side.CLIENT)
+	private <T extends SkillActive & IModifiableSkill, M extends SkillBase & ISkillModifier> void applyKeyPressSkillModifiers(T parent, Minecraft mc, KeyBinding key) {
+		for (SkillBase t : parent.getSkillModifiers()) {
+			if (Config.isSkillDisabled(t)) {
+				continue;
+			}
+			SkillBase instance = this.getPlayerSkill(t);
+			if (instance instanceof ISkillModifier && instance.getLevel() > 0 && ((ISkillModifier) instance).applyOnKeyPress(mc, key, player)) {
+				parent.applySkillModifier((M) instance, player);
+				PacketDispatcher.sendToServer(new ApplySkillModifierPacket(parent, (M) instance));
+			}
 		}
 	}
 
