@@ -255,7 +255,9 @@ public abstract class SkillActive extends SkillBase
 				}
 			}
 			if (onActivated(world, player)) {
-				SkillActive.applyActivationSkillModifiers((SkillActive & IModifiableSkill) this, player);
+				if (this instanceof IModifiableSkill) {
+					SkillActive.applyActivationSkillModifiers((SkillActive & IModifiableSkill) this, player);
+				}
 				postActivated(player);
 				return true;
 			}
