@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Sets;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.IComboDamage;
 import dynamicswordskills.api.IMetadataSkillItem;
 import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.api.SkillRegistry;
@@ -468,7 +469,9 @@ public class DSSPlayerInfo implements IExtendedEntityProperties
 		}
 		// combo gets updated last, after all damage modifications are completed
 		if (!event.isCanceled() && event.ammount > 0.0F && getComboSkill() != null && ((SkillActive) getComboSkill()).isActive()) {
-			getComboSkill().onHurtTarget(player, event);
+			if (!(event.source instanceof IComboDamage) || ((IComboDamage) event.source).isComboDamage(player)) {
+				getComboSkill().onHurtTarget(player, event);
+			}
 		}
 	}
 
