@@ -67,7 +67,7 @@ public class SuperSpinAttack extends SkillBase implements ISkillModifier
 
 	/** Returns the range modifier to apply to attack reach while spinning */
 	public float getRangeModifier() {
-		return level * 0.5F;
+		return level * 0.3F;
 	}
 
 	@Override
