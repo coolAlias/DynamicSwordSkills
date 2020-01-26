@@ -160,7 +160,7 @@ public class SpinAttack extends SkillActive implements IModifiableSkill, IReachA
 
 	/** Returns the spin speed modified based on the skill's level */
 	private float getSpinSpeed() {
-		return 70 + (3 * (superLevel + level));
+		return 120 + (3 * (superLevel + level));
 	}
 
 	/** Returns true if the player can spin, i.e. holding a weapon, not using an item, and super#canUse returns true */
@@ -332,8 +332,8 @@ public class SpinAttack extends SkillActive implements IModifiableSkill, IReachA
 	 */
 	private void incrementSpin(EntityPlayer player) {
 		// 0.15D is the multiplier from Entity.setAngles, but that is too little now that no longer in render tick
-		// 0.24D results in a perfect circle per spin, at all levels, taking 21 ticks to complete at level 1, and 15 at level 10
-		currentSpin += getSpinSpeed() * 0.24D;
+		// 0.21D results in a near-perfect circle per spin at all levels
+		currentSpin += getSpinSpeed() * 0.21D;
 		if (currentSpin >= arc) {
 			deactivate(player);
 		} else if (currentSpin > (360F * refreshed)) {
