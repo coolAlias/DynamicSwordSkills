@@ -413,6 +413,10 @@ public class GuiSkills extends GuiScreen
 					if (Config.clickedSkillSound()) {
 						this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 					}
+					// Refresh description
+					if (slot.skill.is(this.currentSkill)) {
+						this.pageRight = this.getSkillDescriptionPage(this.currentSkill);
+					}
 				}
 				break;
 			}
