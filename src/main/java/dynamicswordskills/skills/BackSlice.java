@@ -65,7 +65,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * 		- Other enemies may take no damage at all, if they have a hard carapace or some such
  * 		- Chance to remove enemy's chest armor
  */
-public class BackSlice extends BaseModSkill
+public class BackSlice extends SkillActive
 {
 	/** Key that was pressed to initiate movement, either left or right */
 	@SideOnly(Side.CLIENT)

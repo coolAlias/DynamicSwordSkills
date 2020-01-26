@@ -47,7 +47,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Special: Chance to avoid damage is 10% per level, plus a timing bonus of up to 20%
  * 
  */
-public class Dodge extends BaseModSkill
+public class Dodge extends SkillActive
 {
 	/** Key that was pressed to initiate dodge */
 	@SideOnly(Side.CLIENT)

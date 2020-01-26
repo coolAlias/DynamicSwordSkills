@@ -10,24 +10,28 @@ import net.minecraft.util.ResourceLocation;
 
 public class Skills
 {
+	/** Base directory for skill icons */
+	public static final String ICON_LOCATION = ModInfo.ID + ":textures/skills/";
+	// Skill Groups
 	public static final SkillGroup DEFAULT_GROUP = new SkillGroup(ModInfo.ID, -1).register();
 	public static final SkillGroup SWORD_GROUP = new SkillGroup("sword", 1).setHasTooltip().register();
 	public static final SkillGroup TARGETED_GROUP = new SkillGroup("targeted", 0).setHasTooltip().register();
 	public static final SkillGroup WEAPON_GROUP = new SkillGroup("weapon", 1).setHasTooltip().register();
-	public static final SkillBase swordBasic = new SwordBasic("basic_technique").register("basic_technique");
-	public static final SkillBase armorBreak = new ArmorBreak("armor_break").register("armor_break");
-	public static final SkillBase dodge = new Dodge("dodge").register("dodge");
-	public static final SkillBase leapingBlow = new LeapingBlow("leaping_blow").register("leaping_blow");
-	public static final SkillBase parry = new Parry("parry").register("parry");
-	public static final SkillBase dash = new Dash("dash").register("dash");
-	public static final SkillBase spinAttack = new SpinAttack("spin_attack").register("spin_attack");
-	public static final SkillBase superSpinAttack = new SuperSpinAttack("super_spin_attack").register("super_spin_attack");
-	public static final SkillBase mortalDraw = new MortalDraw("mortal_draw").register("mortal_draw");
-	public static final SkillBase swordBreak = new SwordBreak("sword_break").register("sword_break");
-	public static final SkillBase risingCut = new RisingCut("rising_cut").register("rising_cut");
-	public static final SkillBase endingBlow = new EndingBlow("ending_blow").register("ending_blow");
-	public static final SkillBase backSlice = new BackSlice("back_slice").register("back_slice");
-	public static final SkillBase swordBeam = new SwordBeam("sword_beam").register("sword_beam");
+	// Skills
+	public static final SkillBase swordBasic = new SwordBasic("basic_technique").setIconLocation(ICON_LOCATION + "basic_technique.png").addDefaultTooltip().register("basic_technique");
+	public static final SkillBase armorBreak = new ArmorBreak("armor_break").setIconLocation(ICON_LOCATION + "armor_break.png").addDefaultTooltip().register("armor_break");
+	public static final SkillBase dodge = new Dodge("dodge").setIconLocation(ICON_LOCATION + "dodge.png").addDefaultTooltip().register("dodge");
+	public static final SkillBase leapingBlow = new LeapingBlow("leaping_blow").setIconLocation(ICON_LOCATION + "leaping_blow.png").addDefaultTooltip().register("leaping_blow");
+	public static final SkillBase parry = new Parry("parry").setIconLocation(ICON_LOCATION + "parry.png").addDefaultTooltip().register("parry");
+	public static final SkillBase dash = new Dash("dash").setIconLocation(ICON_LOCATION + "dash.png").addDefaultTooltip().register("dash");
+	public static final SkillBase spinAttack = new SpinAttack("spin_attack").setIconLocation(ICON_LOCATION + "basic_technique.png").addDefaultTooltip().register("spin_attack");
+	public static final SkillBase superSpinAttack = new SuperSpinAttack("super_spin_attack").setIconLocation(ICON_LOCATION + "super_spin_attack.png").addDefaultTooltip().register("super_spin_attack");
+	public static final SkillBase mortalDraw = new MortalDraw("mortal_draw").setIconLocation(ICON_LOCATION + "mortal_draw.png").addDefaultTooltip().register("mortal_draw");
+	public static final SkillBase swordBreak = new SwordBreak("sword_break").setIconLocation(ICON_LOCATION + "sword_break.png").addDefaultTooltip().register("sword_break");
+	public static final SkillBase risingCut = new RisingCut("rising_cut").setIconLocation(ICON_LOCATION + "rising_cut.png").addDefaultTooltip().register("rising_cut");
+	public static final SkillBase endingBlow = new EndingBlow("ending_blow").setIconLocation(ICON_LOCATION + "ending_blow.png").addDefaultTooltip().register("ending_blow");
+	public static final SkillBase backSlice = new BackSlice("back_slice").setIconLocation(ICON_LOCATION + "back_slice.png").addDefaultTooltip().register("back_slice");
+	public static final SkillBase swordBeam = new SwordBeam("sword_beam").setIconLocation(ICON_LOCATION + "sword_beam.png").addDefaultTooltip().register("sword_beam");
 
 	public static void init() {
 		// Skills are registered during declaration

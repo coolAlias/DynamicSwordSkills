@@ -58,7 +58,7 @@ import swordskillsapi.api.damage.IComboDamage.IComboDamageFull;
  * Special: Missing an attack or taking too much damage breaks the current combo.
  * 
  */
-public class SwordBasic extends BaseModSkill implements IComboSkill, ILockOnTarget
+public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarget
 {
 	/** True if this skill is currently active */
 	private boolean isActive = false;

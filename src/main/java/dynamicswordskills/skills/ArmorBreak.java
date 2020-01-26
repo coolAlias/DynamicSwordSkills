@@ -55,7 +55,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * the player will perform the Armor Break attack automatically.
  * 
  */
-public class ArmorBreak extends BaseModSkill
+public class ArmorBreak extends SkillActive
 {
 	/** Set when triggered; set to 0 when target struck in onImpact() */
 	private int activeTimer = 0;
