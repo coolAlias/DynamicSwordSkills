@@ -20,6 +20,7 @@ package dynamicswordskills.skills;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import swordskillsapi.api.damage.IComboDamage;
 import swordskillsapi.api.damage.IComboDamage.IComboDamageFull;
 
 /**
@@ -58,6 +59,7 @@ public interface IComboSkill
 	 * Combo if necessary and either combo.add(player, damage) or combo.addDamageOnly(player, damage).
 	 * LivingHurtEvent is only called server side, but Combo will update itself automatically.
 	 * @param player should be gotten from '(EntityPlayer) event.source.getEntity()' if event.source.getEntity() is correct type
+	 * @param event If the event damage source is an {@link IComboDamage}, {@link IComboDamage#isComboDamage(EntityPlayer)} has already returned true. 
 	 */
 	void onHurtTarget(EntityPlayer player, LivingHurtEvent event);
 

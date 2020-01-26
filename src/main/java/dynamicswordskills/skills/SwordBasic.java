@@ -350,10 +350,7 @@ public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarge
 	}
 
 	private boolean isValidComboDamage(EntityPlayer player, DamageSource source) {
-		if (source instanceof IComboDamage) {
-			return ((IComboDamage) source).isComboDamage(player);
-		}
-		return !source.isProjectile();
+		return source instanceof IComboDamage || !source.isProjectile();
 	}
 
 	private SoundEvent getComboDamageSound(EntityPlayer player, DamageSource source) {

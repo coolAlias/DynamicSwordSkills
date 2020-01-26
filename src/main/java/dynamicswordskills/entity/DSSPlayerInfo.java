@@ -61,6 +61,7 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import swordskillsapi.api.damage.IComboDamage;
 
 public class DSSPlayerInfo
 {
@@ -456,7 +457,9 @@ public class DSSPlayerInfo
 		}
 		// combo gets updated last, after all damage modifications are completed
 		if (!event.isCanceled() && event.getAmount() > 0.0F && getComboSkill() != null && ((SkillActive) getComboSkill()).isActive()) {
-			getComboSkill().onHurtTarget(player, event);
+			if (!(event.getSource() instanceof IComboDamage) || ((IComboDamage) event.getSource()).isComboDamage(player)) {
+				getComboSkill().onHurtTarget(player, event);
+			}
 		}
 	}
 
