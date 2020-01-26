@@ -1,49 +1,37 @@
 {
-	"homepage": "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1294232",
+	"homepage": "https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 	"promos": {
-		"1.7.10-latest": "1.7",
-		"1.7.10-recommended": "1.7",
-		"1.8.0-latest": "2.1",
-		"1.8.9-latest": "2.5",
-		"1.8.9-recommended": "2.5",
-	},
-	"1.8.0": {
-	    "2.1": "Added Weapon Registry\nSee mod home page for full change log"
+		"1.8.9-latest": "1.8.9-final",
+		"1.8.9-recommended": "1.8.9-final",
+		"1.7.10-latest": "1.7.10-final",
+		"1.7.10-recommended": "1.7.10-final"
 	},
 	"1.8.9": {
-	    "2.5": "Updated to 1.8.9\nSee mod home page for full change log"
+		"1.8.9-final": "Final 1.8.9 version\nSee mod home page for full change log"
+	},
+	"1.7.10": {
+		"1.7.10-final": "Final 1.7.10 version\nSee mod home page for full change log"
 	},
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.8.9",
-			"modVersion":"2.5",
+			"modVersion":"1.8.9-final",
 			"changeLog": [
-	               "Updated to 1.8.9",
-	               "See main mod page for full change log"
+				"Final 1.8.9 version",
+				"See main mod page for full change log"
 			],
-			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1294232",
-			"isDirectLink":"false",
-			"newFileName":""
-		},
-		{
-			"mcVersion":"Minecraft 1.8.0",
-			"modVersion":"2.1",
-			"changeLog": [
-	               "Added Weapon Registry",
-	               "See main mod page for full change log"
-			],
-			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1294232",
+			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
 			"newFileName":""
 		},
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"1.7",
+			"modVersion":"1.7.10-final",
 			"changeLog": [
-	               "Added Weapon Registry",
-	               "See main mod page for full change log"
+				"Final 1.7.10 version",
+				"See main mod page for full change log"
 			],
-			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1294232",
+			"updateURL":"https://www.planetminecraft.com/mod/172164-dynamic-sword-skills/",
 			"isDirectLink":"false",
 			"newFileName":""
 		}

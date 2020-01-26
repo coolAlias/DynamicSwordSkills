@@ -20,7 +20,7 @@ plugins {
 }
 */
 
-version = "2.5.1"
+version = "final"
 group = "com.google.coolalias008.dynamicswordskills"
 archivesBaseName = "DynamicSwordSkills-1.8.9"
 
