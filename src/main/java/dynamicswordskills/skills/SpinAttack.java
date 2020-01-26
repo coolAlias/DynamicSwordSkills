@@ -59,7 +59,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Exhaustion: 3.0F - 0.2F per level, added each spin
  *
  */
-public class SpinAttack extends BaseModSkill implements IModifiableSkill
+public class SpinAttack extends SkillActive implements IModifiableSkill
 {
 	/** Current charge time; only ever set on the client - server is never charging */
 	private int charge;

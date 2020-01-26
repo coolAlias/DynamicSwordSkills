@@ -50,7 +50,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * - Has no effect other than blocking the attack if the attacker's held item can not be damaged
  *
  */
-public class SwordBreak extends BaseModSkill
+public class SwordBreak extends SkillActive
 {
 	/** Timer during which player is considered actively parrying */
 	private int breakTimer;
