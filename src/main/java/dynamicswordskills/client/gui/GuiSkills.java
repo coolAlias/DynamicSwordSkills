@@ -270,7 +270,7 @@ public class GuiSkills extends GuiScreen
 				);
 		GuiElementContainer<GuiTextElement> body = new GuiTextElementContainer(153, 35, 110, 121);
 		body.pad(2, 5, 2, 3);
-		if (Config.isSkillDisabled(currentSkill)) {
+		if (Config.isSkillDisabled(this.mc.thePlayer, currentSkill)) {
 			String tk = "skill.dss.disabled." + (Config.isSkillAllowed(currentSkill) ? "client" : "server");
 			body.add((GuiTextElement)(new GuiTextElement(body, GuiTextElement.getBoldComponent(new ChatComponentTranslation(tk), EnumChatFormatting.DARK_RED), TEXT_COLOR, true).pad(0, 0, pad, 0)));
 		}
@@ -406,7 +406,7 @@ public class GuiSkills extends GuiScreen
 				break;
 			case 1: // right-click
 				if (Config.isSkillAllowed(slot.skill) && this.skills.getSkillLevel(slot.skill) > 0) {
-					Config.toggleDeactivatedSkill(slot.skill);
+					this.skills.toggleDisabledSkill(slot.skill);
 					if (Config.clickedSkillSound()) {
 						this.mc.getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("gui.button.press"), 1.0F));
 					}
@@ -418,7 +418,7 @@ public class GuiSkills extends GuiScreen
 
 	@Override
 	public void onGuiClosed() {
-		Config.updateDeactivatedSkills();
+		this.skills.syncDisabledSkills();
 	}
 
 	@Override
@@ -669,7 +669,7 @@ public class GuiSkills extends GuiScreen
 				tooltip.add(EnumChatFormatting.DARK_RED + new ChatComponentTranslation("skill.dss.disabled.server").getUnformattedText());
 			} else {
 				tooltip.add(skill.getDisplayName());
-				if (!Config.isSkillActive(skill)) {
+				if (this.skillScreen.skills.isSkillDisabled(skill)) {
 					tooltip.add(EnumChatFormatting.DARK_RED + new ChatComponentTranslation("skill.dss.disabled.client").getUnformattedText());
 				}
 				tooltip.add(EnumChatFormatting.GOLD + skill.getLevelDisplay(false));

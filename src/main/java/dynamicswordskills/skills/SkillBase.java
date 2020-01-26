@@ -396,7 +396,7 @@ public abstract class SkillBase
 	 */
 	public final void validateSkill(EntityPlayer player) {
 		byte lvl = this.level;
-		if (!Config.isSkillAllowed(this)) {
+		if (Config.isSkillDisabled(player, this)) {
 			this.level = 0;
 		}
 		resetModifiers(player);
@@ -421,6 +421,9 @@ public abstract class SkillBase
 		while (level < targetLevel && canIncreaseLevel(player, level + 1)) {
 			++level;
 			levelUp(player);
+		}
+		if (Config.isSkillDisabled(player, this)) {
+			validateSkill(player);
 		}
 		if (!player.worldObj.isRemote && oldLevel < level) {
 			PacketDispatcher.sendTo(new SyncSkillPacket(this), (EntityPlayerMP) player);
