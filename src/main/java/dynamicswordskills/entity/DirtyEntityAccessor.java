@@ -20,12 +20,15 @@ package dynamicswordskills.entity;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class DirtyEntityAccessor {
 
@@ -35,6 +38,10 @@ public class DirtyEntityAccessor {
 	private static Field experienceValue;
 	/** Accessible reference to {@code EntityPlayer#itemStackMainHand} */
 	private static Field itemStackMainHand;
+	/** Accessible reference to {@code PlayerControllerMP#syncCurrentPlayItem} */
+	private static Method syncCurrentPlayItem;
+	/** Accessible reference to {@code EntityLivingBase#ticksSinceLastSwing */
+	private static Field ticksSinceLastSwing;
 
 	/**
 	 * Returns the amount of damage the entity will receive after armor and potions are taken into account
@@ -79,6 +86,31 @@ public class DirtyEntityAccessor {
 		}
 		try {
 			itemStackMainHand.set(player, stack == null ? null : stack.copy());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Sets or adds to the amount of xp the entity will drop when killed */
+	public static void setTicksSinceLastSwing(EntityLivingBase entity, int ticks) {
+		if (ticksSinceLastSwing == null) {
+			ticksSinceLastSwing = ReflectionHelper.findField(EntityLivingBase.class, "field_184617_aD", "ticksSinceLastSwing");
+		}
+		try {
+			ticksSinceLastSwing.set(entity, ticks);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Calls {@link PlayerControllerMP#syncCurrentPlayItem()} */
+	@SideOnly(Side.CLIENT)
+	public static void syncCurrentPlayItem(PlayerControllerMP player) {
+		if (syncCurrentPlayItem == null) {
+			syncCurrentPlayItem = ReflectionHelper.findMethod(PlayerControllerMP.class, player, new String[]{"func_78750_j","syncCurrentPlayItem"});
+		}
+		try {
+			syncCurrentPlayItem.invoke(player);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

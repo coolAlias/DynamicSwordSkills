@@ -28,6 +28,7 @@ import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
@@ -60,7 +61,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Exhaustion: 3.0F - 0.2F per level, added each spin
  *
  */
-public class SpinAttack extends SkillActive implements IModifiableSkill
+public class SpinAttack extends SkillActive implements IModifiableSkill, IReachAttackSkill
 {
 	/** Current charge time; only ever set on the client - server is never charging */
 	private int charge;
@@ -283,12 +284,9 @@ public class SpinAttack extends SkillActive implements IModifiableSkill
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		if (PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
-			List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D, getTargetSelectors());
-			for (EntityLivingBase target : list) {
-				if (targets != null && targets.contains(target)) {
-					Minecraft.getMinecraft().playerController.attackEntity(player, target);
-					targets.remove(target);
-				}
+			DirtyEntityAccessor.syncCurrentPlayItem(Minecraft.getMinecraft().playerController);
+			if (!player.isSpectator()) {
+				attackTargetsInSight(player);
 			}
 			spawnParticles(player);
 			DSSPlayerInfo.get(player).setArmSwingProgress(0.5F, 0.5F);
@@ -297,6 +295,16 @@ public class SpinAttack extends SkillActive implements IModifiableSkill
 			player.setAngles((clockwise ? speed: -speed), 0);
 		}
 		return true;
+	}
+
+	private void attackTargetsInSight(EntityPlayer player) {
+		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D, getTargetSelectors());
+		for (EntityLivingBase target : list) {
+			if (targets != null && targets.contains(target)) {
+				IReachAttackSkill.multiAttack(Minecraft.getMinecraft(), target, this);
+				targets.remove(target);
+			}
+		}
 	}
 
 	/**
@@ -355,6 +363,16 @@ public class SpinAttack extends SkillActive implements IModifiableSkill
 		for (int i = 0; i < 2; ++i) {
 			player.worldObj.spawnParticle(particle, posX, posY, posZ, vec3.xCoord * 0.15D, 0.01D, vec3.zCoord * 0.15D);
 		}
+	}
+
+	@Override
+	public double getAttackRange(EntityPlayer player) {
+		return getRange();
+	}
+
+	@Override
+	public int getTicksSinceLastSwing(EntityPlayer player) {
+		return 20;
 	}
 
 	@SuppressWarnings("unchecked")
