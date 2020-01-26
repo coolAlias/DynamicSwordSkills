@@ -28,8 +28,6 @@ public class SuperSpinAttack extends SkillBase implements ISkillModifier
 {
 	public SuperSpinAttack(String translationKey) {
 		super(translationKey);
-		this.addTranslatedTooltip(getTranslationKey() + ".tooltip");
-		this.setIconLocation(BaseModSkill.ICON_LOCATION + translationKey + ".png");
 	}
 
 	private SuperSpinAttack(SuperSpinAttack skill) {

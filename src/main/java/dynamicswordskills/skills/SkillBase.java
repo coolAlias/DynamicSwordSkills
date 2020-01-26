@@ -278,6 +278,11 @@ public abstract class SkillBase
 		return MAX_LEVEL;
 	}
 
+	/** Calls {@link #addTranslatedTooltip(String)} using the default tooltip language key, i.e. {@link #getTranslationKey()} + ".tooltip"  */
+	protected final SkillBase addDefaultTooltip() {
+		return addTranslatedTooltip(getTranslationKey() + ".tooltip");
+	}
+
 	/** Adds a translation component to the skill's tooltip display */
 	protected final SkillBase addTranslatedTooltip(String translationKey) {
 		return addTooltip(new ChatComponentTranslation(translationKey));

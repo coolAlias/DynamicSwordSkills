@@ -47,7 +47,7 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
  * Exhaustion: 3.0F - (level * 0.2F)
  * 
  */
-public class RisingCut extends BaseModSkill
+public class RisingCut extends SkillActive
 {
 	/** Flag for activation; set when player jumps while sneaking */
 	private int ticksTilFail;

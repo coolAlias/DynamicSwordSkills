@@ -50,7 +50,7 @@ import net.minecraft.world.World;
  *  - At max level, the beam can penetrate multiple targets
  *  - Each additional target receives 20% less damage than the previous
  */
-public class SwordBeam extends BaseModSkill
+public class SwordBeam extends SkillActive
 {
 	/** Used to end combo if the sword beam fails to strike a target */
 	private int missTimer;

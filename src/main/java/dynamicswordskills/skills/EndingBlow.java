@@ -58,7 +58,7 @@ import net.minecraft.world.World;
  * - Failure to slay the target results in not being able to attack for the duration
  * 
  */
-public class EndingBlow extends BaseModSkill
+public class EndingBlow extends SkillActive
 {
 	/** Flag for isActive() so that skill can trigger upon impact from LivingHurtEvent */
 	private int activeTimer = 0;

@@ -50,7 +50,7 @@ import net.minecraft.world.World;
  *   - For players of equal parry skill, chance to disarm is based solely on timing
  * 
  */
-public class Parry extends BaseModSkill
+public class Parry extends SkillActive
 {
 	/** Timer during which player is considered actively parrying */
 	private int parryTimer;

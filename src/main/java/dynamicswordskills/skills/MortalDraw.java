@@ -51,7 +51,7 @@ import net.minecraft.world.World;
  * - There is a 1.5s cooldown between uses, representing re-sheathing of the sword
  *
  */
-public class MortalDraw extends BaseModSkill
+public class MortalDraw extends SkillActive
 {
 	/** Delay before skill can be used again */
 	private static final int DELAY = 30;

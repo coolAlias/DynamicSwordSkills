@@ -52,7 +52,7 @@ import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
  * are weakened temporarily.
  * 
  */
-public class LeapingBlow extends BaseModSkill
+public class LeapingBlow extends SkillActive
 {
 	/** Activation window for pressing the attack key, set when player initially leaps */
 	private int ticksTilFail;
