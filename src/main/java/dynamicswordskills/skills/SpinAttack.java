@@ -225,6 +225,10 @@ public class SpinAttack extends SkillActive implements IModifiableSkill, IReachA
 	@Override
 	protected void postActivated(EntityPlayer player) {
 		TargetUtils.applyExtendedReachModifier(player, getRange());
+		IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
+		if (combo != null) {
+			combo.setComboDamageOnlyMode(true);
+		}
 		startSpin(player);
 	}
 
@@ -235,6 +239,10 @@ public class SpinAttack extends SkillActive implements IModifiableSkill, IReachA
 		arc = 0.0F;
 		DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 		TargetUtils.removeExtendedReachModifier(player);
+		IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
+		if (combo != null) {
+			combo.setComboDamageOnlyMode(false);
+		}
 	}
 
 	@Override
