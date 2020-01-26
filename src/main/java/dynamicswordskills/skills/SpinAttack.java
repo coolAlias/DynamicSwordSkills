@@ -57,7 +57,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Super Spin Attack: Tap attack while spinning to spin again, up to once per level
  * Arc: 360 degrees, plus an extra 360 degrees for every level of Super Spin Attack
  * Charge time: 20 ticks, minus 2 per level
- * Range: 3.0D plus 0.5D per level each of Spin and Super Spin Attack
+ * Range: 3.0D plus 0.3D per level each of Spin and Super Spin Attack
  * Exhaustion: 3.0F - 0.2F per level, added each spin
  *
  */
@@ -155,7 +155,7 @@ public class SpinAttack extends SkillActive implements IModifiableSkill, IReachA
 
 	/** Max sword range for striking targets */
 	private float getRange() {
-		return 3.0F + (level * 0.5F) + bonusRange;
+		return 3.0F + (level * 0.3F) + bonusRange;
 	}
 
 	/** Returns the spin speed modified based on the skill's level */
