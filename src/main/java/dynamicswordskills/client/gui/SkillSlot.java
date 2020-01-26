@@ -92,7 +92,7 @@ public class SkillSlot extends GuiContainedElement
 
 	@Override
 	public void drawElement(Minecraft mc, int mouseX, int mouseY) {
-		boolean grayScale = Config.isSkillDisabled(this.skill);
+		boolean grayScale = Config.isSkillDisabled(mc.thePlayer, this.skill);
 		int rgb = (grayScale ? 136 : 255);
 		this.frame.setColor(rgb, rgb, rgb, 255);
 		this.frame.drawElement(mc, mouseX, mouseY);

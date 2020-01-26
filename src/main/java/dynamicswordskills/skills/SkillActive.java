@@ -188,7 +188,7 @@ public abstract class SkillActive extends SkillBase
 	 * @return The result of {@link DSSPlayerInfo#activateSkill(SkillBase, boolean)}
 	 */
 	public final boolean activate(EntityPlayer player) {
-		if (Config.isSkillDisabled(this) || !allowUserActivation()) {
+		if (Config.isSkillDisabled(player, this) || !allowUserActivation()) {
 			return false;
 		} else if (player.worldObj.isRemote) {
 			PacketDispatcher.sendToServer(new ActivateSkillPacket(this, false));
@@ -237,7 +237,7 @@ public abstract class SkillActive extends SkillBase
 	 * @return	Returns {@link #onActivated}, signaling whether or not to add the skill to the list of currently active skills.
 	 */
 	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
-		if (!Config.isSkillAllowed(this)) {
+		if (Config.isSkillDisabled(player, this)) {
 			// Force client to deactivate in case client config settings differ
 			if (!world.isRemote) {
 				PacketDispatcher.sendTo(new DeactivateSkillPacket(this), (EntityPlayerMP) player);
@@ -279,7 +279,7 @@ public abstract class SkillActive extends SkillBase
 	 */
 	protected static <T extends SkillActive & IModifiableSkill> void applyActivationSkillModifiers(T parent, EntityPlayer player) {
 		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-		parent.getSkillModifiers().stream().filter(t -> !Config.isSkillDisabled(t)).forEach(t -> {
+		parent.getSkillModifiers().stream().filter(t -> !Config.isSkillDisabled(player, t)).forEach(t -> {
 			SkillBase instance = skills.getPlayerSkill(t);
 			if (instance instanceof ISkillModifier && instance.getLevel() > 0 && ((ISkillModifier) instance).applyOnActivated(player)) {
 				parent.applySkillModifier((SkillBase & ISkillModifier) instance, player);

@@ -62,7 +62,7 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 
 	@Override
 	public boolean shouldRender() {
-		if (Config.isSkillDisabled(Skills.endingBlow) || Config.endingBlowHudDisplayTime < 1) {
+		if (Config.isSkillDisabled(this.mc.thePlayer, Skills.endingBlow) || Config.endingBlowHudDisplayTime < 1) {
 			return false;
 		}
 		SkillActive skill = DSSPlayerInfo.get(mc.thePlayer).getActiveSkill(Skills.endingBlow);

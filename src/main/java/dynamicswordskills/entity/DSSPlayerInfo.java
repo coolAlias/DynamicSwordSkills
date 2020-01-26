@@ -17,10 +17,14 @@
 
 package dynamicswordskills.entity;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
+
+import com.google.common.collect.Sets;
 
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.IMetadataSkillItem;
@@ -30,6 +34,7 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.network.client.SyncSkillPacket;
 import dynamicswordskills.network.server.ApplySkillModifierPacket;
+import dynamicswordskills.network.server.SyncDisabledSkillsPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.ILockOnTarget;
@@ -46,6 +51,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.util.Constants;
@@ -71,6 +77,9 @@ public class DSSPlayerInfo
 
 	/** Stores information on the player's skills */
 	private final Map<Byte, SkillBase> skills;
+
+	/** List of user-disabled skill IDs */
+	private Set<Byte> disabledSkillIds = Sets.<Byte>newHashSet();
 
 	/** Reference to last active {@link IComboSkill} */
 	private IComboSkill comboSkill = null;
@@ -310,7 +319,7 @@ public class DSSPlayerInfo
 
 	@SideOnly(Side.CLIENT)
 	private <T extends SkillActive & IModifiableSkill> void applyKeyPressSkillModifiers(T parent, Minecraft mc, KeyBinding key) {
-		parent.getSkillModifiers().stream().filter(t -> !Config.isSkillDisabled(t)).forEach(t -> {
+		parent.getSkillModifiers().stream().filter(t -> !Config.isSkillDisabled(player, t)).forEach(t -> {
 			SkillBase instance = this.getPlayerSkill(t);
 			if (instance instanceof ISkillModifier && instance.getLevel() > 0 && ((ISkillModifier) instance).applyOnKeyPress(mc, key, player)) {
 				parent.applySkillModifier((SkillBase & ISkillModifier) instance, player);
@@ -331,7 +340,7 @@ public class DSSPlayerInfo
 	public boolean onKeyPressed(Minecraft mc, KeyBinding key) {
 		boolean isLockedOn = (targetingSkill != null && targetingSkill.isLockedOn());
 		for (SkillBase skill : skills.values()) {
-			if (Config.isSkillDisabled(skill)) {
+			if (Config.isSkillDisabled(player, skill)) {
 				continue;
 			}
 			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key, isLockedOn)) {
@@ -694,6 +703,49 @@ public class DSSPlayerInfo
 	}
 
 	/**
+	 * @return true if the skill has been disabled by the user
+	 */
+	public final boolean isSkillDisabled(@Nullable SkillBase skill) {
+		return skill != null && this.disabledSkillIds.contains(skill.getId());
+	}
+
+	/**
+	 * @return Set of user-disabled skill IDs
+	 */
+	public Set<Byte> getDisabledSkillIds() {
+		return Collections.unmodifiableSet(this.disabledSkillIds);
+	}
+
+	/**
+	 * Toggles the skill's per-user disabled state, but does not notify the server.
+	 * Calling code should call {@link #syncDisabledSkills()} when finished making changes.
+	 */
+	@SideOnly(Side.CLIENT)
+	public void toggleDisabledSkill(SkillBase skill) {
+		if (disabledSkillIds.contains(skill.getId())) {
+			disabledSkillIds.remove(skill.getId());
+		} else {
+			disabledSkillIds.add(skill.getId());
+		}
+	}
+
+	/**
+	 * Sends a packet to update the server side user-disabled skill ID list
+	 */
+	@SideOnly(Side.CLIENT)
+	public void syncDisabledSkills() {
+		PacketDispatcher.sendToServer(new SyncDisabledSkillsPacket(this.player));
+	}
+
+	/**
+	 * Should only be called from {@link SyncDisabledSkillsPacket} to set the server side user-disabled skill ID list
+	 */
+	public void setDisabledSkills(Set<Byte> disabledIds) {
+		this.disabledSkillIds = disabledIds;
+		this.validateSkills();
+	}
+
+	/**
 	 * Updates the local skills map with the skill, removing it if level is < 1.
 	 * Called client side only for synchronizing a skill with the server version.
 	 */
@@ -864,6 +916,12 @@ public class DSSPlayerInfo
 		}
 		compound.setTag("DynamicSwordSkills", taglist);
 		compound.setBoolean("receivedGear", receivedGear);
+		// User-disabled skills
+		NBTTagList disabled = new NBTTagList();
+		SkillRegistry.getValues().stream().filter(s -> disabledSkillIds.contains(s.getId())).forEach(s -> {
+			disabled.appendTag(new NBTTagString(s.getRegistryName().toString()));
+		});
+		compound.setTag("UserDisabledSkills", disabled);
 		return compound;
 	}
 
@@ -881,5 +939,15 @@ public class DSSPlayerInfo
 			}
 		}
 		receivedGear = compound.getBoolean("receivedGear");
+		// User-disabled skills
+		disabledSkillIds.clear();
+		NBTTagList disabled = compound.getTagList("UserDisabledSkills", Constants.NBT.TAG_STRING);
+		for (int i = 0; i < disabled.tagCount(); ++i) {
+			String s = disabled.getStringTagAt(i);
+			SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(s));
+			if (skill != null) {
+				disabledSkillIds.add(skill.getId());
+			}
+		}
 	}
 }
