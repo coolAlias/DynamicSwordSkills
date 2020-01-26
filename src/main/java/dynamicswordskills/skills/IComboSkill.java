@@ -17,6 +17,8 @@
 
 package dynamicswordskills.skills;
 
+import dynamicswordskills.api.IComboDamage.IComboDamageFull;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 
@@ -28,20 +30,28 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 public interface IComboSkill
 {
 	/** Returns the Combo instance for associated class */
-	public Combo getCombo();
+	Combo getCombo();
 
 	/** Should assign the instance of Combo retrieved from getCombo() to the argument combo */
-	public void setCombo(Combo combo);
+	void setCombo(Combo combo);
 
 	/** Returns true if a combo is currently in progress */
-	public boolean isComboInProgress();
+	boolean isComboInProgress();
+
+	/**
+	 * Manual override for the combo damage mode that will be used in {@link #onHurtTarget(EntityPlayer, LivingHurtEvent)}, in cases
+	 * where the DamageSource cannot be readily swapped to an {@link IComboDamageFull} type.
+	 * Calling code should generally always set the state back to standard when finished.
+	 * @param flag True if {@link Combo#addDamageOnly(EntityPlayer, float)} should always be used instead of {@link Combo#add(EntityPlayer, Entity, float)}
+	 */
+	void setComboDamageOnlyMode(boolean flag);
 
 	/**
 	 * Called client side when the player attacks but there is no target within reach;
 	 * use this method to e.g. send a packet to the server to terminate a Combo.
 	 * The implementing skill is not guaranteed to be active or to have an in-progress Combo when this is called.
 	 */
-	public void onMiss(EntityPlayer player);
+	void onMiss(EntityPlayer player);
 
 	/**
 	 * Should be called when an EntityPlayer actively using a Combo damages an entity, creating a new
@@ -49,7 +59,7 @@ public interface IComboSkill
 	 * LivingHurtEvent is only called server side, but Combo will update itself automatically.
 	 * @param player should be gotten from '(EntityPlayer) event.source.getEntity()' if event.source.getEntity() is correct type
 	 */
-	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event);
+	void onHurtTarget(EntityPlayer player, LivingHurtEvent event);
 
 	/**
 	 * Should be called when a player actively using a Combo receives damage. Useful for ending a
@@ -57,5 +67,6 @@ public interface IComboSkill
 	 * on the server side, but Combo class will self-update if endCombo(player) is called.
 	 * @param player should be gotten from '(EntityPlayer) event.entity' if event.entity is correct type
 	 */
-	public void onPlayerHurt(EntityPlayer player, LivingHurtEvent event);
+	void onPlayerHurt(EntityPlayer player, LivingHurtEvent event);
+
 }

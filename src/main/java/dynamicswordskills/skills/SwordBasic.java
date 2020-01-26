@@ -71,6 +71,9 @@ public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarge
 	/** Set to a new instance each time a combo begins */
 	private Combo combo = null;
 
+	/** Flag for {@link #setComboDamageOnlyMode(boolean)} */
+	private boolean comboDamageOnlyMode = true;
+
 	public SwordBasic(String translationKey) {
 		super(translationKey);
 	}
@@ -302,6 +305,11 @@ public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarge
 	}
 
 	@Override
+	public void setComboDamageOnlyMode(boolean flag) {
+		this.comboDamageOnlyMode = flag;
+	}
+
+	@Override
 	public void onMiss(EntityPlayer player) {
 		if (PlayerUtils.isWeapon(player.getHeldItem())) {
 			PlayerUtils.playRandomizedSound(player, ModInfo.SOUND_SWORDMISS, 0.4F, 0.5F);
@@ -327,7 +335,7 @@ public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarge
 		}
 		float damage = DirtyEntityAccessor.getModifiedDamage(event.entityLiving, event.source, event.ammount);
 		if (damage > 0) {
-			if (!(event.source instanceof IComboDamageFull) || ((IComboDamageFull) event.source).increaseComboCount(player)) {
+			if (!comboDamageOnlyMode && (!(event.source instanceof IComboDamageFull) || ((IComboDamageFull) event.source).increaseComboCount(player))) {
 				combo.add(player, event.entityLiving, damage);
 			} else {
 				combo.addDamageOnly(player, damage);
