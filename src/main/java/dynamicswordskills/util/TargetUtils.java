@@ -25,6 +25,8 @@ import javax.annotation.Nullable;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 
+import dynamicswordskills.DynamicSwordSkills;
+import mods.battlegear2.BattlemodeHookContainerClass;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -65,6 +67,9 @@ public class TargetUtils
 	 * NetHandlerPlayServer#processUseEntity.
 	 */
 	public static double getReachDistanceSq(EntityPlayer player) {
+		if (DynamicSwordSkills.isBG2Enabled) {
+			return BattlemodeHookContainerClass.INSTANCE.maxReachDistance(player);
+		}
 		return player.capabilities.isCreativeMode ? 36.0D : 12.0D;
 	}
 
