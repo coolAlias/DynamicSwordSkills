@@ -17,10 +17,19 @@
 
 package net.minecraft.entity;
 
+import java.lang.reflect.Method;
+
+import cpw.mods.fml.relauncher.ReflectionHelper;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.util.DamageSource;
 
 public class DirtyEntityAccessor
 {
+	/** Accessible reference to {@code PlayerControllerMP#syncCurrentPlayItem} */
+	private static Method syncCurrentPlayItem;
+
 	/**
 	 * Returns the amount of damage the entity will receive after armor and potions are taken into account
 	 */
@@ -38,5 +47,18 @@ public class DirtyEntityAccessor
 	/** Sets or adds to the amount of xp the entity will drop when killed */
 	public static void setLivingXp(EntityLiving entity, int xp, boolean add) {
 		entity.experienceValue = (add ? entity.experienceValue + xp : xp);
+	}
+
+	/** Calls {@link PlayerControllerMP#syncCurrentPlayItem()} */
+	@SideOnly(Side.CLIENT)
+	public static void syncCurrentPlayItem(PlayerControllerMP player) {
+		if (syncCurrentPlayItem == null) {
+			syncCurrentPlayItem = ReflectionHelper.findMethod(PlayerControllerMP.class, player, new String[]{"func_78750_j","syncCurrentPlayItem"});
+		}
+		try {
+			syncCurrentPlayItem.invoke(player);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

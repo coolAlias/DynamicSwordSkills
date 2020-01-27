@@ -64,6 +64,7 @@ public class PacketDispatcher
 		registerMessage(DashImpactPacket.class);
 		registerMessage(EndComboPacket.class);
 		registerMessage(OpenGuiPacket.class);
+		registerMessage(ReachAttackSkillPacket.class);
 		registerMessage(SyncDisabledSkillsPacket.class);
 		registerMessage(TargetIdPacket.class);
 	}

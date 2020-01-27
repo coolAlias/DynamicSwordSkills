@@ -30,8 +30,16 @@ import dynamicswordskills.client.gui.ComboOverlay;
 import dynamicswordskills.client.gui.GuiEndingBlowOverlay;
 import dynamicswordskills.client.gui.IGuiOverlay;
 import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.PacketDispatcher;
+import dynamicswordskills.network.server.ReachAttackSkillPacket;
 import dynamicswordskills.skills.IComboSkill;
+import dynamicswordskills.skills.IReachAttackSkill;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.PlayerControllerMP;
+import net.minecraft.entity.DirtyEntityAccessor;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -112,6 +120,30 @@ public class DSSClientEvents
 		if (combo != null) {
 			combo.onMiss(mc.thePlayer);
 		}
+	}
+
+	/**
+	 * Equivalent of {@link PlayerControllerMP#attackEntity(EntityPlayer, Entity)} but sends a custom attack packet to bypass the hard-coded vanilla reach values.
+	 * @param <T> The IReachAttackSkill type
+	 * @param mc Current Minecraft player will be used as the attacker
+	 * @param target The target to attack
+	 * @param skill The IReachAttackSkill skill
+	 */
+	@SideOnly(Side.CLIENT)
+	public static <T extends SkillBase & IReachAttackSkill> void attackEntity(Minecraft mc, Entity target, T skill) {
+		DirtyEntityAccessor.syncCurrentPlayItem(mc.playerController);
+		DSSClientEvents.multiAttack(mc, target, skill);
+	}
+
+	/**
+	 * Use this method when attacking multiple entities e.g. in a loop.
+	 * Be sure to call {@link DirtyEntityAccessor#syncCurrentPlayItem(PlayerControllerMP)} first.
+	 * Same parameters as {@link DSSClientEvents#attackEntity(Minecraft, Entity, SkillBase)}.
+	 */
+	@SideOnly(Side.CLIENT)
+	public static <T extends SkillBase & IReachAttackSkill> void multiAttack(Minecraft mc, Entity target, T skill) {
+		PacketDispatcher.sendToServer(new ReachAttackSkillPacket(skill, target));
+		mc.thePlayer.attackTargetEntityWithCurrentItem(target);
 	}
 
 	/**
