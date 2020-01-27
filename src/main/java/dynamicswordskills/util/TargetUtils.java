@@ -25,8 +25,11 @@ import javax.annotation.Nullable;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 
+import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dynamicswordskills.DynamicSwordSkills;
+import mods.battlegear2.api.weapons.IExtendedReachWeapon;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -37,6 +40,8 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
@@ -66,7 +71,25 @@ public class TargetUtils
 	 * NetHandlerPlayServer#processUseEntity.
 	 */
 	public static double getReachDistanceSq(EntityPlayer player) {
+		if (DynamicSwordSkills.isBG2Enabled) {
+			float reach = getBattlegearReachDistance(player);
+			return reach * reach;
+		}
 		return player.capabilities.isCreativeMode ? 36.0D : 12.0D;
+	}
+
+	@Method(modid="battlegear2")
+	private static float getBattlegearReachDistance(EntityPlayer player) {
+		ItemStack mainhand = player.getCurrentEquippedItem();
+		float reachMod = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
+		if (mainhand == null) {
+			return reachMod - 2.2F; //Reduce bare hands range
+		} else if (mainhand.getItem() instanceof ItemBlock) {
+			return reachMod - 2.1F; //Reduce block in hands range too
+		} else if (mainhand.getItem() instanceof IExtendedReachWeapon) {
+			reachMod = ((IExtendedReachWeapon) mainhand.getItem()).getReachModifierInBlocks(mainhand);
+		}
+		return reachMod;
 	}
 
 	/**
