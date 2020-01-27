@@ -20,10 +20,13 @@ package dynamicswordskills.entity;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class DirtyEntityAccessor {
 
@@ -31,6 +34,8 @@ public class DirtyEntityAccessor {
 	private static Method applyPotionDamageCalculations;
 	/** Accessible reference to {@code EntityLiving#experienceValue */
 	private static Field experienceValue;
+	/** Accessible reference to {@code PlayerControllerMP#syncCurrentPlayItem} */
+	private static Method syncCurrentPlayItem;
 
 	/**
 	 * Returns the amount of damage the entity will receive after armor and potions are taken into account
@@ -61,6 +66,19 @@ public class DirtyEntityAccessor {
 		try {
 			int value = experienceValue.getInt(entity);
 			experienceValue.set(entity, (add ? value + xp : xp));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Calls {@link PlayerControllerMP#syncCurrentPlayItem()} */
+	@SideOnly(Side.CLIENT)
+	public static void syncCurrentPlayItem(PlayerControllerMP player) {
+		if (syncCurrentPlayItem == null) {
+			syncCurrentPlayItem = ReflectionHelper.findMethod(PlayerControllerMP.class, player, new String[]{"func_78750_j","syncCurrentPlayItem"});
+		}
+		try {
+			syncCurrentPlayItem.invoke(player);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
