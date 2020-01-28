@@ -51,6 +51,7 @@ public class GuiFactoryConfig implements IModGuiFactory
 		private static List<IConfigElement> getConfigElements() {
 			List<IConfigElement> list = new ArrayList<IConfigElement>();
 			list.add(new DummyCategoryElement("dssClientConfig", "dss.config.client", ClientEntry.class));
+			list.add(new DummyCategoryElement("dssServerConfig", "dss.config.server", ServerEntry.class));
 			return list;
 		}
 
@@ -79,7 +80,28 @@ public class GuiFactoryConfig implements IModGuiFactory
 				return new GuiConfig(this.owningScreen,
 						list,
 						this.owningScreen.modID,
-						Configuration.CATEGORY_CLIENT,
+						Config.CONFIG_ID + ".client",
+						this.configElement.requiresWorldRestart() || this.owningScreen.allRequireWorldRestart,
+						this.configElement.requiresMcRestart() || this.owningScreen.allRequireMcRestart,
+						GuiConfig.getAbridgedConfigPath(Config.config.toString()));
+			}
+		}
+
+		public static class ServerEntry extends CategoryEntry
+		{
+			public ServerEntry(GuiConfig owningScreen, GuiConfigEntries owningEntryList, IConfigElement prop) {
+				super(owningScreen, owningEntryList, prop);
+			}
+
+			@Override
+			protected GuiScreen buildChildScreen() {
+				List<IConfigElement> list = (new ConfigElement(Config.config.getCategory("general"))).getChildElements();
+				List<IConfigElement> drops = (new ConfigElement(Config.config.getCategory("drops"))).getChildElements();
+				list.add(new DummyCategoryElement("dssServerDropsConfig", "dss.config.server.drops", drops));
+				return new GuiConfig(this.owningScreen,
+						list,
+						this.owningScreen.modID,
+						Config.CONFIG_ID + ".server",
 						this.configElement.requiresWorldRestart() || this.owningScreen.allRequireWorldRestart,
 						this.configElement.requiresMcRestart() || this.owningScreen.allRequireMcRestart,
 						GuiConfig.getAbridgedConfigPath(Config.config.toString()));
