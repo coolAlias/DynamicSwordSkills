@@ -42,12 +42,13 @@ import dynamicswordskills.network.client.SyncConfigPacket;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.skills.Skills;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
 
 public class Config
 {
+	/** Config ID for GuiConfig */
+	public static final String CONFIG_ID = "dss.config";
 	public static Configuration config;
 	/** Flag set after {@link #postInit()} has been called */
 	private static boolean loaded;
@@ -94,44 +95,27 @@ public class Config
 	private static String[] forbidden_swords = new String[0];
 	/** Items that are forbidden from being considered as Melee Weapons */
 	private static String[] forbidden_weapons = new String[0];
-	/*================== GENERAL =====================*/
-	/** [SYNC] Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20] */
-	private static int baseSwingSpeed;
-	/** Whether all players should start with a Basic Skill orb */
-	private static boolean enableBonusOrb;
-	/** Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10] */
-	private static int chestLootWeight;
-	/** [Back Slice] Allow Back Slice to potentially knock off player armor */
-	private static boolean allowDisarmorPlayer;
-	/** [Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50] */
-	private static float disarmTimingBonus;
-	/** [Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20] */
-	private static float disarmPenalty;
-	/** [Rising Cut] Allow the player to activate Rising Cut without hitting a target, i.e. perform a High Jump */
-	private static boolean enableHighJump;
-	/** [Skill Swords] Enable randomized Skill Swords to appear as loot in various chests */
-	private static boolean enableRandomSkillSwords;
-	/** [Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples) */
-	private static boolean enableCreativeSkillSwords;
-	/** [Skill Swords] Skill level provided by the Creative Tab Skill Swords */
-	private static int skillSwordLevel;
-	/** [SYNC] [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
-	private static boolean requireFullHealth;
-	/** Skills not allowed on this server */
+	/*================== SERVER =====================*/
+	/* General server settings */
+	private static boolean backSliceDisarmorPlayer;
 	private static Set<String> bannedSkills = Sets.<String>newHashSet();
-	/*================== DROPS =====================*/
-	/** [Player] Enable skill orbs to drop from players when killed in PvP */
-	private static boolean enablePlayerDrops;
-	/** [Player] Factor by which to multiply chance for skill orb to drop by slain players */
-	private static int playerDropFactor;
-	/** Enable skill orbs to drop as loot from mobs */
-	private static boolean enableOrbDrops;
-	/** Chance of dropping random orb */
-	private static float randomDropChance;
-	/** Chance for unmapped mob to drop an orb */
-	private static float genericMobDropChance;
-	/** Individual drop chances for skill orbs and heart pieces */
+	private static int baseSwingSpeed;
+	private static float parryDisarmTimingBonus;
+	private static float parryDisarmPenalty;
+	private static boolean requireFullHealth;
+	private static boolean risingCutHighJump;
+	private static boolean skillSwordCreative;
+	private static int skillSwordCreativeLevel;
+	private static boolean skillSwordRandom;
+	/* Loot / drops settings */
+	private static boolean bonusOrbEnable;
+	private static int chestLootWeight;
 	private static Map<Integer, Float> orbDropChance;
+	private static boolean orbDropEnable;
+	private static float orbDropGeneralChance;
+	private static float orbDropRandomChance;
+	private static boolean playerDropEnable;
+	private static int playerDropFactor;
 
 	public static void init(FMLPreInitializationEvent event) {
 		config = new Configuration(event.getSuggestedConfigurationFile());
@@ -142,7 +126,6 @@ public class Config
 
 	public static void refreshClient() {
 		/* General client settings */
-		config.addCustomCategoryComment("client", "This category contains client side settings; i.e. they are not synchronized with the server.");
 		enableAdditionalControls = config.get("client", "dss.config.client.enableAdditionalControls", false, "Enables additional WASD-equivalent keybindings for activating skills with e.g. a gamepad").setRequiresMcRestart(true).getBoolean(false);
 		enableAutoTarget = config.get("client", "dss.config.client.enableAutoTarget", true, "Enable auto-targeting when locked on and the current target becomes invalid").getBoolean(true);
 		enableTargetPassive = config.get("client", "dss.config.client.enableTargetPassive", true, "Allow targeting passive mobs with the lock-on mechanic").getBoolean(true);
@@ -205,38 +188,34 @@ public class Config
 		Arrays.sort(forbidden_swords);
 		forbidden_weapons = config.get("Weapon Registry", "[Forbidden Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Forbid one or more items from acting as WEAPONs, e.g. if an item is added by IMC and you don't want it to be usable with skills.\nNote that this will also prevent the item from behaving as a SWORD.").getStringList();
 		Arrays.sort(forbidden_weapons);
-		/*================== GENERAL =====================*/
-		baseSwingSpeed = MathHelper.clamp_int(config.get("general", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
-		enableBonusOrb = config.get("general", "Whether all players should start with a Basic Skill orb", true).getBoolean(true);
-		chestLootWeight = MathHelper.clamp_int(config.get("general", "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10]", 1).getInt(), 0, 10);
-		allowDisarmorPlayer = config.get("general", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
-		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("general", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 50);
-		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("general", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
-		enableHighJump = config.get("general", "[Rising Cut] Allow the player to activate Rising Cut without hitting a target, i.e. perform a High Jump", false).getBoolean(false);
-		enableRandomSkillSwords = config.get("general", "[Skill Swords] Enable randomized Skill Swords to appear as loot in various chests", true).getBoolean(true);
-		enableCreativeSkillSwords = config.get("general", "[Skill Swords] Enable Skill Swords in the Creative Tab (iron only, as examples)", true).getBoolean(true);
-		skillSwordLevel = MathHelper.clamp_int(config.get("general", "[Skill Swords] Skill level provided by the Creative Tab Skill Swords [1-5]", 3).getInt(), 1, 5);
-		requireFullHealth = config.get("general", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
-		config.addCustomCategoryComment("general.bannedskills",
-				"Disabling a skill on the server prevents players from using that skill, but does not change the player\'s known skills."
-				+ "\nSkill items previously generated as loot may be found but not used, and subsequent loot will not generate with that skill."
-				+ "\nSkill orb-like items may still drop from mobs / players unless disabled separately, but may not be used to learn the skill."
-				+ "\nThis setting is save-game safe: skills may be disabled and re-enabled without affecting the saved game state.");
-		String[] banned = config.get("general.bannedskills", "bannedSkills", new String[0], "Enter the registry names for each skill disallowed on this server, each on a separate line between the '<' and '>'").getStringList();
+		/*================== SERVER =====================*/
+		/* General server settings */
+		backSliceDisarmorPlayer = config.get("general", "dss.config.server.general.backSliceDisarmorPlayer", true, "Allow Back Slice to potentially knock off player armor").getBoolean(true);
+		String[] banned = config.get("general", "dss.config.server.general.bannedSkills", new String[0], "Enter the registry names for each skill disallowed on this server, each on a separate line between the '<' and '>'. Disabling a skill prevents players from using that skill, but does not change the player's known skills. Skill items previously generated as loot may be found but not used, and subsequent loot will not generate with that skill. Skill orb-like items may still drop from mobs / players unless disabled separately, but may not be used to learn the skill. This setting is save-game safe: skills may be disabled and re-enabled without affecting the saved game state.").setRequiresMcRestart(true).getStringList();
 		bannedSkills.clear();
 		bannedSkills.addAll(Lists.<String>newArrayList(banned));
-		/*================== DROPS =====================*/
-		enablePlayerDrops = config.get("drops", "[Player] Enable skill orbs to drop from players when killed in PvP", true).getBoolean(true);
-		playerDropFactor = MathHelper.clamp_int(config.get("drops", "[Player] Factor by which to multiply chance for skill orb to drop by slain players [1-20]", 5).getInt(), 1, 20);
-		enableOrbDrops = config.get("drops", "Enable skill orbs to drop as loot from mobs (may still be disabled individually)", true).getBoolean(true);
-		randomDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("drops", "Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
-		genericMobDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("drops", "Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
+		baseSwingSpeed = config.get("general", "dss.config.server.general.baseSwingSpeed", 0, "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0, 20).setRequiresWorldRestart(true).getInt();
+		parryDisarmPenalty = 0.01F * (float)config.get("general", "dss.config.server.general.parryDisarmPenalty", 10, "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 0, 20).getInt();
+		parryDisarmTimingBonus = 0.001F * (float)config.get("general", "dss.config.server.general.parryDisarmTimingBonus", 25, "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 0, 50).getInt();
+		requireFullHealth = config.get("general", "dss.config.server.general.requireFullHealth", false, "True to require a completely full health bar to use Super Spin Attack and Sword Beam, or false to allow a small amount to be missing per level").setRequiresWorldRestart(true).getBoolean(false);
+		risingCutHighJump = config.get("general", "dss.config.server.general.risingCutHighJump", false, "Allow the player to activate Rising Cut without hitting a target, i.e. perform a High Jump").getBoolean(false);
+		skillSwordCreative = config.get("general", "dss.config.server.general.skillSwordCreative", true, "Enable Skill Swords in the Creative Tab (iron only, as examples)").setRequiresMcRestart(true).getBoolean(true);
+		skillSwordCreativeLevel = config.get("general", "dss.config.server.general.skillSwordCreativeLevel", 3, "Skill level provided by the Creative Tab Skill Swords [1-5]", 1, 5).setRequiresMcRestart(true).getInt();
+		skillSwordRandom = config.get("general", "dss.config.server.general.skillSwordRandom", true, "Enable randomized Skill Swords to appear as loot in various chests").setRequiresMcRestart(true).getBoolean(true);
+		/* Loot / drops settings */
+		bonusOrbEnable = config.get("drops", "dss.config.server.drops.bonusOrbEnable", true, "Whether all players should start with a Basic Skill orb").getBoolean(true);
+		chestLootWeight = config.get("drops", "dss.config.server.drops.chestLootWeight", 1, "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10]", 0, 10).setRequiresMcRestart(true).getInt();
+		orbDropEnable = config.get("drops", "dss.config.server.drops.orbDropEnable", true, "Enable skill orbs to drop as loot from mobs (may still be disabled individually)").getBoolean(true);
+		orbDropGeneralChance = 0.01F * (float)config.get("drops", "dss.config.server.drops.orbDropGeneralChance", 1, "Chance (as a percent) for generic mobs to drop a random skill orb [0-100]", 0, 100).getInt();
+		orbDropRandomChance = 0.01F * (float)config.get("drops", "dss.config.server.drops.orbDropRandomChance", 10, "Chance (as a percent) for mobs with a specific skill orb drop to drop a random one instead [0-100]", 0, 100).getInt();
 		orbDropChance = new HashMap<Integer, Float>(Skills.getSkillIdMap().size());
 		for (Entry<Integer, ResourceLocation> entry : Skills.getSkillIdMap().entrySet()) {
 			SkillBase skill = SkillRegistry.get(entry.getValue());
-			int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-1000]", 5).getInt(), 0, 1000);
+			int i = config.get("drops", "dss.config.server.drops.orbDropChance." + skill.getRegistryName().getResourcePath(), 5, "Chance (in tenths of a percent) for Skill Orb of " + skill.getDisplayName() + " to drop when available (0 to disable) [0-1000]", 0, 1000).getInt();
 			orbDropChance.put((int)skill.getId(), (0.001F * (float) i));
 		}
+		playerDropEnable = config.get("drops", "dss.config.server.drops.playerDropEnable", true, "Enable skill orbs to drop from players when killed in PvP").getBoolean(true);
+		playerDropFactor = config.get("drops", "dss.config.server.drops.playerDropFactor", 5, "Factor by which to multiply chance for skill orb to drop by slain players [1-20]", 1, 20).getInt();
 		if (config.hasChanged()) {
 			config.save();
 		}
@@ -305,16 +284,16 @@ public class Config
 		return set != null && (set.contains(name) || set.contains(alt));
 	}
 	/*================== SKILLS =====================*/
-	public static boolean giveBonusOrb() { return enableBonusOrb; }
+	public static boolean giveBonusOrb() { return bonusOrbEnable; }
 	public static int getLootWeight() { return chestLootWeight; }
 	public static int getBaseSwingSpeed() { return baseSwingSpeed; }
-	public static boolean areRandomSwordsEnabled() { return enableRandomSkillSwords; }
-	public static boolean areCreativeSwordsEnabled() { return enableCreativeSkillSwords; }
-	public static boolean canDisarmorPlayers() { return allowDisarmorPlayer; }
-	public static float getDisarmPenalty() { return disarmPenalty; }
-	public static float getDisarmTimingBonus() { return disarmTimingBonus; }
-	public static boolean canHighJump() { return enableHighJump; }
-	public static int getSkillSwordLevel() { return skillSwordLevel; }
+	public static boolean areRandomSwordsEnabled() { return skillSwordRandom; }
+	public static boolean areCreativeSwordsEnabled() { return skillSwordCreative; }
+	public static boolean canDisarmorPlayers() { return backSliceDisarmorPlayer; }
+	public static float getDisarmPenalty() { return parryDisarmPenalty; }
+	public static float getDisarmTimingBonus() { return parryDisarmTimingBonus; }
+	public static boolean canHighJump() { return risingCutHighJump; }
+	public static int getSkillSwordLevel() { return skillSwordCreativeLevel; }
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));
@@ -328,11 +307,11 @@ public class Config
 		return skill != null && skill.getRegistryName() != null && !bannedSkills.contains(skill.getRegistryName().toString());
 	}
 	/*================== DROPS =====================*/
-	public static boolean arePlayerDropsEnabled() { return enablePlayerDrops; }
+	public static boolean arePlayerDropsEnabled() { return playerDropEnable; }
 	public static float getPlayerDropFactor() { return playerDropFactor; }
-	public static boolean areOrbDropsEnabled() { return enableOrbDrops; }
-	public static float getChanceForRandomDrop() { return randomDropChance; }
-	public static float getRandomMobDropChance() { return genericMobDropChance; }
+	public static boolean areOrbDropsEnabled() { return orbDropEnable; }
+	public static float getChanceForRandomDrop() { return orbDropRandomChance; }
+	public static float getRandomMobDropChance() { return orbDropGeneralChance; }
 	public static float getDropChance(int orbID) {
 		return (orbDropChance.containsKey(orbID) ? orbDropChance.get(orbID) : 0.0F);
 	}
