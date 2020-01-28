@@ -234,7 +234,7 @@ public class Config
 		orbDropChance = new HashMap<Integer, Float>(Skills.getSkillIdMap().size());
 		for (Entry<Integer, ResourceLocation> entry : Skills.getSkillIdMap().entrySet()) {
 			SkillBase skill = SkillRegistry.get(entry.getValue());
-			int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
+			int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-1000]", 5).getInt(), 0, 1000);
 			orbDropChance.put((int)skill.getId(), (0.001F * (float) i));
 		}
 		if (config.hasChanged()) {
