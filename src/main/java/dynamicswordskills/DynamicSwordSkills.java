@@ -25,7 +25,9 @@ import org.apache.logging.log4j.Logger;
 
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.command.DSSCommands;
+import dynamicswordskills.crafting.RecipeInfuseSkillOrb;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
 import dynamicswordskills.entity.IPlayerInfo.CapabilityPlayerInfo;
@@ -36,6 +38,7 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
@@ -47,6 +50,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
+import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
@@ -57,7 +61,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import swordskillsapi.api.item.WeaponRegistry;
 
-@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST)
+@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST, guiFactory = ModInfo.ID + ".client.gui.GuiFactoryConfig")
 public class DynamicSwordSkills
 {
 	@Mod.Instance(ModInfo.ID)
@@ -67,6 +71,9 @@ public class DynamicSwordSkills
 	public static CommonProxy proxy;
 
 	public static final Logger logger = LogManager.getLogger(ModInfo.ID);
+
+	/** Expected FPS used as a reference to normalize e.g. client-side motion adjustments */
+	public static final float BASE_FPS = 30F;
 
 	public static CreativeTabs tabSkills;
 
@@ -87,6 +94,7 @@ public class DynamicSwordSkills
 		if (Loader.isModLoaded("zeldaswordskills")) {
 			throw new RuntimeException("Dynamic Sword Skills may not be loaded at the same time as Zelda Sword Skills! Please remove one or the other.");
 		}
+		Skills.init();
 		Config.init(event);
 		tabSkills = new CreativeTabs("dss.skills") {
 			@Override
@@ -95,31 +103,36 @@ public class DynamicSwordSkills
 				return DynamicSwordSkills.skillOrb;
 			}
 		};
-		skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
+		skillOrb = new ItemSkillOrb(Skills.getSkillIdMap()).setRegistryName(ModInfo.ID, "skillorb").setUnlocalizedName("dss.skillorb");
 		GameRegistry.register(skillOrb);
 		if (Config.areCreativeSwordsEnabled()) {
-			skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
+			skillItems = new ArrayList<Item>(SkillRegistry.getValues().size());
 			Item item = null;
-			for (SkillBase skill : SkillBase.getSkills()) {
+			// Hack to maintain original display order
+			List<SkillBase> skills = SkillRegistry.getSortedList(SkillRegistry.SORT_BY_ID);
+			for (SkillBase skill : skills) {
 				if (!(skill instanceof SkillActive)) {
 					continue;
 				}
 				int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
-				item = new ItemSkillProvider(ToolMaterial.IRON, "iron_sword", skill, (byte) level).setCreativeTab(DynamicSwordSkills.tabSkills);
+				item = new ItemSkillProvider(ToolMaterial.WOOD, "stick", skill, (byte) level)
+						.setRegistryName(ModInfo.ID, "training_stick_" + skill.getRegistryName().getResourcePath())
+						.setUnlocalizedName("dss.training_stick")
+						.setCreativeTab(DynamicSwordSkills.tabSkills);
 				skillItems.add(item);
 				GameRegistry.register(item);
 			}
 		}
 		if (Config.areRandomSwordsEnabled()) {
-			skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword");
+			skillWood = new ItemRandomSkill(ToolMaterial.WOOD, "wooden_sword").setRegistryName(ModInfo.ID, "skill_sword_wood").setUnlocalizedName("dss.skill_sword.wood");
 			GameRegistry.register(skillWood);
-			skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword");
+			skillStone = new ItemRandomSkill(ToolMaterial.STONE, "stone_sword").setRegistryName(ModInfo.ID, "skill_sword_stone").setUnlocalizedName("dss.skill_sword.stone");
 			GameRegistry.register(skillStone);
-			skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword");
+			skillIron = new ItemRandomSkill(ToolMaterial.IRON, "iron_sword").setRegistryName(ModInfo.ID, "skill_sword_iron").setUnlocalizedName("dss.skill_sword.iron");
 			GameRegistry.register(skillIron);
-			skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword");
+			skillGold = new ItemRandomSkill(ToolMaterial.GOLD, "golden_sword").setRegistryName(ModInfo.ID, "skill_sword_gold").setUnlocalizedName("dss.skill_sword.gold");
 			GameRegistry.register(skillGold);
-			skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword");
+			skillDiamond = new ItemRandomSkill(ToolMaterial.DIAMOND, "diamond_sword").setRegistryName(ModInfo.ID, "skill_sword_diamond").setUnlocalizedName("dss.skill_sword.diamond");
 			GameRegistry.register(skillDiamond);
 		}
 		proxy.preInit();
@@ -138,15 +151,15 @@ public class DynamicSwordSkills
 	public void init(FMLInitializationEvent event) {
 		proxy.init();
 		MinecraftForge.EVENT_BUS.register(new DSSCombatEvents());
-		MinecraftForge.EVENT_BUS.register(new LootHandler());
 		DSSCombatEvents.initializeDrops();
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
-		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", ModInfo.VERSION_LIST);
+		GameRegistry.addRecipe(new RecipeInfuseSkillOrb());
 	}
 
 	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		Config.postInit();
+		MinecraftForge.EVENT_BUS.register(new LootHandler());
 	}
 
 	@Mod.EventHandler
@@ -161,6 +174,38 @@ public class DynamicSwordSkills
 		}
 	}
 
+	@Mod.EventHandler
+	public void processMissingMappings(FMLMissingMappingsEvent event) {
+		event.get().stream().forEach(s -> {
+			ResourceLocation location = null;
+			if (s.resourceLocation.getResourcePath().startsWith("skillitem_")) {
+				// Update old skillitem to training_stick
+				String skill_name = s.resourceLocation.getResourcePath().substring("skillitem_".length());
+				SkillBase skill = SkillRegistry.get(new ResourceLocation(s.resourceLocation.getResourceDomain(), skill_name));
+				if (skill != null) {
+					location = new ResourceLocation(s.resourceLocation.getResourceDomain(), "training_stick_" + skill.getRegistryName().getResourcePath().toLowerCase());
+				}
+			} else if (s.resourceLocation.getResourcePath().startsWith("training_stick_")) {
+				// Handle skill registry name changes
+				String skill_name = s.resourceLocation.getResourcePath().substring("training_stick_".length());
+				SkillBase skill = SkillRegistry.get(new ResourceLocation(s.resourceLocation.getResourceDomain(), skill_name));
+				if (skill != null && !skill.getRegistryName().getResourcePath().equals(skill_name)) {
+					location = new ResourceLocation(s.resourceLocation.getResourceDomain(), "training_stick_" + skill.getRegistryName().getResourcePath().toLowerCase());
+				}
+			} else if (s.resourceLocation.getResourcePath().startsWith("skillsword_")) {
+				location = new ResourceLocation(s.resourceLocation.getResourceDomain(), s.resourceLocation.getResourcePath().replace("skillsword", "skill_sword").toLowerCase());
+			}
+			if (location != null) {
+				Item item = Item.REGISTRY.getObject(location);
+				if (item == null) {
+					s.fail();
+				} else {
+					s.remap(item);
+				}
+			}
+		});
+	}
+
 	/**
 	 * Call during mod initialization to register all mod sounds
 	 */
@@ -173,5 +218,18 @@ public class DynamicSwordSkills
 
 	private void registerSound(ResourceLocation location) {
 		GameRegistry.register(new SoundEvent(location).setRegistryName(location));
+	}
+
+	/**
+	 * Parses a String into a ResourceLocation, or NULL if format was invalid
+	 * @param name A valid ResourceLocation string e.g. 'modid:registry_name'
+	 */
+	public static ResourceLocation getResourceLocation(String name) {
+		try {
+			return new ResourceLocation(name);
+		} catch (NullPointerException e) {
+			DynamicSwordSkills.logger.error(String.format("Invalid ResourceLocation string: %s", name));
+		}
+		return null;
 	}
 }

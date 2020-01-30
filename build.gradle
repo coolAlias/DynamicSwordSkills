@@ -15,13 +15,13 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 version = "4.0.1"
 group = "com.google.coolalias008.dynamicswordskills"
-archivesBaseName = "1.10.2-DynamicSwordSkills"
+archivesBaseName = "DynamicSwordSkills-1.10.2"
 
-sourceCompatibility = targetCompatibility = "1.7"
+sourceCompatibility = targetCompatibility = "1.8"
 
 dependencies {
     compile files (
-		"eclipse/libs/1.10.2-SwordSkillsApi-1.1.0-deobf.jar",
+		"eclipse/libs/SwordSkillsApi-1.10.2-1.5.1-deobf.jar",
     )
 }
 

@@ -19,15 +19,17 @@ package dynamicswordskills.network.client;
 
 import java.io.IOException;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
+import dynamicswordskills.skills.Combo;
+import dynamicswordskills.skills.IComboSkill;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
-import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage.AbstractClientMessage;
-import dynamicswordskills.skills.Combo;
-import dynamicswordskills.skills.ICombo;
 
 /**
  * 
@@ -58,14 +60,12 @@ public class UpdateComboPacket extends AbstractClientMessage<UpdateComboPacket>
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		Combo combo = Combo.readFromNBT(compound);
-		try {
-			ICombo skill = (ICombo) DSSPlayerInfo.get(player).getPlayerSkill(combo.getSkill());
-			if (skill != null) {
-				combo.getEntityFromWorld(player.getEntityWorld());
-				skill.setCombo(combo);
-			}
-		} catch (ClassCastException e) {
-			DynamicSwordSkills.logger.error("Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
+		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(SkillRegistry.getSkillById(combo.getSkillId()));
+		if (skill instanceof IComboSkill) {
+			combo.getEntityFromWorld(player.getEntityWorld());
+			((IComboSkill) skill).setCombo(combo);
+		} else {
+			DynamicSwordSkills.logger.error("Invalid Combo skill id: " + combo.getSkillId());
 		}
 	}
 }

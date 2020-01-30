@@ -20,9 +20,13 @@ package dynamicswordskills.api;
 import java.util.List;
 import java.util.Random;
 
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.item.IModItem;
+import dynamicswordskills.loot.functions.SkillFunction;
 import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
@@ -47,7 +51,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * they extend ItemSword instead of Item, but could just as well be anything.
  *
  */
-public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvider
+public class ItemRandomSkill extends ItemSword implements IModItem, IRandomSkill, ISkillProviderInfusable
 {
 	/** Item quality based on tool material; higher quality tends toward higher levels */
 	private final int quality;
@@ -60,8 +64,12 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		this.texture = textureName;
 		this.quality = material.getHarvestLevel() + (material == ToolMaterial.GOLD ? 3 : 0);
 		setCreativeTab(null);
-		setRegistryName(ModInfo.ID, "skillsword_" + material.name());
-		setUnlocalizedName("dss.skill" + material.name());
+	}
+
+	@Override
+	public SkillBase getRandomSkill(Random rand) {
+		SkillBase skill = SkillFunction.getRandomSkill(rand);
+		return (skill instanceof SkillActive ? skill : null);
 	}
 
 	@Override
@@ -90,22 +98,13 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		if (!stack.hasTagCompound()) {
 			return -1;
 		}
-		NBTTagCompound tag = stack.getTagCompound();
-		SkillBase skill = null;
-		if (tag.hasKey("ItemSkillName")) {
-			skill = SkillBase.getSkillByName(tag.getString("ItemSkillName"));
-		}
+		String name = stack.getTagCompound().getString("ItemSkillName");
 		// For backwards compatibility:
-		if (tag.hasKey("ItemSkillId")) {
-			if (skill == null) {
-				skill = SkillBase.getSkill(tag.getInteger("ItemSkillId"));
-				if (skill != null) {
-					tag.setString("ItemSkillName", skill.getUnlocalizedName());
-				}
-			} else if (tag.getInteger("ItemSkillId") != skill.getId()) {
-				tag.setInteger("ItemSkillId", skill.getId());
-			}
+		if (name.lastIndexOf(':') == -1) {
+			name = ModInfo.ID + ":" + name;
+			stack.getTagCompound().setString("ItemSkillName", name);
 		}
+		SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
 		return (skill == null ? -1 : skill.getId());
 	}
 
@@ -121,23 +120,52 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	}
 
 	@Override
+	public int getInfusionCost(ItemStack stack, SkillBase skill) {
+		if (skill.is(Skills.swordBasic) && !grantsBasicSwordSkill(stack)) {
+			return 1;
+		} else if (!skill.is(getSkill(stack))) {
+			return 0;
+		}
+		int i = getSkillLevel(stack);
+		return (i < skill.getMaxLevel() ? i + 1 : 0);
+	}
+
+	@Override
+	public ItemStack getInfusionResult(ItemStack stack, SkillBase skill) {
+		ItemStack result = stack.copy();
+		if (skill.is(Skills.swordBasic) && !grantsBasicSwordSkill(stack)) {
+			result.getTagCompound().setBoolean("grantsBasicSword", true);
+		} else {
+			int level = Math.min(skill.getMaxLevel(), getSkillLevel(stack) + 1);
+			result.getTagCompound().setByte("ItemSkillLevel", (byte) level);
+		}
+		return result;
+	}
+
+	@Override
+	public boolean isRepairable() {
+		return false;
+	}
+
+	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
-		return new TextComponentTranslation("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
+		return new TextComponentTranslation(getUnlocalizedName(stack) + ".name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null) {
-			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()).getUnformattedText());
-			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.level", skill.getLevel(), skill.getMaxLevel()).getUnformattedText());
+			list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.skill", skill.getLevel(), TextFormatting.GOLD + skill.getDisplayName() + TextFormatting.GRAY).getUnformattedText());
 			if (grantsBasicSwordSkill(stack)) {
-				String name = TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + TextFormatting.RESET;
-				list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.provider", name).getUnformattedText());
+				String name = TextFormatting.DARK_GREEN + Skills.swordBasic.getDisplayName() + TextFormatting.GRAY;
+				list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.provider", name).getUnformattedText());
 			}
-			list.addAll(skill.getDescription(player));
+			if (advanced) {
+				list.addAll(skill.getTooltip(player, true));
+			}
 		}
 	}
 
@@ -168,10 +196,10 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 			stack.setTagCompound(new NBTTagCompound());
 		}
 		NBTTagCompound tag = stack.getTagCompound();
-		tag.setString("ItemSkillName", skill.getUnlocalizedName());
+		tag.setString("ItemSkillName", skill.getRegistryName().toString());
 		int level = 1 + rand.nextInt(Math.min(this.quality + 2, skill.getMaxLevel()));
 		tag.setByte("ItemSkillLevel", (byte) level);
-		boolean flag = (skill.getId() != SkillBase.swordBasic.getId() && rand.nextInt(16) > 9 - this.quality); 
+		boolean flag = (!skill.is(Skills.swordBasic) && rand.nextInt(16) > 9 - this.quality); 
 		tag.setBoolean("grantsBasicSword", flag);
 	}
 }

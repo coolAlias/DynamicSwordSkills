@@ -18,6 +18,7 @@
 package dynamicswordskills.skills;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
@@ -28,11 +29,13 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -44,38 +47,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * used to store any data that needs to be maintained between game sessions.
  * 
  * Unless the skill's activation is handled exclusively by the client side, ONLY activate or trigger
- * the skill on the server, as a packet will be sent automatically to notify the client
- * 
- * Each Skill should contain the following documentation followed by a full description
- * 
- * NAME: name of the skill
- * Description: one-line summary of skill
- * Activation:  Standard - activated by selecting the skill in the Skill Bar and pressing 'x'
- * 				Triggered - this skill can not be directly activated by the player
- * 				(toggle) - this skill is toggled on or off when activated
- * 				other - give details of how to activate the skill
- * Exhaustion: format is [0.0F +- (amount * level)]
- * Damage: if any, give the amount and additional details as necessary
- * Duration: if any, give the amount in ticks or seconds, as applicable
- * Range: if restricted, give the range in an applicable format, such as in blocks
- * Area: if any, give the dimensions and additional details as necessary
- * Special: any special notes
- * 
- * Full description goes here.
+ * the skill on the server, as a packet will be sent automatically to notify the client.
  *
  */
 public abstract class SkillActive extends SkillBase
 {
-	/**
-	 * Constructs the first instance of a skill and stores it in the skill list
-	 * @param name	this is the unlocalized name and should not contain any spaces
-	 */
-	protected SkillActive(String name) {
-		super(name, true);
+	public SkillActive(String translationKey) {
+		super(translationKey);
 	}
 
 	protected SkillActive(SkillActive skill) {
 		super(skill);
+	}
+
+	@Override
+	public String getActivationDisplay() {
+		return new TextComponentTranslation(getTranslationKey() + ".activation").getUnformattedText();
 	}
 
 	/**
@@ -102,7 +89,7 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	@Override
-	protected void levelUp(EntityPlayer player) {}
+	protected void resetModifiers(EntityPlayer player) {}
 
 	/**
 	 * Returns true if this skill can currently be used by the player (i.e. activated or triggered)
@@ -123,24 +110,43 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
-	 * Return true if {@link #keyPressed} should be called when the given key is pressed
+	 * Returning true allows {@link #keyPressed} and {@link #receiveActiveKeys} to be called, as appropriate
+	 * @param isLockedOn Whether the player is currently locked on to a target with an ILockOnTarget skill
 	 */
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
 		return false;
 	}
 
 	/**
-	 * This method is called if {@link #isKeyListener} returns true for the given key,
-	 * allowing the skill to handle the key input accordingly. Note that each key press
-	 * may only be handled once, on a first-come first-serve basis.
-	 * @return	True signals that the key press was handled: no other key listeners
-	 * 			will receive this key press
+	 * Equivalent of {@link #keyPressed} but called only while this skill is animating.
+	 * Will not be called for the ATTACK key if {@link DSSPlayerInfo#canAttack()} returns false.
+	 * Will not be called for the USE_ITEM key if {@link DSSPlayerInfo#canUseItem()} returns false.
+	 * Note that key presses while animating are always considered 'handled' i.e. the button state will not be changed
+	 */
+	@SideOnly(Side.CLIENT)
+	public void keyPressedWhileAnimating(Minecraft mc, KeyBinding key, EntityPlayer player) {
+	}
+
+	/**
+	 * This method is called if {@link #isKeyListener} returns true for the given key and the
+	 * skill is not currently animating, allowing the skill to handle the key input accordingly.
+	 * Note that each key press may only be handled once, on a first-come first-serve basis.
+	 * @return	True signals that the key press was "handled" and prevents propagation to any
+	 * 			remaining listeners; this should usually only occur when a skill is activated
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		return false;
 	}
+
+	/**
+	 * This method is called if {@link #isKeyListener} returns true for the given key,
+	 * allowing each skill to handle key releases accordingly.
+	 * Skills do not have to be {@link #isActive()} to receive key releases.
+	 */
+	@SideOnly(Side.CLIENT)
+	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {}
 
 	/**
 	 * Whether this skill automatically sends an {@link ActivateSkillPacket} to the client from {@link #trigger}
@@ -176,15 +182,21 @@ public abstract class SkillActive extends SkillBase
 	protected abstract void onDeactivated(World world, EntityPlayer player);
 
 	/**
-	 * This is the method that should be called when a player tries to activate a skill
-	 * directly, e.g. from a key binding, HUD, or other such means, to ensure that skills
-	 * with special activation requirements are not circumvented: i.e. {@link #trigger} is
-	 * called only if direct {@link #allowUserActivation() user activation} is allowed.
-	 * 
-	 * @return false if the skill could not be activated, or returns {@link #trigger}
+	 * Use this method when a player tries to manually activate a skill, e.g. from a key binding,
+	 * HUD, or other such means. An activation packet is sent to the server if called client-side.
+	 * {@link #allowUserActivation()} may prevent activation via this method.
+	 * @return The result of {@link DSSPlayerInfo#activateSkill(SkillBase, boolean)}
 	 */
-	public final boolean activate(World world, EntityPlayer player) {
-		return (allowUserActivation() ? trigger(world, player, false) : false);
+	public final boolean activate(EntityPlayer player) {
+		if (Config.isSkillDisabled(player, this) || !allowUserActivation()) {
+			return false;
+		} else if (player.getEntityWorld().isRemote) {
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this, false));
+			if (sendClientUpdate()) {
+				return true; // prevent activateSkill from getting called twice
+			}
+		}
+		return DSSPlayerInfo.get(player).activateSkill(this, false);
 	}
 
 	/**
@@ -213,26 +225,26 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
-	 * This method should not be called directly except from an {@link ActivateSkillPacket}
-	 * sent by a skill when it determines that any special activation requirements have been
-	 * met (e.g. Armor Break must first charge up by holding the 'attack' key for a while).
+	 * This method should not be called directly; use {@link DSSPlayerInfo#activateSkill} instead.
 	 * 
 	 * If {@link #canUse} returns true, the skill will be activated.
 	 * {@link #getExhaustion} is added if {@link #autoAddExhaustion} is true, and an
 	 * {@link ActivateSkillPacket} is sent to the client if required.
 	 * 
-	 * Finally, {@link #onActivated} is called, allowing the skill to initialize its
-	 * active state.
+	 * Finally, {@link #onActivated} is called, allowing the skill to initialize its active state.
 	 * 
-	 * @param wasTriggered	Flag for {@link ActivateSkillPacket} when received on the client: 
-	 * 						true to call {@link #trigger}, false to call {@link #activate}.
-	 * @return	Returns {@link #onActivated}, signaling whether or not to add the skill to the
-	 * 			list of currently active skills.
+	 * @param wasTriggered Whether the skill was triggered via some means other than direct user interaction (see {@link #allowUserActivation})
+	 * @return	Returns {@link #onActivated}, signaling whether or not to add the skill to the list of currently active skills.
 	 */
 	public final boolean trigger(World world, EntityPlayer player, boolean wasTriggered) {
-		if (!Config.isSkillEnabled(getId())) {
-			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(getTranslationString()));
-			return false;
+		if (Config.isSkillDisabled(player, this)) {
+			// Force client to deactivate in case client config settings differ
+			if (!world.isRemote) {
+				PacketDispatcher.sendTo(new DeactivateSkillPacket(this), (EntityPlayerMP) player);
+			}
+			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(getNameTranslationKey()));
+		} else if (!wasTriggered && !allowUserActivation()) {
+			// no-op
 		} else if (canUse(player)) {
 			if (autoAddExhaustion() && !player.capabilities.isCreativeMode) {
 				player.addExhaustion(getExhaustion());
@@ -242,13 +254,37 @@ public abstract class SkillActive extends SkillBase
 					PacketDispatcher.sendTo(new ActivateSkillPacket(this, wasTriggered), (EntityPlayerMP) player);
 				}
 			}
-			return onActivated(world, player);
-		} else {
-			if (level > 0) {
-				PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new TextComponentTranslation(getTranslationString()));
+			if (onActivated(world, player)) {
+				if (this instanceof IModifiableSkill) {
+					SkillActive.applyActivationSkillModifiers((SkillActive & IModifiableSkill) this, player);
+				}
+				postActivated(player);
+				return true;
 			}
-			return false;
+		} else if (level > 0) {
+			PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.fail", new TextComponentTranslation(getNameTranslationKey()));
 		}
+		return false;
+	}
+
+	/**
+	 * Called after {@link #onActivated(World, EntityPlayer)} has returned true and any {@link ISkillModifier}s have had a chance to be applied
+	 */
+	protected void postActivated(EntityPlayer player) {
+	}
+
+	/**
+	 * Applies all modifiers that {@link ISkillModifier#applyOnActivated(SkillActive, EntityPlayer) apply on activation} to the parent skill,
+	 * provided the player has at least 1 level in the modifier and it is not {@link Config#isSkillDisabled(SkillBase) disabled}
+	 */
+	protected static <T extends SkillActive & IModifiableSkill> void applyActivationSkillModifiers(T parent, EntityPlayer player) {
+		DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+		parent.getSkillModifiers().stream().filter(t -> !Config.isSkillDisabled(player, t)).forEach(t -> {
+			SkillBase instance = skills.getPlayerSkill(t);
+			if (instance instanceof ISkillModifier && instance.getLevel() > 0 && ((ISkillModifier) instance).applyOnActivated(player)) {
+				parent.applySkillModifier((SkillBase & ISkillModifier) instance, player);
+			}
+		});
 	}
 
 	/**
@@ -281,6 +317,20 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
+	 * Use this method to e.g. attack the target entity with a different damage source.
+	 * Called from {@link LivingAttackEvent}; for players, this is called on both sides. 
+	 * 
+	 * @param player The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
+	 * @param entity The entity damaged, i.e. LivingHurtEvent's entityLiving
+	 * @param source The DamageSource from the event
+	 * @param amount The damage amount
+	 * @return       True to cancel the event
+	 */
+	public boolean onAttack(EntityPlayer player, EntityLivingBase entity, DamageSource source, float amount) {
+		return false;
+	}
+
+	/**
 	 * Called from LivingAttackEvent only if the skill is currently {@link #isActive() active}
 	 * @param player	The skill-using player under attack
 	 * @param source	The source of damage; source#getEntity() is the entity that will strike the player,
@@ -293,44 +343,44 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/**
-	 * Called from LivingHurtEvent when a player using this skill first damages an entity,
-	 * before any other modifiers are applied.
-	 * The skill should currently be {@link #isActive() active}. Setting the event damage
-	 * to zero or canceling the event will prevent any further processing of the LivingHurtEvent.
-	 * @param player	The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
-	 * @param event		The hurt event may be canceled, damage amount modified, etc.
-	 */
-	//public void onImpact(EntityPlayer player, LivingHurtEvent event) {}
-
-	/**
-	 * Called from LivingHurtEvent only if the skill is currently {@link #isActive() active}
-	 * for the player that inflicted the damage, after all damage modifiers have been taken
-	 * into account, providing a final chance to modify the damage or perform other actions.
+	 * Use this method to modify the damage amount for an entity attacked while this skill is active.
+	 * Called from LivingHurtEvent with NORMAL priority.
 	 * 
-	 * @param player	The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
-	 * @param entity	The entity damaged, i.e. LivingHurtEvent's entityLiving
-	 * @param amount	The current damage amount from {@link LivingHurtEvent#ammount}
-	 * @return			The final damage amount to inflict
+	 * @param player The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
+	 * @param entity The entity damaged, i.e. LivingHurtEvent's entityLiving
+	 * @param amount The current damage amount from {@link LivingHurtEvent#amount}
+	 * @return       The modified damage amount to inflict, or 0 to cancel the event
 	 */
-	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		return amount;
 	}
 
-	@Override
-	public final void writeToNBT(NBTTagCompound compound) {
-		compound.setByte("id", getId());
-		compound.setByte("level", level);
+	/**
+	 * Use this method to activate effects after damage has been done.
+	 * Called from LivingHurtEvent with LOWEST priority.
+	 * 
+	 * @param player	The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
+	 * @param entity	The entity damaged, i.e. LivingHurtEvent's entityLiving
+	 * @param amount	The current damage amount from {@link LivingHurtEvent#amount}
+	 */
+	public void postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 	}
 
-	@Override
-	public final void readFromNBT(NBTTagCompound compound) {
-		level = compound.getByte("level");
+	/**
+	 * Called from Forge fall Events if the skill is currently {@link #isActive() active};
+	 * note that these are not fired if the player lands in liquid
+	 * @return True to prevent further processing without having to cancel the event or set distance to 0
+	 */
+	public boolean onFall(EntityPlayer player, LivingFallEvent event) {
+		return false;
 	}
 
-	@Override
-	public final SkillActive loadFromNBT(NBTTagCompound compound) {
-		SkillActive skill = (SkillActive) getNewSkillInstance(compound.getByte("id"));
-		skill.readFromNBT(compound);
-		return skill;
+	/**
+	 * Called from Forge fall Events if the skill is currently {@link #isActive() active};
+	 * note that these are not fired if the player lands in liquid
+	 * @return True to prevent further processing without having to cancel the event or set distance to 0
+	 */
+	public boolean onCreativeFall(EntityPlayer player, PlayerFlyableFallEvent event) {
+		return false;
 	}
 }

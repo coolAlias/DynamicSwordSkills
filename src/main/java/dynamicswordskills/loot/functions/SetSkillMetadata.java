@@ -25,6 +25,10 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.IMetadataSkillItem;
+import dynamicswordskills.api.IRandomSkill;
+import dynamicswordskills.api.SkillRegistry;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.item.ItemStack;
@@ -38,6 +42,8 @@ import net.minecraft.world.storage.loot.functions.LootFunction;
  * 
  * Sets item metadata to the id of a random enabled skill
  * or to that of one specified by name in the JSON file.
+ * 
+ * Requires Item to implement {@link IMetadataSkillItem}
  *
  */
 public class SetSkillMetadata extends SkillFunction
@@ -56,11 +62,19 @@ public class SetSkillMetadata extends SkillFunction
 
 	@Override
 	public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
-		int i = getSkillId(rand);
-		if (SkillBase.doesSkillExist(i)) {
-			stack.setItemDamage(i);
+		if (!(stack.getItem() instanceof IMetadataSkillItem)) {
+			DynamicSwordSkills.logger.error("Invalid item for SetSkillMetadata function: " + stack.toString());
 		} else {
-			DynamicSwordSkills.logger.warn("Skill with ID " + i + " does not exist");
+			SkillBase skill = this.getSkill();
+			if (skill == null && stack.getItem() instanceof IRandomSkill) {
+				skill = ((IRandomSkill) stack.getItem()).getRandomSkill(rand);
+			}
+			int damage = (skill == null ? -1 : ((IMetadataSkillItem) stack.getItem()).getItemDamage(skill));
+			if (damage < 0 || !Config.isSkillAllowed(skill)) {
+				stack.stackSize = 0; // invalidate loot stack
+			} else {
+				stack.setItemDamage(damage);
+			}
 		}
 		return stack;
 	}
@@ -73,7 +87,7 @@ public class SetSkillMetadata extends SkillFunction
 		@Override
 		public void serialize(JsonObject json, SetSkillMetadata instance, JsonSerializationContext context) {
 			if (instance.skill_name != null) {
-				SkillBase skill = SkillBase.getSkillByName(instance.skill_name);
+				SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(instance.skill_name));
 				if (skill == null) {
 					throw new JsonSyntaxException("Unknown skill '" + instance.skill_name + "'");
 				}
@@ -84,7 +98,7 @@ public class SetSkillMetadata extends SkillFunction
 		public SetSkillMetadata deserialize(JsonObject json, JsonDeserializationContext context, LootCondition[] conditions) {
 			if (json.has("skill_name")) {
 				String name = JsonUtils.getString(json, "skill_name");
-				SkillBase skill = SkillBase.getSkillByName(name);
+				SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
 				if (skill == null) {
 					throw new JsonSyntaxException("Unknown skill '" + name + "'");
 				}

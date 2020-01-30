@@ -17,6 +17,10 @@
 
 package dynamicswordskills.network;
 
+import dynamicswordskills.network.bidirectional.*;
+import dynamicswordskills.network.client.*;
+import dynamicswordskills.network.server.*;
+import dynamicswordskills.ref.ModInfo;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -25,22 +29,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.network.bidirectional.AttackTimePacket;
-import dynamicswordskills.network.bidirectional.DeactivateSkillPacket;
-import dynamicswordskills.network.bidirectional.PlaySoundPacket;
-import dynamicswordskills.network.client.MortalDrawPacket;
-import dynamicswordskills.network.client.SyncConfigPacket;
-import dynamicswordskills.network.client.SyncPlayerInfoPacket;
-import dynamicswordskills.network.client.SyncSkillPacket;
-import dynamicswordskills.network.client.UpdateComboPacket;
-import dynamicswordskills.network.server.AddExhaustionPacket;
-import dynamicswordskills.network.server.DashImpactPacket;
-import dynamicswordskills.network.server.EndComboPacket;
-import dynamicswordskills.network.server.OpenGuiPacket;
-import dynamicswordskills.network.server.RefreshSpinPacket;
-import dynamicswordskills.network.server.TargetIdPacket;
-import dynamicswordskills.ref.ModInfo;
 
 /**
  * 
@@ -58,12 +46,13 @@ public class PacketDispatcher
 	 */
 	public static final void initialize() {
 		// Bidirectional packets
-		registerMessage(PlaySoundPacket.class);
 		registerMessage(ActivateSkillPacket.class);
-		registerMessage(AttackTimePacket.class);
+		registerMessage(ActionTimePacket.class);
 		registerMessage(DeactivateSkillPacket.class);
+		registerMessage(PlaySoundPacket.class);
 
 		// Packets handled on CLIENT
+		registerMessage(EndingBlowPacket.class);
 		registerMessage(MortalDrawPacket.class);
 		registerMessage(SyncConfigPacket.class);
 		registerMessage(SyncPlayerInfoPacket.class);
@@ -72,10 +61,12 @@ public class PacketDispatcher
 
 		// Packets handled on SERVER
 		registerMessage(AddExhaustionPacket.class);
+		registerMessage(ApplySkillModifierPacket.class);
 		registerMessage(DashImpactPacket.class);
 		registerMessage(EndComboPacket.class);
 		registerMessage(OpenGuiPacket.class);
-		registerMessage(RefreshSpinPacket.class);
+		registerMessage(ReachAttackSkillPacket.class);
+		registerMessage(SyncDisabledSkillsPacket.class);
 		registerMessage(TargetIdPacket.class);
 	}
 

@@ -17,12 +17,17 @@
 
 package dynamicswordskills.client.gui;
 
+import dynamicswordskills.client.RenderHelperQ;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.ref.Config;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.EndingBlow;
 import dynamicswordskills.skills.SkillActive;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -33,8 +38,13 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 	/** Time at which the current combo first started displaying */
 	private long displayStartTime;
 
-	/** Length of time combo pop-up will display */
-	private static final long DISPLAY_TIME = 1000;
+	private static final ResourceLocation HUD_ICONS = new ResourceLocation(ModInfo.ID, "textures/gui/hud_icons.png");
+
+	private static final int ICON_SIZE = 16;
+
+	private int iconIndex;
+
+	private String text;
 
 	public GuiEndingBlowOverlay(Minecraft mc) {
 		super(mc);
@@ -42,40 +52,65 @@ public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 
 	@Override
 	public HALIGN getHorizontalAlignment() {
-		return Config.endingBlowHudHAlign;
+		return Config.endingBlowHudXAlign;
 	}
 
 	@Override
 	public VALIGN getVerticalAlignment() {
-		return Config.endingBlowHudVAlign;
+		return Config.endingBlowHudYAlign;
 	}
 
 	@Override
 	public boolean shouldRender() {
-		if (!Config.isEndingBlowHudEnabled) {
+		if (Config.isSkillDisabled(this.mc.player, Skills.endingBlow) || Config.endingBlowHudDisplayTime < 1) {
 			return false;
 		}
-		SkillActive skill = DSSPlayerInfo.get(mc.player).getActiveSkill(SkillActive.endingBlow);
+		SkillActive skill = DSSPlayerInfo.get(mc.player).getActiveSkill(Skills.endingBlow);
 		if (skill == null) {
 			this.displayStartTime = 0;
 		} else if (skill.canUse(this.mc.player)) {
 			this.displayStartTime = Minecraft.getSystemTime();
+			((EndingBlow) skill).skillResult = 0;
 		} else if (((EndingBlow) skill).getLastActivationTime() < this.displayStartTime) {
 			this.displayStartTime = 0; // unable to use and was not activated during this opportunity window
 		}
-		return ((Minecraft.getSystemTime() - this.displayStartTime) < DISPLAY_TIME);
+		if (skill instanceof EndingBlow) {
+			byte i = ((EndingBlow) skill).skillResult;
+			this.iconIndex = (i < 0 ? 2 : i);
+		}
+		if (!Config.endingBlowHudResult && this.iconIndex != 0) {
+			return false;
+		}
+		return ((Minecraft.getSystemTime() - this.displayStartTime) < Config.endingBlowHudDisplayTime);
 	}
 
 	@Override
 	protected void setup(ScaledResolution resolution) {
-		this.height = this.mc.fontRendererObj.FONT_HEIGHT;
-		this.width = this.mc.fontRendererObj.getStringWidth(new TextComponentTranslation("combo.ending").getUnformattedText());
-		this.setPosX(resolution, Config.endingBlowHudOffsetX);
-		this.setPosY(resolution, Config.endingBlowHudOffsetY);
+		String textKey = Skills.endingBlow.getTranslationKey() + (this.iconIndex == 2 ? ".hud.failure" : (this.iconIndex == 1 ? "hud.success" : "hud.activate"));
+		this.text = new TextComponentTranslation(textKey).getUnformattedText();
+		this.height = (Config.endingBlowHudText ? this.mc.fontRendererObj.FONT_HEIGHT : ICON_SIZE);
+		this.width = (Config.endingBlowHudText ? this.mc.fontRendererObj.getStringWidth(this.text) : ICON_SIZE);
+		this.setPosX(resolution, Config.endingBlowHudXOffset);
+		this.setPosY(resolution, Config.endingBlowHudYOffset);
 	}
 
 	@Override
 	protected void render(ScaledResolution resolution) {
-		this.mc.fontRendererObj.drawString(new TextComponentTranslation("combo.ending").getUnformattedText(), this.x, this.y, 0xFF0000, true);
+		if (Config.endingBlowHudText) {
+			this.mc.fontRendererObj.drawString(this.text, this.x, this.y, 0XFF0000, true);
+		} else {
+			GlStateManager.pushAttrib();
+			GlStateManager.disableLighting();
+			GlStateManager.enableAlpha();
+			GlStateManager.enableBlend();
+			float r = this.iconIndex == 1 ? 0.0F : 1.0F;
+			float g = this.iconIndex == 2 ? 0.0F : 1.0F;
+			float b = 0.0F;
+			GlStateManager.color(r, g, b, 1.0F);
+			this.mc.getTextureManager().bindTexture(HUD_ICONS);
+			RenderHelperQ.drawTexturedRect(this.x, this.y, this.iconIndex * ICON_SIZE, 0, ICON_SIZE, ICON_SIZE, 256, 256);
+			RenderHelperQ.drawTexturedRect(this.x, this.y, this.iconIndex * ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE, 256, 256);
+			GlStateManager.popAttrib();
+		}
 	}
 }

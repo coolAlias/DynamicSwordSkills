@@ -22,8 +22,8 @@ import java.util.List;
 import com.google.common.collect.Multimap;
 
 import dynamicswordskills.item.IModItem;
-import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -35,6 +35,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -42,10 +43,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import swordskillsapi.api.item.IWeapon;
 
 /**
  * 
- * Base class providing all the functionality needed for ISkillItem as well as
+ * Base class providing all the functionality needed for ISkillProvider as well as
  * acting almost exactly like a regular sword (aside from the web-cutting ability),
  * without actually being a sword.
  * 
@@ -74,7 +76,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	private float weaponDamage;
 
 	/** The registry name of the skill provided by this item */
-	private final String skillName;
+	private final ResourceLocation skillName;
 
 	/** The skill level of the SkillBase.{skill} granted by this Item */
 	private final byte level;
@@ -86,7 +88,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	private final boolean grantsBasicSkill;
 
 	/**
-	 * Shortcut method sets ISkillItem to always grant Basic Sword skill if needed to use
+	 * Shortcut method sets ISkillProvider to always grant Basic Sword skill if needed to use
 	 * the main skill designated by the skill id below.
 	 * Standard sword-like weapon with max stack size of 1; be sure to set the unlocalized
 	 * name, texture, and creative tab using chained methods if using the class as is.
@@ -107,20 +109,18 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	 * @param skill            use SkillBase.{skill} during construction to ensure a valid skill
 	 * @param level            should be at least 1, and will be capped automatically at the skill's max level
 	 * @param grantsBasicSkill if true, the player will be temporarily granted Basic Sword skill in
-	 *                         order to use the ISkillItem's main skill, if other than Basic Sword
+	 *                         order to use the ISkillProvider main skill, if other than Basic Sword
 	 */
 	public ItemSkillProvider(ToolMaterial material, String texture, SkillBase skill, byte level, boolean grantsBasicSkill) {
 		super();
 		this.material = material;
 		this.texture = texture;
-		this.weaponDamage = 4.0F + this.material.getDamageVsEntity();
-		this.skillName = skill.getUnlocalizedName();
+		this.weaponDamage = 2.0F + this.material.getDamageVsEntity();
+		this.skillName = skill.getRegistryName();
 		this.level = level;
 		this.grantsBasicSkill = grantsBasicSkill;
 		setMaxDamage(this.material.getMaxUses());
 		setMaxStackSize(1);
-		setRegistryName(ModInfo.ID, "skillitem_" + skill.getUnlocalizedName());
-		setUnlocalizedName("dss.skillitem" + skill.getId());
 	}
 
 	@Override
@@ -150,7 +150,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 
 	@Override
 	public int getSkillId(ItemStack stack) {
-		SkillBase skill = SkillBase.getSkillByName(this.skillName);
+		SkillBase skill = SkillRegistry.get(this.skillName);
 		return (skill == null ? -1 : skill.getId());
 	}
 
@@ -206,21 +206,22 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
-		return new TextComponentTranslation("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
+		return new TextComponentTranslation(getUnlocalizedName(stack) + ".name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null) {
-			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()).getUnformattedText());
-			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.level", skill.getLevel(), skill.getMaxLevel()).getUnformattedText());
+			list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.skill", skill.getLevel(), TextFormatting.GOLD + skill.getDisplayName() + TextFormatting.GRAY).getUnformattedText());
 			if (grantsBasicSwordSkill(stack)) {
-				String name = TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + TextFormatting.RESET;
-				list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.provider", name).getUnformattedText());
+				String name = TextFormatting.DARK_GREEN + Skills.swordBasic.getDisplayName() + TextFormatting.GRAY;
+				list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.provider", name).getUnformattedText());
 			}
-			list.addAll(skill.getDescription(player));
+			if (advanced) {
+				list.addAll(skill.getTooltip(player, true));
+			}
 		}
 	}
 

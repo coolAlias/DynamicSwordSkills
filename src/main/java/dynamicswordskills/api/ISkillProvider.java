@@ -33,6 +33,7 @@ public interface ISkillProvider extends IWeapon {
 
 	/**
 	 * Returns the ID of the skill this Item provides; should return SkillBase.{skill}.id
+	 * Implementations should use the skill's registry name, i.e. the ResourceLocation string.
 	 * @return returning a negative value or invalid id will prevent the Item from granting a skill
 	 * @param stack allows returning different values based on the ItemStack's data or damage
 	 */

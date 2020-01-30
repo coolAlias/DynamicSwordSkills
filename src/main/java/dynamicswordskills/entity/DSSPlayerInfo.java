@@ -17,22 +17,33 @@
 
 package dynamicswordskills.entity;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
+import com.google.common.collect.Sets;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.IMetadataSkillItem;
 import dynamicswordskills.api.ISkillProvider;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncPlayerInfoPacket;
 import dynamicswordskills.network.client.SyncSkillPacket;
+import dynamicswordskills.network.server.ApplySkillModifierPacket;
+import dynamicswordskills.network.server.SyncDisabledSkillsPacket;
 import dynamicswordskills.ref.Config;
-import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.ILockOnTarget;
+import dynamicswordskills.skills.IModifiableSkill;
+import dynamicswordskills.skills.ISkillModifier;
+import dynamicswordskills.skills.MortalDraw;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
@@ -40,42 +51,54 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import swordskillsapi.api.damage.IComboDamage;
 
 public class DSSPlayerInfo
 {
-	/** Maximum time the player may be prevented from taking a left-click action */
-	private final static int MAX_ATTACK_DELAY = 50;
+	/** Maximum time the player may be prevented from taking a left- or right-click action */
+	private final static int MAX_CLICK_COOLDOWN = 50;
 
 	private final EntityPlayer player;
 
 	/** Time remaining until player may perform another left-click action, such as an attack */
 	private int attackTime;
 
+	/** Time remaining until player may perform another right-click action, such as blocking with a shield */
+	private int useItemCooldown;
+
 	/** Stores information on the player's skills */
 	private final Map<Byte, SkillBase> skills;
 
-	/** Used to temporarily store skill used from ISkillItem */
+	/** List of user-disabled skill IDs */
+	private Set<Byte> disabledSkillIds = Sets.<Byte>newHashSet();
+
+	/** Reference to last active {@link IComboSkill} */
+	private IComboSkill comboSkill = null;
+
+	/** Flag to set comboSkill to null next update cycle, allowing combo HUD to receive final update packet */
+	private boolean invalidateCombo;
+
+	/** Reference to last active ILockOnTarget skill */
+	private ILockOnTarget targetingSkill = null;
+
+	/** Skill instance provided by currently held ISkillProvider, if any */
 	private SkillBase itemSkill = null;
 
-	/** Stores the last held ItemStack that was checked for ISkillItem */
+	/** Stores the last held ItemStack that was checked for ISkillProvider */
 	private ItemStack lastCheckedStack = null;
 
-	/** A dummy version of Basic Sword skill for use with ISkillItem skills when player's skill level is 0 */
+	/** A dummy version of Basic Sword skill provided by an ISkillProvider when the player's skill level is 0 */
 	private SkillBase dummySwordSkill = null;
-
-	/** Slot of the item providing the persistent dummy sword skill, if any */
-	private int persistentDummySkillSlot = -1;
-
-	/** Currently active skills */
-	private final List<SkillActive> activeSkills = new LinkedList<SkillActive>();
 
 	/**
 	 * Currently animating skill that {@link SkillActive#hasAnimation() has an animation};
@@ -87,15 +110,15 @@ public class DSSPlayerInfo
 	/** Whether the player has received the starting bonus gear or not yet */
 	private boolean receivedGear = false;
 
-	/** Reduces fall damage next impact; used for Rising Cut */
-	public float reduceFallAmount = 0.0F;
+	/** Used by certain skills for controlling the player's main arm rendering; set to 0.0F for vanilla behavior */
+	public float swingProgress = 0.0F;
 
-	/** Used by certain skills for controlling the player's main arm rendering */
-	public float armSwing = 0.0F;
+	/** Used by certain skills for controlling the player's main arm rendering; set to 0.0F for vanilla behavior */
+	public float prevSwingProgress = 0.0F;
 
 	public DSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
-		this.skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
+		this.skills = new HashMap<Byte, SkillBase>(SkillRegistry.getValues().size());
 	}
 
 	/**
@@ -116,13 +139,45 @@ public class DSSPlayerInfo
 	 * Sets the number of ticks remaining before another action may be performed, but
 	 * no less than the current value and no more than MAX_ATTACK_DELAY.
 	 */
-	public void setAttackTime(int ticks) {
-		this.attackTime = MathHelper.clamp(ticks, attackTime, MAX_ATTACK_DELAY);
+	public void setAttackCooldown(int ticks) {
+		this.attackTime = MathHelper.clamp(ticks, attackTime, MAX_CLICK_COOLDOWN);
+	}
+
+	/**
+	 * True if the player can perform a right-click action (i.e. the action timer is zero)
+	 */
+	public boolean canUseItem() {
+		return useItemCooldown == 0 || player.capabilities.isCreativeMode;
+	}
+
+	/**
+	 * Returns the current amount of time remaining before a right-click action may be performed
+	 */
+	public int getUseItemCooldown() {
+		return useItemCooldown;
+	}
+
+	/**
+	 * Sets the number of ticks remaining before another right-click action may be performed, but
+	 * no less than the current value and no more than MAX_ATTACK_DELAY.
+	 */
+	public void setUseItemCooldown(int ticks) {
+		this.useItemCooldown = MathHelper.clamp(ticks, useItemCooldown, MAX_CLICK_COOLDOWN);
+	}
+
+	/**
+	 * Sets the current and previous arm swing amount; used by some skills for rendering the player's arm position
+	 * @param current  See {@link #swingProgress}
+	 * @param previous See {@link #prevSwingProgress}
+	 */
+	public void setArmSwingProgress(float current, float previous) {
+		this.swingProgress = current;
+		this.prevSwingProgress = previous;
 	}
 
 	/**
 	 * Removes the skill with the given name, or "all" skills
-	 * @param name	Unlocalized skill name or "all" to remove all skills
+	 * @param name	ResourceLocation string or "all" to remove all skills
 	 * @return		False if no skill was removed
 	 */
 	public boolean removeSkill(String name) {
@@ -130,10 +185,9 @@ public class DSSPlayerInfo
 			resetSkills();
 			return true;
 		} else {
-			// TODO change skill storage to use unlocalized name instead of id
 			SkillBase dummy = null;
 			for (SkillBase skill : skills.values()) {
-				if (skill.getUnlocalizedName().equals(name)) {
+				if (skill.getRegistryName().toString().equals(name)) {
 					dummy = skill;
 					break;
 				}
@@ -161,7 +215,7 @@ public class DSSPlayerInfo
 	 */
 	public void resetSkills() {
 		// need level zero skills for validation, specifically for attribute-affecting skills
-		for (SkillBase skill : SkillBase.getSkills()) {
+		for (SkillBase skill : SkillRegistry.getValues()) {
 			skills.put(skill.getId(), skill.newInstance());
 		}
 		validateSkills();
@@ -173,66 +227,27 @@ public class DSSPlayerInfo
 
 	/** Returns true if the player has at least one level in the specified skill */
 	public boolean hasSkill(SkillBase skill) {
-		return hasSkill(skill.getId());
-	}
-
-	/** Returns true if the player has at least one level in the specified skill (of any class) */
-	private boolean hasSkill(byte id) {
-		return getSkillLevel(id) > 0;
-	}
-
-	/** Returns the player's skill level for given skill, or 0 if the player doesn't have that skill */
-	public byte getSkillLevel(SkillBase skill) {
-		return getSkillLevel(skill.getId());
+		return getSkillLevel(skill) > 0;
 	}
 
 	/**
 	 * Returns the player's skill level for given skill, or 0 if the player doesn't have that skill
 	 */
-	public byte getSkillLevel(byte id) {
+	public byte getSkillLevel(SkillBase skill) {
 		byte level = 0;
-		if (itemSkill != null && itemSkill.getId() == id) {
+		if (skill == null) {
+			return 0;
+		} else if (skill.is(itemSkill)) {
 			level = itemSkill.getLevel();
-		} else if (id == SkillBase.swordBasic.getId()) {
-			if (player.getHeldItemMainhand() == null) {
-				retrieveDummySwordSkill();
-			}
-			if (dummySwordSkill != null) {
-				level = dummySwordSkill.getLevel();
-			}
-		} else if (id == SkillBase.mortalDraw.getId() && (itemSkill == null || dummySwordSkill == null)) {
-			for (int i = 0; i < 9; ++i) {
-				ItemStack stack = player.inventory.getStackInSlot(i);
-				if (stack != null && stack.getItem() instanceof ISkillProvider &&
-						((ISkillProvider) stack.getItem()).getSkillId(stack) == id)
-				{
-					if (itemSkill == null) {
-						itemSkill = SkillBase.getSkillFromItem(stack, (ISkillProvider) stack.getItem());
-						if (itemSkill != null && itemSkill.getLevel() > getTrueSkillLevel(id)) {
-							level = itemSkill.getLevel();
-						}
-					}
-					if (dummySwordSkill == null && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack)
-							&& getTrueSkillLevel(SkillBase.swordBasic.getId()) < 1)
-					{
-						dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic.getId(), (byte) 1);
-						persistentDummySkillSlot = i;
-					}
-					break;
-				}
-			}
+		} else if (skill.is(dummySwordSkill)) {
+			level = dummySwordSkill.getLevel();
 		}
-		return (byte) Math.max(level, getTrueSkillLevel(id));
+		return (byte) Math.max(level, getTrueSkillLevel(skill));
 	}
 
-	/** Returns the player's true skill level, ignoring any ISkillItem that may be equipped */
+	/** Returns the player's true skill level, ignoring any ISkillProvider that may be equipped */
 	public byte getTrueSkillLevel(SkillBase skill) {
-		return getTrueSkillLevel(skill.getId());
-	}
-
-	/** Returns the player's true skill level, ignoring any ISkillItem that may be equipped */
-	private byte getTrueSkillLevel(byte id) {
-		return (skills.containsKey(id) ? skills.get(id).getLevel() : 0);
+		return (skills.containsKey(skill.getId()) ? skills.get(skill.getId()).getLevel() : 0);
 	}
 
 	/**
@@ -277,12 +292,41 @@ public class DSSPlayerInfo
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean canInteract() {
-		// don't set the current skill to null just yet if it is still animating
-		// this allows skills to prevent key/mouse input without having to be 'active'
-		if (animatingSkill != null && !animatingSkill.isActive() && !animatingSkill.isAnimating()) {//!isSkillActive(currentActiveSkill)) {
-			animatingSkill = null;
-		}
 		return animatingSkill == null || !animatingSkill.isAnimating();
+	}
+
+	/**
+	 * Called when a key is pressed while a skill is animating (i.e. {@link #canInteract()} returns false);
+	 * calls {@link SkillActive#keyPressedWhileAnimating} for the animating skill if {@link SkillActive#isKeyListener} returns true
+	 */
+	@SideOnly(Side.CLIENT)
+	public void onKeyPressedWhileAnimating(Minecraft mc, KeyBinding key) {
+		boolean isLockedOn = (targetingSkill != null && targetingSkill.isLockedOn());
+		if (animatingSkill != null && animatingSkill.isKeyListener(mc, key, isLockedOn)) {
+			animatingSkill.keyPressedWhileAnimating(mc, key, player);
+		}
+		if (animatingSkill instanceof IModifiableSkill) {
+			applyKeyPressSkillModifiers((SkillActive & IModifiableSkill) animatingSkill, mc, key);
+		}
+		if (isLockedOn && targetingSkill instanceof SkillActive && targetingSkill != animatingSkill) {
+			if (((SkillActive) targetingSkill).isKeyListener(mc, key, isLockedOn)) {
+				((SkillActive) targetingSkill).keyPressedWhileAnimating(mc, key, player);
+			}
+			if (targetingSkill instanceof IModifiableSkill) {
+				applyKeyPressSkillModifiers((SkillActive & IModifiableSkill) targetingSkill, mc, key);
+			}
+		}
+	}
+
+	@SideOnly(Side.CLIENT)
+	private <T extends SkillActive & IModifiableSkill> void applyKeyPressSkillModifiers(T parent, Minecraft mc, KeyBinding key) {
+		parent.getSkillModifiers().stream().filter(t -> !Config.isSkillDisabled(player, t)).forEach(t -> {
+			SkillBase instance = this.getPlayerSkill(t);
+			if (instance instanceof ISkillModifier && instance.getLevel() > 0 && ((ISkillModifier) instance).applyOnKeyPress(mc, key, player)) {
+				parent.applySkillModifier((SkillBase & ISkillModifier) instance, player);
+				PacketDispatcher.sendToServer(new ApplySkillModifierPacket(parent, (SkillBase & ISkillModifier) instance));
+			}
+		});
 	}
 
 	/**
@@ -295,17 +339,63 @@ public class DSSPlayerInfo
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean onKeyPressed(Minecraft mc, KeyBinding key) {
+		boolean isLockedOn = (targetingSkill != null && targetingSkill.isLockedOn());
 		for (SkillBase skill : skills.values()) {
-			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key)) {
+			if (Config.isSkillDisabled(player, skill)) {
+				continue;
+			}
+			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key, isLockedOn)) {
 				if (((SkillActive) skill).keyPressed(mc, key, player)) {
 					return true;
 				}
 			}
 		}
-		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isKeyListener(mc, key)) {
-			return ((SkillActive) itemSkill).keyPressed(mc, key, player);
+		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isKeyListener(mc, key, isLockedOn) && ((SkillActive) itemSkill).keyPressed(mc, key, player)) {
+			return true;
+		}
+		if (dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isKeyListener(mc, key, isLockedOn) && ((SkillActive) dummySwordSkill).keyPressed(mc, key, player)) {
+			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Call when a key is released to pass that information to each skills' {@link SkillActive#keyReleased keyReleased} method
+	 */
+	@SideOnly(Side.CLIENT)
+	public void onKeyReleased(Minecraft mc, KeyBinding key) {
+		boolean isLockedOn = (targetingSkill != null && targetingSkill.isLockedOn());
+		for (SkillBase skill : skills.values()) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key, isLockedOn)) {
+				((SkillActive) skill).keyReleased(mc, key, player);
+			}
+		}
+		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isKeyListener(mc, key, isLockedOn)) {
+			((SkillActive) itemSkill).keyReleased(mc, key, player);
+		}
+		if (dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isKeyListener(mc, key, isLockedOn)) {
+			((SkillActive) dummySwordSkill).keyReleased(mc, key, player);
+		}
+	}
+
+	/**
+	 * Called from LivingAttackEvent to trigger {@link SkillActive#onAttack} for each
+	 * currently active skill, potentially canceling the event. If the event is canceled, it
+	 * returns immediately without processing any remaining active skills.
+	 */
+	public void onAttack(LivingAttackEvent event) {
+		for (SkillBase skill : skills.values()) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isActive() && ((SkillActive) skill).onAttack(player, event.getEntityLiving(), event.getSource(), event.getAmount())) {
+				event.setCanceled(true);
+				return;
+			}
+		}
+		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+			event.setCanceled(((SkillActive) itemSkill).onAttack(player, event.getEntityLiving(), event.getSource(), event.getAmount()));
+		}
+		if (!event.isCanceled() && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+			event.setCanceled(((SkillActive) dummySwordSkill).onAttack(player, event.getEntityLiving(), event.getSource(), event.getAmount()));
+		}
 	}
 
 	/**
@@ -314,140 +404,282 @@ public class DSSPlayerInfo
 	 * returns immediately without processing any remaining active skills.
 	 */
 	public void onBeingAttacked(LivingAttackEvent event) {
-		for (SkillActive skill : activeSkills) {
-			if (skill.isActive() && skill.onBeingAttacked(player, event.getSource())) {
+		for (SkillBase skill : skills.values()) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isActive() && ((SkillActive) skill).onBeingAttacked(player, event.getSource())) {
 				event.setCanceled(true);
 				return;
 			}
 		}
 		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
-			((SkillActive) itemSkill).onBeingAttacked(player, event.getSource());
+			event.setCanceled(((SkillActive) itemSkill).onBeingAttacked(player, event.getSource()));
+		}
+		if (!event.isCanceled() && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+			event.setCanceled(((SkillActive) dummySwordSkill).onBeingAttacked(player, event.getSource()));
 		}
 	}
 
 	/**
-	 * Called from LivingHurtEvent to trigger {@link SkillActive#postImpact} for each
-	 * currently active skill, potentially altering the value of event.ammount, as
-	 * well as calling {@link ICombo#onHurtTarget onHurtTarget} for the current ICombo.
+	 * Called from LivingHurtEvent to trigger {@link SkillActive#onImpact} for each
+	 * currently active skill, potentially altering the value of event.amount
+	 */
+	public void onImpact(LivingHurtEvent event) {
+		for (SkillBase skill : skills.values()) {
+			if (event.isCanceled() || event.getAmount() <= 0.0F) {
+				return;
+			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+				float amount = ((SkillActive) skill).onImpact(player, event.getEntityLiving(), event.getAmount());
+				event.setAmount(amount);
+			}
+		}
+		if (!event.isCanceled() && event.getAmount() > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+			event.setAmount(((SkillActive) itemSkill).onImpact(player, event.getEntityLiving(), event.getAmount()));
+		}
+		if (!event.isCanceled() && event.getAmount() > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+			event.setAmount(((SkillActive) dummySwordSkill).onImpact(player, event.getEntityLiving(), event.getAmount()));
+		}
+	}
+
+	/**
+	 * Calls {@link SkillActive#postImpact} for each currently active skill,
+	 * as well as calling {@link IComboSkill#onHurtTarget} for the current ICombo.
 	 */
 	public void onPostImpact(LivingHurtEvent event) {
-		for (SkillActive skill : activeSkills) {
-			if (skill.isActive()) {
-				event.setAmount(skill.postImpact(player, event.getEntityLiving(), event.getAmount()));
+		for (SkillBase skill : skills.values()) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+				((SkillActive) skill).postImpact(player, event.getEntityLiving(), event.getAmount());
 			}
 		}
 		if (itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
-			event.setAmount(((SkillActive) itemSkill).postImpact(player, event.getEntityLiving(), event.getAmount()));
+			((SkillActive) itemSkill).postImpact(player, event.getEntityLiving(), event.getAmount());
+		}
+		if (dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+			((SkillActive) dummySwordSkill).postImpact(player, event.getEntityLiving(), event.getAmount());
 		}
 		// combo gets updated last, after all damage modifications are completed
-		if (getComboSkill() != null) {
-			getComboSkill().onHurtTarget(player, event);
+		if (!event.isCanceled() && event.getAmount() > 0.0F && getComboSkill() != null && ((SkillActive) getComboSkill()).isActive()) {
+			if (!(event.getSource() instanceof IComboDamage) || ((IComboDamage) event.getSource()).isComboDamage(player)) {
+				getComboSkill().onHurtTarget(player, event);
+			}
 		}
 	}
 
 	/**
-	 * Checks hot bar for an ISkillItem that provides a persistent SwordBasic skill
-	 * when the dummy skill is otherwise null; if itemSkill is null, it will also
-	 * search for a Mortal Draw skill, using the same item if a dummy is needed
+	 * Called from LivingFallEvent to trigger {@link SkillActive#onFall} for each currently active skill
 	 */
-	private void retrieveDummySwordSkill() {
-		boolean needsDummy = (getTrueSkillLevel(SkillBase.swordBasic.getId()) < 1 && dummySwordSkill == null);
-		if ((needsDummy || itemSkill == null) && persistentDummySkillSlot == -1) {
-			for (int i = 0; i < 9; ++i) {
-				ItemStack stack = player.inventory.getStackInSlot(i);
-				if (stack != null && stack.getItem() instanceof ISkillProvider &&
-						((ISkillProvider) stack.getItem()).getSkillId(stack) == SkillBase.mortalDraw.getId())
-				{
-					if (needsDummy && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack)) {
-						dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic.getId(), (byte) 1);
-						persistentDummySkillSlot = i;
-					}
-					if (itemSkill == null) {
-						itemSkill = SkillBase.getSkillFromItem(stack, (ISkillProvider) stack.getItem());
-					}
-					if (!needsDummy || dummySwordSkill != null) {
-						break;
-					}
+	public void onFall(LivingFallEvent event) {
+		for (SkillBase skill : skills.values()) {
+			if (event.isCanceled() || event.getDistance() <= 0.0F) {
+				return;
+			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+				if (((SkillActive) skill).onFall(player, event)) {
+					return;
 				}
 			}
-			// prevent the for loop from running every single tick when nothing found
-			if (dummySwordSkill == null) {
-				persistentDummySkillSlot = -30;
+		}
+		if (!event.isCanceled() && event.getDistance() > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+			if (((SkillActive) itemSkill).onFall(player, event)) {
+				return;
 			}
 		}
+		if (!event.isCanceled() && event.getDistance() > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+			if (((SkillActive) dummySwordSkill).onFall(player, event)) {
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Called from PlayerFlyableFallEvent to trigger {@link SkillActive#onCreativeFall} for each currently active skill
+	 */
+	public void onCreativeFall(PlayerFlyableFallEvent event) {
+		for (SkillBase skill : skills.values()) {
+			if (event.getDistance() <= 0.0F) {
+				return;
+			} else if (skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+				if (((SkillActive) skill).onCreativeFall(player, event)) {
+					return;
+				}
+			}
+		}
+		if (event.getDistance() > 0.0F && itemSkill instanceof SkillActive && ((SkillActive) itemSkill).isActive()) {
+			if (((SkillActive) itemSkill).onCreativeFall(player, event)) {
+				return;
+			}
+		}
+		if (event.getDistance() > 0.0F && dummySwordSkill instanceof SkillActive && ((SkillActive) dummySwordSkill).isActive()) {
+			if (((SkillActive) dummySwordSkill).onCreativeFall(player, event)) {
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Checks for the first Mortal Draw-eligible sword item in the player's hotbar,
+	 * setting {@link #itemSkill} and {@link #dummySwordSkill} accordingly.
+	 * @return true if the eligible item is or will be providing the Mortal Draw or Targeting skill
+	 */
+	private boolean retrieveDummySwordSkill() {
+		int swordSlot = MortalDraw.getSwordSlot(player);
+		if (swordSlot > -1) {
+			ItemStack stack = player.inventory.getStackInSlot(swordSlot);
+			if (stack != null && stack.getItem() instanceof ISkillProvider) {
+				boolean flag = false;
+				boolean needsDummy = (getTrueSkillLevel(Skills.swordBasic) < 1);
+				if (needsDummy && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack)) {
+					flag = true;
+					if (dummySwordSkill == null) {
+						dummySwordSkill = SkillBase.createLeveledSkill(Skills.swordBasic, (byte) 1);
+					}
+				}
+				byte plvl = getTrueSkillLevel(Skills.mortalDraw);
+				SkillBase skill = SkillBase.getSkillFromItem(stack, (ISkillProvider) stack.getItem());
+				if (Skills.mortalDraw.is(skill) && skill.getLevel() > plvl) {
+					flag = true;
+					if (itemSkill == null || !skill.equals(itemSkill)) {
+						itemSkill = skill;
+					}
+				}
+				// Found item is providing targeting skill but not mortal draw while held item is null
+				if (flag && !Skills.mortalDraw.is(itemSkill)) {
+					itemSkill = null;
+				}
+				return flag;
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * Returns a SkillActive version of the player's actual skill instance,
 	 * or null if the player doesn't have the skill or it is not the correct type
 	 */
-	public SkillActive getActiveSkill(SkillBase skill) {
-		SkillBase active = getPlayerSkill(skill.getId());
+	@Nullable
+	public SkillActive getActiveSkill(@Nullable SkillBase skill) {
+		SkillBase active = getPlayerSkill(skill);
 		return (active instanceof SkillActive ? (SkillActive) active : null);
 	}
 
-	/** Returns the skill instance for actual use, whether from the player or an ISkillItem or null */
-	public SkillBase getPlayerSkill(SkillBase skill) {
-		return getPlayerSkill(skill.getId());
-	}
-
 	/**
-	 * Returns the skill instance for actual use, whether from the player or an ISkillItem or null
+	 * Returns the skill instance for actual use, whether from the player or an ISkillProvider or null 
 	 */
-	public SkillBase getPlayerSkill(byte id) {
-		if (itemSkill != null && itemSkill.getId() == id) {
+	@Nullable
+	public SkillBase getPlayerSkill(@Nullable SkillBase skill) {
+		if (skill == null) {
+			return null;
+		} else if (skill.is(itemSkill)) {
 			return itemSkill;
-		} else if (id == SkillBase.spinAttack.getId() && itemSkill != null && itemSkill.getId() == SkillBase.superSpinAttack.getId()) {
-			SkillBase skill = getTruePlayerSkill(id);
-			return (skill == null && !Config.isSpinAttackRequired() ? itemSkill : skill);
-		} else if (id == SkillBase.swordBasic.getId()) {
-			if (player.getHeldItemMainhand() == null) {
-				retrieveDummySwordSkill();
-			}
-			return (dummySwordSkill == null ? getTruePlayerSkill(id) : dummySwordSkill);
+		} else if (skill.is(dummySwordSkill)) {
+			return dummySwordSkill;
 		} else {
-			return getTruePlayerSkill(id);
+			return getTruePlayerSkill(skill);
 		}
 	}
 
-	/** Returns the player's actual skill instance or null if the player doesn't have the skill */
+	/**
+	 * Returns the player's actual skill instance or null if the player doesn't have the skill 
+	 */
+	@Nullable
 	public SkillBase getTruePlayerSkill(SkillBase skill) {
-		return getTruePlayerSkill(skill.getId());
-	}
-
-	/** Returns the player's actual skill instance or null if the player doesn't have the skill */
-	private SkillBase getTruePlayerSkill(byte id) {
-		return (skills.containsKey(id) ? skills.get(id) : null);
+		return (skills.containsKey(skill.getId()) ? skills.get(skill.getId()) : null);
 	}
 
 	/**
-	 * Returns first ICombo from a currently active skill, if any; ICombo may or may not be in progress
+	 * Returns first {@link IComboSkill} from a currently active skill, if any, or the last active one;
+	 * Combo skill may no longer be active and a combo may or may not be in progress
 	 */
-	public ICombo getComboSkill() {
-		SkillBase skill = getPlayerSkill(SkillBase.swordBasic);
-		if (skill != null && (((ICombo) skill).getCombo() != null || ((SkillActive) skill).isActive())) {
-			return (ICombo) skill;
+	public IComboSkill getComboSkill() {
+		if (comboSkill == null || comboSkill.getCombo() == null || !((SkillActive) comboSkill).isActive()) {
+			IComboSkill combo = getFirstActiveComboSkill();
+			if (combo != null) {
+				comboSkill = combo;
+				invalidateCombo = false;
+			} else if (comboSkill != null && !comboSkill.isComboInProgress()) {
+				invalidateCombo = true;
+			}
+		}
+		return comboSkill;
+	}
+
+	/**
+	 * Returns the first active {@link IComboSkill} instance, if any; combo may or may not be in progress
+	 */
+	private IComboSkill getFirstActiveComboSkill() {
+		for (SkillBase skill : SkillRegistry.getValues()) {
+			if (skill instanceof IComboSkill && skill instanceof SkillActive) {
+				SkillBase instance = getPlayerSkill(skill);
+				if (instance != null && ((SkillActive) instance).isActive()) {
+					return (IComboSkill) instance;
+				}
+			}
 		}
 		return null;
 	}
 
-	/** Returns an ILockOnTarget skill, if any, with preference for currently active skill */
+	/**
+	 * Activates the first found targeting skill unless another is already active
+	 */
+	public void activateTargetingSkill() {
+		if (getTargetingSkill() != null) {
+			return;
+		}
+		for (SkillBase skill : SkillRegistry.getValues()) {
+			if (skill instanceof ILockOnTarget && skill instanceof SkillActive) {
+				SkillBase instance = getPlayerSkill(skill);
+				if (instance != null && ((SkillActive) instance).activate(player)) {
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Deactivates the currently active targeting skill, if any
+	 */
+	public void deactivateTargetingSkill() {
+		getTargetingSkill();
+		if (targetingSkill != null) {
+			((SkillActive) targetingSkill).deactivate(player);
+		}
+	}
+
+	/**
+	 * Returns the first active ILockOnTarget skill instance, if any
+	 */
 	public ILockOnTarget getTargetingSkill() {
-		return (ILockOnTarget) getPlayerSkill(SkillBase.swordBasic);
+		if (targetingSkill == null || !((SkillActive) targetingSkill).isActive()) {
+			targetingSkill = getFirstActiveTargetingSkill();
+		}
+		return targetingSkill;
+	}
+
+	/**
+	 * Returns the first active ILockOnTarget instance, if any
+	 */
+	private ILockOnTarget getFirstActiveTargetingSkill() {
+		for (SkillBase skill : SkillRegistry.getValues()) {
+			if (skill instanceof ILockOnTarget && skill instanceof SkillActive) {
+				SkillBase instance = getPlayerSkill(skill);
+				if (instance != null && ((SkillActive) instance).isActive()) {
+					return (ILockOnTarget) instance;
+				}
+			}
+		}
+		return null;
 	}
 
 	/** Grants a skill with target level of current skill level plus one */
 	public boolean grantSkill(SkillBase skill) {
-		return grantSkill(skill.getId(), (byte)(getSkillLevel(skill) + 1));
+		return grantSkill(skill, (byte)(getTrueSkillLevel(skill) + 1));
 	}
 
 	/**
 	 * Grants skill to player if player meets the requirements; returns true if skill learned
 	 */
-	public boolean grantSkill(byte id, byte targetLevel) {
-		SkillBase skill = skills.containsKey(id) ? (SkillBase) skills.get(id) : SkillBase.getNewSkillInstance(id);
-		if (skill.grantSkill(player, targetLevel)) {
-			skills.put(id, skill);
+	public boolean grantSkill(SkillBase skill, byte targetLevel) {
+		byte id = skill.getId();
+		SkillBase instance = skills.containsKey(id) ? (SkillBase) skills.get(id) : skill.newInstance();
+		if (instance.grantSkill(player, targetLevel)) {
+			skills.put(id, instance);
 			return true;
 		} else {
 			return false;
@@ -455,69 +687,78 @@ public class DSSPlayerInfo
 	}
 
 	/**
-	 * Called after {@link SkillActive#onActivated} returns true to add the skill to the
-	 * list of currently active skills, as well as set the currently animating skill
+	 * Activates the skill if possible
+	 * @param wasTriggered Whether the skill was triggered via some means other than direct user interaction (see {@link SkillActive#allowUserActivation})
+	 * @return true if the player has this skill and {@link SkillActive#trigger} returns true
 	 */
-	private void onSkillActivated(World world, SkillActive skill) {
-		if (skill.isActive()) {
-			activeSkills.add(skill);
-			if (world.isRemote) {
+	public boolean activateSkill(SkillBase skill, boolean wasTriggered) {
+		return (skill instanceof SkillActive && onSkillActivated((SkillActive) skill, wasTriggered));
+	}
+
+	private boolean onSkillActivated(SkillActive skill, boolean wasTriggered) {
+		if (skill.trigger(player.getEntityWorld(), player, wasTriggered)) {
+			if (player.getEntityWorld().isRemote && skill.isActive()) {
 				setCurrentlyAnimatingSkill(skill);
 			}
-		}
-	}
-
-	/**
-	 * Returns true if the player has this skill and {@link SkillActive#activate} returns true
-	 */
-	public boolean activateSkill(World world, SkillBase skill) {
-		return activateSkill(world, skill.getId());
-	}
-
-	/**
-	 * Returns true if the player has this skill and {@link SkillActive#activate} returns true
-	 */
-	public boolean activateSkill(World world, byte id) {
-		SkillBase skill = getPlayerSkill(id);
-		if (skill instanceof SkillActive && ((SkillActive) skill).activate(world, player)) {
-			onSkillActivated(world, (SkillActive) skill);
 			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * Returns true if the player has this skill and {@link SkillActive#trigger} returns true
+	 * @return true if the skill has been disabled by the user
 	 */
-	public boolean triggerSkill(World world, SkillBase skill) {
-		return triggerSkill(world, skill.getId());
+	public final boolean isSkillDisabled(@Nullable SkillBase skill) {
+		return skill != null && this.disabledSkillIds.contains(skill.getId());
 	}
 
 	/**
-	 * Returns true if the player has this skill and {@link SkillActive#trigger} returns true
+	 * @return Set of user-disabled skill IDs
 	 */
-	public boolean triggerSkill(World world, byte id) {
-		SkillBase skill = getPlayerSkill(id);
-		if (skill instanceof SkillActive && ((SkillActive) skill).trigger(world, player, true)) {
-			onSkillActivated(world, (SkillActive) skill);
-			return true;
+	public Set<Byte> getDisabledSkillIds() {
+		return Collections.unmodifiableSet(this.disabledSkillIds);
+	}
+
+	/**
+	 * Toggles the skill's per-user disabled state, but does not notify the server.
+	 * Calling code should call {@link #syncDisabledSkills()} when finished making changes.
+	 */
+	@SideOnly(Side.CLIENT)
+	public void toggleDisabledSkill(SkillBase skill) {
+		if (disabledSkillIds.contains(skill.getId())) {
+			disabledSkillIds.remove(skill.getId());
+		} else {
+			disabledSkillIds.add(skill.getId());
 		}
-		return false;
 	}
 
 	/**
-	 * Reads a SkillBase from stream and updates the local skills map; if the skill
-	 * loaded from NBT is level 0, that skill will be removed.
+	 * Sends a packet to update the server side user-disabled skill ID list
+	 */
+	@SideOnly(Side.CLIENT)
+	public void syncDisabledSkills() {
+		PacketDispatcher.sendToServer(new SyncDisabledSkillsPacket(this.player));
+	}
+
+	/**
+	 * Should only be called from {@link SyncDisabledSkillsPacket} to set the server side user-disabled skill ID list
+	 */
+	public void setDisabledSkills(Set<Byte> disabledIds) {
+		this.disabledSkillIds = disabledIds;
+		this.validateSkills();
+	}
+
+	/**
+	 * Updates the local skills map with the skill, removing it if level is < 1.
 	 * Called client side only for synchronizing a skill with the server version.
 	 */
 	@SideOnly(Side.CLIENT)
-	public void syncClientSideSkill(byte id, NBTTagCompound compound) {
-		if (SkillBase.doesSkillExist(id)) {
-			SkillBase skill = SkillBase.getNewSkillInstance(id).loadFromNBT(compound);
+	public void syncClientSideSkill(SkillBase skill) {
+		if (skill != null) {
 			if (skill.getLevel() > 0) {
-				skills.put(id, skill);
+				skills.put(skill.getId(), skill);
 			} else {
-				skills.remove(id);
+				skills.remove(skill.getId());
 			}
 		}
 	}
@@ -530,7 +771,11 @@ public class DSSPlayerInfo
 		// flags whether a skill is currently animating
 		boolean flag = false;
 		if (animatingSkill != null) {
-			if (animatingSkill.isAnimating()) {
+			if (getSkillLevel(animatingSkill) < 1) {
+				// Clear animating skill if no longer valid
+				setCurrentlyAnimatingSkill(null);
+			} else if (animatingSkill.isAnimating()) {
+				// Allow animations to complete even if skill is no longer considered active
 				flag = animatingSkill.onRenderTick(player, partialRenderTick);
 			} else if (!animatingSkill.isActive()) {
 				setCurrentlyAnimatingSkill(null);
@@ -546,9 +791,12 @@ public class DSSPlayerInfo
 	 * This method should be called every update tick; currently called from LivingUpdateEvent
 	 */
 	public void onUpdate() {
-		updateISkillItem();
+		updateISkillProvider();
 		if (attackTime > 0) {
 			--attackTime;
+		}
+		if (useItemCooldown > 0) {
+			--useItemCooldown;
 		}
 		if (itemSkill != null) {
 			itemSkill.onUpdate(player);
@@ -556,87 +804,55 @@ public class DSSPlayerInfo
 		if (dummySwordSkill != null) {
 			dummySwordSkill.onUpdate(player);
 		}
-		if (persistentDummySkillSlot < -1) {
-			++persistentDummySkillSlot;
-		}
 		for (SkillBase skill : skills.values()) {
 			skill.onUpdate(player);
 		}
-		// must use iterators to avoid concurrent modification exceptions to list
-		Iterator<SkillActive> iterator = activeSkills.iterator();
-		while (iterator.hasNext()) {
-			SkillActive skill = iterator.next();
-			if (!skill.isActive()) {
-				iterator.remove();
-			}
+		if (invalidateCombo) {
+			comboSkill = null;
+			invalidateCombo = false;
 		}
 	}
 
 	/**
 	 * Updates the current itemSkill and dummySwordSkill based on the player's currently held item
 	 */
-	private void updateISkillItem() {
+	private void updateISkillProvider() {
 		ItemStack stack = player.getHeldItemMainhand();
-		if (itemSkill != null && itemSkill.getId() == SkillBase.mortalDraw.getId() &&
-				(stack == null || ((SkillActive) itemSkill).isActive()))
-		{
-			// do not replace Mortal Draw until it is no longer active
-			if (persistentDummySkillSlot > -1 && stack == null) {
-				ItemStack dummyStack = player.inventory.getStackInSlot(persistentDummySkillSlot);
-				if (dummyStack == null || (!(dummyStack.getItem() instanceof ISkillProvider)) ||
-						!SkillBase.getSkillFromItem(dummyStack, (ISkillProvider) dummyStack.getItem()).equals(itemSkill))
-				{
-					boolean wasFound = false;
-					for (int i = 0; i < 9; ++i) {
-						ItemStack newStack = player.inventory.getStackInSlot(i);
-						if (newStack != null && newStack.getItem() instanceof ISkillProvider &&
-								SkillBase.getSkillFromItem(newStack, (ISkillProvider) newStack.getItem()).equals(itemSkill))
-						{
-							persistentDummySkillSlot = i;
-							wasFound = true;
-							break;
-						}
-					}
-					if (!wasFound) {
-						itemSkill = null;
-						dummySwordSkill = null;
-						persistentDummySkillSlot = -1;
-					}
-				}
-			}
+		// Mortal Draw from skill item requires special handling
+		boolean skipUpdate = false;
+		if (Skills.mortalDraw.is(itemSkill) && ((SkillActive) itemSkill).isActive()) {
+			skipUpdate = true;
+		} else if (stack == null) {
+			lastCheckedStack = null;
+			skipUpdate = retrieveDummySwordSkill();
+		}
+		if (skipUpdate) {
+			// no-op
 		} else if (stack != null && stack.getItem() instanceof ISkillProvider) {
 			if (stack == lastCheckedStack) {
 				return;
 			}
 			lastCheckedStack = stack;
-			ISkillProvider item = (ISkillProvider) stack.getItem();
-			SkillBase skill = SkillBase.getSkillFromItem(stack, item);
+			ISkillProvider provider = (ISkillProvider) stack.getItem();
+			SkillBase skill = SkillBase.getSkillFromItem(stack, provider);
 			if (itemSkill == null || !itemSkill.equals(skill)) {
-				itemSkill = skill;
-				if (itemSkill != null) {
-					if (itemSkill.getLevel() <= getTrueSkillLevel(itemSkill.getId())) {
-						itemSkill = null;
-					}
-					if (item.grantsBasicSwordSkill(stack) && skill.getId() != SkillBase.swordBasic.getId()
-							&& getTrueSkillLevel(SkillBase.swordBasic.getId()) < 1)
-					{
-						if (dummySwordSkill == null) {
-							dummySwordSkill = SkillBase.createLeveledSkill(SkillBase.swordBasic.getId(), (byte) 1);
-							persistentDummySkillSlot = -1;
-						}
-					} else {
-						dummySwordSkill = null;
-						persistentDummySkillSlot = -1;
-					}
+				if (skill.getLevel() > getTrueSkillLevel(skill)) {
+					itemSkill = skill;
+				} else {
+					itemSkill = null;
 				}
 			}
-		} else {
-			itemSkill = null;
-			dummySwordSkill = null;
-			lastCheckedStack = null;
-			if (persistentDummySkillSlot > -1) {
-				persistentDummySkillSlot = -1;
+			if (provider.grantsBasicSwordSkill(stack)) {
+				if (dummySwordSkill == null && !skill.is(Skills.swordBasic) && getTrueSkillLevel(Skills.swordBasic) < 1) {
+					dummySwordSkill = SkillBase.createLeveledSkill(Skills.swordBasic, (byte) 1);
+				}
+			} else if (dummySwordSkill != null) {
+				dummySwordSkill = null; // held item does not provide basic sword skill
 			}
+		} else {
+			dummySwordSkill = null;
+			itemSkill = null;
+			lastCheckedStack = null;
 		}
 	}
 
@@ -645,8 +861,8 @@ public class DSSPlayerInfo
 	 */
 	public void verifyStartingGear() {
 		if (!receivedGear && Config.giveBonusOrb()) {
-			receivedGear = player.inventory.addItemStackToInventory(
-					new ItemStack(DynamicSwordSkills.skillOrb,1,SkillBase.swordBasic.getId()));
+			int damage = ((IMetadataSkillItem) DynamicSwordSkills.skillOrb).getItemDamage(Skills.swordBasic);
+			receivedGear = player.inventory.addItemStackToInventory(new ItemStack(DynamicSwordSkills.skillOrb, 1, damage));
 		}
 	}
 
@@ -699,12 +915,16 @@ public class DSSPlayerInfo
 	public NBTTagCompound writeNBT(NBTTagCompound compound) {
 		NBTTagList taglist = new NBTTagList();
 		for (SkillBase skill : skills.values()) {
-			NBTTagCompound skillTag = new NBTTagCompound();
-			skill.writeToNBT(skillTag);
-			taglist.appendTag(skillTag);
+			taglist.appendTag(skill.writeToNBT());
 		}
 		compound.setTag("DynamicSwordSkills", taglist);
 		compound.setBoolean("receivedGear", receivedGear);
+		// User-disabled skills
+		NBTTagList disabled = new NBTTagList();
+		SkillRegistry.getValues().stream().filter(s -> disabledSkillIds.contains(s.getId())).forEach(s -> {
+			disabled.appendTag(new NBTTagString(s.getRegistryName().toString()));
+		});
+		compound.setTag("UserDisabledSkills", disabled);
 		return compound;
 	}
 
@@ -715,10 +935,22 @@ public class DSSPlayerInfo
 		skills.clear(); // allows skills to reset on client without re-adding all the skills
 		NBTTagList taglist = compound.getTagList("DynamicSwordSkills", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < taglist.tagCount(); ++i) {
-			NBTTagCompound skill = taglist.getCompoundTagAt(i);
-			byte id = skill.getByte("id");
-			skills.put(id, SkillBase.getSkill(id).loadFromNBT(skill));
+			NBTTagCompound tag = taglist.getCompoundTagAt(i);
+			SkillBase skill = SkillBase.loadFromNBT(tag);
+			if (skill != null) {
+				skills.put(skill.getId(), skill);
+			}
 		}
 		receivedGear = compound.getBoolean("receivedGear");
+		// User-disabled skills
+		disabledSkillIds.clear();
+		NBTTagList disabled = compound.getTagList("UserDisabledSkills", Constants.NBT.TAG_STRING);
+		for (int i = 0; i < disabled.tagCount(); ++i) {
+			String s = disabled.getStringTagAt(i);
+			SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(s));
+			if (skill != null) {
+				disabledSkillIds.add(skill.getId());
+			}
+		}
 	}
 }

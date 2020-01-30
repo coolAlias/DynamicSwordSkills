@@ -19,18 +19,17 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.client.MortalDrawPacket;
-import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -39,7 +38,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -74,8 +72,8 @@ public class MortalDraw extends SkillActive
 	 */
 	private Entity target;
 
-	public MortalDraw(String name) {
-		super(name);
+	public MortalDraw(String translationKey) {
+		super(translationKey);
 	}
 
 	private MortalDraw(MortalDraw skill) {
@@ -85,6 +83,11 @@ public class MortalDraw extends SkillActive
 	@Override
 	public MortalDraw newInstance() {
 		return new MortalDraw(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.SWORD_GROUP || group == Skills.TARGETED_GROUP;
 	}
 
 	@Override
@@ -134,38 +137,50 @@ public class MortalDraw extends SkillActive
 	public boolean canUse(EntityPlayer player) {
 		swordSlot = -1;
 		if (super.canUse(player) && player.getHeldItemMainhand() == null && attackTimer == 0) {
-			for (int i = 0; i < 9; ++i) {
-				ItemStack stack = player.inventory.getStackInSlot(i);
-				if (stack != null && PlayerUtils.isSwordOrProvider(stack, this)) {
-					swordSlot = i;
-					break;
-				}
-			}
+			swordSlot = getSwordSlot(player);
 		}
 		return swordSlot > -1;
+	}
+
+	/**
+	 * Returns the inventory slot index for the first Mortal Draw-eligible sword item in the player's hotbar
+	 * @return 0-8 or -1 if no eligible sword was found
+	 */
+	public static int getSwordSlot(EntityPlayer player) {
+		int plvl = DSSPlayerInfo.get(player).getTrueSkillLevel(Skills.mortalDraw);
+		boolean needsDummy = (DSSPlayerInfo.get(player).getTrueSkillLevel(Skills.swordBasic) < 1);
+		for (int i = 0; i < 9; ++i) {
+			ItemStack stack = player.inventory.getStackInSlot(i);
+			if (stack != null 
+					&& ((plvl > 0 && PlayerUtils.isSword(stack)) || PlayerUtils.isProvider(stack, Skills.mortalDraw))
+					&& (!needsDummy || PlayerUtils.isProvider(stack, Skills.swordBasic))
+					)
+			{
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.getHeldItemMainhand() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown()
-				|| DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].isKeyDown());
+		return player.getHeldItemMainhand() == null && Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (!isLockedOn) {
+			return false;
+		}
+		return key == mc.gameSettings.keyBindAttack;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (canExecute(player)) {
-			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-			return true;
-		}
-		return false;
+		return canExecute(player) && activate(player);
 	}
 
 	@Override
@@ -186,7 +201,7 @@ public class MortalDraw extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		if (attackTimer > 0) {
 			--attackTimer;
-			if (attackTimer == DELAY && !player.getEntityWorld().isRemote) {
+			if (attackTimer == DELAY && !player.getEntityWorld().isRemote && player.getHeldItemMainhand() == null) {
 				drawSword(player, null);
 				if (player.getHeldItemMainhand() != null) {
 					PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
@@ -218,15 +233,17 @@ public class MortalDraw extends SkillActive
 	/**
 	 * Call upon landing a mortal draw blow
 	 */
-	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
+	@Override
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		// need to check time again, due to 2-tick delay for damage prevention
 		if (attackTimer > DELAY) {
 			attackTimer = DELAY;
-			event.setAmount(event.getAmount() * (1.0F + ((float) getDamageMultiplier() / 100F)));
 			PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
+			return (amount * (1.0F + ((float) getDamageMultiplier() / 100F)));
 		} else { // too late - didn't defend against this target!
 			target = null;
 		}
+		return amount;
 	}
 
 	/**
