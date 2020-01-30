@@ -72,7 +72,7 @@ public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarge
 	private Combo combo = null;
 
 	/** Flag for {@link #setComboDamageOnlyMode(boolean)} */
-	private boolean comboDamageOnlyMode = true;
+	private boolean comboDamageOnlyMode;
 
 	public SwordBasic(String translationKey) {
 		super(translationKey);
