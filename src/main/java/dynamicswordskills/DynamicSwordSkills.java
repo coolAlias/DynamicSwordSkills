@@ -189,14 +189,18 @@ public class DynamicSwordSkills
 			if (s.matches("^dss.skillitem([0-9])+$")) {
 				int i = Integer.valueOf(s.replace("dss.skillitem", ""));
 				SkillBase skill = SkillRegistry.getSkillById(i);
-				if (skill != null) {
+				if (Skills.superSpinAttack.is(skill)) {
+					mapping.ignore();
+				} else if (skill != null) {
 					location = "training_stick_" + skill.getRegistryName().getResourcePath().toLowerCase();
 				}
 			} else if (s.startsWith("training_stick_")) {
 				// Handle skill registry name changes
 				String skill_name = s.substring("training_stick_".length());
 				SkillBase skill = SkillRegistry.get(new ResourceLocation(ModInfo.ID, skill_name));
-				if (skill != null && !skill.getRegistryName().getResourcePath().equals(skill_name)) {
+				if (Skills.superSpinAttack.is(skill)) {
+					mapping.ignore();
+				} else if (skill != null && !skill.getRegistryName().getResourcePath().equals(skill_name)) {
 					location = "training_stick_" + skill.getRegistryName().getResourcePath().toLowerCase();
 				}
 			} else if (s.matches("^dss.skill(wood|stone|iron|diamond|gold)$")) {
