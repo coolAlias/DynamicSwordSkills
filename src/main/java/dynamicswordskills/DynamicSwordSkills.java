@@ -182,14 +182,18 @@ public class DynamicSwordSkills
 				// Update old skillitem to training_stick
 				String skill_name = s.resourceLocation.getResourcePath().substring("skillitem_".length());
 				SkillBase skill = SkillRegistry.get(new ResourceLocation(s.resourceLocation.getResourceDomain(), skill_name));
-				if (skill != null) {
+				if (Skills.superSpinAttack.is(skill)) {
+					s.ignore();
+				} else if (skill != null) {
 					location = new ResourceLocation(s.resourceLocation.getResourceDomain(), "training_stick_" + skill.getRegistryName().getResourcePath().toLowerCase());
 				}
 			} else if (s.resourceLocation.getResourcePath().startsWith("training_stick_")) {
 				// Handle skill registry name changes
 				String skill_name = s.resourceLocation.getResourcePath().substring("training_stick_".length());
 				SkillBase skill = SkillRegistry.get(new ResourceLocation(s.resourceLocation.getResourceDomain(), skill_name));
-				if (skill != null && !skill.getRegistryName().getResourcePath().equals(skill_name)) {
+				if (Skills.superSpinAttack.is(skill)) {
+					s.ignore();
+				} else if (skill != null && !skill.getRegistryName().getResourcePath().equals(skill_name)) {
 					location = new ResourceLocation(s.resourceLocation.getResourceDomain(), "training_stick_" + skill.getRegistryName().getResourcePath().toLowerCase());
 				}
 			} else if (s.resourceLocation.getResourcePath().startsWith("skillsword_")) {
