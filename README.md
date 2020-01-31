@@ -27,17 +27,17 @@ Some skills, such as Spin Attack, may require pressing multiple movement keys at
 
 Commands
 --------
-*/grantskill <player> all*  
-Grants all skills at max level to the specified player
+`/grantskill <skill | all> <player> <level>`  
+Grants a single skill or all skills to the target player at the specified level
 
-*/grantskill <player> <skill> <level>*  
-Grants the designated skill and level to the specified player
+- If `<level>` is omitted, the command increases the skill(s) level by 1 instead
 
-*/removeskill <player> all*  
-Removes all skills from the specified player
+- If `<player>` is omitted, the command sender will be targeted
 
-*/removeskill <player> <skill>*  
-Removes all levels in the designated skill from the specified player
+`/removeskill <skill | all> <player>`  
+Removes all levels in a single skill or all skills from the target player
+
+- If `<player>` is omitted, the command sender will be targeted
 
 Skills
 ------
