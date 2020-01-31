@@ -19,10 +19,8 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
@@ -43,17 +41,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * 
  * DODGE
  * Description: Avoid damage by quickly dodging out of the way
- * Activation: Tap left or right arrow key to dodge in that direction
+ * Activation: Double-tap left or right to dodge in that direction
  * Exhaustion: 0.05F
  * Duration: (5 + level) ticks; this is the amount of time during which damage may be avoided
- * Special: - May only be used while locked on to a target
- * 			- Chance to avoid damage is 10% per level, plus a timing bonus of up to 20%
- * 
- * Tap 'left' or 'right' arrow key to dodge out of harm's way (activated when key released);
- * can be configured to require double-tap and / or to allow use of default movement keys ('a'
- * and 'd') for activation in addition to arrow keys.
- * 
- * While dodging, there is a chance to avoid any incoming attacks.
+ * Special: Chance to avoid damage is 10% per level, plus a timing bonus of up to 20%
  * 
  */
 public class Dodge extends SkillActive
@@ -63,8 +54,13 @@ public class Dodge extends SkillActive
 	private KeyBinding keyPressed;
 
 	/** Current number of ticks remaining before dodge will not activate */
-	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
+
+	/** Only for double-tap activation; true after the first key press and release */
+	private boolean keyReleased;
+
+	/** Trajectory based on player's look vector and Dodge direction */
+	private Vec3d trajectory;
 
 	/** Timer during which player may evade incoming attacks */
 	private int dodgeTimer = 0;
@@ -72,8 +68,8 @@ public class Dodge extends SkillActive
 	/** Entity dodged, since the attack event may fire multiple times in quick succession for mobs like zombies */
 	private Entity entityDodged;
 
-	public Dodge(String name) {
-		super(name);
+	public Dodge(String translationKey) {
+		super(translationKey);
 	}
 
 	private Dodge(Dodge skill) {
@@ -88,10 +84,8 @@ public class Dodge extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(new TextComponentTranslation(getInfoString("info", 1),
-				(int)(getBaseDodgeChance(player) * 100)).getUnformattedText());
-		desc.add(new TextComponentTranslation(getInfoString("info", 2),
-				(getDodgeTime() + level - 5) * 2).getUnformattedText()); // don't use real time bonus, since timer is zero
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.chance", (int)(getBaseDodgeChance(player) * 100)).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.bonus", level * 4).getUnformattedText());
 		desc.add(getTimeLimitDisplay(getDodgeTime()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
@@ -133,48 +127,90 @@ public class Dodge extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && DSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() && !PlayerUtils.isBlocking(player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.onGround && canUse(player);
+		return player.onGround && canUse(player) && keyReleased && ticksTilFail > 0;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
-				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT] || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT]);
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (canExecute(player)) {
-			if (Config.requiresDoubleTap()) {
-				if (ticksTilFail > 0 && key == keyPressed) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-					ticksTilFail = 0;
-					return true;
-				} else {
-					keyPressed = key;
-					ticksTilFail = 6;
-				}
-				// Single-tap activation only allowed using custom key bindings:
-			} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT] || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT]) {
-				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-				return true;
+		if (key == keyPressed) {
+			boolean flag = canExecute(player) && activate(player);
+			resetKeyState(flag);
+			return flag;
+		} else if (Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) {
+			firstKeyPress(mc, key, player);
+		} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey()) {
+			if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() && mc.gameSettings.keyBindRight.isKeyDown()) {
+				return false;
+			} else if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() && mc.gameSettings.keyBindLeft.isKeyDown()) {
+				return false;
 			}
+			firstKeyPress(mc, key, player);
+			if (!Config.requiresDoubleTap()) {
+				keyReleased = true;
+				boolean flag = canExecute(player) && activate(player);
+				resetKeyState(true);
+				return flag;
+			}
+		} else {
+			keyPressed = null;
 		}
-		return false; // allow other skills to receive this key press (e.g. Spin Attack)
+		return false;
+	}
+
+	@SideOnly(Side.CLIENT)
+	private void firstKeyPress(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		keyPressed = key;
+		keyReleased = false;
+		ticksTilFail = 6;
+	}
+
+	@SideOnly(Side.CLIENT)
+	private void resetKeyState(boolean flag) {
+		keyReleased = false;
+		ticksTilFail = 0;
+		if (!flag) {
+			keyPressed = null;
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		keyReleased = (key == keyPressed);
+		if (keyReleased && ticksTilFail < 1) {
+			keyPressed = null;
+		}
 	}
 
 	@Override
 	public boolean onActivated(World world, EntityPlayer player) {
 		dodgeTimer = getDodgeTime();
 		entityDodged = null;
+		if (player.getEntityWorld().isRemote) {
+			trajectory = player.getLookVec();
+			if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
+				trajectory = new Vec3d(-trajectory.z, 0.0D, trajectory.x);
+			} else {
+				trajectory = new Vec3d(trajectory.z, 0.0D, -trajectory.x);
+			}
+			keyPressed = null;
+		}
 		return isActive();
 	}
 
@@ -188,7 +224,8 @@ public class Dodge extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		if (isActive()) {
 			--dodgeTimer;
-		} else if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
+		}
+		if (ticksTilFail > 0) {
 			--ticksTilFail;
 		}
 	}
@@ -196,24 +233,19 @@ public class Dodge extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isAnimating() {
-		return (dodgeTimer > level);
+		return (dodgeTimer > level && trajectory != null);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
-		double speed = 1.0D + 10.0D * (player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - Dash.BASE_MOVE);
-		if (speed > 1.0D) {
-			speed = 1.0D;
+		double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
+		double fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS()); 
+		double d = 1.15D * fps * speed;
+		if (player.isInWater() || player.isInLava()) {
+			d *= 0.15D;
 		}
-		// TODO reduce speed in liquids?
-		double d = 0.15D * speed * speed;
-		Vec3d vec3 = player.getLookVec();
-		if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
-			player.addVelocity(-vec3.z * d, 0.0D, vec3.x * d);
-		} else {
-			player.addVelocity(vec3.z * d, 0.0D, -vec3.x * d);
-		}
+		player.addVelocity(trajectory.x * d, -0.02D * fps, trajectory.z * d);
 		return true;
 	}
 

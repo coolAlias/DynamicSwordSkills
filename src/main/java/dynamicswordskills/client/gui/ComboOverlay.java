@@ -24,7 +24,7 @@ import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.Combo;
-import dynamicswordskills.skills.ICombo;
+import dynamicswordskills.skills.IComboSkill;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
@@ -52,21 +52,18 @@ public class ComboOverlay extends AbstractGuiOverlay
 	/** Time at which the current combo first started displaying */
 	private long displayStartTime;
 
-	/** Length of time combo pop-up will display */
-	private static final long DISPLAY_TIME = 5000;
-
 	public ComboOverlay(Minecraft mc) {
 		super(mc);
 	}
 
 	@Override
 	public HALIGN getHorizontalAlignment() {
-		return Config.comboHudHAlign;
+		return Config.comboHudXAlign;
 	}
 
 	@Override
 	public VALIGN getVerticalAlignment() {
-		return Config.comboHudVAlign;
+		return Config.comboHudYAlign;
 	}
 
 	@Override
@@ -76,10 +73,10 @@ public class ComboOverlay extends AbstractGuiOverlay
 
 	@Override
 	public boolean shouldRender() {
-		if (!Config.isComboHudEnabled) {
+		if (Config.comboHudDisplayTime < 1) {
 			return false;
 		}
-		ICombo iCombo = DSSPlayerInfo.get(mc.player).getComboSkill();
+		IComboSkill iCombo = DSSPlayerInfo.get(mc.player).getComboSkill();
 		if (iCombo != null && iCombo.getCombo() != null) {
 			if (this.combo != iCombo.getCombo()) {
 				this.combo = iCombo.getCombo();
@@ -97,7 +94,7 @@ public class ComboOverlay extends AbstractGuiOverlay
 				this.lastComboSize = this.combo.getNumHits();
 				this.displayStartTime = Minecraft.getSystemTime();
 			}
-			return ((Minecraft.getSystemTime() - this.displayStartTime) < DISPLAY_TIME);
+			return ((Minecraft.getSystemTime() - this.displayStartTime) < Config.comboHudDisplayTime);
 		}
 		return false;
 	}
@@ -111,8 +108,9 @@ public class ComboOverlay extends AbstractGuiOverlay
 		this.comboSize = new TextComponentTranslation("combo.size", this.combo.getNumHits(), this.combo.getMaxNumHits()).getUnformattedText();
 		this.comboDamage = new TextComponentTranslation("combo.damage", String.format("%.1f", this.combo.getDamage())).getUnformattedText();
 		this.width = Math.max(this.mc.fontRenderer.getStringWidth(this.label), this.mc.fontRenderer.getStringWidth(this.comboDamage));
-		this.setPosX(resolution, this.getOffsetX(DEFAULT_PADDING) + Config.comboHudOffsetX);
-		this.setPosY(resolution, this.getOffsetY(DEFAULT_PADDING) + Config.comboHudOffsetY);
+		this.width = Math.max(this.mc.fontRenderer.getStringWidth(this.label), this.mc.fontRenderer.getStringWidth(this.comboDamage));
+		this.setPosX(resolution, this.getOffsetX(DEFAULT_PADDING) + Config.comboHudXOffset);
+		this.setPosY(resolution, this.getOffsetY(DEFAULT_PADDING) + Config.comboHudYOffset);
 	}
 
 	@Override

@@ -19,11 +19,8 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSClientEvents;
-import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.util.PlayerUtils;
 import net.minecraft.client.Minecraft;
@@ -32,7 +29,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketEntityVelocity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -40,29 +41,31 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * 
  * RISING CUT
  * Description: Rising slash flings enemy upward
- * Activation: Jump while sneaking and attack
+ * Activation: Crouch by pressing the sneak key, then jump and attack
  * Effect: Attacks target for normal sword damage and knocks the target into the air
- * Range: 2 + level blocks
+ * Range: Up to 4 + 0.5 blocks per level
  * Exhaustion: 3.0F - (level * 0.2F)
- * Special: May only be used while locked on to a target
  * 
- * Requires onRenderTick to be called each render tick while active.
- *  
  */
 public class RisingCut extends SkillActive
 {
 	/** Flag for activation; set when player jumps while sneaking */
-	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 
-	/** True while animation is in progress */
+	/** Set when activated and lasts until the player hits the ground or the duration expires */
 	private int activeTimer;
+
+	/** True while animation is in progress */
+	private int animationTimer;
 
 	/** Stores the entity struck to add velocity on the next update */
 	private Entity entityHit;
 
-	public RisingCut(String name) {
-		super(name);
+	/** Flag to prevent a second attack from adding even more motionY */
+	private boolean hitEntity;
+
+	public RisingCut(String translationKey) {
+		super(translationKey);
 	}
 
 	private RisingCut(RisingCut skill) {
@@ -75,9 +78,14 @@ public class RisingCut extends SkillActive
 	}
 
 	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.SWORD_GROUP;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(getRangeDisplay(2 + level));
+		desc.add(getRangeDisplay(4 + (level / 2)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
@@ -87,8 +95,25 @@ public class RisingCut extends SkillActive
 	}
 
 	@Override
+	public boolean isAnimating() {
+		return animationTimer > 0;
+	}
+
+	@Override
 	protected float getExhaustion() {
 		return 3.0F - (level * 0.2F);
+	}
+
+	/** The amount of upward velocity to apply to affected entities */
+	protected double getMotionY() {
+		return (0.4D + (0.065D * level));
+	}
+
+	private void jump(EntityPlayer player) {
+		player.motionY += getMotionY();
+		if (player instanceof EntityPlayerMP) {
+			((EntityPlayerMP) player).connection.sendPacket(new SPacketEntityVelocity(player));
+		}
 	}
 
 	@Override
@@ -104,9 +129,11 @@ public class RisingCut extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return (key == mc.gameSettings.keyBindJump || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK]
-				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
+			return false;
+		}
+		return (key == mc.gameSettings.keyBindJump || key == mc.gameSettings.keyBindAttack);
 	}
 
 	/**
@@ -117,13 +144,11 @@ public class RisingCut extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (key == mc.gameSettings.keyBindJump) {
-			if (!isActive() && !player.isHandActive() && player.isSneaking()) {
+			if (player.onGround && ticksTilFail == 0 && !isActive() && !player.isHandActive() && player.isSneaking()) {
 				ticksTilFail = 3; // this allows canExecute to return true for 3 ticks
-				return true;
 			}
-		} else if (canExecute(player)) {
-			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-			DSSClientEvents.performComboAttack(mc, DSSPlayerInfo.get(player).getTargetingSkill());
+		} else if (canExecute(player) && activate(player)) {
+			DSSClientEvents.handlePlayerAttack(mc);
 			return true;
 		}
 		return false;
@@ -131,33 +156,66 @@ public class RisingCut extends SkillActive
 
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
-		activeTimer = 5 + level;
+		// Approximate time it should take to hit the ground with about 5 ticks of leeway
+		// If the player misses, they will have a short delay before they can use Rising Cut again
+		activeTimer = (20 + 3 * level);
+		animationTimer = 5 + level;
 		entityHit = null;
-		player.motionY += 0.3D + (0.115D * level);
-		DSSPlayerInfo.get(player).reduceFallAmount += level;
+		hitEntity = false;
+		if (!player.getEntityWorld().isRemote && Config.canHighJump()) {
+			jump(player);
+		}
 		return isActive();
+	}
+
+	private boolean canAttack(EntityLivingBase entity) {
+		return (!(entity instanceof EntityPlayer) || !PlayerUtils.isBlocking((EntityPlayer) entity));
+	}
+
+	@Override
+	public boolean onAttack(EntityPlayer player, EntityLivingBase entity, DamageSource source, float amount) {
+		if (!hitEntity && canAttack(entity)) {
+			hitEntity = true;
+			if (!player.getEntityWorld().isRemote && !Config.canHighJump()) {
+				jump(player);
+			}
+		}
+		return false;
 	}
 
 	@Override
 	protected void onDeactivated(World world, EntityPlayer player) {
 		activeTimer = 0;
+		animationTimer = 0;
+		hitEntity = false;
+		entityHit = null;
 	}
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
+		if (ticksTilFail > 0) {
 			--ticksTilFail;
 		}
-		if (isActive()) {
+		if (animationTimer > 0) {
+			--animationTimer;
+		}
+		if (activeTimer > 0) {
 			--activeTimer;
-			if (entityHit != null) {
+			if (player.onGround) {
+				if (!player.getEntityWorld().isRemote && (hitEntity || Config.canHighJump())) {
+					deactivate(player);
+				}
+			} else if (entityHit != null) {
 				if (!entityHit.isDead) {
-					double addY = 0.3D + (0.125D * level);
 					double resist = 1.0D;
 					if (entityHit instanceof EntityLivingBase) {
 						resist = 1.0D - ((EntityLivingBase) entityHit).getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getAttributeValue();
 					}
-					entityHit.addVelocity(0.0D, addY * resist, 0.0D);
+					double dy = getMotionY() * resist;
+					entityHit.addVelocity(0.0D, dy, 0.0D);
+					if (entityHit instanceof EntityPlayerMP && !player.getEntityWorld().isRemote) {
+						((EntityPlayerMP) entityHit).connection.sendPacket(new SPacketEntityVelocity(entityHit));
+					}
 				}
 				entityHit = null;
 			}
@@ -176,9 +234,18 @@ public class RisingCut extends SkillActive
 	 * This is necessary because adding velocity right before the entity is damaged fails.
 	 */
 	@Override
-	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
-		boolean flag = !(entity instanceof EntityPlayer) || !PlayerUtils.isBlocking((EntityPlayer) entity);
-		this.entityHit = (flag ? entity : null);
-		return amount;
+	public void postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		if (canAttack(entity)) {
+			entityHit = entity;
+		}
+	}
+
+	@Override
+	public boolean onFall(EntityPlayer player, LivingFallEvent event) {
+		if (isActive() && (hitEntity || Config.canHighJump())) {
+			event.setDistance(event.getDistance() - (1.0F + level));
+			onDeactivated(player.getEntityWorld(), player);
+		}
+		return false;
 	}
 }

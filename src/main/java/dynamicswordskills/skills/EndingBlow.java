@@ -19,13 +19,14 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.network.bidirectional.AttackTimePacket;
+import dynamicswordskills.network.bidirectional.ActionTimePacket;
+import dynamicswordskills.network.client.EndingBlowPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
@@ -71,9 +72,16 @@ public class EndingBlow extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private int keyPressed;
 
+	/** Only for double-tap activation; true after the first key press and release */
+	@SideOnly(Side.CLIENT)
+	private boolean keyReleased;
+
 	/** The last time this skill was activated (so HUD element can display or hide as appropriate) */
 	@SideOnly(Side.CLIENT)
 	private long lastActivationTime;
+
+	/** Flag indicating the skill's result: 0 - result pending; +1 - success; -1 - failure; only used for HUD  */
+	public byte skillResult;
 
 	/** Number of consecutive hits the combo had when the skill was last used */
 	private int lastNumHits;
@@ -84,8 +92,8 @@ public class EndingBlow extends SkillActive
 	/** Xp amount to grant if entityHit is dead on update tick */
 	private int xp;
 
-	public EndingBlow(String name) {
-		super(name);
+	public EndingBlow(String translationKey) {
+		super(translationKey);
 	}
 
 	private EndingBlow(EndingBlow skill) {
@@ -95,6 +103,11 @@ public class EndingBlow extends SkillActive
 	@Override
 	public EndingBlow newInstance() {
 		return new EndingBlow(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP || group == Skills.TARGETED_GROUP;
 	}
 
 	@Override
@@ -129,10 +142,12 @@ public class EndingBlow extends SkillActive
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		if (!isActive() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
-			ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
-			ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
-			if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
-				if (lastNumHits > 0) {
+			IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
+			if (combo != null && combo.isComboInProgress()) {
+				ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
+				if (lock == null || (lock.isLockedOn() && lock.getCurrentTarget() != combo.getCombo().getLastEntityHit())) {
+					return false;
+				} else if (lastNumHits > 0) {
 					return combo.getCombo().getConsecutiveHits() > 1 && combo.getCombo().getNumHits() > lastNumHits + 2;
 				} else {
 					return combo.getCombo().getConsecutiveHits() > 1;
@@ -145,14 +160,17 @@ public class EndingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return ticksTilFail > 0 && keyPressed > 1 && canUse(player);
+		return ticksTilFail > 0 && keyPressed > 1 && keyReleased && canUse(player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return (key == mc.gameSettings.keyBindForward || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK]
-				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
+			return false;
+		}
+		return (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey()
+				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward));
 	}
 
 	/**
@@ -162,7 +180,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (key == mc.gameSettings.keyBindForward) {
+		if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward)) {
 			if (ticksTilFail == 0) {
 				ticksTilFail = 6;
 			}
@@ -170,24 +188,32 @@ public class EndingBlow extends SkillActive
 		} else if (canExecute(player)) {
 			ticksTilFail = 0;
 			keyPressed = 0;
-			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-			return true;
+			keyReleased = false;
+			return activate(player);
 		}
 		return false;
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
+	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey() || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward)) {
+			keyReleased = (keyPressed > 0 && ticksTilFail > 0);
+		}
+	}
+
+	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		activeTimer = 3; // gives server some time for client attack to occur
-		ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
-		if (skill.getCombo() != null) {
+		entityHit = null;
+		IComboSkill skill = DSSPlayerInfo.get(player).getComboSkill();
+		if (skill != null && skill.getCombo() != null) {
 			lastNumHits = skill.getCombo().getNumHits();
 		}
 		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
-			DSSClientEvents.performComboAttack(Minecraft.getMinecraft(), DSSPlayerInfo.get(player).getTargetingSkill());
+			DSSClientEvents.handlePlayerAttack(Minecraft.getMinecraft());
 			this.lastActivationTime = Minecraft.getSystemTime();
-			ticksTilFail = 0;
-			keyPressed = 0;
+			this.skillResult = 0;
 		}
 		return isActive();
 	}
@@ -199,6 +225,7 @@ public class EndingBlow extends SkillActive
 		xp = 0;
 		if (world.isRemote) {
 			keyPressed = 0;
+			keyReleased = false;
 			ticksTilFail = 0;
 		}
 	}
@@ -209,23 +236,22 @@ public class EndingBlow extends SkillActive
 			--ticksTilFail;
 			if (ticksTilFail == 0) {
 				keyPressed = 0;
+				keyReleased = false;
 			}
 		}
 		if (lastNumHits > 0) {
 			if (entityHit != null && xp > 0) {
 				updateEntityState(player);
 			}
-			ICombo skill = DSSPlayerInfo.get(player).getComboSkill();
+			IComboSkill skill = DSSPlayerInfo.get(player).getComboSkill();
 			if (skill == null || !skill.isComboInProgress()) {
 				lastNumHits = 0;
 			}
 		}
 		if (isActive()) {
 			--activeTimer;
-			if (activeTimer == 0 && !player.getEntityWorld().isRemote && !player.capabilities.isCreativeMode) {
-				DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-				skills.setAttackTime(getDuration() * 2);
-				PacketDispatcher.sendTo(new AttackTimePacket(skills.getAttackTime()), (EntityPlayerMP) player);
+			if (activeTimer == 0 && !player.getEntityWorld().isRemote) {
+				onFail(player, true);
 			}
 		}
 	}
@@ -241,13 +267,9 @@ public class EndingBlow extends SkillActive
 				} else {
 					PlayerUtils.spawnXPOrbsWithRandom(player.getEntityWorld(), player.getEntityWorld().rand, entityHit.getPosition(), xp);
 				}
+				PacketDispatcher.sendTo(new EndingBlowPacket((byte) 1), (EntityPlayerMP) player);
 			} else {
-				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.3F, 0.8F);
-				if (!player.getEntityWorld().isRemote && !player.capabilities.isCreativeMode) {
-					DSSPlayerInfo skills = DSSPlayerInfo.get(player);
-					skills.setAttackTime(getDuration());
-					PacketDispatcher.sendTo(new AttackTimePacket(skills.getAttackTime()), (EntityPlayerMP) player);
-				}
+				onFail(player, false);
 			}
 		}
 		entityHit = null;
@@ -255,16 +277,36 @@ public class EndingBlow extends SkillActive
 	}
 
 	@Override
-	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
-		activeTimer = 0;
-		ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
-		ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
-		if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
+		if (combo != null && combo.isComboInProgress() && entity == combo.getCombo().getLastEntityHit() && combo.getCombo().getConsecutiveHits() > 1) {
 			amount *= 1.0F + (level * 0.2F);
 			PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
 			entityHit = entity;
-			xp = level + 1 + player.getEntityWorld().rand.nextInt(Math.max(2, MathHelper.ceil(entity.getHealth())));
+		} else if (!player.getEntityWorld().isRemote) {
+			onFail(player, false);
 		}
 		return amount;
+	}
+
+	@Override
+	public void postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		activeTimer = 0;
+		if (entityHit != null) {
+			xp = level + 1 + player.getEntityWorld().rand.nextInt(Math.max(2, MathHelper.ceil(entity.getHealth())));
+		}
+	}
+
+	private void onFail(EntityPlayer player, boolean timedOut) {
+		if (!player.capabilities.isCreativeMode) {
+			DSSPlayerInfo skills = DSSPlayerInfo.get(player);
+			int t = getDuration() * (timedOut ? 2 : 1);
+			skills.setAttackCooldown(t);
+			PacketDispatcher.sendTo(new ActionTimePacket(skills.getAttackTime(), true), (EntityPlayerMP) player);
+		}
+		if (!timedOut) {
+			PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.HURT_FLESH, SoundCategory.PLAYERS, 0.3F, 0.8F);
+		}
+		PacketDispatcher.sendTo(new EndingBlowPacket((byte)-1), (EntityPlayerMP) player);
 	}
 }

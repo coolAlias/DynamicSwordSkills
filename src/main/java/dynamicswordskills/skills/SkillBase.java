@@ -18,23 +18,30 @@
 package dynamicswordskills.skills;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ISkillProvider;
+import dynamicswordskills.api.SkillGroup;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncSkillPacket;
+import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.FMLContainer;
+import net.minecraftforge.fml.common.InjectedModContainer;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -48,130 +55,110 @@ public abstract class SkillBase
 	/** Default maximum skill level */
 	public static final byte MAX_LEVEL = 5;
 
-	/** For convenience in providing initial id values */
-	private static byte skillIndex = 0;
+	/** Unique ResourceLocation for this skill */
+	private ResourceLocation registryName = null;
 
-	/**  Map containing all registered skills */
-	private static final Map<Byte, SkillBase> skillsMap = new HashMap<Byte, SkillBase>();
+	/** Placeholder skill icon used by default */
+	public static final ResourceLocation DEFAULT_ICON = new ResourceLocation(ModInfo.ID, "textures/skills/default.png");
 
-	/** List of registered skills' unlocalized names, for use in Commands */
-	// if the skillsMap was keyed by unlocalized name, could just return the key set
-	private static final List<String> skillNames = new ArrayList<String>();
+	/** Icon texture location, if any */
+	private ResourceLocation iconLocation = null;
 
-	public static final SkillBase swordBasic = new SwordBasic("swordbasic").addDescriptions(1);
-	public static final SkillBase armorBreak = new ArmorBreak("armorbreak").addDescriptions(1);
-	public static final SkillBase dodge = new Dodge("dodge").addDescriptions(1);
-	public static final SkillBase leapingBlow = new LeapingBlow("leapingblow").addDescriptions(1);
-	public static final SkillBase parry = new Parry("parry").addDescriptions(1);
-	public static final SkillBase dash = new Dash("dash").addDescriptions(1);
-	public static final SkillBase spinAttack = new SpinAttack("spinattack").addDescriptions(1);
-	public static final SkillBase superSpinAttack = new SpinAttack("superspinattack").addDescriptions(1);
-	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw").addDescriptions(1);
-	public static final SkillBase swordBreak = new SwordBreak("swordbreak").addDescriptions(1);
-	public static final SkillBase risingCut = new RisingCut("risingcut").addDescriptions(1);
-	public static final SkillBase endingBlow = new EndingBlow("endingblow").addDescriptions(1);
-	public static final SkillBase backSlice = new BackSlice("backslice").addDescriptions(1);
-	public static final SkillBase swordBeam = new SwordBeam("swordbeam").addDescriptions(1);
+	/** Icon texture resolution */
+	private int iconResolution = 16;
 
-	/** Unlocalized name for language registry */
-	private final String unlocalizedName;
+	/** Language registry translation key */
+	public final String translationKey;
 
-	/** IDs are determined internally; used as key to retrieve skill instance from skills map */
-	private final byte id;
+	/** IDs are determined internally and may change between server sessions; do NOT use these for persistent storage */
+	private byte id;
 
 	/** Mutable field storing current level for this instance of SkillBase */
 	protected byte level = 0;
 
 	/** Contains descriptions for tooltip display */
-	private final List<String> tooltip = new ArrayList<String>();
+	private final List<ITextComponent> tooltip = new ArrayList<ITextComponent>();
 
 	/**
-	 * Constructs the first instance of a skill and stores it in the skill list
-	 * @param name		this is the unlocalized name and should not contain any spaces
-	 * @param register	whether to register the skill, adding the skill to the skill list;
-	 * 					seems to always be true since skills are declared statically
+	 * @param translationKey String used as the language translation key
 	 */
-	protected SkillBase(String name, boolean register) {
-		this.unlocalizedName = name;
-		this.id = skillIndex++;
-		if (register) {
-			if (skillsMap.containsKey(id)) {
-				DynamicSwordSkills.logger.warn("CONFLICT @ skill " + id + " id already occupied by "
-						+ skillsMap.get(id).unlocalizedName + " while adding " + name);
-			}
-			skillsMap.put(id, this);
-			skillNames.add(unlocalizedName);
-		}
+	public SkillBase(String translationKey) {
+		this.translationKey = translationKey;
 	}
 
 	/**
 	 * Copy constructor creates a level zero version of the skill
 	 */
 	protected SkillBase(SkillBase skill) {
-		this.unlocalizedName = skill.unlocalizedName;
 		this.id = skill.id;
+		this.iconLocation = skill.iconLocation;
+		this.registryName = skill.registryName;
+		this.translationKey = skill.translationKey;
 		this.tooltip.addAll(skill.tooltip);
 	}
 
-	/** Returns true if the id provided is mapped to a skill */
-	public static final boolean doesSkillExist(int id) {
-		return (id >= 0 && id <= Byte.MAX_VALUE && skillsMap.containsKey((byte) id));
-	}
-
-	/** Returns a new instance of the skill with id, or null if it doesn't exist */
-	public static final SkillBase getNewSkillInstance(byte id) {
-		return (skillsMap.containsKey(id) ? skillsMap.get(id).newInstance() : null);
-	}
-
-	/** Returns the instance of the skill stored in the map if it exists, or null */
-	public static final SkillBase getSkill(int id) {
-		return (doesSkillExist(id) ? skillsMap.get((byte) id) : null);
-	}
-
-	/** Returns an iterable collection of all the skills in the map */
-	public static final Collection<SkillBase> getSkills() {
-		return Collections.unmodifiableCollection(skillsMap.values());
-	}
-
-	/** Returns the total number of registered skills */
-	public static final int getNumSkills() {
-		return skillsMap.size();
-	}
-
-	/** Returns all registered skills' unlocalized names as an array */
-	public static final String[] getSkillNames() {
-		return skillNames.toArray(new String[skillNames.size()]);
-	}
-
 	/**
-	 * Retrieves a skill by its unlocalized name, or null if not found
+	 * Sets the registry name and registers this skill to the SkillRegistry
+	 * @param registryName
+	 * @return The registered skill instance
 	 */
-	public static final SkillBase getSkillByName(String name) {
-		for (SkillBase skill : SkillBase.getSkills()) {
-			if (name.equals(skill.getUnlocalizedName())) {
-				return skill;
-			}
-		}
-		return null;
+	public SkillBase register(String registryName) {
+		this.setRegistryName(registryName);
+		return SkillRegistry.register(this);
 	}
 
 	/**
-	 * Returns a leveled skill from an ISkillItem using {@link ISkillProvider#getSkillId(ItemStack)}
+	 * Called by the SkillRegistry after successfully registering a new skill to set the skill ID
+	 */
+	public final SkillBase onRegistered() {
+		this.id = (byte) SkillRegistry.getSkillId(this);
+		return this;
+	}
+
+	// Copied from IForgeRegistryEntry
+	public SkillBase setRegistryName(String name) {
+		if (getRegistryName() != null) {
+			throw new IllegalStateException("Attempted to set registry name with existing registry name! New: " + name + " Old: " + getRegistryName());
+		}
+		int index = name.lastIndexOf(':');
+		String oldPrefix = index == -1 ? "" : name.substring(0, index);
+		name = index == -1 ? name : name.substring(index + 1);
+		ModContainer mc = Loader.instance().activeModContainer();
+		String prefix = mc == null || (mc instanceof InjectedModContainer && ((InjectedModContainer)mc).wrappedContainer instanceof FMLContainer) ? ModInfo.ID : mc.getModId().toLowerCase();
+		if (!oldPrefix.equals(prefix) && oldPrefix.length() > 0) {
+			DynamicSwordSkills.logger.warn("Dangerous alternative prefix `%s` for name `%s`, expected `%s` invalid registry invocation/invalid name?", oldPrefix, name, prefix);
+			prefix = oldPrefix;
+		}
+		this.registryName = new ResourceLocation(prefix, name);
+		return this;
+	}
+
+	public SkillBase setRegistryName(ResourceLocation name) {
+		return this.setRegistryName(name.toString());
+	}
+
+	public ResourceLocation getRegistryName() {
+		return this.registryName;
+	}
+
+	/**
+	 * Returns a leveled skill from an ISkillProvider using {@link ISkillProvider#getSkillId(ItemStack)}
 	 * and {@link ISkillProvider#getSkillLevel(ItemStack)}, or null if not possible
 	 */
 	public static final SkillBase getSkillFromItem(final ItemStack stack, final ISkillProvider item) {
-		return createLeveledSkill(item.getSkillId(stack), item.getSkillLevel(stack));
+		SkillBase skill = SkillRegistry.getSkillById(item.getSkillId(stack));
+		return createLeveledSkill(skill, item.getSkillLevel(stack));
 	}
 
 	/**
 	 * Returns a leveled skill from an id and level, capped at the max level for the skill;
 	 * May return null if the id is invalid or level is less than 1
 	 */
-	public static final SkillBase createLeveledSkill(final int id, final byte level) {
-		if (doesSkillExist(id) && level > 0) {
-			SkillBase skill = getNewSkillInstance((byte) id);
-			skill.level = (level > skill.getMaxLevel() ? skill.getMaxLevel() : level);
-			return skill;
+	public static final SkillBase createLeveledSkill(@Nullable final SkillBase skill, final byte level) {
+		if (skill != null && level > 0) {
+			SkillBase instance = skill.newInstance();
+			instance.level = (level > skill.getMaxLevel() ? skill.getMaxLevel() : level);
+			return instance;
 		}
 		return null;
 	}
@@ -196,32 +183,83 @@ public abstract class SkillBase
 		return (skill.id == this.id && skill.level == this.level);
 	}
 
-	/** Returns a new instance of the skill with appropriate class type without registering it to the Skill database */
+	/**
+	 * Use this method instead of equals when level is not relevant to the equality comparison
+	 * @return true if this skill is the same as another based solely on {@link #getId()}
+	 */
+	public boolean is(@Nullable SkillBase skill) {
+		return (skill != null && this.getId() == skill.getId());
+	}
+
+	/** Return a new instance of the skill with appropriate class type */
 	public abstract SkillBase newInstance();
 
 	/** Returns the translated skill name */
-	public final String getDisplayName() {
-		return new TextComponentTranslation(getFullUnlocalizedName() + ".name").getUnformattedText();
+	public String getDisplayName() {
+		return new TextComponentTranslation(getNameTranslationKey()).getUnformattedText();
+	}
+
+	/** Returns the translation key prefixed by 'skill.dss.' */
+	public String getTranslationKey() {
+		return "skill.dss." + translationKey;
 	}
 
 	/** Returns the string used to translate this skill's name */
-	public final String getTranslationString() {
-		return getFullUnlocalizedName() + ".name";
+	public String getNameTranslationKey() {
+		return getTranslationKey() + ".name";
 	}
 
-	/** Returns the unlocalized name with no prefix, exactly as the skill was registered */
-	public final String getUnlocalizedName() {
-		return unlocalizedName;
+	/**
+	 * Default implementation returns true if the group's label matches the resource domain of this skill's registry name
+	 * @return True if the skill should be displayed in the requested group by default; user settings may override this.
+	 */
+	public boolean displayInGroup(SkillGroup group) {
+		return this.getRegistryName() != null && group.label.equalsIgnoreCase(this.getRegistryName().getResourceDomain());
 	}
 
-	/** Returns the unlocalized name prefixed by 'skill.dss' */
-	public final String getFullUnlocalizedName() {
-		return "skill.dss." + unlocalizedName;
+	/**
+	 * Called when the player does not have any levels in this skill and the GUI is configured to display unknown skills.
+	 * Note that this method is NOT called on the player's actual skill instance, but a dummy version.
+	 * @return true to display this skill's actual icon rather than the placeholder icon
+	 */
+	@SideOnly(Side.CLIENT)
+	public boolean showIconIfUnknown(EntityPlayer player) {
+		return false;
 	}
 
-	/** Returns texture path for the skill's icon */
-	public String getIconTexture() {
-		return ModInfo.ID + ":skillorb_" + unlocalizedName;
+	/**
+	 * Called when the player does not have any levels in this skill and the GUI is configured to display unknown skills.
+	 * Note that this method is NOT called on the player's actual skill instance, but a dummy version.
+	 * @return true to display this skill's actual display name rather than the placeholder text
+	 */
+	@SideOnly(Side.CLIENT)
+	public boolean showNameIfUnknown(EntityPlayer player) {
+		return false;
+	}
+
+	/** Return the texture path for the skill's icon */
+	public ResourceLocation getIconLocation() {
+		return (iconLocation == null ? DEFAULT_ICON : iconLocation);
+	}
+
+	/** Sets the texture path for the skill's icon */
+	public SkillBase setIconLocation(String location) {
+		this.iconLocation = DynamicSwordSkills.getResourceLocation(location);
+		return this;
+	}
+
+	/** Returns the skill icon's resolution */
+	public int getIconResolution() {
+		return this.iconResolution;
+	}
+
+	/**
+	 * Sets the texture resolution for the skill's icon
+	 * @param resolution For best results, use either 16, 32, or 64 
+	 */
+	public SkillBase setIconResolution(int resolution) {
+		this.iconResolution = resolution;
+		return this;
 	}
 
 	/** Each skill's ID can be used as a key to retrieve it from the map */
@@ -239,116 +277,81 @@ public abstract class SkillBase
 		return MAX_LEVEL;
 	}
 
-	/**
-	 * Returns the key used by the language file for getting tooltip description n
-	 * Language file should contain key "skill.dss.{unlocalizedName}.desc.{label}.n"
-	 * @param label the category for the data, usually "tooltip" or "info"
-	 * @param n if less than zero, ".n" will not be appended
-	 */
-	protected final String getInfoString(String label, int n) {
-		return getFullUnlocalizedName() + ".desc." + label + (n < 0 ? "" : ("." + n));
+	/** Calls {@link #addTranslatedTooltip(String)} using the default tooltip language key, i.e. {@link #getTranslationKey()} + ".tooltip"  */
+	protected final SkillBase addDefaultTooltip() {
+		return addTranslatedTooltip(getTranslationKey() + ".tooltip");
 	}
 
-	/** Adds a single untranslated string to the skill's tooltip display */
-	protected final SkillBase addDescription(String string) {
-		tooltip.add(string);
-		return this;
+	/** Adds a translation component to the skill's tooltip display */
+	protected final SkillBase addTranslatedTooltip(String translationKey) {
+		return addTooltip(new TextComponentTranslation(translationKey));
 	}
 
-	/** Adds all entries in the provided list to the skill's tooltip display */
-	protected final SkillBase addDescription(List<String> list) {
-		for (String s : list) { tooltip.add(s); }
+	/** Adds a text component to the skill's tooltip display; note that formatting may be ignored */
+	protected final SkillBase addTooltip(ITextComponent component) {
+		tooltip.add(component);
 		return this;
 	}
 
 	/**
-	 * Adds n descriptions to the tooltip using the default 'tooltip' label:
-	 * {@link SkillBase#getInfoString(String label, int n) getInfoString}
-	 * @param n the number of descriptions to add should be at least 1
-	 */
-	protected final SkillBase addDescriptions(int n) {
-		for (int i = 1; i <= n; ++i) {
-			tooltip.add(getInfoString("tooltip", i));
-		}
-		return this;
-	}
-
-	/**
-	 * Returns the translated tooltip, possibly with advanced display with player information
+	 * @return unformatted tooltip strings with {@link #addInformation additional information} if showing the advanced tooltip 
 	 */
 	@SideOnly(Side.CLIENT)
-	public final List<String> getTranslatedTooltip(EntityPlayer player) {
+	public final List<String> getTooltip(EntityPlayer player, boolean advanced) {
 		List<String> desc = new ArrayList<String>(tooltip.size());
-		for (String s : tooltip) {
-			desc.add(new TextComponentTranslation(s).getUnformattedText());
+		for (ITextComponent s : tooltip) {
+			desc.add(s.getUnformattedText());
 		}
-		if (Minecraft.getMinecraft().gameSettings.advancedItemTooltips) {
+		if (advanced) {
 			addInformation(desc, player);
 		}
 		return desc;
 	}
 
-	/** Returns the translated list containing Strings for tooltip display */
-	@SideOnly(Side.CLIENT)
-	public final List<String> getDescription() {
-		List<String> desc = new ArrayList<String>(tooltip.size());
-		for (String s : tooltip) {
-			desc.add(new TextComponentTranslation(s).getUnformattedText());
-		}
-		return desc;
-	}
-
-	/** Returns a personalized tooltip display containing info about skill at current level */
-	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
-		addInformation(desc, player);
-		return desc;
-	}
-
-	/** Allows subclasses to add descriptions of pertinent traits (damage, range, etc.) */
+	/** Add all pertinent traits (damage, range, etc.) to display in advanced tooltips and the skill GUI */
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {}
 
-	/** Returns the translated description of the skill's activation requirements (long version) */
+	/** Returns the translated description of the skill's activation requirements, if any */
+	@Nullable
 	public String getActivationDisplay() {
-		return new TextComponentTranslation(getFullUnlocalizedName() + ".desc.activate").getUnformattedText();
+		return null;
 	}
 
 	/** Returns a translated description of the skill's AoE, using the value provided */
 	public String getAreaDisplay(double area) {
-		return new TextComponentTranslation("skill.dss.desc.area", String.format("%.1f", area)).getUnformattedText();
+		return new TextComponentTranslation("skill.dss.info.area", String.format("%.1f", area)).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's charge time in ticks, using the value provided */
 	public String getChargeDisplay(int chargeTime) {
-		return new TextComponentTranslation("skill.dss.desc.charge", chargeTime).getUnformattedText();
+		return new TextComponentTranslation("skill.dss.info.charge", chargeTime).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's damage, using the value provided and with "+" if desired */
 	public String getDamageDisplay(float damage, boolean displayPlus) {
-		return new TextComponentTranslation("skill.dss.desc.damage", (displayPlus ? "+" : ""), String.format("%.1f", damage)).getUnformattedText();
+		return new TextComponentTranslation("skill.dss.info.damage", (displayPlus ? "+" : ""), String.format("%.1f", damage)).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's damage, using the value provided and with "+" if desired */
 	public String getDamageDisplay(int damage, boolean displayPlus) {
-		return new TextComponentTranslation("skill.dss.desc.damage", (displayPlus ? "+" : ""), damage).getUnformattedText();
+		return new TextComponentTranslation("skill.dss.info.damage", (displayPlus ? "+" : ""), damage).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's duration, in ticks or seconds, using the value provided */
 	public String getDurationDisplay(int duration, boolean inTicks) {
 		String time = (inTicks ? new TextComponentTranslation("skill.dss.ticks").getUnformattedText() : new TextComponentTranslation("skill.dss.seconds").getUnformattedText());
-		return new TextComponentTranslation("skill.dss.desc.duration", (inTicks ? duration : duration / 20), time).getUnformattedText();
+		return new TextComponentTranslation("skill.dss.info.duration", (inTicks ? duration : duration / 20), time).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's exhaustion, using the value provided */
 	public String getExhaustionDisplay(float exhaustion) {
-		return new TextComponentTranslation("skill.dss.desc.exhaustion", String.format("%.2f", exhaustion)).getUnformattedText();
+		return new TextComponentTranslation("skill.dss.info.exhaustion", String.format("%.2f", exhaustion)).getUnformattedText();
 	}
 
 	/** Returns the translated description of the skill's effect (long version) */
 	public String getFullDescription() {
-		return new TextComponentTranslation(getFullUnlocalizedName() + ".desc.full").getUnformattedText();
+		return new TextComponentTranslation(getTranslationKey() + ".description").getUnformattedText();
 	}
 
 	/**
@@ -359,17 +362,17 @@ public abstract class SkillBase
 		if (simpleMax && level == getMaxLevel()) {
 			return new TextComponentTranslation("skill.dss.level.max").getUnformattedText();
 		}
-		return new TextComponentTranslation("skill.dss.desc.level", level, getMaxLevel()).getUnformattedText();
+		return new TextComponentTranslation("skill.dss.info.level", level, getMaxLevel()).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's range, using the value provided */
 	public String getRangeDisplay(double range) {
-		return new TextComponentTranslation("skill.dss.desc.range", String.format("%.1f", range)).getUnformattedText();
+		return new TextComponentTranslation("skill.dss.info.range", String.format("%.1f", range)).getUnformattedText();
 	}
 
 	/** Returns a translated description of the skill's time limit, using the value provided */
 	public String getTimeLimitDisplay(int time) {
-		return new TextComponentTranslation("skill.dss.desc.time", time).getUnformattedText();
+		return new TextComponentTranslation("skill.dss.info.time", time).getUnformattedText();
 	}
 
 	/** Returns true if player meets requirements to learn this skill at target level */
@@ -377,12 +380,31 @@ public abstract class SkillBase
 		return ((level + 1) == targetLevel && targetLevel <= getMaxLevel());
 	}
 
-	/** Called each time a skill's level increases; responsible for everything OTHER than increasing the skill's level: applying any bonuses, handling Xp, etc. */
-	protected abstract void levelUp(EntityPlayer player);
+	/**
+	 * Called each time a skill's level increases; the {@link #level} value has already been incremented when this is called.
+	 * Default implementation calls {@link #resetModifiers(EntityPlayer)} - override if leveling up requires more complexity.
+	 */
+	protected void levelUp(EntityPlayer player) {
+		resetModifiers(player);
+	}
 
-	/** Recalculates bonuses, etc. upon player respawn; Override if levelUp does things other than just calculate bonuses! */
-	public void validateSkill(EntityPlayer player) {
-		levelUp(player);
+	/**
+	 * Implementations should remove any modifiers applied to the player (e.g. AttributeModifiers) and
+	 * reapply them based on the current skill level.
+	 * Skill level may be 0 when e.g. removing a skill completely.
+	 */
+	protected abstract void resetModifiers(EntityPlayer player);
+
+	/**
+	 * Calls {@link #resetModifiers(EntityPlayer)} to ensure modifiers are correct upon respawn, skill removal, etc. 
+	 */
+	public final void validateSkill(EntityPlayer player) {
+		byte lvl = this.level;
+		if (Config.isSkillDisabled(player, this)) {
+			this.level = 0;
+		}
+		resetModifiers(player);
+		this.level = lvl;
 	}
 
 	/** Shortcut method to grant skill at current level + 1 */
@@ -394,13 +416,18 @@ public abstract class SkillBase
 	 * Attempts to level up the skill to target level, returning true if skill's level increased (not necessarily to the target level)
 	 */
 	public final boolean grantSkill(EntityPlayer player, int targetLevel) {
-		if (targetLevel <= level || targetLevel > getMaxLevel()) {
+		if (!Config.isSkillAllowed(this)) {
+			return false;
+		} else if (targetLevel <= level || targetLevel > getMaxLevel()) {
 			return false;
 		}
 		byte oldLevel = level;
 		while (level < targetLevel && canIncreaseLevel(player, level + 1)) {
 			++level;
 			levelUp(player);
+		}
+		if (Config.isSkillDisabled(player, this)) {
+			validateSkill(player);
 		}
 		if (!player.getEntityWorld().isRemote && oldLevel < level) {
 			PacketDispatcher.sendTo(new SyncSkillPacket(this), (EntityPlayerMP) player);
@@ -411,13 +438,55 @@ public abstract class SkillBase
 	/** This method should be called every update tick */
 	public void onUpdate(EntityPlayer player) {}
 
-	/** Writes mutable data to NBT. */
-	public abstract void writeToNBT(NBTTagCompound compound);
+	/**
+	 * Calls {@link #writeAdditionalData(NBTTagCompound)} with a new tag and appends this skill's registry name and level
+	 */
+	public final NBTTagCompound writeToNBT() {
+		NBTTagCompound tag = new NBTTagCompound();
+		this.writeAdditionalData(tag);
+		tag.setString("id", this.getRegistryName().toString());
+		tag.setByte("level", level);
+		return tag;
+	}
 
-	/** Reads mutable data from NBT. */
-	public abstract void readFromNBT(NBTTagCompound compound);
+	/**
+	 * Calls {@link #readAdditionalData(NBTTagCompound)} after loading the skill's {@link #level} field from NBT.
+	 */
+	public void readFromNBT(NBTTagCompound tag) {
+		this.level = tag.getByte("level");
+		this.readAdditionalData(tag);
+	}
 
-	/** Returns a new instance from NBT */
-	public abstract SkillBase loadFromNBT(NBTTagCompound compound);
+	/**
+	 * Called from {@link #writeToNBT()} to write additional data to the skill's NBT tag.
+	 */
+	public void writeAdditionalData(NBTTagCompound tag) {}
 
+	/**
+	 * Called from {@link #readFromNBT()} to read additional data from the skill's NBT tag.
+	 */
+	public void readAdditionalData(NBTTagCompound tag) {}
+
+	/**
+	 * Creates a new skill instance of the appropriate type based on the NBT data
+	 * and calls {@link #readFromNBT(NBTTagCompound)} prior to returning it.
+	 * @return May be null for an invalid NBT tag
+	 */
+	public static final SkillBase loadFromNBT(NBTTagCompound tag) {
+		SkillBase skill = null;
+		if (tag.hasKey("id", Constants.NBT.TAG_BYTE)) {
+			skill = SkillRegistry.getSkillById(tag.getByte("id"));
+		} else {
+			String name = tag.getString("id");
+			if (name.lastIndexOf(':') == -1) {
+				name = ModInfo.ID + ":" + name;
+			}
+			skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
+		}
+		if (skill != null) {
+			skill = skill.newInstance();
+			skill.readFromNBT(tag);
+		}
+		return skill;
+	}
 }

@@ -17,12 +17,12 @@
 
 package dynamicswordskills.loot.functions;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.loot.conditions.SkillCondition;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.SkillBase;
@@ -37,10 +37,10 @@ import net.minecraft.world.storage.loot.functions.LootFunction;
  */
 public abstract class SkillFunction extends LootFunction
 {
-	/** List of skill ids that are enabled and allowed as loot */
-	public static final List<Integer> SKILL_IDS;
+	/** List of skills that are enabled and allowed as loot */
+	private static final List<SkillBase> SKILLS;
 
-	/** Unlocalized name of the skill to grant if not random */
+	/** Skill to grant if not random */
 	protected String skill_name;
 
 	/**
@@ -60,30 +60,41 @@ public abstract class SkillFunction extends LootFunction
 	}
 
 	/**
-	 * Returns the skill id of {@link #skill_name} if specified and valid;
-	 * otherwise generates a random skill id for an enabled skill.
+	 * Returns the skill id of {@link #skill_name} if specified and valid
 	 */
-	protected int getSkillId(Random rand) {
+	protected SkillBase getSkill() {
 		if (this.skill_name != null) {
-			SkillBase skill = SkillBase.getSkillByName(this.skill_name);
+			SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(this.skill_name));
 			if (skill == null) {
-				throw new RuntimeException("Unknown skill '" + this.skill_name + "'");
-			} else if (!Config.isSkillEnabled(skill.getId())) {
-				DynamicSwordSkills.logger.warn(skill.getDisplayName() + " has been disabled in the Config settings; a random skill will be used instead.");
+				DynamicSwordSkills.logger.warn("Unknown skill '" + this.skill_name + "' - a random skill may be selected instead.");
+			} else if (!Config.isSkillAllowed(skill)) {
+				DynamicSwordSkills.logger.warn(skill.getDisplayName() + " has been disabled in the Config settings; a random skill may be selected instead.");
 			} else {
-				return skill.getId();
+				return skill;
 			}
 		}
-		return SkillFunction.SKILL_IDS.get(MathHelper.getInt(rand, 0, SkillFunction.SKILL_IDS.size() - 1));
+		return null;
+	}
+
+	/**
+	 * Returns true if at least one skills is enabled
+	 */
+	public static boolean areSkillsEnabled() {
+		return !SkillFunction.SKILLS.isEmpty();
+	}
+
+	/**
+	 * Returns a random skill from among all enabled skills, possibly null
+	 */
+	public static SkillBase getRandomSkill(Random rand) {
+		if (!SkillFunction.areSkillsEnabled()) {
+			return null;
+		}
+		int i = MathHelper.getInt(rand, 0, SkillFunction.SKILLS.size() - 1);
+		return SkillFunction.SKILLS.get(i);
 	}
 
 	static {
-		List<Integer> ids = new ArrayList<Integer>();
-		for (SkillBase skill : SkillBase.getSkills()) {
-			if (Config.isSkillEnabled(skill.getId())) {
-				ids.add((int) skill.getId());
-			}
-		}
-		SKILL_IDS = Collections.unmodifiableList(ids);
+		SKILLS = SkillRegistry.getValues().stream().filter(s -> Config.isSkillAllowed(s)).collect(Collectors.toList());
 	}
 }

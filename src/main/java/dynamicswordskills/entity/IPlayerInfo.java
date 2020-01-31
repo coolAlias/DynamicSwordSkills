@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
 
 import dynamicswordskills.capability.SimpleCapabilityProvider;
 import dynamicswordskills.ref.ModInfo;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
@@ -90,9 +91,9 @@ public interface IPlayerInfo {
 			MinecraftForge.EVENT_BUS.register(new CapabilityPlayerInfo());
 		}
 		@SubscribeEvent
-		public void attach(AttachCapabilitiesEvent.Entity event) {
-			if (event.getEntity() instanceof EntityPlayer) {
-				IPlayerInfo info = new IPlayerInfo.PlayerInfo(new DSSPlayerInfo((EntityPlayer) event.getEntity()));
+		public void attach(AttachCapabilitiesEvent<Entity> event) {
+			if (event.getObject() instanceof EntityPlayer) {
+				IPlayerInfo info = new IPlayerInfo.PlayerInfo(new DSSPlayerInfo((EntityPlayer) event.getObject()));
 				event.addCapability(ID, createProvider(info));
 			}
 		}
