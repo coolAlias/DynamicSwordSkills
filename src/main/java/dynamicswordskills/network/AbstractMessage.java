@@ -17,10 +17,10 @@
 
 package dynamicswordskills.network;
 
-import io.netty.buffer.ByteBuf;
-
 import java.io.IOException;
 
+import dynamicswordskills.DynamicSwordSkills;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.IThreadListener;
@@ -28,10 +28,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
-
-import com.google.common.base.Throwables;
-
-import dynamicswordskills.DynamicSwordSkills;
 
 /**
  * 
@@ -84,7 +80,7 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements I
 		try {
 			read(new PacketBuffer(buffer));
 		} catch (IOException e) {
-			throw Throwables.propagate(e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -93,7 +89,7 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements I
 		try {
 			write(new PacketBuffer(buffer));
 		} catch (IOException e) {
-			throw Throwables.propagate(e);
+			throw new RuntimeException(e);
 		}
 	}
 
