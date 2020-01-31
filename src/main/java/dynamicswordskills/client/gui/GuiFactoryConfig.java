@@ -56,6 +56,7 @@ public class GuiFactoryConfig implements cpw.mods.fml.client.IModGuiFactory
 		@Override
 		public void onGuiClosed() {
 			Config.refreshClient();
+			Config.refreshServer();
 		}
 
 		public static class ClientEntry extends CategoryEntry
