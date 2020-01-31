@@ -58,6 +58,7 @@ public class GuiFactoryConfig implements IModGuiFactory
 		@Override
 		public void onGuiClosed() {
 			Config.refreshClient();
+			Config.refreshServer();
 		}
 
 		public static class ClientEntry extends CategoryEntry
