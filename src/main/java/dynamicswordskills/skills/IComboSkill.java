@@ -29,13 +29,13 @@ public interface IComboSkill
 {
 	/** Returns the Combo instance for associated class */
 	public Combo getCombo();
-	
+
 	/** Should assign the instance of Combo retrieved from getCombo() to the argument combo */
 	public void setCombo(Combo combo);
-	
+
 	/** Returns true if a combo is currently in progress */
 	public boolean isComboInProgress();
-	
+
 	/**
 	 * Called client side when the player attacks but there is no target within reach;
 	 * use this method to e.g. send a packet to the server to terminate a Combo.
@@ -50,7 +50,7 @@ public interface IComboSkill
 	 * @param player should be gotten from '(EntityPlayer) event.source.getEntity()' if event.source.getEntity() is correct type
 	 */
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event);
-	
+
 	/**
 	 * Should be called when a player actively using a Combo receives damage. Useful for ending a
 	 * combo when damage exceeds a certain threshold. Note that LivingHurtEvent only gets called
