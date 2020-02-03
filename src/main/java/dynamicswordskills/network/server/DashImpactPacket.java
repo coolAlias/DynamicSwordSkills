@@ -61,7 +61,7 @@ public class DashImpactPacket extends AbstractServerMessage<DashImpactPacket>
 	 * @param mop Must not be null
 	 */
 	public DashImpactPacket(EntityPlayer player, MovingObjectPosition mop) {
-		this.hitType = (byte) mop.typeOfHit.ordinal();
+		this.hitType = (byte)(mop == null ? MovingObjectType.MISS.ordinal() : mop.typeOfHit.ordinal());
 		if (this.hitType == MovingObjectType.ENTITY.ordinal()) {
 			this.entityId = mop.entityHit.getEntityId();
 		}
