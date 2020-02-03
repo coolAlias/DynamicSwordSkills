@@ -334,7 +334,7 @@ public class SpinAttack extends SkillActive implements IModifiableSkill, IReachA
 	private void startSpin(EntityPlayer player) {
 		++refreshed;
 		if (player.getEntityWorld().isRemote) {
-			targets = player.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, player.getEntityBoundingBox().expand(getRange(), 0.0D, getRange()));
+			targets = player.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, player.getEntityBoundingBox().grow(getRange(), 0.0D, getRange()));
 			if (targets.contains(player)) {
 				targets.remove(player);
 			}
