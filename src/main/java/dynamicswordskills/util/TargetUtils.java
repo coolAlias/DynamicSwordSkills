@@ -34,6 +34,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -311,6 +312,7 @@ public class TargetUtils
 
 	/**
 	 * Returns the default target selector predicates:
+	 * - {@link EntitySelectors#IS_ALIVE}
 	 * - {@link #COLLIDABLE_ENTITY_SELECTOR}
 	 * - {@link #NON_RIDING_SELECTOR}
 	 * - {@link #NON_TEAM_SELECTOR}
@@ -318,6 +320,7 @@ public class TargetUtils
 	 */
 	public static final List<Predicate<Entity>> getDefaultSelectors() {
 		List<Predicate<Entity>> list = Lists.<Predicate<Entity>>newArrayList();
+		list.add(EntitySelectors.IS_ALIVE);
 		list.add(COLLIDABLE_ENTITY_SELECTOR);
 		list.add(NON_RIDING_SELECTOR);
 		list.add(NON_TEAM_SELECTOR);
