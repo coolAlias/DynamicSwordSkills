@@ -39,6 +39,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
@@ -320,6 +321,7 @@ public class SpinAttack extends SkillActive implements IModifiableSkill, IReachA
 	 */
 	protected List<Predicate<Entity>> getTargetSelectors() {
 		List<Predicate<Entity>> list = Lists.<Predicate<Entity>>newArrayList();
+		list.add(EntitySelectors.IS_ALIVE);
 		list.add(TargetUtils.COLLIDABLE_ENTITY_SELECTOR);
 		list.add(TargetUtils.NON_RIDING_SELECTOR);
 		list.add(TargetUtils.NON_TEAM_SELECTOR);
@@ -334,7 +336,7 @@ public class SpinAttack extends SkillActive implements IModifiableSkill, IReachA
 	private void startSpin(EntityPlayer player) {
 		++refreshed;
 		if (player.worldObj.isRemote) {
-			targets = player.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, player.getEntityBoundingBox().expand(getRange(), 0.0D, getRange()));
+			targets = player.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, player.getEntityBoundingBox().expand(getRange(), 0.0D, getRange()), EntitySelectors.IS_ALIVE);
 			if (targets.contains(player)) {
 				targets.remove(player);
 			}
