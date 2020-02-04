@@ -196,11 +196,6 @@ public abstract class SkillBase
 		return getTranslationKey() + ".name";
 	}
 
-	/** Returns texture path for the skill's icon */
-	public String getIconTexture() {
-		return ModInfo.ID + ":skillorb_" + translationKey;
-	}
-
 	/** Each skill's ID can be used as a key to retrieve it from the map */
 	public final byte getId() {
 		return id;

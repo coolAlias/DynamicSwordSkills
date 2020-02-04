@@ -32,6 +32,7 @@ import dynamicswordskills.api.IRandomSkill;
 import dynamicswordskills.api.ISkillInfusionFuelItem;
 import dynamicswordskills.api.ItemGrantSkill;
 import dynamicswordskills.api.SkillRegistry;
+import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
@@ -115,8 +116,7 @@ public class ItemSkillOrb extends ItemGrantSkill implements ISkillInfusionFuelIt
 	public void registerIcons(IIconRegister register) {
 		icons = new ArrayList<IIcon>(skill_id_map.size());
 		for (Entry<Integer, ResourceLocation> entry : skill_id_map.entrySet()) {
-			SkillBase skill = SkillRegistry.get(entry.getValue());
-			icons.add(register.registerIcon(skill.getIconTexture()));
+			icons.add(register.registerIcon(ModInfo.ID + ":skillorb_" + entry.getValue().getResourcePath().toLowerCase()));
 		}
 	}
 }
