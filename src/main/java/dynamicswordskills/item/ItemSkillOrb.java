@@ -17,12 +17,12 @@
 
 package dynamicswordskills.item;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
 import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -45,7 +45,7 @@ import net.minecraft.util.StatCollector;
 public class ItemSkillOrb extends ItemGrantSkill implements ISkillInfusionFuelItem, IMetadataSkillItem, IRandomSkill
 {
 	@SideOnly(Side.CLIENT)
-	private List<IIcon> icons;
+	private BiMap<Integer, IIcon> icons;
 
 	private final BiMap<Integer, ResourceLocation> skill_id_map;
 
@@ -114,9 +114,9 @@ public class ItemSkillOrb extends ItemGrantSkill implements ISkillInfusionFuelIt
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister register) {
-		icons = new ArrayList<IIcon>(skill_id_map.size());
+		icons = HashBiMap.<Integer, IIcon>create(skill_id_map.size());
 		for (Entry<Integer, ResourceLocation> entry : skill_id_map.entrySet()) {
-			icons.add(register.registerIcon(ModInfo.ID + ":skillorb_" + entry.getValue().getResourcePath().toLowerCase()));
+			icons.put(entry.getKey(), register.registerIcon(ModInfo.ID + ":skillorb_" + entry.getValue().getResourcePath().toLowerCase()));
 		}
 	}
 }
