@@ -98,13 +98,25 @@ public class ItemRandomSkill extends ItemSword implements IModItem, IRandomSkill
 		if (!stack.hasTagCompound()) {
 			return -1;
 		}
-		String name = stack.getTagCompound().getString("ItemSkillName");
-		// For backwards compatibility:
-		if (name.lastIndexOf(':') == -1) {
-			name = ModInfo.ID + ":" + name;
-			stack.getTagCompound().setString("ItemSkillName", name);
+		NBTTagCompound tag = stack.getTagCompound();
+		SkillBase skill = null;
+		if (tag.hasKey("ItemSkillName")) {
+			String name = tag.getString("ItemSkillName");
+			// For backwards compatibility:
+			if (name.lastIndexOf(':') == -1) {
+				name = ModInfo.ID + ":" + name;
+				tag.setString("ItemSkillName", name);
+			}
+			skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
 		}
-		SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
+		// For backwards compatibility:
+		if (skill == null && tag.hasKey("ItemSkillId")) {
+			skill = SkillRegistry.getSkillById(tag.getInteger("ItemSkillId"));
+			if (skill != null) {
+				tag.setString("ItemSkillName", skill.getRegistryName().toString());
+				tag.removeTag("ItemSkillId");
+			}
+		}
 		return (skill == null ? -1 : skill.getId());
 	}
 
