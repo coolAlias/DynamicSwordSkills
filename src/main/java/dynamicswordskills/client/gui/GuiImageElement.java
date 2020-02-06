@@ -113,19 +113,10 @@ public class GuiImageElement extends GuiContainedElement
 		int dy = Math.round((float)this.scrollY * f);
 		this.offsetY = 0;
 		if (this.scale > 1.0F) {
-			//System.out.println(String.format("dh = %d | dw = %d | dx = %d | dy = %d", dh, dw, dx, dy));
 			int i = dh + dy;
-			// 47 + 18 = 65
-			// TODO this fixes the scaled up image from rendering extra, but throws off the yPos of the next element
 			if (i > this.textureHeight) {
-				//this.displayAddY = 1;//Math.round(f * (i - this.textureHeight));
 				this.offsetY = i - this.textureHeight;
 				dy -= this.offsetY;
-				// this.offsetY += 2;
-				//dh += i - this.textureHeight;
-				// this.remainingHeight = dh + dy;
-				//dh -= 4;
-				//dy -= 4;
 			}
 		}
 		GlStateManager.pushAttrib();
