@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/basic_technique"
+        "layer0": "dynamicswordskills:items/skill_orb_basic_technique"
     },
     "display": {
         "thirdperson": {

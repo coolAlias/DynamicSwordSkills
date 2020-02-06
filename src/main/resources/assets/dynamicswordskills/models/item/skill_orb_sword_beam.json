@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/sword_beam"
+        "layer0": "dynamicswordskills:items/skill_orb_sword_beam"
     },
     "display": {
         "thirdperson": {

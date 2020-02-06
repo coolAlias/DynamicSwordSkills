@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/armor_break"
+        "layer0": "dynamicswordskills:items/skill_orb_armor_break"
     },
     "display": {
         "thirdperson": {

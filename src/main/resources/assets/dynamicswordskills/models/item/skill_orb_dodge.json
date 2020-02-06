@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/dodge"
+        "layer0": "dynamicswordskills:items/skill_orb_dodge"
     },
     "display": {
         "thirdperson": {

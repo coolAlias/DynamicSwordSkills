@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/mortal_draw"
+        "layer0": "dynamicswordskills:items/skill_orb_mortal_draw"
     },
     "display": {
         "thirdperson": {

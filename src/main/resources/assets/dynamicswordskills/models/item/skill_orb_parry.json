@@ -1,7 +1,7 @@
 {
     "parent": "dynamicswordskills:builtin/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/parry"
+        "layer0": "dynamicswordskills:items/skill_orb_parry"
     },
     "display": {
         "thirdperson": {
