@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "dynamicswordskills:items/spin_attack"
+        "layer0": "dynamicswordskills:items/skill_orb_spin_attack"
     }
 }
