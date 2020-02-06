@@ -60,7 +60,7 @@ public class DashImpactPacket extends AbstractServerMessage<DashImpactPacket>
 	 * @param mop Must not be null
 	 */
 	public DashImpactPacket(EntityPlayer player, RayTraceResult result) {
-		this.hitType = (result != null ? (byte) result.typeOfHit.ordinal() : (byte) 0);
+		this.hitType = (result != null ? (byte) result.typeOfHit.ordinal() : (byte) RayTraceResult.Type.MISS.ordinal());
 		if (this.hitType == RayTraceResult.Type.ENTITY.ordinal()) {
 			this.entityId = result.entityHit.getEntityId();
 		}
