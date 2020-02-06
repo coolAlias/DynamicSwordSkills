@@ -73,7 +73,8 @@ public class TargetUtils
 	 */
 	public static double getReachDistanceSq(EntityPlayer player) {
 		if (DynamicSwordSkills.isBG2Enabled) {
-			return BattlemodeHookContainerClass.INSTANCE.maxReachDistance(player);
+			double reach = BattlemodeHookContainerClass.INSTANCE.maxReachDistance(player);
+			return reach * reach;
 		}
 		return player.capabilities.isCreativeMode ? 36.0D : 12.0D;
 	}
