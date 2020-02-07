@@ -19,10 +19,9 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
@@ -41,21 +40,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
- * Tap 'down' arrow to parry an incoming attack with chance to disarm opponent. Only works on
- * opponents wielding an item, not against raw physical attacks such as a zombie touch.
- * 
- * Once activated, their is a short window (4 ticks at level 1) during which all incoming
- * attacks will be parried, followed by another short period during which parry cannot be
- * activated again (to prevent spamming). The 'cooldown' time decreases with level, whereas
- * the 'window' time increases.
- * 
- * Chance to Disarm: 0.1F per level + a time bonus of up to 0.2F
+ * PARRY
+ * Activation: Double-tap back then right-click while wielding a weapon
+ * Effect: A defensive flourish that blocks incoming weapon attacks and may disarm the opponent
  * Exhaustion: 0.3F minus 0.02F per level (0.2F at level 5)
- * Notes: For players of equal parry skill, chance to disarm is based solely on timing
- * 
- * Using vanilla controls, Parry is activated just like the Dodge skill, requiring either a
- * single tap and release, or a double-tap based on the Config settings. Parry never requires
- * a double tap when using the arrow key.
+ * Chance to Disarm: 0.1F per level + a time bonus of up to 0.2F - 0.05F for each attack parried beyond the first
+ * Duration: Timing window starts at 4 ticks and increases to 8 by max level
+ * Max Attacks Parried: 1 + (level / 2)
+ * Notes:
+ *   - Only works on attacks made with an item, not against raw physical attacks such as a zombie touch
+ *   - For players of equal parry skill, chance to disarm is based solely on timing
  * 
  */
 public class Parry extends SkillActive
@@ -66,6 +60,10 @@ public class Parry extends SkillActive
 	/** Number of attacks parried this activation cycle */
 	private int attacksParried;
 
+	/** Counter incremented when next correct key in sequence pressed; reset when activated or if ticksTilFail timer reaches 0 */
+	@SideOnly(Side.CLIENT)
+	private int keysPressed;
+
 	/** Only for double-tap activation: Current number of ticks remaining before skill will not activate */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
@@ -73,8 +71,8 @@ public class Parry extends SkillActive
 	/** Notification to play miss sound; set to true when activated and false when attack parried */
 	private boolean playMissSound;
 
-	public Parry(String name) {
-		super(name);
+	public Parry(String translationKey) {
+		super(translationKey);
 	}
 
 	private Parry(Parry skill) {
@@ -87,11 +85,16 @@ public class Parry extends SkillActive
 	}
 
 	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(new TextComponentTranslation(getInfoString("info", 1), (int)(getDisarmChance(player, null) * 100)).getUnformattedText());
-		desc.add(new TextComponentTranslation(getInfoString("info", 2), (int)(2.5F * (getActiveTime() - getParryDelay()))).getUnformattedText());
-		desc.add(new TextComponentTranslation(getInfoString("info", 3), getMaxParries()).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.chance", (int)(getDisarmChance(player, null) * 100)).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.bonus", (int)(2.5F * (getActiveTime() - getParryDelay()))).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.max", getMaxParries()).getUnformattedText());
 		desc.add(getTimeLimitDisplay(getActiveTime() - getParryDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
@@ -108,12 +111,12 @@ public class Parry extends SkillActive
 
 	/** Number of ticks that skill will be considered active */
 	private int getActiveTime() {
-		return 6 + level;
+		return 9 + (level / 2);
 	}
 
 	/** Number of ticks before player may attempt to use this skill again */
 	private int getParryDelay() {
-		return (5 - (level / 2)); // 2 tick usage window at level 1
+		return (5 - (level / 2));
 	}
 
 	/** The maximum number of attacks that may be parried per use of the skill */
@@ -123,54 +126,65 @@ public class Parry extends SkillActive
 
 	/**
 	 * Returns player's chance to disarm an attacker
-	 * @param attacker if the attacker is an EntityPlayer, their Parry score will decrease their chance
-	 * of being disarmed
+	 * @param attacker if the attacker is an EntityPlayer, their Parry score will decrease their chance of being disarmed
 	 */
 	private float getDisarmChance(EntityPlayer player, EntityLivingBase attacker) {
-		float penalty = 0.0F;
+		float penalty = 0.05F * attacksParried;
 		float bonus = Config.getDisarmTimingBonus() * (parryTimer > 0 ? (parryTimer - getParryDelay()) : 0);
 		if (attacker instanceof EntityPlayer) {
-			penalty = Config.getDisarmPenalty() * DSSPlayerInfo.get((EntityPlayer) attacker).getSkillLevel(this);
+			penalty += Config.getDisarmPenalty() * DSSPlayerInfo.get((EntityPlayer) attacker).getSkillLevel(this);
 		}
 		return ((level * 0.1F) - penalty + bonus);
 	}
 
-	@Override
-	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand());
+	/**
+	 * Returns the strength of the knockback effect when an attack is parried
+	 */
+	public float getKnockbackStrength() {
+		return 0.4F; // 0.5F is the base line per blocking with a shield
 	}
 
-	/**
-	 * Only allow activation if player not using item, to prevent clashing with SwordBreak
-	 */
+	@Override
+	public boolean canUse(EntityPlayer player) {
+		return super.canUse(player) && !isActive() 
+				&& !player.isHandActive() 
+				&& PlayerUtils.isWeapon(player.getHeldItemMainhand());
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return canUse(player) && !PlayerUtils.isBlocking(player);
+		return canUse(player) && keysPressed > 1 && ticksTilFail > 0;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_DOWN] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack));
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (canExecute(player)) {
-			if (Config.requiresDoubleTap()) {
-				if (ticksTilFail > 0) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-					ticksTilFail = 0;
-					return true;
-				} else {
-					ticksTilFail = 6;
+		if ((Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_BACK].getKey()) {
+			ticksTilFail = 6;
+			if (keysPressed < 2) {
+				if (!Config.requiresDoubleTap() && key == DSSKeyHandler.keys[DSSKeyHandler.KEY_BACK].getKey()) {
+					keysPressed++;
 				}
-			} else if (key != mc.gameSettings.keyBindBack) { // activate on first press, but not for vanilla key!
-				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-				return true;
+				keysPressed++;
 			}
+		} else if (key == mc.gameSettings.keyBindUseItem) {
+			boolean flag = (canExecute(player) && activate(player));
+			ticksTilFail = 0;
+			keysPressed = 0;
+			return flag;
+		} else {
+			ticksTilFail = 0;
+			keysPressed = 0;
 		}
 		return false;
 	}
@@ -181,6 +195,7 @@ public class Parry extends SkillActive
 		attacksParried = 0;
 		playMissSound = true;
 		player.swingArm(EnumHand.MAIN_HAND);
+		player.resetCooldown();
 		return isActive();
 	}
 
@@ -198,6 +213,9 @@ public class Parry extends SkillActive
 			}
 		} else if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
+			if (ticksTilFail < 1) {
+				keysPressed = 0;
+			}
 		}
 	}
 
@@ -209,10 +227,10 @@ public class Parry extends SkillActive
 				if (player.getEntityWorld().rand.nextFloat() < getDisarmChance(player, attacker)) {
 					PlayerUtils.dropHeldItem(attacker);
 				}
-				++attacksParried; // increment after disarm
+				++attacksParried; // increment after disarm check
 				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.SWORD_STRIKE, SoundCategory.PLAYERS, 0.4F, 0.5F);
 				playMissSound = false;
-				TargetUtils.knockTargetBack(attacker, player);
+				TargetUtils.knockTargetBack(attacker, player, getKnockbackStrength());
 				return true;
 			} // don't deactivate early, as there is a delay between uses
 		}

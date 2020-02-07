@@ -18,13 +18,17 @@
 package dynamicswordskills.skills;
 
 import java.util.List;
+import java.util.Set;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.network.server.RefreshSpinPacket;
+import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
@@ -32,8 +36,10 @@ import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
@@ -44,21 +50,19 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
- * Activated by left or right arrow; player spins in designated direction attacking
- * all enemies within 360 arc (like Link's spin attack in Zelda). With the Super Spin
- * Attack, most attributes are doubled, but it may only be used at full health.
+ * Player spins in a 360 degree arc, attacking all enemies within it.
+ * Super Spin Attack greatly improves the Spin Attack and allows spinning extra times
+ * by tapping the attack key, but it requires full or near-full health.
  * 
- * Activation: Hold left or right arrow key to charge up until spin attack commences
- * Vanilla: Begin moving either left or right, then press the other direction to
- * 			commence charging; both keys must be held to continue charging
- * 			Tapping attack will continue the spin (Super Spin Attack only)
+ * Activation: Hold both left and right movement keys to charge up until spin attack commences
+ * Super Spin Attack: Tap attack while spinning to spin again, up to once per level
  * Arc: 360 degrees, plus an extra 360 degrees for every level of Super Spin Attack
  * Charge time: 20 ticks, minus 2 per level
- * Range: 3.0D plus 0.5D per level each of Spin and Super Spin Attack
+ * Range: 3.0D plus 0.3D per level each of Spin and Super Spin Attack
  * Exhaustion: 3.0F - 0.2F per level, added each spin
  *
  */
-public class SpinAttack extends SkillActive
+public class SpinAttack extends SkillActive implements IModifiableSkill, IReachAttackSkill
 {
 	/** Current charge time; only ever set on the client - server is never charging */
 	private int charge;
@@ -76,10 +80,6 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private boolean clockwise;
 
-	/** Used to allow vanilla keys to determine spin direction */
-	@SideOnly(Side.CLIENT)
-	private boolean wasKeyPressed;
-
 	/** Entities within range upon activation so no entity targeted more than once */
 	@SideOnly(Side.CLIENT)
 	private List<EntityLivingBase> targets;
@@ -90,8 +90,11 @@ public class SpinAttack extends SkillActive
 	/** The player's Super Spin Attack level will allow multiple spins and extended range */
 	private int superLevel;
 
-	public SpinAttack(String name) {
-		super(name);
+	/** Bonus sword range provided by Super Spin Attack modifier, if any */
+	private float bonusRange;
+
+	public SpinAttack(String translationKey) {
+		super(translationKey);
 	}
 
 	private SpinAttack(SpinAttack skill) {
@@ -104,18 +107,20 @@ public class SpinAttack extends SkillActive
 	}
 
 	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		byte temp = level;
-		if (!isActive()) {
-			superLevel = (checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
-			level = DSSPlayerInfo.get(player).getSkillLevel(spinAttack);
-		}
+		superLevel = 0;
+		bonusRange = 0.0F;
+		SkillActive.applyActivationSkillModifiers(this, player);
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(new TextComponentTranslation(getInfoString("info", 1).replace("super", ""), superLevel + 1).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.spins", superLevel + 1).getUnformattedText());
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		level = temp;
 	}
 
 	@Override
@@ -145,36 +150,35 @@ public class SpinAttack extends SkillActive
 	}
 
 	/** Returns true if the arc may be extended by 360 more degrees */
-	private boolean canRefresh() {
+	private boolean canRefreshArc() {
 		return (refreshed < (superLevel + 1) && arc == (360F * refreshed));
 	}
 
 	/** Max sword range for striking targets */
 	private float getRange() {
-		return (3.0F + ((superLevel + level) * 0.5F));
+		return 3.0F + (level * 0.3F) + bonusRange;
 	}
 
 	/** Returns the spin speed modified based on the skill's level */
 	private float getSpinSpeed() {
-		return 70 + (3 * (superLevel + level));
+		return 120 + (3 * (superLevel + level));
 	}
 
-	/** Returns true if players current health is within the allowed limit */
-	private boolean checkHealth(EntityPlayer player) {
-		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= Config.getHealthAllowance(level);
+	/** Returns true if the player can spin, i.e. holding a weapon, not using an item, and super#canUse returns true */
+	protected boolean canSpin(EntityPlayer player) {
+		// return super.canUse instead of this.canUse to avoid !isActive() check
+		return super.canUse(player) && this.checkActiveHand(player) && PlayerUtils.isWeapon(player.getHeldItemMainhand());
 	}
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand());
+		return !isActive() && canSpin(player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		// return super.canUse instead of this.canUse to avoid !isActive() check; allows
-		// canExecute to be checked when refreshing super spin attack
-		return super.canUse(player) && this.checkActiveHand(player) && PlayerUtils.isWeapon(player.getHeldItemMainhand());
+		return canSpin(player);
 	}
 
 	/**
@@ -186,64 +190,43 @@ public class SpinAttack extends SkillActive
 	}
 
 	/**
-	 * Returns true if either left or right arrow key is currently being pressed (or both in the case of vanilla controls)
+	 * Returns true if both activation keys are currently being pressed
 	 */
 	@SideOnly(Side.CLIENT)
 	private boolean isKeyPressed() {
-		return DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].isKeyDown() || DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].isKeyDown()
+		return (DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].isKeyDown() && DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].isKeyDown())
 				|| (Config.allowVanillaControls() && (Minecraft.getMinecraft().gameSettings.keyBindLeft.isKeyDown()
 						&& Minecraft.getMinecraft().gameSettings.keyBindRight.isKeyDown()));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		// attack key is handled separately in order to intercept the key before it may be passed
-		// to other skills; this is necessary to prevent another skill activating while spin attack is active
-		return (//key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK] ||
-				(Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
-				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT] || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT]);
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
+			return false;
+		}
+		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
+				key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey());
 	}
 
-	/**
-	 * Sets direction of spin and activates skill when left or right arrow key pressed
-	 * or adds extra spin for Super Spin Attack when attack key pressed
-	 * NOTE: Super Spin Attack requires this method to be called explicitly for the
-	 * 		 attack key, since the attack key is normally only processed if canInteract
-	 * 		 returns true, which is not the case while spin attack is active
-	 */
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK]) {
-			if (isActive() && canRefresh() && canExecute(player)) {
-				PacketDispatcher.sendToServer(new RefreshSpinPacket());
-				arc += 360F;
-				return true;
-			}
-		} else if (!isCharging()) {
-			// prevents activation of Dodge from interfering with spin direction
-			if (wasKeyPressed) {
-				wasKeyPressed = false;
-			} else {
-				clockwise = (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || key == mc.gameSettings.keyBindRight);
-				wasKeyPressed = true;
-			}
-			if (isKeyPressed()) {
-				wasKeyPressed = false;
-				charge = getChargeTime();
-				return true;
-			}
+		if (!isCharging() && isKeyPressed() && canSpin(player)) {
+			clockwise = (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || key == mc.gameSettings.keyBindRight);
+			charge = getChargeTime();
+			return true;
 		}
 		return false;
 	}
 
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
-		currentSpin = 0F;
+		currentSpin = 0.0F;
 		arc = 360F;
 		refreshed = 0;
-		superLevel = (checkHealth(player) ? DSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
+		superLevel = 0;
+		bonusRange = 0.0F;
 		isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
 		if (player.isHandActive()) {
 			player.stopActiveHand();
@@ -251,8 +234,16 @@ public class SpinAttack extends SkillActive
 				KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
 			}
 		}
-		startSpin(world, player);
 		return true;
+	}
+
+	@Override
+	protected void postActivated(EntityPlayer player) {
+		IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
+		if (combo != null) {
+			combo.setComboDamageOnlyMode(true);
+		}
+		startSpin(player);
 	}
 
 	@Override
@@ -260,28 +251,41 @@ public class SpinAttack extends SkillActive
 		charge = 0;
 		currentSpin = 0.0F;
 		arc = 0.0F;
-		DSSPlayerInfo.get(player).armSwing = 0.0F;
+		DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
+		IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
+		if (combo != null) {
+			combo.setComboDamageOnlyMode(false);
+		}
 	}
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		// isCharging can only be true on the client, which is where charging is handled
 		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
-			if (PlayerUtils.isWeapon(player.getHeldItemMainhand()) && player.getEntityWorld().isRemote && isKeyPressed()) {
+			if (player.getEntityWorld().isRemote && canSpin(player) && isKeyPressed()) {
 				--charge;
 				int maxCharge = getChargeTime();
 				if (charge < maxCharge) {
-					DSSPlayerInfo.get(player).armSwing = 1F - 0.5F * ((float)(maxCharge - charge) / (float) maxCharge);
+					float f = 1F - 0.5F * ((float)(maxCharge - charge) / (float) maxCharge);
+					DSSPlayerInfo.get(player).setArmSwingProgress(f, f);
 				}
 				if (charge == 0 && canExecute(player)) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+					activate(player);
 				}
 			} else {
 				charge = 0;
-				DSSPlayerInfo.get(player).armSwing = 0.0F;
+				DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 			}
 		} else if (isActive()) {
-			incrementSpin(player);
+			if (player.getEntityWorld().isRemote) {
+				if (!PlayerUtils.isWeapon(player.getHeldItemMainhand()) || !isKeyPressed()) {
+					deactivate(player);
+				} else {
+					incrementSpin(player);
+				}
+			} else {
+				incrementSpin(player);
+			}
 		}
 	}
 
@@ -289,15 +293,12 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		if (PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
-			List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D);
-			for (EntityLivingBase target : list) {
-				if (targets != null && targets.contains(target)) {
-					Minecraft.getMinecraft().playerController.attackEntity(player, target);
-					targets.remove(target);
-				}
+			DirtyEntityAccessor.syncCurrentPlayItem(Minecraft.getMinecraft().playerController);
+			if (!player.isSpectator()) {
+				attackTargetsInSight(player);
 			}
 			spawnParticles(player);
-			DSSPlayerInfo.get(player).armSwing = 0.5F;
+			DSSPlayerInfo.get(player).setArmSwingProgress(0.5F, 0.5F);
 			float fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS());
 			float speed = fps * this.getSpinSpeed();
 			player.turn((clockwise ? speed: -speed), 0);
@@ -305,15 +306,37 @@ public class SpinAttack extends SkillActive
 		return true;
 	}
 
+	private void attackTargetsInSight(EntityPlayer player) {
+		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D, getTargetSelectors());
+		for (EntityLivingBase target : list) {
+			if (targets != null && targets.contains(target)) {
+				IReachAttackSkill.multiAttack(Minecraft.getMinecraft(), target, this);
+				targets.remove(target);
+			}
+		}
+	}
+
+	/**
+	 * Unlike the default targeting, Spin Attack damages invisible entities
+	 */
+	protected List<Predicate<Entity>> getTargetSelectors() {
+		List<Predicate<Entity>> list = Lists.<Predicate<Entity>>newArrayList();
+		list.add(EntitySelectors.IS_ALIVE);
+		list.add(TargetUtils.COLLIDABLE_ENTITY_SELECTOR);
+		list.add(TargetUtils.NON_RIDING_SELECTOR);
+		list.add(TargetUtils.NON_TEAM_SELECTOR);
+		return list;
+	}
+
 	/**
 	 * Initiates spin attack and increments refreshed
 	 * Client populates the nearby target list
 	 * Server plays spin sound and, if not the first spin, adds exhaustion
 	 */
-	private void startSpin(World world, EntityPlayer player) {
+	private void startSpin(EntityPlayer player) {
 		++refreshed;
-		if (world.isRemote) {
-			targets = world.getEntitiesWithinAABB(EntityLivingBase.class, player.getEntityBoundingBox().expand(getRange(), 0.0D, getRange()));
+		if (player.getEntityWorld().isRemote) {
+			targets = player.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, player.getEntityBoundingBox().grow(getRange(), 0.0D, getRange()), EntitySelectors.IS_ALIVE);
 			if (targets.contains(player)) {
 				targets.remove(player);
 			}
@@ -330,12 +353,12 @@ public class SpinAttack extends SkillActive
 	 */
 	private void incrementSpin(EntityPlayer player) {
 		// 0.15D is the multiplier from Entity.setAngles, but that is too little now that no longer in render tick
-		// 0.24D results in a perfect circle per spin, at all levels, taking 21 ticks to complete at level 1, and 15 at level 10
-		currentSpin += getSpinSpeed() * 0.24D;
+		// 0.21D results in a near-perfect circle per spin at all levels
+		currentSpin += getSpinSpeed() * 0.21D;
 		if (currentSpin >= arc) {
 			deactivate(player);
 		} else if (currentSpin > (360F * refreshed)) {
-			startSpin(player.getEntityWorld(), player);
+			startSpin(player);
 		}
 	}
 
@@ -352,11 +375,28 @@ public class SpinAttack extends SkillActive
 		}
 	}
 
-	/**
-	 * Called on the server after receiving the {@link RefreshSpinPacket}
-	 */
-	public void refreshServerSpin(EntityPlayer player) {
-		if (canRefresh() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
+	@Override
+	public double getAttackRange(EntityPlayer player) {
+		return getRange();
+	}
+
+	@Override
+	public int getTicksSinceLastSwing(EntityPlayer player) {
+		return 20;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends SkillBase & ISkillModifier> Set<T> getSkillModifiers() {
+		return Sets.<T>newHashSet((T) Skills.superSpinAttack);
+	}
+
+	@Override
+	public <T extends SkillBase & ISkillModifier> void applySkillModifier(T modifier, EntityPlayer player) {
+		if (currentSpin < 0.01F) {
+			superLevel = modifier.getLevel();
+			bonusRange = ((SuperSpinAttack) modifier).getRangeModifier();
+		} else if (canRefreshArc() && canSpin(player)) {
 			arc += 360F;
 		}
 	}

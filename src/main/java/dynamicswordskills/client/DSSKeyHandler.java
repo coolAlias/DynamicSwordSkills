@@ -20,16 +20,14 @@ package dynamicswordskills.client;
 import org.lwjgl.input.Keyboard;
 
 import dynamicswordskills.CommonProxy;
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
-import dynamicswordskills.network.server.OpenGuiPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.skills.ILockOnTarget;
-import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.PlayerUtils;
+import dynamicswordskills.skills.SkillActive;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -43,35 +41,59 @@ public class DSSKeyHandler
 	private final Minecraft mc;
 
 	/** Key index for easy handling and retrieval of keys and key descriptions */
-	public static final byte KEY_SKILL_ACTIVATE = 0, KEY_NEXT_TARGET = 1, KEY_ATTACK = 2,
-			KEY_LEFT = 3, KEY_RIGHT = 4, KEY_DOWN = 5, KEY_BLOCK = 6, KEY_TOGGLE_AUTOTARGET = 7,
-			KEY_SKILLS_GUI = 8, KEY_TOGGLE_HUD = 9;
+	public static final byte 
+	KEY_SKILL_ACTIVATE = 0,
+	KEY_NEXT_TARGET = 1,
+	KEY_SKILLS_GUI = 2,
+	KEY_FORWARD = 3,
+	KEY_BACK = 4,
+	KEY_LEFT = 5,
+	KEY_RIGHT = 6;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
-	public static final String[] desc = { "activate","next","attack","left","right","down",
-			"block","toggleat","skills_gui","togglehud"};
+	private static final String[] desc = {
+			"activate",
+			"next",
+			"skills_gui",
+			"forward",
+			"back",
+			"left",
+			"right"
+	};
 
 	/** Default key values */
-	private static final int[] keyValues = {Keyboard.KEY_X, Keyboard.KEY_TAB, Keyboard.KEY_UP,
-			Keyboard.KEY_LEFT, Keyboard.KEY_RIGHT, Keyboard.KEY_DOWN, Keyboard.KEY_RCONTROL,
-			Keyboard.KEY_PERIOD, Keyboard.KEY_P, Keyboard.KEY_V};
+	private static final int[] keyValues = {
+			Keyboard.KEY_X,
+			Keyboard.KEY_TAB,
+			Keyboard.KEY_P,
+			Keyboard.KEY_UP,
+			Keyboard.KEY_DOWN,
+			Keyboard.KEY_LEFT,
+			Keyboard.KEY_RIGHT
+	};
 
-	public static final KeyBinding[] keys = new KeyBinding[desc.length];
+	public static final KeyBindingHolder[] keys = new KeyBindingHolder[desc.length];
 
 	public DSSKeyHandler() {
 		this.mc = Minecraft.getMinecraft();
 		for (int i = 0; i < desc.length; ++i) {
-			keys[i] = new KeyBinding("key.dss." + desc[i] + ".desc", keyValues[i], "key.dss.label");
-			ClientRegistry.registerKeyBinding(keys[i]);
+			KeyBinding key = null;
+			if (Config.enableAdditionalControls() || i < KEY_FORWARD) {
+				key = new KeyBinding("key.dss." + desc[i] + ".desc", keyValues[i], new TextComponentTranslation("key.dss.label").getUnformattedText());
+				ClientRegistry.registerKeyBinding(key);
+			}
+			keys[i] = new KeyBindingHolder(key);
 		}
 	}
 
 	@SubscribeEvent
 	public void onKeyInput(KeyInputEvent event) {
 		if (Keyboard.getEventKeyState()) {
-			onKeyPressed(mc, Keyboard.getEventKey());
-		} else if (Keyboard.getEventKey() == keys[KEY_BLOCK].getKeyCode()) {
-			KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
+			if (!Keyboard.isRepeatEvent()) {
+				onKeyPressed(mc, Keyboard.getEventKey());
+			}
+		} else {
+			onKeyReleased(mc, Keyboard.getEventKey());
 		}
 	}
 
@@ -81,112 +103,106 @@ public class DSSKeyHandler
 	 * key is pressed, not when it is released (i.e. when event.buttonstate is true).
 	 * @param mc	Pass in Minecraft instance, since this is a static method
 	 * @param kb	The key code of the key pressed; for the mouse, this is the mouse button number minus 100
+	 * @return true if the key press was 'handled'
 	 */
-	public static void onKeyPressed(Minecraft mc, int kb) {
+	public static boolean onKeyPressed(Minecraft mc, int kb) {
 		if (mc.inGameHasFocus && mc.player != null) {
-			DSSPlayerInfo skills = DSSPlayerInfo.get(mc.player);
-			if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
-				if (skills.hasSkill(SkillBase.swordBasic)) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.swordBasic));
-				}
-			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
-				if (mc.player.isSneaking()) {
-					PlayerUtils.sendTranslatedChat(mc.player, "key.dss.toggletp", new TextComponentTranslation(Config.toggleTargetPlayers() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
-				} else if (mc.player.isSprinting()) {
-					PlayerUtils.sendTranslatedChat(mc.player, "key.dss.toggletpm", new TextComponentTranslation(Config.toggleTargetPassiveMobs() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
-				} else {
-					PlayerUtils.sendTranslatedChat(mc.player, "key.dss.toggleat", new TextComponentTranslation(Config.toggleAutoTarget() ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
-				}
-			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
-				PacketDispatcher.sendToServer(new OpenGuiPacket(CommonProxy.GUI_SKILLS));
-			}  else if (kb == keys[KEY_TOGGLE_HUD].getKeyCode()) {
-				Config.isComboHudEnabled = !Config.isComboHudEnabled;
-				PlayerUtils.sendTranslatedChat(mc.player, "key.dss.togglehud", new TextComponentTranslation(Config.isComboHudEnabled ? "key.dss.enable" : "key.dss.disable").getUnformattedText());
+			if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
+				mc.player.openGui(DynamicSwordSkills.instance, CommonProxy.GUI_SKILLS, mc.player.getEntityWorld(), (int) mc.player.posX, (int) mc.player.posY, (int) mc.player.posZ);
 			} else {
-				handleTargetingKeys(mc, kb, skills);
+				return handleSkillKeys(mc, kb);
 			}
 		}
+		return false;
 	}
 
 	/**
-	 * All ILockOnTarget skill related keys are handled here
+	 * Call for any key code, mouse or keyboard, to handle custom key bindings that may
+	 * have been remapped to mouse. From MouseEvent, ONLY call this method when the mouse
+	 * key is released, not when it is pressed (i.e. when event.buttonstate is false).
+	 * @param mc	Pass in Minecraft instance, since this is a static method
+	 * @param kb	The key code of the key released; for the mouse, this is the mouse button number minus 100
 	 */
-	private static void handleTargetingKeys(Minecraft mc, int kb, DSSPlayerInfo skills) {
-		ILockOnTarget skill = skills.getTargetingSkill();
-		boolean canInteract = skills.canInteract();
-
-		if (skill == null || !skill.isLockedOn()) {
-			return;
+	public static void onKeyReleased(Minecraft mc, int kb) {
+		KeyBinding key = getKeyBindFromCode(mc, kb);
+		if (key != null && mc.inGameHasFocus && mc.player != null) {
+			DSSPlayerInfo.get(mc.player).onKeyReleased(mc, key);
 		}
-		if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
-			skill.getNextTarget(mc.player);
-		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
-			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK] : mc.gameSettings.keyBindAttack);
-			boolean canAttack = skills.canAttack();
-			if (canInteract && canAttack) {
-				KeyBinding.setKeyBindState(key.getKeyCode(), true);
-			} else if (canAttack) {
-				// hack for Super Spin Attack, as it requires key press to be passed while animation is in progress
-				if (skills.isSkillActive(SkillBase.spinAttack)) {
-					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.player);
-					return;
-				} else if (skills.isSkillActive(SkillBase.backSlice)) {
-					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, key, mc.player);
-					return;
-				}
+	}
+
+	private static boolean handleSkillKeys(Minecraft mc, int kb) {
+		DSSPlayerInfo skills = DSSPlayerInfo.get(mc.player);
+		ILockOnTarget lock = skills.getTargetingSkill();
+		boolean canInteract = skills.canInteract();
+		boolean isLockedOn = (lock != null && lock.isLockedOn());
+		if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
+			if (lock instanceof SkillActive && ((SkillActive) lock).isActive()) {
+				skills.deactivateTargetingSkill();
+			} else {
+				skills.activateTargetingSkill();
 			}
-			// Only allow attack key to continue processing if it was set to pressed
-			if (key.isKeyDown()) {
-				if (!skills.onKeyPressed(mc, key)) {
-					DSSClientEvents.performComboAttack(mc, skill);
-				}
-				// hack for Armor Break to begin charging without having to press attack again
-				if (skills.hasSkill(SkillBase.armorBreak)) {
-					skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.player);
-				}
+		} else if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
+			if (isLockedOn) {
+				lock.getNextTarget(mc.player);
 			}
-		} else if (canInteract) {
-			// Only works for keys mapped to custom key bindings, which is fine for remapped mouse keys
+		} else if (kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
+			if (!skills.canAttack()) {
+				return true;
+			} else if (!canInteract) {
+				skills.onKeyPressedWhileAnimating(mc, mc.gameSettings.keyBindAttack);
+				return true;
+			} else if (skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
+				return true;
+			}
+			KeyBinding.setKeyBindState(kb, true);
+			if (isLockedOn) {
+				DSSClientEvents.handlePlayerAttack(mc);
+			} else if (mc.objectMouseOver.typeOfHit != RayTraceResult.Type.ENTITY) {
+				DSSClientEvents.handlePlayerMiss(mc);
+			}
+			return isLockedOn;
+		} else {
 			KeyBinding key = getKeyBindFromCode(mc, kb);
 			if (key != null) {
-				KeyBinding.setKeyBindState(kb, true);
-				// Piggy-back on vanilla use item key so shield blocking will work with custom keybinding
-				if (kb == keys[KEY_BLOCK].getKeyCode()) {
-					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), true);
+				if (!canInteract) {
+					if (skills.canUseItem() || kb != mc.gameSettings.keyBindUseItem.getKeyCode()) {
+						skills.onKeyPressedWhileAnimating(mc, key);
+					}
+					return true;
+				} else if (skills.onKeyPressed(mc, key)) {
+					return true;
 				}
-				skills.onKeyPressed(mc, key);
+				KeyBinding.setKeyBindState(kb, true);
 			}
 		}
+		return false;
 	}
 
 	/**
 	 * Returns the KeyBinding corresponding to the key code given, or NULL if no key binding is found
-	 * Currently handles all custom keys, plus the following vanilla keys:
-	 * 	Always allowed: keyBindForward, keyBindJump
-	 * 	{@link Config#allowVanillaControls}: keyBindLeft, keyBindRight, keyBindBack
+	 * Certain vanilla keys may return null depending on config settings, see {@link #isVanillaControl(Minecraft, KeyBinding)}
 	 * @param keyCode	Will be a negative number for mouse keys, or positive for keyboard
 	 * @param mc		Pass in Minecraft instance as a workaround to get vanilla KeyBindings
 	 */
-	@SideOnly(Side.CLIENT)
 	public static KeyBinding getKeyBindFromCode(Minecraft mc, int keyCode) {
-		for (KeyBinding k : keys) {
+		for (KeyBinding k : mc.gameSettings.keyBindings) {
 			if (k.getKeyCode() == keyCode) {
+				if (!Config.allowVanillaControls() && isVanillaControl(mc, k)) {
+					return null;
+				}
 				return k;
 			}
 		}
-		if (keyCode == mc.gameSettings.keyBindForward.getKeyCode()) {
-			return mc.gameSettings.keyBindForward;
-		} else if (keyCode == mc.gameSettings.keyBindJump.getKeyCode()) {
-			return mc.gameSettings.keyBindJump;
-		} else if (Config.allowVanillaControls()) {
-			if (keyCode == mc.gameSettings.keyBindLeft.getKeyCode()) {
-				return mc.gameSettings.keyBindLeft;
-			} else if (keyCode == mc.gameSettings.keyBindRight.getKeyCode()) {
-				return mc.gameSettings.keyBindRight;
-			} else if (keyCode == mc.gameSettings.keyBindBack.getKeyCode()) {
-				return mc.gameSettings.keyBindBack;
-			}
-		}
 		return null;
+	}
+
+	/**
+	 * Returns whether the key usage is controlled by the Config#allowVanillaControls setting, i.e. WASD
+	 */
+	public static boolean isVanillaControl(Minecraft mc, KeyBinding key) {
+		return (key == mc.gameSettings.keyBindLeft 
+				|| key == mc.gameSettings.keyBindRight
+				|| key == mc.gameSettings.keyBindForward
+				|| key == mc.gameSettings.keyBindBack);
 	}
 }

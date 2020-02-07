@@ -20,12 +20,21 @@ package dynamicswordskills.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import dynamicswordskills.ref.Config;
+import javax.annotation.Nullable;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IRangedAttackMob;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -134,26 +143,46 @@ public class TargetUtils
 	}
 
 	/**
-	 * Returns true if target is considered valid, specifically:
-	 *   - target is not the current seeker
-	 *   - target is not riding or being ridden by the current seeker
-	 *   - {@link Entity#canBeCollidedWith} returns true
-	 *   - {@link Entity#isInvisible} returns false
+	 * Returns true if target is not the current seeker and meets all other filter criteria
 	 */
-	public static final boolean isTargetValid(Entity target, EntityLivingBase seeker) {
+	public static final boolean isTargetValid(Entity target, EntityLivingBase seeker, List<Predicate<Entity>> filters) {
 		if (target == seeker) {
 			return false;
-		} else if (target.getRidingEntity() == seeker || seeker.getRidingEntity() == target) {
-			return false;
-		} else if (!Config.canTargetPassiveMobs() && !(target instanceof IMob)) {
-			return false;
 		}
-		return target.canBeCollidedWith() && !target.isInvisible();
+		for (Predicate<Entity> p : filters) {
+			if (p instanceof TargetPredicate) {
+				((TargetPredicate<Entity>) p).setSeeker(seeker);
+			}
+			if (!p.apply(target)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
-	/** Returns the EntityLivingBase closest to the point at which the seeker is looking and within the distance and radius specified */
-	public static final EntityLivingBase acquireLookTarget(EntityLivingBase seeker, int distance, double radius) {
-		return acquireLookTarget(seeker, distance, radius, false);
+	/**
+	 * Returns true for the following 'mob' type entities:
+	 *   - Instances of IMob and IRangedAttackMob
+	 *   - EntityLiving types if {@link EntityLiving#getAttackTarget()} is not null
+	 *   - EntityLivingBase types if they have an ATTACK_DAMAGE attribute value > 0
+	 */
+	public static final boolean isMobEntity(Entity entity) {
+		if (entity instanceof IMob || entity instanceof IRangedAttackMob) {
+			return true;
+		} else if (entity instanceof EntityLiving && ((EntityLiving) entity).getAttackTarget() != null) {
+			return true;
+		} else if (entity instanceof EntityLivingBase) {
+			IAttributeInstance damage = ((EntityLivingBase) entity).getAttributeMap().getAttributeInstance(SharedMonsterAttributes.ATTACK_DAMAGE);
+			if (damage != null && damage.getAttributeValue() > 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Calls {@link #acquireAllLookTargets(EntityLivingBase, int, double, List)} with the {@link #getDefaultSelectors()} */
+	public static final EntityLivingBase acquireLookTarget(EntityLivingBase seeker, int distance, double radius, boolean closestToSeeker) {
+		return acquireLookTarget(seeker, distance, radius, closestToSeeker, getDefaultSelectors());
 	}
 
 	/**
@@ -163,7 +192,7 @@ public class TargetUtils
 	 * @param closestToEntity if true, the target closest to the seeker and still within the line of sight search radius is returned
 	 * @return the entity the seeker is looking at or null if no entity within sight search range
 	 */
-	public static final EntityLivingBase acquireLookTarget(EntityLivingBase seeker, int distance, double radius, boolean closestToSeeker) {
+	public static final EntityLivingBase acquireLookTarget(EntityLivingBase seeker, int distance, double radius, boolean closestToSeeker, List<Predicate<Entity>> filters) {
 		if (distance < 0 || distance > MAX_DISTANCE) {
 			distance = MAX_DISTANCE;
 		}
@@ -174,7 +203,6 @@ public class TargetUtils
 		double targetY = seeker.posY + seeker.getEyeHeight() - 0.10000000149011612D;
 		double targetZ = seeker.posZ;
 		double distanceTraveled = 0;
-
 		while ((int) distanceTraveled < distance) {
 			targetX += vec3.x;
 			targetY += vec3.y;
@@ -183,7 +211,7 @@ public class TargetUtils
 			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
 			List<EntityLivingBase> list = seeker.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
-				if (isTargetValid(target, seeker) && isTargetInSight(vec3, seeker, target)) {
+				if (isTargetValid(target, seeker, filters) && isTargetInSight(vec3, seeker, target)) {
 					double newDistance = (closestToSeeker ? target.getDistanceSq(seeker) : target.getDistanceSq(targetX, targetY, targetZ));
 					if (newDistance < currentDistance) {
 						currentTarget = target;
@@ -192,15 +220,19 @@ public class TargetUtils
 				}
 			}
 		}
-
 		return currentTarget;
+	}
+
+	/** Calls {@link #acquireAllLookTargets(EntityLivingBase, int, double, List)} with the {@link #getDefaultSelectors()} */
+	public static final List<EntityLivingBase> acquireAllLookTargets(EntityLivingBase seeker, int distance, double radius) {
+		return acquireAllLookTargets(seeker, distance, radius, getDefaultSelectors());
 	}
 
 	/**
 	 * Similar to the single entity version, but this method returns a List of all EntityLivingBase entities
 	 * that are within the entity's field of vision, up to a certain range and distance away
 	 */
-	public static final List<EntityLivingBase> acquireAllLookTargets(EntityLivingBase seeker, int distance, double radius) {
+	public static final List<EntityLivingBase> acquireAllLookTargets(EntityLivingBase seeker, int distance, double radius, List<Predicate<Entity>> filters) {
 		if (distance < 0 || distance > MAX_DISTANCE) {
 			distance = MAX_DISTANCE;
 		}
@@ -210,7 +242,6 @@ public class TargetUtils
 		double targetY = seeker.posY + seeker.getEyeHeight() - 0.10000000149011612D;
 		double targetZ = seeker.posZ;
 		double distanceTraveled = 0;
-
 		while ((int) distanceTraveled < distance) {
 			targetX += vec3.x;
 			targetY += vec3.y;
@@ -219,14 +250,13 @@ public class TargetUtils
 			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
 			List<EntityLivingBase> list = seeker.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
-				if (isTargetValid(target, seeker) && isTargetInSight(vec3, seeker, target)) {
+				if (isTargetValid(target, seeker, filters) && isTargetInSight(vec3, seeker, target)) {
 					if (!targets.contains(target)) {
 						targets.add(target);
 					}
 				}
 			}
 		}
-
 		return targets;
 	}
 
@@ -270,15 +300,90 @@ public class TargetUtils
 
 	/**
 	 * Knocks the pushed entity back slightly as though struck by the pushing entity
+	 * @param strength The strength of the push; see {@link EntityLivingBase#knockBack(Entity, float, double, double) EntityLivingBase#knockBack}
 	 */
-	public static final void knockTargetBack(EntityLivingBase pushedEntity, EntityLivingBase pushingEntity) {
+	public static final void knockTargetBack(EntityLivingBase pushedEntity, EntityLivingBase pushingEntity, float strength) {
 		if (pushedEntity.canBePushed()) {
-			double dx = pushedEntity.posX - pushingEntity.posX;
-			double dz;
-			for (dz = pushedEntity.posZ - pushingEntity.posZ; dx * dx + dz * dz < 1.0E-4D; dz = (Math.random() - Math.random()) * 0.01D){
-				dx = (Math.random() - Math.random()) * 0.01D;
+			double dx = pushingEntity.posX - pushedEntity.posX;
+			double dz = pushingEntity.posZ - pushedEntity.posZ;
+			pushedEntity.knockBack(pushingEntity, strength, dx, dz);
+		}
+	}
+
+	/**
+	 * Returns the default target selector predicates:
+	 * - {@link EntitySelectors#IS_ALIVE}
+	 * - {@link #COLLIDABLE_ENTITY_SELECTOR}
+	 * - {@link #NON_RIDING_SELECTOR}
+	 * - {@link #NON_TEAM_SELECTOR}
+	 * - {@link #VISIBLE_ENTITY_SELECTOR}
+	 */
+	public static final List<Predicate<Entity>> getDefaultSelectors() {
+		List<Predicate<Entity>> list = Lists.<Predicate<Entity>>newArrayList();
+		list.add(EntitySelectors.IS_ALIVE);
+		list.add(COLLIDABLE_ENTITY_SELECTOR);
+		list.add(NON_RIDING_SELECTOR);
+		list.add(NON_TEAM_SELECTOR);
+		list.add(VISIBLE_ENTITY_SELECTOR);
+		return list;
+	}
+
+	/** Select entities that can be collided with */
+	public static final Predicate<Entity> COLLIDABLE_ENTITY_SELECTOR = new Predicate<Entity>() {
+		public boolean apply(@Nullable Entity entity) {
+			return entity != null && entity.canBeCollidedWith();
+		}
+	};
+
+	/** Select entities that are considered hostile mobs */
+	public static final Predicate<Entity> HOSTILE_MOB_SELECTOR = new Predicate<Entity>() {
+		public boolean apply(@Nullable Entity entity) {
+			return TargetUtils.isMobEntity(entity);
+		}
+	};
+
+	/** Select only non-player entities */
+	public static final Predicate<Entity> NON_PLAYER_SELECTOR = new Predicate<Entity>() {
+		public boolean apply(@Nullable Entity entity) {
+			return !(entity instanceof EntityPlayer);
+		}
+	};
+
+	/** Select entities that are not riding or being ridden by the seeker */
+	public static final TargetPredicate<Entity> NON_RIDING_SELECTOR = new TargetPredicate<Entity>() {
+		public boolean apply(@Nullable Entity entity) {
+			if (entity == null) {
+				return false;
+			} else if (this.seeker == null) {
+				return true;
 			}
-			pushedEntity.knockBack(pushingEntity, 0, -dx, -dz);
+			return entity.getRidingEntity() != this.seeker && this.seeker.getRidingEntity() != entity;
+		}
+	};
+
+	/** Select entities that are not on the same team as the seeker */
+	public static final TargetPredicate<Entity> NON_TEAM_SELECTOR = new TargetPredicate<Entity>() {
+		public boolean apply(@Nullable Entity entity) {
+			return entity != null && (this.seeker == null || !entity.isOnSameTeam(this.seeker));
+		}
+	};
+
+	/** Select entities that are not invisible */
+	public static final Predicate<Entity> VISIBLE_ENTITY_SELECTOR = new Predicate<Entity>() {
+		public boolean apply(@Nullable Entity entity) {
+			return entity != null && !entity.isInvisible();
+		}
+	};
+
+	/**
+	 * Class for entity selectors that rely on knowing the seeker
+	 */
+	public abstract static class TargetPredicate<T extends Entity> implements Predicate<T>
+	{
+		@Nullable
+		protected EntityLivingBase seeker;
+		public void setSeeker(@Nullable EntityLivingBase seeker) {
+			this.seeker = seeker;
 		}
 	}
 }

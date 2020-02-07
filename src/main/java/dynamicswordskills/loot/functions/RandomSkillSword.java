@@ -26,7 +26,9 @@ import com.google.gson.JsonSyntaxException;
 
 import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.api.ItemRandomSkill;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
@@ -47,7 +49,7 @@ import net.minecraft.world.storage.loot.functions.LootFunction;
  * 
  * If "skill_tag" is specified, that will be used instead of generating a random tag.
  * 
- * JSON Tag Format: "skill_tag": "{ItemSkillName:\"skill_name\",ItemSkillLevel:xb,grantsBasicSword:yb}"
+ * JSON Tag Format: "skill_tag": "{ItemSkillName:\"mod_id:skill_name\",ItemSkillLevel:xb,grantsBasicSword:yb}"
  * where ItemSkillLevel 'x' is a number from 1 to max skill level (usually 5) and
  * "grantsBasicSword" is either 0 or 1; both entries are followed by the letter 'b'.
  *
@@ -75,15 +77,20 @@ public class RandomSkillSword extends SkillFunction
 
 	@Override
 	public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
-		int i = getSkillId(rand);
 		if (!(stack.getItem() instanceof ItemRandomSkill)) {
-			DynamicSwordSkills.logger.warn("Invalid item for RandomSkillSword function: " + stack.toString());
+			DynamicSwordSkills.logger.error("Invalid item for RandomSkillSword function: " + stack.toString());
 		} else if (this.skill_tag != null) {
 			stack.setTagCompound(this.skill_tag);
-		} else if (SkillBase.doesSkillExist(i)) {
-			((ItemRandomSkill) stack.getItem()).generateSkillTag(stack, SkillBase.getSkill(i), rand);
 		} else {
-			DynamicSwordSkills.logger.warn("Skill with ID " + i + " does not exist");
+			SkillBase skill = this.getSkill();
+			if (skill == null) {
+				skill = ((ItemRandomSkill) stack.getItem()).getRandomSkill(rand);
+			}
+			if (skill instanceof SkillActive) {
+				((ItemRandomSkill) stack.getItem()).generateSkillTag(stack, skill, rand);
+			} else {
+				stack.setCount(0); // invalidate loot stack
+			}
 		}
 		return stack;
 	}
@@ -98,7 +105,7 @@ public class RandomSkillSword extends SkillFunction
 			if (instance.skill_tag != null) {
 				json.addProperty("skill_tag", instance.skill_tag.toString());
 			} else if (instance.skill_name != null) {
-				SkillBase skill = SkillBase.getSkillByName(instance.skill_name);
+				SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(instance.skill_name));
 				if (skill == null) {
 					throw new JsonSyntaxException("Unknown skill '" + instance.skill_name + "'");
 				}
@@ -111,9 +118,12 @@ public class RandomSkillSword extends SkillFunction
 				try {
 					NBTTagCompound tag = JsonToNBT.getTagFromJson(JsonUtils.getString(json, "skill_tag"));
 					if (!tag.hasKey("ItemSkillName") || !tag.hasKey("ItemSkillLevel")) {
-						throw new JsonSyntaxException("Invalid skill tag; correct format is: {ItemSkillName:\"skill_name\",ItemSkillLevel:xb,grantsBasicSword:yb}");
-					} else if (SkillBase.getSkillByName(tag.getString("ItemSkillName")) == null) {
-						throw new JsonSyntaxException("Unknown skill '" + tag.getString("ItemSkillName") + "'");
+						throw new JsonSyntaxException("Invalid skill tag; correct format is: {ItemSkillName:\"mod_id:skill_name\",ItemSkillLevel:xb,grantsBasicSword:yb}");
+					} else {
+						String name = tag.getString("ItemSkillName");
+						if (SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name)) == null) {
+							throw new JsonSyntaxException("Unknown skill '" + name + "'");
+						}
 					}
 					return new RandomSkillSword(conditions, tag);
 				} catch (NBTException e) {
@@ -121,7 +131,7 @@ public class RandomSkillSword extends SkillFunction
 				}
 			} else if (json.has("skill_name")) {
 				String name = JsonUtils.getString(json, "skill_name");
-				SkillBase skill = SkillBase.getSkillByName(name);
+				SkillBase skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
 				if (skill == null) {
 					throw new JsonSyntaxException("Unknown skill '" + name + "'");
 				}

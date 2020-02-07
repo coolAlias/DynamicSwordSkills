@@ -23,15 +23,14 @@ import dynamicswordskills.api.ISkillProvider;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.PlaySoundPacket;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -57,9 +56,7 @@ public class PlayerUtils
 	}
 
 	/**
-	 * Returns true if the item is a sword: i.e. if it is an {@link ItemSword},
-	 * an {@link IWeapon} (returns {@link IWeapon#isSword(ItemStack)}),
-	 * or registered to the {@link WeaponRegistry} as a sword
+	 * Copy of SwordSkillsAPI v1.5+ {@link WeaponRegistry#isSword(ItemStack} for backwards compatibility
 	 */
 	public static boolean isSword(ItemStack stack) {
 		if (stack.isEmpty()) {
@@ -71,8 +68,7 @@ public class PlayerUtils
 	}
 
 	/**
-	 * Returns true if the item is any kind of weapon: a {@link #isSword(ItemStack) sword},
-	 * an {@link IWeapon}, or registered to the {@link WeaponRegistry} as a weapon
+	 * Copy of SwordSkillsAPI v1.5+ {@link WeaponRegistry#isWeapon(ItemStack} for backwards compatibility
 	 */
 	public static boolean isWeapon(ItemStack stack) {
 		if (stack.isEmpty()) {
@@ -80,13 +76,24 @@ public class PlayerUtils
 		} else if (stack.getItem() instanceof IWeapon) {
 			return ((IWeapon) stack.getItem()).isWeapon(stack);
 		}
-		return (isSword(stack) || WeaponRegistry.INSTANCE.isWeapon(stack.getItem()));
+		return WeaponRegistry.INSTANCE.isWeapon(stack.getItem());
 	}
 
-	/** Returns true if the stack is either a {@link #isSwordItem(Item) sword} or {@link ISkillProvider provider} of this skill */
+	/** Returns true if the stack is either a {@link #isSword(ItemStack) sword} or {@link #isProvider(ItemStack, SkillBase) provider} of this skill */
 	public static boolean isSwordOrProvider(ItemStack stack, SkillBase skill) {
-		Item item = stack.getItem();
-		return (isSword(stack) || (item instanceof ISkillProvider && ((ISkillProvider) item).getSkillId(stack) == skill.getId()));
+		return (isSword(stack) || isProvider(stack, skill));
+	}
+
+	/**
+	 * Returns whether the stack is a {@link ISkillProvider} for the target skill
+	 */
+	public static boolean isProvider(ItemStack stack, SkillBase skill) {
+		if (stack.isEmpty() || !(stack.getItem() instanceof ISkillProvider)) {
+			return false;
+		} else if (((ISkillProvider) stack.getItem()).getSkillId(stack) == skill.getId()) {
+			return true;
+		}
+		return Skills.swordBasic.is(skill) && ((ISkillProvider) stack.getItem()).grantsBasicSwordSkill(stack);
 	}
 
 	/** Returns the difference between player's max and current health */

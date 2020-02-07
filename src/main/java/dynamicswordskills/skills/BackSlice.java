@@ -21,10 +21,10 @@ import java.util.List;
 
 import dynamicswordskills.DSSCombatEvents;
 import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSKeyHandler;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.network.server.EndComboPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
@@ -78,11 +78,17 @@ public class BackSlice extends SkillActive
 	/** Timer during which player may evade incoming attacks */
 	private int dodgeTimer = 0;
 
+	/** Flag set in onImpact to notify postImpact to process additional effects */
+	private boolean impacted;
+
+	/** Flag set in onImpact to notify postImpact to process additional effects */
+	private boolean success;
+
 	/** Used client side to get an extra renderTick for the targeting camera */
 	private SkillActive targetingSkill;
 
-	public BackSlice(String name) {
-		super(name);
+	public BackSlice(String translationKey) {
+		super(translationKey);
 	}
 
 	private BackSlice(BackSlice skill) {
@@ -95,11 +101,16 @@ public class BackSlice extends SkillActive
 	}
 
 	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.SWORD_GROUP || group == Skills.TARGETED_GROUP;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(new TextComponentTranslation(getInfoString("info", 1), 360 - (2 * getAttackAngle())).getUnformattedText());
-		String chance = String.format("%.2f", getDisarmorChance(ItemStack.EMPTY, player.getHeldItemMainhand(), level));
-		desc.add(new TextComponentTranslation(getInfoString("info", 2), chance).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.angle", 360 - (2 * getAttackAngle())).getUnformattedText());
+		String chance = String.format("%.2f", getDisarmorChance(null, player.getHeldItemMainhand(), level));
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.chance", chance).getUnformattedText());
 		desc.add(getDamageDisplay(level * 10, true) + "%");
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
@@ -163,7 +174,11 @@ public class BackSlice extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isSwordOrProvider(player.getHeldItemMainhand(), this) && DSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		ILockOnTarget lock = DSSPlayerInfo.get(player).getTargetingSkill();
+		return super.canUse(player) && !isActive() 
+				&& !player.isHandActive() 
+				&& PlayerUtils.isSwordOrProvider(player.getHeldItemMainhand(), this) 
+				&& lock != null && lock.isLockedOn();
 	}
 
 	@Override
@@ -174,44 +189,54 @@ public class BackSlice extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		if (isActive()) {
-			return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (!isLockedOn) {
+			return false;
+		} else if (isAnimating()) {
+			return key == mc.gameSettings.keyBindAttack;
 		}
-		return key == mc.gameSettings.keyBindForward || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT] || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] ||
-				((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)));
+		return key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_LEFT].getKey() || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() ||
+				((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindForward || key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void keyPressedWhileAnimating(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (isActive()) {
+			// Attack targeted entity directly rather than using mouse cursor object due to camera funkiness
+			Entity target = TargetUtils.getMouseOverEntity();
+			if (target == null && targetingSkill instanceof ILockOnTarget && targetingSkill.isActive()) {
+				target = ((ILockOnTarget) targetingSkill).getCurrentTarget();
+			}
+			if (target != null && TargetUtils.canReachTarget(player, target)) {
+				mc.playerController.attackEntity(mc.player, target);
+			} else {
+				player.resetCooldown();
+				PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
+				IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
+				if (combo != null && combo.isComboInProgress()) {
+					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) combo));
+				}
+			}
+			player.swingArm(EnumHand.MAIN_HAND);
+			DSSCombatEvents.setPlayerAttackTime(mc.player);
+		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
-			if (keyPressed != null && keyPressed.isKeyDown() && key == mc.gameSettings.keyBindForward) {
+			if (keyPressed != null && keyPressed.isKeyDown() && ((Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey())) {
 				if (ticksTilFail > 0) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
-					return true;
+					return activate(player);
 				} else {
 					ticksTilFail = 6;
 				}
-			} else if (key != mc.gameSettings.keyBindForward) {
+			} else if (key != mc.gameSettings.keyBindForward && key != DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey()) {
 				keyPressed = key;
 			}
-		} else if (isActive() && (key == mc.gameSettings.keyBindAttack || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK])) {
-			// Attack targeted entity directly rather than using mouse cursor object due to camera funkiness
-			Entity target = DSSPlayerInfo.get(player).getTargetingSkill().getCurrentTarget();
-			if (target != null && TargetUtils.canReachTarget(player, target)) {
-				mc.playerController.attackEntity(mc.player, target);
-			} else {
-				player.resetCooldown();
-				PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
-				ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
-				if (combo.isComboInProgress()) {
-					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) combo));
-				}
-			}
-			player.swingArm(EnumHand.MAIN_HAND);
-			DSSCombatEvents.setPlayerAttackTime(mc.player);
 		}
 		return false; // allow other skills to receive this key press (e.g. Spin Attack)
 	}
@@ -219,7 +244,9 @@ public class BackSlice extends SkillActive
 	@Override
 	public boolean onActivated(World world, EntityPlayer player) {
 		dodgeTimer = getActiveTime();
-		targetingSkill = DSSPlayerInfo.get(player).getActiveSkill(swordBasic);
+		targetingSkill = (SkillActive) DSSPlayerInfo.get(player).getTargetingSkill();
+		impacted = false;
+		success = false;
 		return isActive();
 	}
 
@@ -236,6 +263,9 @@ public class BackSlice extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		if (isActive()) {
 			--dodgeTimer;
+			if (impacted) {
+				deactivate(player);
+			}
 		} else if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
 			if (--ticksTilFail == 0) {
 				keyPressed = null;
@@ -254,25 +284,22 @@ public class BackSlice extends SkillActive
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		if (player.onGround) {
 			// force extra camera update so player can more easily hit target:
-			if (targetingSkill != null && targetingSkill.isActive()) {
+			if (Minecraft.getDebugFPS() < 90 && targetingSkill != null && targetingSkill.isActive()) {
 				targetingSkill.onRenderTick(player, partialTickTime);
 			}
-			double speed = 1.0D + 10.0D * (player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - Dash.BASE_MOVE);
-			if (speed > 1.0D) {
-				speed = 1.0D;
-			}
+			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
 			double fps = (DynamicSwordSkills.BASE_FPS / (float) Minecraft.getDebugFPS());
-			double d = 0.15D * fps * speed * speed;
+			double d = 1.125D * fps * speed;
 			if (player.isInWater() || player.isInLava()) {
 				d *= 0.15D;
 			}
 			Vec3d vec3 = player.getLookVec();
-			if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
+			if (keyPressed == DSSKeyHandler.keys[DSSKeyHandler.KEY_RIGHT].getKey() || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
 				player.addVelocity(-vec3.z * d, 0.0D, vec3.x * d);
 			} else {
 				player.addVelocity(vec3.z * d, 0.0D, -vec3.x * d);
 			}
-			player.addVelocity(vec3.x * d * 1.15D, 0.0D, vec3.z * d * 1.15D);
+			player.addVelocity(vec3.x * d, 0.0D, vec3.z * d);
 		}
 		return false; // allow camera to update again
 	}
@@ -284,24 +311,26 @@ public class BackSlice extends SkillActive
 	}
 
 	@Override
-	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		impacted = true;
 		if (isActive() && dodgeTimer <= (getActiveTime() - 5)) { // can strike any time after 5 ticks have passed
-			ILockOnTarget targeting = DSSPlayerInfo.get(player).getTargetingSkill();
-			if (targeting != null && targeting.getCurrentTarget() == entity) {
-				if (!TargetUtils.isTargetInFrontOf(entity, player, getAttackAngle())) {
-					amount *= 1.0F + (level * 0.1F);
-					PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
-					if (Config.canDisarmorPlayers() || !(entity instanceof EntityPlayer)) {
-						ItemStack armor = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
-						if (!armor.isEmpty() && player.getEntityWorld().rand.nextFloat() < getDisarmorChance(armor, player.getHeldItemMainhand(), level)) {
-							PlayerUtils.spawnItemWithRandom(entity.getEntityWorld(), armor, entity.posX, entity.posY, entity.posZ);
-							entity.setItemStackToSlot(EntityEquipmentSlot.CHEST, ItemStack.EMPTY);
-						}
-					}
-				}
+			if (!TargetUtils.isTargetInFrontOf(entity, player, getAttackAngle())) {
+				amount *= 1.0F + (level * 0.1F);
+				PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.MORTAL_DRAW, SoundCategory.PLAYERS, 0.4F, 0.5F);
+				success = true;
 			}
 		}
-		deactivate(player); // now deactivate on server side; if player missed, they just have to wait
 		return amount;
+	}
+
+	@Override
+	public void postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		if (success && (Config.canDisarmorPlayers() || !(entity instanceof EntityPlayer))) {
+			ItemStack armor = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
+			if (!armor.isEmpty() && player.getEntityWorld().rand.nextFloat() < getDisarmorChance(armor, player.getHeldItemMainhand(), level)) {
+				PlayerUtils.spawnItemWithRandom(entity.getEntityWorld(), armor, entity.posX, entity.posY, entity.posZ);
+				entity.setItemStackToSlot(EntityEquipmentSlot.CHEST, null);
+			}
+		}
 	}
 }

@@ -25,7 +25,9 @@ import org.apache.logging.log4j.Logger;
 
 import dynamicswordskills.api.ItemRandomSkill;
 import dynamicswordskills.api.ItemSkillProvider;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.command.DSSCommands;
+import dynamicswordskills.crafting.RecipeInfuseSkillOrb;
 import dynamicswordskills.entity.EntityLeapingBlow;
 import dynamicswordskills.entity.EntitySwordBeam;
 import dynamicswordskills.entity.IPlayerInfo.CapabilityPlayerInfo;
@@ -36,11 +38,13 @@ import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModInfo;
 import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -62,7 +66,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import swordskillsapi.api.item.WeaponRegistry;
 
-@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST)
+@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST, guiFactory = ModInfo.ID + ".client.gui.GuiFactoryConfig")
 public class DynamicSwordSkills
 {
 	@Mod.Instance(ModInfo.ID)
@@ -95,6 +99,7 @@ public class DynamicSwordSkills
 		if (Loader.isModLoaded("zeldaswordskills")) {
 			throw new RuntimeException("Dynamic Sword Skills may not be loaded at the same time as Zelda Sword Skills! Please remove one or the other.");
 		}
+		Skills.init();
 		Config.init(event);
 		tabSkills = new CreativeTabs("dss.skills") {
 			@Override
@@ -103,16 +108,21 @@ public class DynamicSwordSkills
 				return new ItemStack(DynamicSwordSkills.skillOrb);
 			}
 		};
-		skillOrb = new ItemSkillOrb().setRegistryName(ModInfo.ID, "skillorb").setTranslationKey("dss.skillorb");
+		skillOrb = new ItemSkillOrb(Skills.getSkillIdMap()).setRegistryName(ModInfo.ID, "skillorb").setTranslationKey("dss.skillorb");
 		if (Config.areCreativeSwordsEnabled()) {
-			skillItems = new ArrayList<Item>(SkillBase.getNumSkills());
+			skillItems = new ArrayList<Item>(SkillRegistry.getValues().size());
 			Item item = null;
-			for (SkillBase skill : SkillBase.getSkills()) {
+			// Hack to maintain original display order
+			List<SkillBase> skills = SkillRegistry.getSortedList(SkillRegistry.SORT_BY_ID);
+			for (SkillBase skill : skills) {
 				if (!(skill instanceof SkillActive)) {
 					continue;
 				}
 				int level = (skill.getMaxLevel() == SkillBase.MAX_LEVEL ? Config.getSkillSwordLevel() : Config.getSkillSwordLevel() * 2);
-				item = new ItemSkillProvider(ToolMaterial.IRON, "iron_sword", skill, (byte) level).setCreativeTab(DynamicSwordSkills.tabSkills);
+				item = new ItemSkillProvider(ToolMaterial.WOOD, "stick", skill, (byte) level)
+						.setRegistryName(ModInfo.ID, "training_stick_" + skill.getRegistryName().getPath())
+						.setTranslationKey("dss.training_stick")
+						.setCreativeTab(DynamicSwordSkills.tabSkills);
 				skillItems.add(item);
 			}
 		}
@@ -133,15 +143,14 @@ public class DynamicSwordSkills
 	public void init(FMLInitializationEvent event) {
 		proxy.init();
 		MinecraftForge.EVENT_BUS.register(new DSSCombatEvents());
-		MinecraftForge.EVENT_BUS.register(new LootHandler());
 		DSSCombatEvents.initializeDrops();
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
-		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", ModInfo.VERSION_LIST);
 	}
 
 	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		Config.postInit();
+		MinecraftForge.EVENT_BUS.register(new LootHandler());
 	}
 
 	@Mod.EventHandler
@@ -189,6 +198,11 @@ public class DynamicSwordSkills
 	}
 
 	@SubscribeEvent
+	public void registerRecipes(RegistryEvent.Register<IRecipe> event) {
+		event.getRegistry().register(new RecipeInfuseSkillOrb());
+	}
+
+	@SubscribeEvent
 	public void registerSounds(RegistryEvent.Register<SoundEvent> event) {
 		final SoundEvent[] sounds = {
 				createSound(new ResourceLocation(ModInfo.ID, "armor_break")),
@@ -213,5 +227,54 @@ public class DynamicSwordSkills
 
 	private void registerCapabilities() {
 		CapabilityPlayerInfo.register();
+	}
+
+	@SubscribeEvent
+	public void processMissingMappings(RegistryEvent.MissingMappings<Item> event) {
+		event.getMappings().stream().forEach(s -> {
+			ResourceLocation location = null;
+			if (s.key.getPath().startsWith("skillitem_")) {
+				// Update old skillitem to training_stick
+				String skill_name = s.key.getPath().substring("skillitem_".length());
+				SkillBase skill = SkillRegistry.get(new ResourceLocation(s.key.getNamespace(), skill_name));
+				if (Skills.superSpinAttack.is(skill)) {
+					s.ignore();
+				} else if (skill != null) {
+					location = new ResourceLocation(s.key.getNamespace(), "training_stick_" + skill.getRegistryName().getPath().toLowerCase());
+				}
+			} else if (s.key.getPath().startsWith("training_stick_")) {
+				// Handle skill registry name changes
+				String skill_name = s.key.getPath().substring("training_stick_".length());
+				SkillBase skill = SkillRegistry.get(new ResourceLocation(s.key.getNamespace(), skill_name));
+				if (Skills.superSpinAttack.is(skill)) {
+					s.ignore();
+				} else if (skill != null && !skill.getRegistryName().getPath().equals(skill_name)) {
+					location = new ResourceLocation(s.key.getNamespace(), "training_stick_" + skill.getRegistryName().getPath().toLowerCase());
+				}
+			} else if (s.key.getPath().startsWith("skillsword_")) {
+				location = new ResourceLocation(s.key.getNamespace(), s.key.getPath().replace("skillsword", "skill_sword").toLowerCase());
+			}
+			if (location != null) {
+				Item item = Item.REGISTRY.getObject(location);
+				if (item == null) {
+					s.fail();
+				} else {
+					s.remap(item);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Parses a String into a key, or NULL if format was invalid
+	 * @param name A valid key string e.g. 'modid:registry_name'
+	 */
+	public static ResourceLocation getResourceLocation(String name) {
+		try {
+			return new ResourceLocation(name);
+		} catch (NullPointerException e) {
+			DynamicSwordSkills.logger.error(String.format("Invalid key string: %s", name));
+		}
+		return null;
 	}
 }

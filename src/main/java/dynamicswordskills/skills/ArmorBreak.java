@@ -19,23 +19,23 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.api.SkillGroup;
+import dynamicswordskills.client.DSSClientEvents;
 import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.DamageUtils;
 import dynamicswordskills.util.PlayerUtils;
-import dynamicswordskills.util.TargetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -46,43 +46,31 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Activation: Hold attack for (20 - level) ticks
  * Effect: Unleashes an attack that inflicts normal weapon damage but ignores armor
  * Exhaustion: 2.0F - (0.1F * level)
- * Special: May only be used while locked on to a target
- * 			Charge time is reduced by 5 ticks when wielding a Master Sword
  * 
  * Using this skill performs an attack that ignores armor but otherwise deals exactly the
  * same damage as a normal attack with the given item would, including all bonuses from other
  * skills and enchantments.
  * 
- * Armor Break cannot be activated by normal means. It must be charged by holding the 'attack'
- * key, and once the charge reaches full, the player will perform the Armor Break attack.
+ * Armor Break must be charged by holding the 'attack' key; once the charge reaches full,
+ * the player will perform the Armor Break attack automatically.
  * 
  */
 public class ArmorBreak extends SkillActive
 {
-	/** Set to 1 when triggered; set to 0 when target struck in onImpact() */
+	/** Set when triggered; set to 0 when target struck in onImpact() */
 	private int activeTimer = 0;
 
 	/** Current charge time */
 	private int charge = 0;
 
-	/**
-	 * Flags whether the vanilla keyBindAttack was used to trigger this skill, in which
-	 * case the keybinding state must be manually set to false once the skill activates;
-	 * this is because the key is still pressed, and vanilla behavior is to attack like
-	 * crazy as long as the key is held, which is not very cool. For custom key bindings
-	 * this is not an issue, as it only results in an attack when the key is first pressed.
-	 * 
-	 * Another issue: while mouse state is true, if the cursor moves over a block, the player
-	 * will furiously swing his arm at it, as though trying to break it. Perhaps it is better
-	 * to set the key state to false as before and track 'buttonstate' from within the skill,
-	 * though in that case it needs to listen for key releases as well as presses.
-	 * Note that this is the default vanilla behavior for holding down the attack key, so
-	 * perhaps it is best to leave it as is.
-	 */
-	private boolean requiresReset;
+	/** Flag to allow armor break to begin charging even if mouse is over a block */
+	private boolean wasLockedOn;
 
-	public ArmorBreak(String name) {
-		super(name);
+	@SideOnly(Side.CLIENT)
+	private KeyBinding attackKey;
+
+	public ArmorBreak(String translationKey) {
+		super(translationKey);
 	}
 
 	private ArmorBreak(ArmorBreak skill) {
@@ -92,6 +80,11 @@ public class ArmorBreak extends SkillActive
 	@Override
 	public ArmorBreak newInstance() {
 		return new ArmorBreak(this);
+	}
+
+	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
 	}
 
 	@Override
@@ -121,137 +114,101 @@ public class ArmorBreak extends SkillActive
 		return 20 - level;
 	}
 
-	/** Returns true if the skill is still charging up; always false on the server, as charge is handled client-side */
-	public boolean isCharging(EntityPlayer player) {
-		ILockOnTarget target = DSSPlayerInfo.get(player).getTargetingSkill();
-		return charge > 0 && target != null && target.isLockedOn();
-	}
-
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand());
 	}
 
-	/**
-	 * ArmorBreak does not listen for any keys so that there is no chance it is bypassed by
-	 * another skill processing first; instead, keyPressed must be called manually, both
-	 * when the attack key is pressed (and, to handle mouse clicks, when released)
-	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return false;
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
+			// Need to receive key release when not locked on to stop charging
+			return charge > 0 && key == mc.gameSettings.keyBindAttack;
+		}
+		wasLockedOn = isLockedOn;
+		return key == mc.gameSettings.keyBindAttack;
 	}
 
-	/**
-	 * Must be called manually when the attack key is pressed (and, for the mouse, when released);
-	 * this is necessary to allow charging to start from a single key press, when other skills
-	 * might otherwise preclude ArmorBreak's keyPressed from being called.
-	 */
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		requiresReset = (key == mc.gameSettings.keyBindAttack);
-		if (requiresReset || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK]) {
-			charge = getChargeTime(player);
-			if (requiresReset) {
-				// manually set the keybind state, since it will not be set by the canceled mouse event
-				// releasing the mouse unsets it normally, but it must be manually unset if the skill is triggered
-				KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), true);
-			}
-			return true; // doesn't matter, as ArmorBreak is handled outside the normal framework
+		// Only begin charging if not mousing over a block or locked on, otherwise player cannot harvest blocks
+		if (wasLockedOn || mc.objectMouseOver == null || mc.objectMouseOver.typeOfHit != RayTraceResult.Type.BLOCK) {
+			attackKey = key;
 		}
 		return false;
 	}
 
-	/**
-	 * Returns true if the attack key is still pressed (i.e. ArmorBreak should continue to charge)
-	 */
+	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyPressed() {
-		return (DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK].isKeyDown() || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.isKeyDown()));
+	public void keyReleased(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (key == attackKey) {
+			attackKey = null;
+			charge = 0;
+			DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
+		}
 	}
 
-	/**
-	 * ArmorBreak's activation was triggered from the client side and it will be over
-	 * on the server by the time the client receives the packet, so don't bother
-	 */
-	@Override
-	protected boolean sendClientUpdate() {
-		return true;
+	@SideOnly(Side.CLIENT)
+	private void initCharging(EntityPlayer player) {
+		if (charge == 0 && attackKey != null && attackKey.isKeyDown() && DSSPlayerInfo.get(player).canInteract()) {
+			charge = getChargeTime(player);
+			// Unset the keybind state to prevent issues if the player mouses over a block while charging
+			KeyBinding.setKeyBindState(attackKey.getKeyCode(), false);
+		}
 	}
 
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
-		activeTimer = 1; // needs to be active for hurt event to process correctly
-		if (world.isRemote) {
-			player.swingArm(EnumHand.MAIN_HAND);
-		} else {
-			// Attack first so skill still active upon impact, then set timer to zero
-			ILockOnTarget skill = DSSPlayerInfo.get(player).getTargetingSkill();
-			if (skill != null && skill.isLockedOn() && TargetUtils.canReachTarget(player, skill.getCurrentTarget())) {
-				player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
-			}
+		activeTimer = 4; // needs to be active for attack event to process correctly
+		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
+			attackKey = null;
+			DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
+			DSSClientEvents.handlePlayerAttack(Minecraft.getMinecraft());
 		}
-		return false;
+		return true;
 	}
 
 	@Override
 	protected void onDeactivated(World world, EntityPlayer player) {
 		activeTimer = 0;
 		charge = 0;
-		DSSPlayerInfo.get(player).armSwing = 0.0F;
+		DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
 	}
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (isCharging(player)) {
-			if (isKeyPressed() && PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
-				if (!player.isSwingInProgress) {
-					int maxCharge = getChargeTime(player);
-					if (charge < maxCharge - 1) {
-						DSSPlayerInfo.get(player).armSwing = 0.25F + 0.75F * ((float)(maxCharge - charge) / (float) maxCharge);
-					}
-					--charge;
-				}
-				// ArmorBreak triggers here, on the client side first, so onActivated need not process on the client
-				if (charge == 0) {
-					// can't use the standard animation methods to prevent key/mouse input,
-					// since Armor Break will not return true for isActive
-					DSSPlayerInfo.get(player).setAttackTime(4); // flag for isAnimating? no player parameter
-					if (requiresReset) { // activated by vanilla attack key: manually unset the key state (fix for mouse event issues)
-						KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack.getKeyCode(), false);
-					}
-					SwordBasic skill = (SwordBasic) DSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
-					if (skill != null && skill.onAttack(player)) {
-						// don't swing arm here, it screws up the attack damage calculations
-						PacketDispatcher.sendToServer(new ActivateSkillPacket(this, true));
-					} else { // player missed - swing arm manually since no activation packet will be sent
-						player.swingArm(EnumHand.MAIN_HAND);
-					}
-				}
-			} else {
-				DSSPlayerInfo.get(player).armSwing = 0.0F;
-				charge = 0;
-			}
-		} else {
-			DSSPlayerInfo.get(player).armSwing = 0.0F;
+		if (player.getEntityWorld().isRemote) {
+			initCharging(player);
 		}
 		if (isActive()) {
-			activeTimer = 0;
+			--activeTimer;
+		} else if (charge > 0) {
+			if (PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
+				int maxCharge = getChargeTime(player);
+				if (charge < maxCharge - 1) {
+					float f = 0.25F + 0.75F * ((float)(maxCharge - charge) / (float) maxCharge);
+					DSSPlayerInfo.get(player).setArmSwingProgress(f, 0.0F);
+				}
+				--charge;
+				if (charge == 0) {
+					PacketDispatcher.sendToServer(new ActivateSkillPacket(this, true));
+				}
+			} else {
+				DSSPlayerInfo.get(player).setArmSwingProgress(0.0F, 0.0F);
+				charge = 0;
+			}
 		}
 	}
 
-	/**
-	 * Deactivates this skill and inflicts armor-ignoring damage directly to the
-	 * target; note that this causes the LivingHurtEvent to repost, but since the
-	 * skill is no longer active it will behave normally. The current event's
-	 * damage is set to zero to avoid double damage.
-	 */
-	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
+	@Override
+	public boolean onAttack(EntityPlayer player, EntityLivingBase entity, DamageSource source, float amount) {
 		activeTimer = 0;
-		PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.ARMOR_BREAK, SoundCategory.PLAYERS, 0.4F, 0.5F);
-		DirtyEntityAccessor.damageEntity(event.getEntityLiving(), DamageUtils.causeArmorBreakDamage(player), event.getAmount());
-		event.setAmount(0.0F);
+		entity.attackEntityFrom(DamageUtils.causeArmorBreakDamage(player), amount);
+		if (!player.getEntityWorld().isRemote) { 
+			PlayerUtils.playSoundAtEntity(player.getEntityWorld(), player, ModSounds.ARMOR_BREAK, SoundCategory.PLAYERS, 0.4F, 0.5F);
+		}
+		return true;
 	}
 }

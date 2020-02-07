@@ -17,70 +17,77 @@
 
 package dynamicswordskills.item;
 
-import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
 
-import javax.annotation.Nullable;
+import com.google.common.collect.BiMap;
 
 import dynamicswordskills.DynamicSwordSkills;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.ref.Config;
-import dynamicswordskills.ref.ModSounds;
+import dynamicswordskills.api.IMetadataSkillItem;
+import dynamicswordskills.api.IRandomSkill;
+import dynamicswordskills.api.ISkillInfusionFuelItem;
+import dynamicswordskills.api.ItemGrantSkill;
+import dynamicswordskills.api.SkillRegistry;
 import dynamicswordskills.skills.SkillBase;
-import dynamicswordskills.util.PlayerUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ItemSkillOrb extends Item implements IModItem
+public class ItemSkillOrb extends ItemGrantSkill implements IModItem, ISkillInfusionFuelItem, IMetadataSkillItem, IRandomSkill
 {
-	public ItemSkillOrb() {
+	private final BiMap<Integer, ResourceLocation> skill_id_map;
+
+	public ItemSkillOrb(BiMap<Integer, ResourceLocation> skill_id_map) {
 		super();
+		if (skill_id_map == null || skill_id_map.isEmpty()) {
+			throw new IllegalArgumentException("Skill orb items require a valid ID map with at least one entry");
+		}
+		this.skill_id_map = skill_id_map;
 		setMaxDamage(0);
 		setHasSubtypes(true);
 		setCreativeTab(DynamicSwordSkills.tabSkills);
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
-		ItemStack stack = player.getHeldItem(hand);
-		if (!player.getEntityWorld().isRemote) {
-			SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
-			if (skill != null) {
-				if (!Config.isSkillEnabled(skill.getId())) {
-					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.use.disabled", new TextComponentTranslation(skill.getTranslationString()));
-				} else if (DSSPlayerInfo.get(player).grantSkill(skill)) {
-					PlayerUtils.playSound(player, ModSounds.LEVEL_UP, SoundCategory.PLAYERS, 1.0F, 1.0F);
-					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.levelup",
-							new TextComponentTranslation(skill.getTranslationString()), DSSPlayerInfo.get(player).getTrueSkillLevel(skill));
-					if (!player.capabilities.isCreativeMode) {
-						stack.shrink(1);
-					}
-				} else {
-					PlayerUtils.sendTranslatedChat(player, "chat.dss.skill.maxlevel", new TextComponentTranslation(skill.getTranslationString()));
-				}
-			}
-		}
-		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
+	public SkillBase getSkillToGrant(ItemStack stack) {
+		return getSkillFromDamage(stack.getItemDamage());
+	}
+
+	@Override
+	public SkillBase getSkillToInfuse(ItemStack stack) {
+		return getSkillFromDamage(stack.getItemDamage());
+	}
+
+	@Override
+	public int getAdjustedInfusionCost(ItemStack orb, ItemStack base, int required) {
+		return required;
+	}
+
+	@Override
+	public int getItemDamage(SkillBase skill) {
+		Integer i = skill_id_map.inverse().get(skill.getRegistryName());
+		return (i == null ? -1 : i);
+	}
+
+	@Override
+	public SkillBase getSkillFromDamage(int damage) {
+		return SkillRegistry.get(skill_id_map.get(damage));
+	}
+
+	@Override
+	public SkillBase getRandomSkill(Random rand) {
+		return getSkillFromDamage(rand.nextInt(skill_id_map.size()));
 	}
 
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
-		SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
+		SkillBase skill = getSkillFromDamage(stack.getItemDamage());
 		return new TextComponentTranslation(super.getTranslationKey() + ".name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
 	}
 
@@ -88,34 +95,16 @@ public class ItemSkillOrb extends Item implements IModItem
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> list) {
 		if (!this.isInCreativeTab(tab)) { return; }
-		for (SkillBase skill : SkillBase.getSkills()) {
-			list.add(new ItemStack(this, 1, skill.getId()));
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, @Nullable World world, List<String> list, ITooltipFlag flag) {
-		if (world != null && SkillBase.doesSkillExist(stack.getItemDamage())) {
-			SkillBase skill = DSSPlayerInfo.get(Minecraft.getMinecraft().player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
-			if (skill != null) {
-				if (!Config.isSkillEnabled(skill.getId())) {
-					list.add(TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled").getUnformattedText());
-				} else if (skill.getLevel() > 0) {
-					list.add(TextFormatting.GOLD + skill.getLevelDisplay(true));
-					list.addAll(skill.getTranslatedTooltip(Minecraft.getMinecraft().player));
-				} else {
-					list.add(TextFormatting.ITALIC + new TextComponentTranslation("tooltip.dss.skillorb.desc.0").getUnformattedText());
-				}
-			}
+		for (int i : skill_id_map.keySet()) {
+			list.add(new ItemStack(this, 1, i));
 		}
 	}
 
 	@Override
 	public String[] getVariants() {
-		String[] variants = new String[SkillBase.getNumSkills()];
-		for (SkillBase skill : SkillBase.getSkills()) {
-			variants[skill.getId()] = skill.getIconTexture();
+		String[] variants = new String[skill_id_map.size()];
+		for (Entry<Integer, ResourceLocation> entry : skill_id_map.entrySet()) {
+			variants[entry.getKey()] = entry.getValue().getNamespace() + ":skill_orb_" + entry.getValue().getPath().toLowerCase();
 		}
 		return variants;
 	}

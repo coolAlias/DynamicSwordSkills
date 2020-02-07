@@ -19,6 +19,9 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import com.google.common.base.Predicate;
+
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.entity.DirtyEntityAccessor;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.server.EndComboPacket;
@@ -45,50 +48,17 @@ import swordskillsapi.api.damage.IComboDamage.IComboDamageFull;
 /**
  * 
  * BASIC SWORD SKILL
- * Description: Foundation for all other Sword Skills
- * Activation: Standard (toggle), but must be looking near a target within range
- * Effects:	1. must be active in order to use any of the Sword Skills (see below)
- * 			2. camera locks on to target so long as player remains within range
- * 			3. chain up to (2 + level) attacks:
- * 				- each attack adds the combo's current size minus one to damage
- * 				- taking more than (0.5F * level) in damage at once will terminate an ongoing combo, as will
- * 					missing a strike or taking too long between consecutive hits
+ * Description: Basic targeting and combo skill
+ * Activation: Toggled with the Z-targeting key while looking at a valid target within range
+ * Effects:	Chain up to (2 + level) attacks, adding bonus damage based on the combo size.
  * Exhaustion: 0.0F - does not cost exertion to use
  * Duration: (a) targeting: unlimited
  * 			 (b) combo: time allowed between strikes is 20 ticks + (2 * level)
  * Range: 6 + level, distance within which targets can be acquired, in blocks
- * Special:	- intended (but not required) for player to use keyboard instead of mouse while skill is active
- * 			- deactivates if the player is no longer holding a sword or if there are no longer any valid targets
- * 
- * Basic sword technique skill; it is a prerequisite for all other sword skills and may only
- * remain active while a sword is in hand.
- * 
- * While active, the player's field of view is locked onto the current target; pressing the 'next
- * target' key (default TAB) will switch to the next closest available target that hasn't been
- * targeted before, or the previous target if no new targets are available
- * 
- * While active, 'R-Ctrl' may be used to block in lieu of the right mouse button
- * 
- * Combos may be performed while locked on using normal attacks and any known sword skills.
- * 
- * Up to 3 attacks can be chained at level 1, plus an additional attack per skill level. Additionally,
- * each Basic Sword level increases the amount of time allowed between successive attacks while
- * chaining combos, the amount of damage the player can take before the combo is broken and also the
- * maximum distance at which the player may remain locked on to a target.
- * 
- * Default Controls
- * Tab (tap) - acquire next target
- * RCtrl (hold) - block
- * Up arrow (tap) - regular attack
- * Up arrow (tap while jumping) - Leaping Blow
- * Up arrow (tap while blocking) - Slam
- * Up arrow (hold) - Armor Break
- * Left / Right arrow (tap) - Dodge
- * Left / Right arrow (hold) - Spin Attack
- * Down arrow (tap) - Parry/Disarm
+ * Special: Missing an attack or taking too much damage breaks the current combo.
  * 
  */
-public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
+public class SwordBasic extends SkillActive implements IComboSkill, ILockOnTarget
 {
 	/** True if this skill is currently active */
 	private boolean isActive = false;
@@ -103,8 +73,11 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	/** Set to a new instance each time a combo begins */
 	private Combo combo = null;
 
-	public SwordBasic(String name) {
-		super(name);
+	/** Flag for {@link #setComboDamageOnlyMode(boolean)} */
+	private boolean comboDamageOnlyMode;
+
+	public SwordBasic(String translationKey) {
+		super(translationKey);
 	}
 
 	private SwordBasic(SwordBasic skill) {
@@ -117,12 +90,17 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getRangeDisplay(getRange()));
-		desc.add(new TextComponentTranslation(getInfoString("info", 1), getMaxComboSize()).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.max", getMaxComboSize()).getUnformattedText());
 		desc.add(getTimeLimitDisplay(getComboTimeLimit()));
-		desc.add(new TextComponentTranslation(getInfoString("info", 2), String.format("%.1f", (0.5F * level))).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.tolerance", String.format("%.1f", getDamageTolerance())).getUnformattedText());
 	}
 
 	@Override
@@ -165,17 +143,17 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		return (6 + level);
 	}
 
+	private float getDamageTolerance() {
+		return (0.5F * level);
+	}
+
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
-		if (isActive) { // deactivate if already active
-			onDeactivated(world, player); // don't need to use deactivate, as packets already sent
-		} else { // otherwise activate
-			isActive = true;
-			if (!isComboInProgress()) {
-				combo = null;
-			}
-			currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true);
+		isActive = true;
+		if (!isComboInProgress()) {
+			combo = null;
 		}
+		currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true, getTargetSelectors());
 		return true;
 	}
 
@@ -244,7 +222,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	public final void getNextTarget(EntityPlayer player) {
 		EntityLivingBase nextTarget = null;
 		double dTarget = 0;
-		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, getRange(), getRange());
+		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, getRange(), getRange(), getTargetSelectors());
 		for (EntityLivingBase entity : list) {
 			if (entity == player) { continue; }
 			if (entity != currentTarget && entity != prevTarget && isTargetValid(player, entity)) {
@@ -272,6 +250,20 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	/**
+	 * See {@link TargetUtils#getDefaultSelectors()}
+	 */
+	protected List<Predicate<Entity>> getTargetSelectors() {
+		List<Predicate<Entity>> list = TargetUtils.getDefaultSelectors();
+		if (!Config.canTargetPassiveMobs()) {
+			list.add(TargetUtils.HOSTILE_MOB_SELECTOR);
+		}
+		if (!Config.canTargetPlayers()) {
+			list.add(TargetUtils.NON_PLAYER_SELECTOR);
+		}
+		return list;
+	}
+
+	/**
 	 * Updates targets, setting to null if no longer valid and acquiring new target if necessary
 	 * @return returns true if the current target is valid
 	 */
@@ -280,7 +272,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		if (!isTargetValid(player, prevTarget) || !TargetUtils.isTargetInSight(player, prevTarget)) {
 			prevTarget = null;
 		}
-		if (!isTargetValid(player, currentTarget)) {
+		if (!isTargetValid(player, currentTarget) || !player.canEntityBeSeen(currentTarget)) {
 			currentTarget = null;
 			if (Config.autoTargetEnabled()) {
 				getNextTarget(player);
@@ -294,9 +286,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	 */
 	@SideOnly(Side.CLIENT)
 	private boolean isTargetValid(EntityPlayer player, EntityLivingBase target) {
-		return (target != null && !target.isDead && target.getHealth() > 0F &&
-				player.getDistance(target) < (float) getRange() && !target.isInvisible() &&
-				(Config.canTargetPlayers() || !(target instanceof EntityPlayer)));
+		return (target != null && !target.isDead && target.getHealth() > 0F 
+				&& player.getDistance(target) < (float) getRange() 
+				&& !target.isInvisible());
 	}
 
 	@Override
@@ -315,17 +307,26 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public boolean onAttack(EntityPlayer player) {
-		Entity mouseOver = TargetUtils.getMouseOverEntity();
-		boolean attackHit = (isLockedOn() && mouseOver != null && TargetUtils.canReachTarget(player, mouseOver));
-		if (!attackHit) {
+	public void setComboDamageOnlyMode(boolean flag) {
+		this.comboDamageOnlyMode = flag;
+	}
+
+	@Override
+	public void onMiss(EntityPlayer player) {
+		if (PlayerUtils.isWeapon(player.getHeldItemMainhand())) {
 			PlayerUtils.playRandomizedSound(player, ModSounds.SWORD_MISS, SoundCategory.PLAYERS, 0.4F, 0.5F);
-			if (isComboInProgress()) {
-				PacketDispatcher.sendToServer(new EndComboPacket(this));
-			}
 		}
-		return attackHit;
+		if (isComboInProgress()) {
+			PacketDispatcher.sendToServer(new EndComboPacket(this));
+		}
+	}
+
+	@Override
+	public float onImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
+		if (combo != null && !combo.isFinished()) {
+			amount += combo.getNumHits();
+		}
+		return amount;
 	}
 
 	@Override
@@ -336,7 +337,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		}
 		float damage = DirtyEntityAccessor.getModifiedDamage(event.getEntityLiving(), event.getSource(), event.getAmount());
 		if (damage > 0) {
-			if (!(event.getSource() instanceof IComboDamageFull) || ((IComboDamageFull) event.getSource()).increaseComboCount(player)) {
+			if (!comboDamageOnlyMode && (!(event.getSource() instanceof IComboDamageFull) || ((IComboDamageFull) event.getSource()).increaseComboCount(player))) {
 				combo.add(player, event.getEntityLiving(), damage);
 			} else {
 				combo.addDamageOnly(player, damage);
@@ -349,10 +350,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	private boolean isValidComboDamage(EntityPlayer player, DamageSource source) {
-		if (source instanceof IComboDamage) {
-			return ((IComboDamage) source).isComboDamage(player);
-		}
-		return !source.isProjectile();
+		return source instanceof IComboDamage || !source.isProjectile();
 	}
 
 	private SoundEvent getComboDamageSound(EntityPlayer player, DamageSource source) {
@@ -366,7 +364,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	public void onPlayerHurt(EntityPlayer player, LivingHurtEvent event) {
-		if (isComboInProgress() && DirtyEntityAccessor.getModifiedDamage(player, event.getSource(), event.getAmount()) > (0.5F * level)) {
+		if (isComboInProgress() && DirtyEntityAccessor.getModifiedDamage(player, event.getSource(), event.getAmount()) > getDamageTolerance()) {
 			combo.endCombo(player);
 		}
 	}

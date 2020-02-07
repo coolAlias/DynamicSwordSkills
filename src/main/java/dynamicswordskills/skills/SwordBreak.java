@@ -19,9 +19,8 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.client.DSSKeyHandler;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
@@ -43,15 +42,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * 
  * SWORD BREAK
- * Activation: Double-tap back while blocking
+ * Activation: Double-tap forward then right-click while wielding a weapon
  * Effect: A fierce block that is capable of destroying the opponent's blade
  * Exhaustion: 2.0F - (0.1 * level)
  * Damage: Up to 90 durability damage to the opponent's held item (15 * (level + 1))
- * Duration: Time allowed before skill fails is 2 ticks at level 1, up to 8 ticks at max level
+ * Knockback: 0.5F + (0.1F * level), slightly better than a standard block
+ * Duration: Timing window starts at 4 ticks and increases to 8 by max level
  * Notes:
  * - Only works when being attacked by an enemy holding an item
  * - Has no effect other than blocking the attack if the attacker's held item can not be damaged
- * - Must release the block key in between uses
  *
  */
 public class SwordBreak extends SkillActive
@@ -59,15 +58,19 @@ public class SwordBreak extends SkillActive
 	/** Timer during which player is considered actively parrying */
 	private int breakTimer;
 
-	/** Only for double-tap activation: Current number of ticks remaining before skill will not activate */
+	/** Counter incremented when next correct key in sequence pressed; reset when activated or if ticksTilFail timer reaches 0 */
+	@SideOnly(Side.CLIENT)
+	private int keysPressed;
+
+	/** Reset each valid key press until executed; if timer reaches 0, full key sequence must be repeated */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 
 	/** Notification to play miss sound; set to true when activated and false when attack parried */
 	private boolean playMissSound;
 
-	public SwordBreak(String name) {
-		super(name);
+	public SwordBreak(String translationKey) {
+		super(translationKey);
 	}
 
 	private SwordBreak(SwordBreak skill) {
@@ -80,9 +83,15 @@ public class SwordBreak extends SkillActive
 	}
 
 	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(new TextComponentTranslation(getInfoString("info", 1), getMaxDamage()).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.durability", getMaxDamage()).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.knockback", getKnockbackStrength()).getUnformattedText());
 		desc.add(getTimeLimitDisplay(getActiveTime() - getUseDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
@@ -99,12 +108,12 @@ public class SwordBreak extends SkillActive
 
 	/** Number of ticks that skill will be considered active */
 	private int getActiveTime() {
-		return 6 + level;
+		return 9 + (level / 2);
 	}
 
 	/** Number of ticks before player may attempt to use this skill again */
 	private int getUseDelay() {
-		return (5 - (level / 2)); // 2 tick usage window at level 1
+		return (5 - (level / 2));
 	}
 
 	/** Maximum amount of damage that may be caused to the opponent's weapon */
@@ -112,42 +121,52 @@ public class SwordBreak extends SkillActive
 		return (level + 1) * 15;
 	}
 
-	@Override
-	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand());
+	/**
+	 * Returns the strength of the knockback effect when an attack is parried
+	 */
+	public float getKnockbackStrength() {
+		return 0.5F + (0.1F * level); // 0.5F is the base line per blocking with a shield
 	}
 
-	/**
-	 * Only allow activation if player is using item, to prevent clashing with Parry
-	 */
+	@Override
+	public boolean canUse(EntityPlayer player) {
+		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItemMainhand()) && !player.isHandActive();
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return canUse(player) && PlayerUtils.isBlocking(player);
+		return canUse(player) && keysPressed > 1 && ticksTilFail > 0;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_DOWN] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack));
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (canExecute(player)) {
-			if (Config.requiresDoubleTap()) {
-				if (ticksTilFail > 0) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-					ticksTilFail = 0;
-					return true;
-				} else {
-					ticksTilFail = 6;
+		if ((Config.allowVanillaControls() && key == mc.gameSettings.keyBindForward) || key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey()) {
+			ticksTilFail = 6;
+			if (keysPressed < 2) {
+				if (!Config.requiresDoubleTap() && key == DSSKeyHandler.keys[DSSKeyHandler.KEY_FORWARD].getKey()) {
+					keysPressed++;
 				}
-			} else if (key != mc.gameSettings.keyBindBack) { // activate on first press, but not for vanilla key!
-				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-				return true;
+				keysPressed++;
 			}
+		} else if (key == mc.gameSettings.keyBindUseItem) {
+			boolean flag = (canExecute(player) && activate(player));
+			ticksTilFail = 0;
+			keysPressed = 0;
+			return flag;
+		} else {
+			ticksTilFail = 0;
+			keysPressed = 0;
 		}
 		return false;
 	}
@@ -158,9 +177,9 @@ public class SwordBreak extends SkillActive
 		playMissSound = true;
 		if (world.isRemote) {
 			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
-			KeyBinding.setKeyBindState(DSSKeyHandler.keys[DSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
-			player.swingArm(EnumHand.MAIN_HAND);
 		}
+		player.swingArm(EnumHand.MAIN_HAND);
+		player.resetCooldown();
 		return isActive();
 	}
 
@@ -178,6 +197,9 @@ public class SwordBreak extends SkillActive
 			}
 		} else if (player.getEntityWorld().isRemote && ticksTilFail > 0) {
 			--ticksTilFail;
+			if (ticksTilFail < 1) {
+				keysPressed = 0;
+			}
 		}
 	}
 
@@ -198,7 +220,7 @@ public class SwordBreak extends SkillActive
 						attacker.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
 					}
 				}
-				TargetUtils.knockTargetBack(attacker, player);
+				TargetUtils.knockTargetBack(attacker, player, getKnockbackStrength());
 				return true;
 			} // don't deactivate early, as there is a delay between uses
 		}

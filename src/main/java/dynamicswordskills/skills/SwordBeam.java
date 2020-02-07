@@ -19,11 +19,9 @@ package dynamicswordskills.skills;
 
 import java.util.List;
 
-import dynamicswordskills.client.DSSKeyHandler;
+import dynamicswordskills.api.SkillGroup;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.entity.EntitySwordBeam;
-import dynamicswordskills.network.PacketDispatcher;
-import dynamicswordskills.network.bidirectional.ActivateSkillPacket;
 import dynamicswordskills.ref.Config;
 import dynamicswordskills.ref.ModSounds;
 import dynamicswordskills.util.PlayerUtils;
@@ -48,7 +46,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Range: Approximately 12 blocks, plus one block per level
  * Exhaustion: 2.0F - (0.1F * level)
  * Special:
- * 	- May only be used while locked on to a target
  *  - Amount of health required decreases with skill level, down to 1-1/2 hearts below max
  *  - Hitting a target with the beam counts as a direct strike for combos
  *  - At max level, the beam can penetrate multiple targets
@@ -59,8 +56,8 @@ public class SwordBeam extends SkillActive
 	/** Used to end combo if the sword beam fails to strike a target */
 	private int missTimer;
 
-	public SwordBeam(String name) {
-		super(name);
+	public SwordBeam(String translationKey) {
+		super(translationKey);
 	}
 
 	private SwordBeam(SwordBeam skill) {
@@ -73,11 +70,16 @@ public class SwordBeam extends SkillActive
 	}
 
 	@Override
+	public boolean displayInGroup(SkillGroup group) {
+		return super.displayInGroup(group) || group == Skills.SWORD_GROUP;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(getDamageFactor(player), false) + "%");
 		desc.add(getRangeDisplay(12 + level));
-		desc.add(new TextComponentTranslation(getInfoString("info", 1), String.format("%.1f", Config.getHealthAllowance(level) / 2.0F)).getUnformattedText());
+		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.health", String.format("%.1f", Config.getHealthAllowance(level) / 2.0F)).getUnformattedText());
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
@@ -113,7 +115,7 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && checkHealth(player) && DSSPlayerInfo.get(player).canAttack() && PlayerUtils.isSwordOrProvider(player.getHeldItemMainhand(), this);
+		return super.canUse(player) && checkHealth(player) && !player.isHandActive() && DSSPlayerInfo.get(player).canAttack() && PlayerUtils.isSwordOrProvider(player.getHeldItemMainhand(), this);
 	}
 
 	/**
@@ -127,32 +129,35 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return (key == DSSKeyHandler.keys[DSSKeyHandler.KEY_ATTACK] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+	public boolean isKeyListener(Minecraft mc, KeyBinding key, boolean isLockedOn) {
+		if (Config.requiresLockOn() && !isLockedOn) {
+			return false;
+		}
+		return key == mc.gameSettings.keyBindAttack;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
-		if (canExecute(player)) {
-			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
-			return true;
-		}
-		return false;
+		return canExecute(player) && activate(player);
 	}
 
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		if (!world.isRemote) {
+			// Base attack strength calculation from EntityPlayer#attackTargetEntityWithCurrentItem
+			float str = player.getCooledAttackStrength(0.5F);
+			float dmg = getDamage(player) * (0.2F + str * str * 0.8F);
 			missTimer = 12 + level;
 			PlayerUtils.playSoundAtEntity(world, player, ModSounds.WHOOSH, SoundCategory.PLAYERS, 0.4F, 0.5F);
-			EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level).setDamage(getDamage(player));
+			EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level).setDamage(dmg);
 			beam.shoot(player, player.rotationPitch, player.rotationYaw, 0.0F, beam.getVelocity(), 1.0F);
 			world.spawnEntity(beam);
 		} else {
-			player.swingArm(EnumHand.MAIN_HAND);
-			DSSPlayerInfo.get(player).setAttackTime(20 - level);
+			DSSPlayerInfo.get(player).setAttackCooldown(20 - level);
 		}
+		player.swingArm(EnumHand.MAIN_HAND);
+		player.resetCooldown();
 		return true;
 	}
 
@@ -166,7 +171,7 @@ public class SwordBeam extends SkillActive
 		if (missTimer > 0) {
 			--missTimer;
 			if (missTimer == 0 && !player.getEntityWorld().isRemote) {
-				ICombo combo = DSSPlayerInfo.get(player).getComboSkill();
+				IComboSkill combo = DSSPlayerInfo.get(player).getComboSkill();
 				if (combo != null && combo.isComboInProgress()) {
 					combo.getCombo().endCombo(player);
 				}

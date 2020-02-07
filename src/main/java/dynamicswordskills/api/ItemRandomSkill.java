@@ -22,9 +22,13 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import dynamicswordskills.DynamicSwordSkills;
 import dynamicswordskills.item.IModItem;
+import dynamicswordskills.loot.functions.SkillFunction;
 import dynamicswordskills.ref.ModInfo;
+import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
+import dynamicswordskills.skills.Skills;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -51,7 +55,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * they extend ItemSword instead of Item, but could just as well be anything.
  *
  */
-public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvider
+public class ItemRandomSkill extends ItemSword implements IModItem, IRandomSkill, ISkillProviderInfusable
 {
 	/** Item quality based on tool material; higher quality tends toward higher levels */
 	private final int quality;
@@ -64,8 +68,14 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		this.texture = textureName;
 		this.quality = material.getHarvestLevel() + (material == ToolMaterial.GOLD ? 3 : 0);
 		setCreativeTab(null);
-		setRegistryName(ModInfo.ID, "skillsword_" + material.name());
-		setTranslationKey("dss.skill" + material.name());
+		setRegistryName(ModInfo.ID, "skill_sword_" + material.name().toLowerCase());
+		setTranslationKey("dss.skill_sword." + material.name().toLowerCase());
+	}
+
+	@Override
+	public SkillBase getRandomSkill(Random rand) {
+		SkillBase skill = SkillFunction.getRandomSkill(rand);
+		return (skill instanceof SkillActive ? skill : null);
 	}
 
 	@Override
@@ -97,17 +107,20 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 		NBTTagCompound tag = stack.getTagCompound();
 		SkillBase skill = null;
 		if (tag.hasKey("ItemSkillName")) {
-			skill = SkillBase.getSkillByName(tag.getString("ItemSkillName"));
+			String name = tag.getString("ItemSkillName");
+			// For backwards compatibility:
+			if (name.lastIndexOf(':') == -1) {
+				name = ModInfo.ID + ":" + name;
+				tag.setString("ItemSkillName", name);
+			}
+			skill = SkillRegistry.get(DynamicSwordSkills.getResourceLocation(name));
 		}
 		// For backwards compatibility:
-		if (tag.hasKey("ItemSkillId")) {
-			if (skill == null) {
-				skill = SkillBase.getSkill(tag.getInteger("ItemSkillId"));
-				if (skill != null) {
-					tag.setString("ItemSkillName", skill.getUnlocalizedName());
-				}
-			} else if (tag.getInteger("ItemSkillId") != skill.getId()) {
-				tag.setInteger("ItemSkillId", skill.getId());
+		if (skill == null && tag.hasKey("ItemSkillId")) {
+			skill = SkillRegistry.getSkillById(tag.getInteger("ItemSkillId"));
+			if (skill != null) {
+				tag.setString("ItemSkillName", skill.getRegistryName().toString());
+				tag.removeTag("ItemSkillId");
 			}
 		}
 		return (skill == null ? -1 : skill.getId());
@@ -125,19 +138,36 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	}
 
 	@Override
-	public boolean isRepairable() {
+	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
 		return false;
 	}
 
+	public int getInfusionCost(ItemStack stack, SkillBase skill) {
+		if (skill.is(Skills.swordBasic) && !grantsBasicSwordSkill(stack)) {
+			return 1;
+		} else if (!skill.is(getSkill(stack))) {
+			return 0;
+		}
+		int i = getSkillLevel(stack);
+		return (i < skill.getMaxLevel() ? i + 1 : 0);
+	}
+
 	@Override
-	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
-		return true;
+	public ItemStack getInfusionResult(ItemStack stack, SkillBase skill) {
+		ItemStack result = stack.copy();
+		if (skill.is(Skills.swordBasic) && !grantsBasicSwordSkill(stack)) {
+			result.getTagCompound().setBoolean("grantsBasicSword", true);
+		} else {
+			int level = Math.min(skill.getMaxLevel(), getSkillLevel(stack) + 1);
+			result.getTagCompound().setByte("ItemSkillLevel", (byte) level);
+		}
+		return result;
 	}
 
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = getSkill(stack);
-		return new TextComponentTranslation("item.dss.skillitem.name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
+		return new TextComponentTranslation(getTranslationKey(stack) + ".name", (skill == null ? "" : skill.getDisplayName())).getUnformattedText();
 	}
 
 	@Override
@@ -145,13 +175,14 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> list, ITooltipFlag flag) {
 		SkillBase skill = getSkill(stack);
 		if (skill != null && world != null) {
-			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.skill", TextFormatting.GOLD + skill.getDisplayName()).getUnformattedText());
-			list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.level", skill.getLevel(), skill.getMaxLevel()).getUnformattedText());
+			list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.skill", skill.getLevel(), TextFormatting.GOLD + skill.getDisplayName() + TextFormatting.GRAY).getUnformattedText());
 			if (grantsBasicSwordSkill(stack)) {
-				String name = TextFormatting.DARK_GREEN + SkillBase.swordBasic.getDisplayName() + TextFormatting.RESET;
-				list.add(new TextComponentTranslation("tooltip.dss.skillprovider.desc.provider", name).getUnformattedText());
+				String name = TextFormatting.DARK_GREEN + Skills.swordBasic.getDisplayName() + TextFormatting.GRAY;
+				list.add(new TextComponentTranslation("tooltip.dss.skill_provider.desc.provider", name).getUnformattedText());
 			}
-			list.addAll(skill.getDescription(Minecraft.getMinecraft().player));
+			if (flag.isAdvanced()) {
+				list.addAll(skill.getTooltip(Minecraft.getMinecraft().player, true));
+			}
 		}
 	}
 
@@ -182,10 +213,10 @@ public class ItemRandomSkill extends ItemSword implements IModItem, ISkillProvid
 			stack.setTagCompound(new NBTTagCompound());
 		}
 		NBTTagCompound tag = stack.getTagCompound();
-		tag.setString("ItemSkillName", skill.getUnlocalizedName());
+		tag.setString("ItemSkillName", skill.getRegistryName().toString());
 		int level = 1 + rand.nextInt(Math.min(this.quality + 2, skill.getMaxLevel()));
 		tag.setByte("ItemSkillLevel", (byte) level);
-		boolean flag = (skill.getId() != SkillBase.swordBasic.getId() && rand.nextInt(16) > 9 - this.quality); 
+		boolean flag = (!skill.is(Skills.swordBasic) && rand.nextInt(16) > 9 - this.quality); 
 		tag.setBoolean("grantsBasicSword", flag);
 	}
 }

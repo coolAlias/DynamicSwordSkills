@@ -17,8 +17,7 @@
 
 package dynamicswordskills;
 
-import dynamicswordskills.client.GuiSkills;
-import dynamicswordskills.inventory.ContainerSkills;
+import dynamicswordskills.client.gui.GuiSkills;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.IThreadListener;
 import net.minecraft.world.World;
@@ -61,17 +60,13 @@ public class CommonProxy implements IGuiHandler
 	public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
 		switch(id) {
 		case GUI_SKILLS:
-			return new GuiSkills(player);
+			return new GuiSkills();
 		}
 		return null;
 	}
 
 	@Override
 	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-		switch(id) {
-		case GUI_SKILLS:
-			return new ContainerSkills(player);
-		}
 		return null;
 	}
 }

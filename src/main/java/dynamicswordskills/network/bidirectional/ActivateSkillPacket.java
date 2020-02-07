@@ -19,57 +19,58 @@ package dynamicswordskills.network.bidirectional;
 
 import java.io.IOException;
 
+import dynamicswordskills.DynamicSwordSkills;
+import dynamicswordskills.api.SkillRegistry;
+import dynamicswordskills.entity.DSSPlayerInfo;
+import dynamicswordskills.network.AbstractMessage;
+import dynamicswordskills.skills.SkillActive;
+import dynamicswordskills.skills.SkillBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
-import dynamicswordskills.entity.DSSPlayerInfo;
-import dynamicswordskills.network.AbstractMessage;
-import dynamicswordskills.skills.SkillBase;
 
 /**
  * 
- * Attempts to activate a skill for player. When activated on the server, a packet is automatically
- * sent to the client, so skills shouldn't be manually activated client side.
+ * Attempts to activate a skill for player on whichever side the packet is received.
  *
  */
 public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 {
-	/** If true, calls triggerSkill(), otherwise uses activateSkill() */
-	private boolean wasTriggered = false;
+	private byte id;
 
-	/** Skill to activate */
-	private byte skillId;
+	private boolean wasTriggered = false;
 
 	public ActivateSkillPacket() {}
 
-	public ActivateSkillPacket(SkillBase skill) {
-		this(skill, false);
-	}
-
+	/**
+	 * See {@link DSSPlayerInfo#activateSkill(SkillBase, boolean)}
+	 */
 	public ActivateSkillPacket(SkillBase skill, boolean wasTriggered) {
+		this.id = skill.getId();
 		this.wasTriggered = wasTriggered;
-		this.skillId = skill.getId();
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
+		id = buffer.readByte();
 		wasTriggered = buffer.readBoolean();
-		skillId = buffer.readByte();
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
+		buffer.writeByte(id);
 		buffer.writeBoolean(wasTriggered);
-		buffer.writeByte(skillId);
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		// handled identically on both sides
-		if (wasTriggered) {
-			DSSPlayerInfo.get(player).triggerSkill(player.getEntityWorld(), skillId);
+		DSSPlayerInfo info = DSSPlayerInfo.get(player);
+		SkillBase skill = info.getPlayerSkill(SkillRegistry.getSkillById(id));
+		if (skill instanceof SkillActive) {
+			info.activateSkill(skill, wasTriggered);
 		} else {
-			DSSPlayerInfo.get(player).activateSkill(player.getEntityWorld(), skillId);
+			DynamicSwordSkills.logger.warn(String.format("Skill ID %d was not valid for %s while processing ActivateSkillPacket", id, player));
 		}
 	}
 }
