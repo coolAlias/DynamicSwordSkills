@@ -24,7 +24,7 @@ public class Skills
 	public static final SkillBase leapingBlow = new LeapingBlow("leaping_blow").setIconLocation(ICON_LOCATION + "leaping_blow.png").addDefaultTooltip().register("leaping_blow");
 	public static final SkillBase parry = new Parry("parry").setIconLocation(ICON_LOCATION + "parry.png").addDefaultTooltip().register("parry");
 	public static final SkillBase dash = new Dash("dash").setIconLocation(ICON_LOCATION + "dash.png").addDefaultTooltip().register("dash");
-	public static final SkillBase spinAttack = new SpinAttack("spin_attack").setIconLocation(ICON_LOCATION + "basic_technique.png").addDefaultTooltip().register("spin_attack");
+	public static final SkillBase spinAttack = new SpinAttack("spin_attack").setIconLocation(ICON_LOCATION + "spin_attack.png").addDefaultTooltip().register("spin_attack");
 	public static final SkillBase superSpinAttack = new SuperSpinAttack("super_spin_attack").setIconLocation(ICON_LOCATION + "super_spin_attack.png").addDefaultTooltip().register("super_spin_attack");
 	public static final SkillBase mortalDraw = new MortalDraw("mortal_draw").setIconLocation(ICON_LOCATION + "mortal_draw.png").addDefaultTooltip().register("mortal_draw");
 	public static final SkillBase swordBreak = new SwordBreak("sword_break").setIconLocation(ICON_LOCATION + "sword_break.png").addDefaultTooltip().register("sword_break");
