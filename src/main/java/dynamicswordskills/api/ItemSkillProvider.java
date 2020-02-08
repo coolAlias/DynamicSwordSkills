@@ -35,7 +35,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -179,11 +178,6 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	}
 
 	@Override
-	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.BLOCK;
-	}
-
-	@Override
 	public int getItemEnchantability() {
 		return material.getEnchantability();
 	}
@@ -191,11 +185,6 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
 		return ItemStack.areItemsEqual(stack, material.getRepairItemStack()) || super.getIsRepairable(toRepair, stack);
-	}
-
-	@Override
-	public int getMaxItemUseDuration(ItemStack stack) {
-		return 72000;
 	}
 
 	@Override
