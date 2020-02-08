@@ -61,9 +61,9 @@ public class LootHandler
 			LootFunction[] functions = new LootFunction[]{new RandomSkillSword()};
 			LootCondition enabled = new SkillCondition();
 			this.skillSwords = new LootEntry[] {
-					createLootEntry(DynamicSwordSkills.skillWood, Config.getSkillSwordLootWeight(), 0, functions, new LootCondition[]{enabled}),
+					createLootEntry(DynamicSwordSkills.skillWood, Config.getSkillSwordLootWeight() * 2, 0, functions, new LootCondition[]{enabled}),
 					createLootEntry(DynamicSwordSkills.skillStone, Config.getSkillSwordLootWeight(), 1, functions, new LootCondition[]{enabled}),
-					createLootEntry(DynamicSwordSkills.skillIron, Config.getSkillSwordLootWeight(), 3, functions, new LootCondition[]{enabled}),
+					createLootEntry(DynamicSwordSkills.skillIron, Config.getSkillSwordLootWeight() * 2, 3, functions, new LootCondition[]{enabled}),
 					createLootEntry(DynamicSwordSkills.skillGold, Config.getSkillSwordLootWeight(), 2, functions, new LootCondition[]{enabled}),
 					createLootEntry(DynamicSwordSkills.skillDiamond, Config.getSkillSwordLootWeight(), 4, functions, new LootCondition[]{enabled})
 			};
