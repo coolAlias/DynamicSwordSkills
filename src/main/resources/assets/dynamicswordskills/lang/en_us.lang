@@ -137,13 +137,13 @@ dss.config.server.general.skillSwordCreative.tooltip=Enable Skill Swords in the 
 dss.config.server.general.skillSwordCreativeLevel=Creative Skill Sword Level
 dss.config.server.general.skillSwordCreativeLevel.tooltip=Skill level provided by the Creative Tab Skill Swords
 dss.config.server.general.skillSwordRandom=Enable Random Skill Swords
-dss.config.server.general.skillSwordRandom.tooltip=Enable randomized Skill Swords to appear as loot in various chests
+dss.config.server.general.skillSwordRandom.tooltip=Enable randomized Skill Swords to add to loot or drop lists
 dss.config.server.drops=Loot and Drop Settings
 dss.config.server.drops.tooltip=Settings for generated loot and mob drops
 dss.config.server.drops.bonusOrbEnable=Enable Bonus Skill Orb
 dss.config.server.drops.bonusOrbEnable.tooltip=Whether all players should start with a Basic Skill orb
-dss.config.server.drops.chestLootWeight=Skill Orb Loot Weight
-dss.config.server.drops.chestLootWeight.tooltip=Weight for skill orbs when added to vanilla chest loot (0 to disable)
+dss.config.server.drops.orbLootWeight=Skill Orb Loot Weight
+dss.config.server.drops.orbLootWeight.tooltip=Weight for skill orbs when added to vanilla chest loot (0 to disable)
 dss.config.server.drops.orbDropChance.armor_break=Armor Break Drop Chance
 dss.config.server.drops.orbDropChance.armor_break.tooltip=Chance (in tenths of a percent) for Skill Orb of Armor Break to drop when available (0 to disable)
 dss.config.server.drops.orbDropChance.back_slice=Back Slice Drop Chance
@@ -182,6 +182,8 @@ dss.config.server.drops.playerDropEnable=Enable Player Orb Drops
 dss.config.server.drops.playerDropEnable.tooltip=Enable skill orbs to drop from players when killed in PvP
 dss.config.server.drops.playerDropFactor=Player Orb Drop Factor
 dss.config.server.drops.playerDropFactor.tooltip=Factor by which to multiply chance for skill orb to drop by slain players
+dss.config.server.drops.skillSwordLootWeight=Skill Sword Loot Weight
+dss.config.server.drops.skillSwordLootWeight.tooltip=Weight for random skill swords when added to vanilla chest loot (0 to disable)
 
 itemGroup.dss.skills=DSS Skills
 
