@@ -34,6 +34,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -185,6 +186,11 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
 		return ItemStack.areItemsEqual(stack, material.getRepairItemStack()) || super.getIsRepairable(toRepair, stack);
+	}
+
+	@Override
+	public boolean canDestroyBlockInCreative(World world, BlockPos pos, ItemStack stack, EntityPlayer player) {
+		return false;
 	}
 
 	@Override
