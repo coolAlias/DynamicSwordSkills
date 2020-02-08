@@ -109,7 +109,7 @@ public class BackSlice extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.angle", 360 - (2 * getAttackAngle())).getUnformattedText());
-		String chance = String.format("%.2f", getDisarmorChance(null, player.getHeldItemMainhand(), level));
+		String chance = String.format("%.2f", getDisarmorChance(ItemStack.EMPTY, player.getHeldItemMainhand(), level));
 		desc.add(new TextComponentTranslation(getTranslationKey() + ".info.chance", chance).getUnformattedText());
 		desc.add(getDamageDisplay(level * 10, true) + "%");
 		desc.add(getExhaustionDisplay(getExhaustion()));
