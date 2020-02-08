@@ -198,7 +198,7 @@ public class Config
 		skillSwordCreativeLevel = config.get("general", "dss.config.server.general.skillSwordCreativeLevel", 3, "Skill level provided by the Creative Tab Skill Swords [1-5]", 1, 5).setRequiresMcRestart(true).getInt();
 		skillSwordRandom = config.get("general", "dss.config.server.general.skillSwordRandom", true, "Enable randomized Skill Swords to add to loot or drop lists").setRequiresMcRestart(true).getBoolean(true);
 		/* Loot / drops settings */
-		bonusOrbEnable = config.get("drops", "dss.config.server.drops.bonusOrbEnable", true, "Whether all players should start with a Basic Skill orb").getBoolean(true);
+		bonusOrbEnable = config.get("drops", "dss.config.server.drops.bonusOrbEnable", false, "Whether all players should start with a Basic Skill orb").getBoolean(false);
 		orbLootWeight = config.get("drops", "dss.config.server.drops.orbLootWeight", 1, "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-100]", 0, 100).setRequiresMcRestart(true).getInt();
 		orbDropEnable = config.get("drops", "dss.config.server.drops.orbDropEnable", true, "Enable skill orbs to drop as loot from mobs (may still be disabled individually)").getBoolean(true);
 		orbDropGeneralChance = 0.01F * (float)config.get("drops", "dss.config.server.drops.orbDropGeneralChance", 1, "Chance (as a percent) for generic mobs to drop a random skill orb [0-100]", 0, 100).getInt();
