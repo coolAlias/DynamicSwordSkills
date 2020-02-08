@@ -198,7 +198,7 @@ public class Config
 		skillSwordRandom = config.get("general", "dss.config.server.general.skillSwordRandom", true, "Enable randomized Skill Swords to appear as loot in various chests").setRequiresMcRestart(true).getBoolean(true);
 		/* Loot / drops settings */
 		bonusOrbEnable = config.get("drops", "dss.config.server.drops.bonusOrbEnable", true, "Whether all players should start with a Basic Skill orb").getBoolean(true);
-		chestLootWeight = config.get("drops", "dss.config.server.drops.chestLootWeight", 1, "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-10]", 0, 10).setRequiresMcRestart(true).getInt();
+		chestLootWeight = config.get("drops", "dss.config.server.drops.chestLootWeight", 1, "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-100]", 0, 100).setRequiresMcRestart(true).getInt();
 		orbDropEnable = config.get("drops", "dss.config.server.drops.orbDropEnable", true, "Enable skill orbs to drop as loot from mobs (may still be disabled individually)").getBoolean(true);
 		orbDropGeneralChance = 0.01F * (float)config.get("drops", "dss.config.server.drops.orbDropGeneralChance", 1, "Chance (as a percent) for generic mobs to drop a random skill orb [0-100]", 0, 100).getInt();
 		orbDropRandomChance = 0.01F * (float)config.get("drops", "dss.config.server.drops.orbDropRandomChance", 10, "Chance (as a percent) for mobs with a specific skill orb drop to drop a random one instead [0-100]", 0, 100).getInt();
