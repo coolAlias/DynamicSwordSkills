@@ -50,26 +50,26 @@ public class LootHandler
 	}
 
 	public LootHandler() {
-		if (Config.getLootWeight() > 0) {
-			this.skillOrbs = createLootEntry(DynamicSwordSkills.skillOrb, Config.getLootWeight(), 0, new LootFunction[]{new SetSkillMetadata(new LootCondition[0])});
+		if (Config.getOrbLootWeight() > 0) {
+			this.skillOrbs = createLootEntry(DynamicSwordSkills.skillOrb, Config.getOrbLootWeight(), 0, new LootFunction[]{new SetSkillMetadata(new LootCondition[0])});
 			RandomValueRange rolls = new RandomValueRange(1, 1);
 			RandomValueRange bonus = new RandomValueRange(0.0F, 0.0F);
-			LootCondition chance = new RandomChance((float)Config.getLootWeight() * 0.01F);
+			LootCondition chance = new RandomChance((float)Config.getOrbLootWeight() * 0.01F);
 			this.skillOrbsPool = new LootPool(new LootEntry[]{this.skillOrbs}, new LootCondition[]{chance}, rolls, bonus, "skill_orbs");
 		}
-		if (Config.areRandomSwordsEnabled()) {
+		if (Config.areRandomSwordsEnabled() && Config.getSkillSwordLootWeight() > 0) {
 			LootFunction[] functions = new LootFunction[]{new RandomSkillSword()};
 			LootCondition enabled = new SkillCondition();
 			this.skillSwords = new LootEntry[] {
-					createLootEntry(DynamicSwordSkills.skillWood, Config.getLootWeight(), 0, functions, new LootCondition[]{enabled}),
-					createLootEntry(DynamicSwordSkills.skillStone, Config.getLootWeight(), 1, functions, new LootCondition[]{enabled}),
-					createLootEntry(DynamicSwordSkills.skillIron, Config.getLootWeight(), 3, functions, new LootCondition[]{enabled}),
-					createLootEntry(DynamicSwordSkills.skillGold, Config.getLootWeight(), 2, functions, new LootCondition[]{enabled}),
-					createLootEntry(DynamicSwordSkills.skillDiamond, Config.getLootWeight(), 4, functions, new LootCondition[]{enabled})
+					createLootEntry(DynamicSwordSkills.skillWood, Config.getSkillSwordLootWeight(), 0, functions, new LootCondition[]{enabled}),
+					createLootEntry(DynamicSwordSkills.skillStone, Config.getSkillSwordLootWeight(), 1, functions, new LootCondition[]{enabled}),
+					createLootEntry(DynamicSwordSkills.skillIron, Config.getSkillSwordLootWeight(), 3, functions, new LootCondition[]{enabled}),
+					createLootEntry(DynamicSwordSkills.skillGold, Config.getSkillSwordLootWeight(), 2, functions, new LootCondition[]{enabled}),
+					createLootEntry(DynamicSwordSkills.skillDiamond, Config.getSkillSwordLootWeight(), 4, functions, new LootCondition[]{enabled})
 			};
 			RandomValueRange rolls = new RandomValueRange(1, 2);
 			RandomValueRange bonus = new RandomValueRange(0.0F, 0.5F);
-			LootCondition chance = new RandomChance((float)Config.getLootWeight() * 0.02F); // twice as likely as a skill orb
+			LootCondition chance = new RandomChance((float)Config.getSkillSwordLootWeight() * 0.01F);
 			this.skillSwordsPool = new LootPool(this.skillSwords, new LootCondition[]{enabled, chance}, rolls, bonus, "skill_swords");
 		}
 	}
@@ -88,7 +88,7 @@ public class LootHandler
 			}
 		}
 		// Add skill swords with randomized skills to chest loot
-		if (Config.areRandomSwordsEnabled()) {
+		if (this.skillSwords != null) {
 			if (event.getName().equals(LootTableList.CHESTS_SPAWN_BONUS_CHEST)) {
 				event.getTable().addPool(this.skillSwordsPool);
 			} else {
