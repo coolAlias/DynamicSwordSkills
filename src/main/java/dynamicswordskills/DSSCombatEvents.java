@@ -22,6 +22,7 @@ import java.util.Map;
 
 import dynamicswordskills.api.IMetadataSkillItem;
 import dynamicswordskills.api.IRandomSkill;
+import dynamicswordskills.api.ItemSkillProvider;
 import dynamicswordskills.entity.DSSPlayerInfo;
 import dynamicswordskills.network.PacketDispatcher;
 import dynamicswordskills.network.client.SyncConfigPacket;
@@ -61,6 +62,7 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -146,6 +148,14 @@ public class DSSCombatEvents
 	 */
 	public static void setPlayerAttackTime(EntityPlayer player) {
 		DSSPlayerInfo.get(player).setAttackCooldown(Config.getBaseSwingSpeed());
+	}
+
+	@SubscribeEvent
+	public void onClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+		if (event.getEntityPlayer().capabilities.isCreativeMode) {
+			ItemStack stack = event.getEntityPlayer().getHeldItemMainhand();
+			event.setCanceled(stack != null && stack.getItem() instanceof ItemSkillProvider);
+		}
 	}
 
 	@SubscribeEvent
