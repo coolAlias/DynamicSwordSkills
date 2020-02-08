@@ -185,6 +185,11 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	}
 
 	@Override
+	public boolean canDestroyBlockInCreative(World world, BlockPos pos, ItemStack stack, EntityPlayer player) {
+		return false;
+	}
+
+	@Override
 	public boolean onBlockDestroyed(ItemStack stack, World world, IBlockState state, BlockPos pos, EntityLivingBase entity) {
 		if (state.getBlockHardness(world, pos) != 0.0D) {
 			stack.damageItem(2, entity);
