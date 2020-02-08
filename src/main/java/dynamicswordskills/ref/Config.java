@@ -109,13 +109,14 @@ public class Config
 	private static boolean skillSwordRandom;
 	/* Loot / drops settings */
 	private static boolean bonusOrbEnable;
-	private static int chestLootWeight;
+	private static int orbLootWeight;
 	private static Map<Integer, Float> orbDropChance;
 	private static boolean orbDropEnable;
 	private static float orbDropGeneralChance;
 	private static float orbDropRandomChance;
 	private static boolean playerDropEnable;
 	private static int playerDropFactor;
+	private static int skillSwordLootWeight;
 
 	public static void init(FMLPreInitializationEvent event) {
 		config = new Configuration(event.getSuggestedConfigurationFile());
@@ -202,10 +203,10 @@ public class Config
 		risingCutHighJump = config.get("general", "dss.config.server.general.risingCutHighJump", false, "Allow the player to activate Rising Cut without hitting a target, i.e. perform a High Jump").getBoolean(false);
 		skillSwordCreative = config.get("general", "dss.config.server.general.skillSwordCreative", true, "Enable Skill Swords in the Creative Tab (iron only, as examples)").setRequiresMcRestart(true).getBoolean(true);
 		skillSwordCreativeLevel = config.get("general", "dss.config.server.general.skillSwordCreativeLevel", 3, "Skill level provided by the Creative Tab Skill Swords [1-5]", 1, 5).setRequiresMcRestart(true).getInt();
-		skillSwordRandom = config.get("general", "dss.config.server.general.skillSwordRandom", true, "Enable randomized Skill Swords to appear as loot in various chests").setRequiresMcRestart(true).getBoolean(true);
+		skillSwordRandom = config.get("general", "dss.config.server.general.skillSwordRandom", true, "Enable randomized Skill Swords to add to loot or drop lists").setRequiresMcRestart(true).getBoolean(true);
 		/* Loot / drops settings */
 		bonusOrbEnable = config.get("drops", "dss.config.server.drops.bonusOrbEnable", true, "Whether all players should start with a Basic Skill orb").getBoolean(true);
-		chestLootWeight = config.get("drops", "dss.config.server.drops.chestLootWeight", 1, "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-100]", 0, 100).setRequiresMcRestart(true).getInt();
+		orbLootWeight = config.get("drops", "dss.config.server.drops.orbLootWeight", 1, "Weight for skill orbs when added to vanilla chest loot (0 to disable) [0-100]", 0, 100).setRequiresMcRestart(true).getInt();
 		orbDropEnable = config.get("drops", "dss.config.server.drops.orbDropEnable", true, "Enable skill orbs to drop as loot from mobs (may still be disabled individually)").getBoolean(true);
 		orbDropGeneralChance = 0.01F * (float)config.get("drops", "dss.config.server.drops.orbDropGeneralChance", 1, "Chance (as a percent) for generic mobs to drop a random skill orb [0-100]", 0, 100).getInt();
 		orbDropRandomChance = 0.01F * (float)config.get("drops", "dss.config.server.drops.orbDropRandomChance", 10, "Chance (as a percent) for mobs with a specific skill orb drop to drop a random one instead [0-100]", 0, 100).getInt();
@@ -217,6 +218,7 @@ public class Config
 		}
 		playerDropEnable = config.get("drops", "dss.config.server.drops.playerDropEnable", true, "Enable skill orbs to drop from players when killed in PvP").getBoolean(true);
 		playerDropFactor = config.get("drops", "dss.config.server.drops.playerDropFactor", 5, "Factor by which to multiply chance for skill orb to drop by slain players [1-20]", 1, 20).getInt();
+		skillSwordLootWeight = config.get("drops", "dss.config.server.drops.skillSwordLootWeight", 1, "Weight for random skill swords when added to vanilla chest loot (0 to disable) [0-100]", 0, 100).setRequiresMcRestart(true).getInt();
 		if (config.hasChanged()) {
 			config.save();
 		}
@@ -286,7 +288,7 @@ public class Config
 	}
 	/*================== SKILLS =====================*/
 	public static boolean giveBonusOrb() { return bonusOrbEnable; }
-	public static int getLootWeight() { return chestLootWeight; }
+	public static int getOrbLootWeight() { return orbLootWeight; }
 	public static int getBaseSwingSpeed() { return baseSwingSpeed; }
 	public static boolean areRandomSwordsEnabled() { return skillSwordRandom; }
 	public static boolean areCreativeSwordsEnabled() { return skillSwordCreative; }
@@ -295,6 +297,7 @@ public class Config
 	public static float getDisarmTimingBonus() { return parryDisarmTimingBonus; }
 	public static boolean canHighJump() { return risingCutHighJump; }
 	public static int getSkillSwordLevel() { return skillSwordCreativeLevel; }
+	public static int getSkillSwordLootWeight() { return skillSwordLootWeight; }
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));

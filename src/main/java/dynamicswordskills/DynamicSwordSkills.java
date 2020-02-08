@@ -161,10 +161,10 @@ public class DynamicSwordSkills
 	public void postInit(FMLPostInitializationEvent event) {
 		Config.postInit();
 		DSSCombatEvents.initializeDrops();
-		if (Config.getLootWeight() > 0) {
+		if (Config.getOrbLootWeight() > 0) {
 			registerSkillOrbLoot();
 		}
-		if (Config.areRandomSwordsEnabled()) {
+		if (Config.areRandomSwordsEnabled() && Config.getSkillSwordLootWeight() > 0) {
 			registerRandomSwordLoot();
 		}
 	}
@@ -223,17 +223,17 @@ public class DynamicSwordSkills
 		for (ResourceLocation location : Skills.getSkillIdMap().values()) {
 			SkillBase skill = SkillRegistry.get(location);
 			if (Config.isSkillAllowed(skill)) {
-				addLootToAll(new WeightedRandomChestContent(new ItemStack(skillOrb, 1, skill.getId()), 1, 1, Config.getLootWeight()), false);
+				addLootToAll(new WeightedRandomChestContent(new ItemStack(skillOrb, 1, skill.getId()), 1, 1, Config.getOrbLootWeight()), false);
 			}
 		}
 	}
 
 	private void registerRandomSwordLoot() {
-		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillWood), 1, 1, 4), false);
-		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillStone), 1, 1, 3), false);
-		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillGold), 1, 1, 2), false);
-		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillIron), 1, 1, 2), false);
-		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillDiamond), 1, 1, 1), false);
+		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillWood), 1, 1, Config.getSkillSwordLootWeight() * 2), false);
+		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillStone), 1, 1, Config.getSkillSwordLootWeight()), false);
+		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillGold), 1, 1, Config.getSkillSwordLootWeight()), false);
+		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillIron), 1, 1, Config.getSkillSwordLootWeight() * 2), false);
+		addLootToAll(new WeightedRandomChestContent(new ItemStack(skillDiamond), 1, 1, Config.getSkillSwordLootWeight()), false);
 	}
 
 	/**
