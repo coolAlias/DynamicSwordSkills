@@ -81,12 +81,12 @@ public abstract class ItemGrantSkill extends Item
 		SkillBase skill = getSkillToGrant(stack);
 		if (skill != null && world != null) {
 			EntityPlayer player = Minecraft.getMinecraft().player;
-			skill = DSSPlayerInfo.get(player).getPlayerSkill(skill);
+			SkillBase instance = DSSPlayerInfo.get(player).getPlayerSkill(skill);
 			if (!Config.isSkillAllowed(skill)) {
 				tooltip.add(TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled.server").getUnformattedText());
-			} else if (skill.getLevel() > 0) {
-				tooltip.add(TextFormatting.GOLD + skill.getLevelDisplay(true));
-				tooltip.addAll(skill.getTooltip(player, flag.isAdvanced()));
+			} else if (instance != null && instance.getLevel() > 0) {
+				tooltip.add(TextFormatting.GOLD + instance.getLevelDisplay(true));
+				tooltip.addAll(instance.getTooltip(player, flag.isAdvanced()));
 			} else {
 				tooltip.add(TextFormatting.ITALIC + new TextComponentTranslation("tooltip.dss.skillorb.desc.0").getUnformattedText());
 			}
