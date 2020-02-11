@@ -112,6 +112,7 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements I
 		IThreadListener thread = DynamicSwordSkills.proxy.getThreadFromContext(ctx);
 		if (!thread.isCallingFromMinecraftThread()) {
 			thread.addScheduledTask(new Runnable() {
+				@Override
 				public void run() {
 					msg.process(DynamicSwordSkills.proxy.getPlayerEntity(ctx), ctx.side);
 				}

@@ -83,6 +83,7 @@ public interface IPlayerInfo {
 					instance.get().readNBT((NBTTagCompound) nbt);
 				}
 			}, new Callable<IPlayerInfo>() {
+				@Override
 				public IPlayerInfo call() throws Exception {
 					return new PlayerInfo(null);
 				}
