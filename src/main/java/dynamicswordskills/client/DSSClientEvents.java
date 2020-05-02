@@ -85,7 +85,7 @@ public class DSSClientEvents
 		if (mc.thePlayer.isUsingItem()) {
 			return;
 		}
-		if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY) {
+		if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY) {
 			mc.playerController.attackEntity(mc.thePlayer, mc.objectMouseOver.entityHit);
 		} else {
 			handlePlayerMiss(mc);
