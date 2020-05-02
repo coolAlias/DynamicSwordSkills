@@ -157,7 +157,7 @@ public class DSSKeyHandler
 			KeyBinding.setKeyBindState(kb, true);
 			if (isLockedOn) {
 				DSSClientEvents.handlePlayerAttack(mc);
-			} else if (mc.objectMouseOver.typeOfHit != RayTraceResult.Type.ENTITY) {
+			} else if (mc.objectMouseOver == null || mc.objectMouseOver.typeOfHit != RayTraceResult.Type.ENTITY) {
 				DSSClientEvents.handlePlayerMiss(mc);
 			}
 			return isLockedOn;
