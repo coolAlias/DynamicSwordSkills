@@ -74,13 +74,14 @@ public abstract class ItemGrantSkill extends Item
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advanced) {
-		SkillBase skill = DSSPlayerInfo.get(player).getPlayerSkill(getSkillToGrant(stack));
+		SkillBase skill = getSkillToGrant(stack);
 		if (skill != null) {
+			SkillBase instance = DSSPlayerInfo.get(player).getPlayerSkill(skill);
 			if (!Config.isSkillAllowed(skill)) {
 				tooltip.add(TextFormatting.DARK_RED + new TextComponentTranslation("skill.dss.disabled.server").getUnformattedText());
-			} else if (skill.getLevel() > 0) {
-				tooltip.add(TextFormatting.GOLD + skill.getLevelDisplay(true));
-				tooltip.addAll(skill.getTooltip(player, advanced));
+			} else if (instance != null && instance.getLevel() > 0) {
+				tooltip.add(TextFormatting.GOLD + instance.getLevelDisplay(true));
+				tooltip.addAll(instance.getTooltip(player, advanced));
 			} else {
 				tooltip.add(TextFormatting.ITALIC + new TextComponentTranslation("tooltip.dss.skillorb.desc.0").getUnformattedText());
 			}

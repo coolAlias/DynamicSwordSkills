@@ -78,7 +78,7 @@ public class DSSClientEvents
 		if (mc.player.isHandActive()) {
 			return;
 		}
-		if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY) {
+		if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY) {
 			mc.playerController.attackEntity(mc.player, mc.objectMouseOver.entityHit);
 		} else {
 			handlePlayerMiss(mc);
