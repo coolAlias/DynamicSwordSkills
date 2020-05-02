@@ -29,6 +29,7 @@ import dynamicswordskills.skills.Skills;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -173,6 +174,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 		return true;
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isFull3D() {
 		return true;
@@ -231,7 +233,7 @@ public class ItemSkillProvider extends Item implements IModItem, ISkillProvider
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerResources() {
-		ModelLoader.registerItemVariants(this, new ModelResourceLocation(texture, "inventory"));
+		ModelBakery.registerItemVariants(this, new ModelResourceLocation(texture, "inventory"));
 		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
 			@Override
 			public ModelResourceLocation getModelLocation(ItemStack stack) {
