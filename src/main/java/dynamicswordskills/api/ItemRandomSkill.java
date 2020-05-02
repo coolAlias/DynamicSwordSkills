@@ -28,6 +28,7 @@ import dynamicswordskills.skills.SkillActive;
 import dynamicswordskills.skills.SkillBase;
 import dynamicswordskills.skills.Skills;
 import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -189,7 +190,7 @@ public class ItemRandomSkill extends ItemSword implements IModItem, IRandomSkill
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerResources() {
-		ModelLoader.registerItemVariants(this, new ModelResourceLocation(texture, "inventory"));
+		ModelBakery.registerItemVariants(this, new ModelResourceLocation(texture, "inventory"));
 		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
 			@Override
 			public ModelResourceLocation getModelLocation(ItemStack stack) {

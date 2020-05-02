@@ -44,6 +44,7 @@ public class SuperSpinAttack extends SkillBase implements ISkillModifier
 		return super.displayInGroup(group) || group == Skills.WEAPON_GROUP;
 	}
 
+	@Override
 	@Nullable
 	public String getActivationDisplay() {
 		return new TextComponentTranslation(getTranslationKey() + ".activation").getUnformattedText();

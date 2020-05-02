@@ -330,6 +330,7 @@ public class TargetUtils
 
 	/** Select entities that can be collided with */
 	public static final Predicate<Entity> COLLIDABLE_ENTITY_SELECTOR = new Predicate<Entity>() {
+		@Override
 		public boolean apply(@Nullable Entity entity) {
 			return entity != null && entity.canBeCollidedWith();
 		}
@@ -337,6 +338,7 @@ public class TargetUtils
 
 	/** Select entities that are considered hostile mobs */
 	public static final Predicate<Entity> HOSTILE_MOB_SELECTOR = new Predicate<Entity>() {
+		@Override
 		public boolean apply(@Nullable Entity entity) {
 			return TargetUtils.isMobEntity(entity);
 		}
@@ -344,6 +346,7 @@ public class TargetUtils
 
 	/** Select only non-player entities */
 	public static final Predicate<Entity> NON_PLAYER_SELECTOR = new Predicate<Entity>() {
+		@Override
 		public boolean apply(@Nullable Entity entity) {
 			return !(entity instanceof EntityPlayer);
 		}
@@ -351,6 +354,7 @@ public class TargetUtils
 
 	/** Select entities that are not riding or being ridden by the seeker */
 	public static final TargetPredicate<Entity> NON_RIDING_SELECTOR = new TargetPredicate<Entity>() {
+		@Override
 		public boolean apply(@Nullable Entity entity) {
 			if (entity == null) {
 				return false;
@@ -363,6 +367,7 @@ public class TargetUtils
 
 	/** Select entities that are not on the same team as the seeker */
 	public static final TargetPredicate<Entity> NON_TEAM_SELECTOR = new TargetPredicate<Entity>() {
+		@Override
 		public boolean apply(@Nullable Entity entity) {
 			return entity != null && (this.seeker == null || !entity.isOnSameTeam(this.seeker));
 		}
@@ -370,6 +375,7 @@ public class TargetUtils
 
 	/** Select entities that are not invisible */
 	public static final Predicate<Entity> VISIBLE_ENTITY_SELECTOR = new Predicate<Entity>() {
+		@Override
 		public boolean apply(@Nullable Entity entity) {
 			return entity != null && !entity.isInvisible();
 		}
