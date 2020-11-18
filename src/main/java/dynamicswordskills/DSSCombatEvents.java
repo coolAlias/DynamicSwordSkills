@@ -145,7 +145,7 @@ public class DSSCombatEvents
 	 * Used for anti-spam of left click, if enabled in the configuration settings.
 	 */
 	public static void setPlayerAttackTime(EntityPlayer player) {
-		DSSPlayerInfo.get(player).setAttackCooldown(Config.getBaseSwingSpeed());
+		DSSPlayerInfo.get(player).setAttackCooldown(Math.round(Config.getBaseSwingSpeed()*0.01f*player.getCooldownPeriod()));
 	}
 
 	@SubscribeEvent
