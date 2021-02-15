@@ -329,7 +329,7 @@ public class BackSlice extends SkillActive
 			ItemStack armor = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
 			if (!armor.isEmpty() && player.getEntityWorld().rand.nextFloat() < getDisarmorChance(armor, player.getHeldItemMainhand(), level)) {
 				PlayerUtils.spawnItemWithRandom(entity.getEntityWorld(), armor, entity.posX, entity.posY, entity.posZ);
-				entity.setItemStackToSlot(EntityEquipmentSlot.CHEST, null);
+				entity.setItemStackToSlot(EntityEquipmentSlot.CHEST, ItemStack.EMPTY);
 			}
 		}
 	}
